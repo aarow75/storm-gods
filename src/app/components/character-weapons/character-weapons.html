@@ -1,0 +1,48 @@
+@if (heading) {
+<h4>{{ heading }}</h4>
+}
+<div class="weapons-section">
+  @if (weapons.length === 0) {
+    <p class="no-weapons">{{ translationService.get('weapons.noWeapons', 'No weapons') }}</p>
+  }
+  @for (weapon of weapons; track $index) {
+    <div class="weapon-row">
+      <div class="form-group">
+        <label [attr.for]="'weapon-name-' + $index">{{ translationService.get('weapons.name', 'Weapon Name') }}</label>
+        <select
+          [id]="'weapon-name-' + $index"
+          [(ngModel)]="weapon.name"
+          [name]="'weapon-name-' + $index"
+          (change)="onWeaponChange($index)"
+        >
+          @for (weaponDef of weaponList; track weaponDef.name) {
+            <option [value]="weaponDef.name">{{ weaponDef.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label [attr.for]="'weapon-damage-' + $index">{{ translationService.get('weapons.damage', 'Damage') }}</label>
+        <input
+          type="text"
+          [id]="'weapon-damage-' + $index"
+          [(ngModel)]="weapon.damage"
+          [name]="'weapon-damage-' + $index"
+        />
+      </div>
+      <div class="form-group">
+        <label [attr.for]="'weapon-skill-' + $index">{{ translationService.get('weapons.skill', 'Skill') }}</label>
+        <select
+          [id]="'weapon-skill-' + $index"
+          [(ngModel)]="weapon.skill"
+          [name]="'weapon-skill-' + $index"
+        >
+          @for (skill of combatSkills; track skill) {
+            <option [value]="skill">{{ skill }}</option>
+          }
+        </select>
+      </div>
+      <button type="button" class="btn-remove" (click)="onRemoveWeapon($index)">{{ translationService.get('button.remove', 'Remove') }}</button>
+    </div>
+  }
+  <button type="button" class="btn-add" (click)="onAddWeapon()">{{ translationService.get('button.add', 'Add') }}</button>
+</div>

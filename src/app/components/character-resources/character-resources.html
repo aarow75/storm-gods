@@ -1,0 +1,17 @@
+@if (heading) {
+<h4>{{ heading }}</h4>
+}
+<div class="resources-grid">
+  @for (resource of getResourceKeys(); track resource.key) {
+    <div class="form-group">
+      <label [attr.for]="'resource-' + resource.key">{{ resource.label }}:</label>
+      <input
+        type="number"
+        [id]="'resource-' + resource.key"
+        [(ngModel)]="resources[resource.key]"
+        [name]="'resource-' + resource.key"
+        min="0"
+      />
+    </div>
+  }
+</div>

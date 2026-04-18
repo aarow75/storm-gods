@@ -1,0 +1,45 @@
+@if (heading) {
+<h4>{{ heading }}</h4>
+}
+<div class="passions-section">
+  @for (passion of passions; track $index) {
+    <div class="passion-row">
+      <div class="passion-name-group">
+        <label [attr.for]="'passion-name-' + $index">{{ translationService.get('passion.name', 'Passion Name') }}</label>
+        <select
+          [id]="'passion-name-' + $index"
+          [value]="getPassionDropdownValue(passion)"
+          (change)="passion.name = $any($event.target).value"
+          [name]="'passion-dropdown-' + $index"
+        >
+          <option value="">{{ translationService.get('passion.custom', 'Custom') }}</option>
+          @for (commonPassion of commonPassions; track commonPassion) {
+            <option [value]="commonPassion">{{ commonPassion }}</option>
+          }
+        </select>
+        @if (isCustomPassion(passion.name)) {
+          <input
+            type="text"
+            class="custom-input"
+            [(ngModel)]="passion.name"
+            [name]="'passion-custom-' + $index"
+            [placeholder]="translationService.get('passion.customPlaceholder', 'Enter custom passion')"
+          />
+        }
+      </div>
+      <div class="form-group">
+        <label [attr.for]="'passion-value-' + $index">{{ translationService.get('passion.value', 'Value') }}</label>
+        <input
+          type="number"
+          [id]="'passion-value-' + $index"
+          [(ngModel)]="passion.value"
+          [name]="'passion-value-' + $index"
+          min="0"
+          max="100"
+        />
+      </div>
+      <button type="button" class="btn-remove-small" (click)="onRemovePassion($index)">×</button>
+    </div>
+  }
+  <button type="button" class="btn-add-small" (click)="onAddPassion()">{{ translationService.get('button.add', 'Add') }}</button>
+</div>

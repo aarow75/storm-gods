@@ -1,0 +1,251 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f5f5;
+  transition: background-color 0.3s ease;
+}
+
+.app-container.runequest-theme {
+  background: #fffbeb;
+}
+
+.app-container.dragonbane-theme {
+  background: #f0fdf4;
+}
+
+header {
+  background: white;
+  padding: 20px 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  flex: 1 1 auto;
+  min-width: 250px;
+}
+
+.header-left h1 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.system-switcher,
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.system-switcher label,
+.language-switcher label {
+  font-size: 0.85rem;
+  color: #2c3e50;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.button-group {
+  display: flex;
+  gap: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.system-toggle-btn,
+.language-switcher button {
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  position: relative;
+}
+
+.system-toggle-btn {
+  background: white;
+  color: #4b5563;
+  border-right: 1px solid #e0e0e0;
+}
+
+.system-toggle-btn:last-child {
+  border-right: none;
+}
+
+.system-toggle-btn:hover:not(.active) {
+  background: #f5f5f5;
+}
+
+/* RuneQuest button - amber/orange */
+.system-toggle-rq {
+  color: #d97706;
+}
+
+.system-toggle-rq.active {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+}
+
+/* Dragonbane button - green */
+.system-toggle-db {
+  color: #059669;
+}
+
+.system-toggle-db.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.language-switcher button {
+  background: white;
+  color: #4b5563;
+  border-right: 1px solid #e0e0e0;
+}
+
+.language-switcher button:last-child {
+  border-right: none;
+}
+
+.language-switcher button:hover:not(.active) {
+  background: #f5f5f5;
+}
+
+.language-switcher button.active {
+  background: #4b5563;
+  color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-left {
+    text-align: center;
+  }
+
+  .header-left h1 {
+    font-size: 1.5rem;
+  }
+
+  .header-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .system-switcher,
+  .language-switcher {
+    justify-content: center;
+  }
+}
+
+/* Navigation */
+.main-nav {
+  display: flex;
+  gap: 0;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  border-bottom: 3px solid #6b7280;
+  transition: border-bottom-color 0.3s ease;
+}
+
+.app-container.runequest-theme .main-nav {
+  border-bottom-color: #f59e0b;
+}
+
+.app-container.dragonbane-theme .main-nav {
+  border-bottom-color: #10b981;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  color: #4b5563;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  position: relative;
+}
+
+.nav-link:hover {
+  background: #f5f5f5;
+  color: #1f2937;
+}
+
+.nav-link.active {
+  background: #1f2937;
+  color: white;
+  border-bottom-color: #6b7280;
+  transition: background 0.3s ease;
+}
+
+.app-container.runequest-theme .nav-link.active {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.app-container.dragonbane-theme .nav-link.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.nav-icon {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+
+main {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.app-container.runequest-theme main {
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+.app-container.dragonbane-theme main {
+  background: linear-gradient(180deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+@media (max-width: 768px) {
+  .main-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-link {
+    flex: 1;
+    min-width: 150px;
+    justify-content: center;
+  }
+}

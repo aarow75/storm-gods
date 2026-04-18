@@ -1,0 +1,11 @@
+@import '../../shared/styles/shared-form-styles.css';
+
+/* Character Derived Stats Specific Styles */
+
+.stat-breakdown {
+  display: block;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
+}

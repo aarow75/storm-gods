@@ -1,0 +1,172 @@
+import { Injectable } from '@angular/core';
+import {
+  Character, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
+  DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES,
+  DEFAULT_FAMILY_HISTORY, DEFAULT_CULT_STATUS,
+  calculateHitLocations, calculateDerivedStats, CHARACTER_COLORS
+} from '../models/character.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class CharacterService {
+  private readonly STORAGE_KEY = 'runequest-characters';
+
+  getCharacters(): Character[] {
+    const data = localStorage.getItem(this.STORAGE_KEY);
+    if (!data) return [];
+
+    const characters = JSON.parse(data);
+    return characters.map((char: any) => this.migrateCharacter(char));
+  }
+
+  getCharacter(id: string): Character | undefined {
+    const characters = this.getCharacters();
+    return characters.find(c => c.id === id);
+  }
+
+  private migrateCharacter(char: any): Character {
+    // Ensure background exists
+    if (!char.background) {
+      char.background = { ...DEFAULT_BACKGROUND };
+    }
+
+    // Ensure derivedStats exist
+    if (!char.derivedStats) {
+      char.derivedStats = char.stats
+        ? calculateDerivedStats(char.stats)
+        : { ...DEFAULT_DERIVED_STATS };
+    }
+
+    // Migrate maxHitPoints if missing
+    if (char.derivedStats && char.derivedStats.maxHitPoints === undefined) {
+      char.derivedStats.maxHitPoints = char.derivedStats.totalHitPoints;
+    }
+
+    // Ensure hitLocations exist
+    if (!char.hitLocations) {
+      char.hitLocations = char.stats
+        ? calculateHitLocations(char.stats.CON || 10, char.stats.SIZ || 10)
+        : { ...DEFAULT_HIT_LOCATIONS };
+    }
+
+    // Ensure armor exists
+    if (!char.armor) {
+      char.armor = { ...DEFAULT_ARMOR };
+    }
+
+    // Ensure weapons array exists
+    if (!char.weapons) {
+      char.weapons = [];
+    }
+
+    // Ensure runes exist
+    if (!char.runes) {
+      char.runes = JSON.parse(JSON.stringify(DEFAULT_RUNES));
+    }
+
+    // Ensure passions array exists
+    if (!char.passions) {
+      char.passions = [];
+    }
+
+    // Ensure magic exists
+    if (!char.magic) {
+      char.magic = { ...DEFAULT_MAGIC, spiritMagic: [], runeMagic: [], sorcery: [] };
+    }
+
+    // Ensure resources exist
+    if (!char.resources) {
+      char.resources = { ...DEFAULT_RESOURCES };
+    }
+
+    // Ensure equipment array exists
+    if (!char.equipment) {
+      char.equipment = [];
+    }
+
+    // Ensure notes exist
+    if (!char.notes) {
+      char.notes = '';
+    }
+
+    // Ensure family history exists
+    if (!char.familyHistory) {
+      char.familyHistory = { ...DEFAULT_FAMILY_HISTORY };
+    }
+
+    // Ensure cult status exists
+    if (!char.cultStatus) {
+      char.cultStatus = { ...DEFAULT_CULT_STATUS };
+      // Auto-populate cult name from background if available
+      if (char.background?.cult) {
+        char.cultStatus.cultName = char.background.cult;
+      }
+    }
+
+    // Migrate old rune magic spells to new format
+    if (char.magic?.runeMagic && char.magic.runeMagic.length > 0) {
+      char.magic.runeMagic = char.magic.runeMagic.map((spell: any) => {
+        // Check if it's old format (has 'points' instead of 'runePointCost')
+        if (spell.points !== undefined && spell.runePointCost === undefined) {
+          return {
+            name: spell.name,
+            runePointCost: spell.points,
+            associatedRune: 'Air',
+            reusable: true
+          };
+        }
+        return spell;
+      });
+    }
+
+    // Assign a color if missing (for existing characters)
+    if (!char.color) {
+      const allChars = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
+      const index = allChars.findIndex((c: any) => c.id === char.id);
+      char.color = CHARACTER_COLORS[index % CHARACTER_COLORS.length];
+    }
+
+    return char as Character;
+  }
+
+  addCharacter(character: Character): void {
+    const characters = this.getCharacters();
+    character.id = this.generateId();
+
+    // Assign a color based on the current count
+    if (!character.color) {
+      character.color = this.getNextColor(characters.length);
+    }
+
+    characters.push(character);
+    this.saveCharacters(characters);
+  }
+
+  private getNextColor(characterCount: number): string {
+    return CHARACTER_COLORS[characterCount % CHARACTER_COLORS.length];
+  }
+
+  updateCharacter(character: Character): void {
+    const characters = this.getCharacters();
+    const index = characters.findIndex(c => c.id === character.id);
+    if (index !== -1) {
+      characters[index] = character;
+      this.saveCharacters(characters);
+    }
+  }
+
+  deleteCharacter(id: string): void {
+    const characters = this.getCharacters();
+    const filtered = characters.filter(c => c.id !== id);
+    this.saveCharacters(filtered);
+  }
+
+  private saveCharacters(characters: Character[]): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(characters));
+  }
+
+  private generateId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+  }
+}

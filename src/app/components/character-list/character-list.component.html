@@ -1,0 +1,68 @@
+<div class="character-list">
+  @if (heading) {
+  <h2>{{ heading }}</h2>
+  }
+
+  <div *ngIf="characters.length === 0" class="no-characters">
+    <p>{{ translationService.get('characterList.noCharacters', 'No characters yet. Create your first character below!') }}</p>
+  </div>
+
+  <div *ngIf="characters.length > 0" class="characters-grid">
+    <div *ngFor="let character of characters" class="character-card" [class.dead]="getCurrentHP(character) <= 0">
+      <h3>{{ character.name }}</h3>
+
+      <div class="hit-points-display"
+           [class.dead]="getCurrentHP(character) <= 0"
+           [style.background]="character.color">
+        <span class="hp-label">Hit Points:</span>
+        <span class="hp-current"
+              [class.wounded]="getCurrentHP(character) < getMaxHP(character) && getCurrentHP(character) > getMaxHP(character) * 0.3"
+              [class.critical]="getCurrentHP(character) > 0 && getCurrentHP(character) <= getMaxHP(character) * 0.3"
+              [class.zero]="getCurrentHP(character) === 0"
+              [class.negative]="getCurrentHP(character) < 0">
+          {{ getCurrentHP(character) }}
+        </span>
+        <span class="hp-separator">/</span>
+        <span class="hp-max">{{ getMaxHP(character) }}</span>
+        <span class="dead-badge" *ngIf="getCurrentHP(character) <= 0">DEAD</span>
+      </div>
+
+      <h4>{{ translationService.get('characterList.characteristics', 'Characteristics') }}</h4>
+      <div class="stats">
+        <div class="stat"><strong>STR:</strong> {{ character.stats.STR }}</div>
+        <div class="stat"><strong>CON:</strong> {{ character.stats.CON }}</div>
+        <div class="stat"><strong>SIZ:</strong> {{ character.stats.SIZ }}</div>
+        <div class="stat"><strong>DEX:</strong> {{ character.stats.DEX }}</div>
+        <div class="stat"><strong>INT:</strong> {{ character.stats.INT }}</div>
+        <div class="stat"><strong>POW:</strong> {{ character.stats.POW }}</div>
+        <div class="stat"><strong>CHA:</strong> {{ character.stats.CHA }}</div>
+      </div>
+
+      <h4>{{ translationService.get('characterList.hitLocations', 'Hit Locations') }}</h4>
+      <div class="hit-locations">
+        <div class="hit-item"><strong>{{ translationService.get('hitLoc.head', 'Head') }}:</strong> {{ character.hitLocations['Head'] }}</div>
+        <div class="hit-item"><strong>{{ translationService.get('hitLoc.chest', 'Chest') }}:</strong> {{ character.hitLocations['Chest'] }}</div>
+        <div class="hit-item"><strong>{{ translationService.get('hitLoc.abdomen', 'Abdomen') }}:</strong> {{ character.hitLocations['Abdomen'] }}</div>
+        <div class="hit-item"><strong>{{ translationService.get('hitLoc.rightArm', 'Right Arm') }}:</strong> {{ character.hitLocations['Right Arm'] }}</div>
+        <div class="hit-item"><strong>{{ translationService.get('hitLoc.leftArm', 'Left Arm') }}:</strong> {{ character.hitLocations['Left Arm'] }}</div>
+        <div class="hit-item"><strong>{{ translationService.get('hitLoc.rightLeg', 'Right Leg') }}:</strong> {{ character.hitLocations['Right Leg'] }}</div>
+        <div class="hit-item"><strong>{{ translationService.get('hitLoc.leftLeg', 'Left Leg') }}:</strong> {{ character.hitLocations['Left Leg'] }}</div>
+      </div>
+
+      <h4>{{ translationService.get('characterList.weapons', 'Weapons') }}</h4>
+      <div class="weapons-list">
+        <div *ngIf="!character.weapons || character.weapons.length === 0" class="no-items">
+          {{ translationService.get('weapons.noWeapons', 'No weapons') }}
+        </div>
+        <div *ngFor="let weapon of character.weapons" class="weapon-item">
+          <strong>{{ weapon.name }}</strong>: {{ weapon.damage }} ({{ weapon.skill }})
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-edit" (click)="onEdit(character.id)">{{ translationService.get('button.edit', 'Edit') }}</button>
+        <button class="btn btn-delete" (click)="deleteCharacter(character.id)">{{ translationService.get('button.delete', 'Delete') }}</button>
+      </div>
+    </div>
+  </div>
+</div>

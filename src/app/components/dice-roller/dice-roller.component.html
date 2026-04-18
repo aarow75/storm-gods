@@ -1,0 +1,38 @@
+<div class="dice-roller">
+  @if (heading) {
+  <h2>{{ heading }}</h2>
+  }
+
+  <div class="roller-container">
+    <div class="dice-controls">
+      <button class="btn-roll" (click)="rollD4()">d4</button>
+      <button class="btn-roll" (click)="rollD6()">d6</button>
+      <button class="btn-roll" (click)="rollD8()">d8</button>
+      <button class="btn-roll" (click)="rollD10()">d10</button>
+      <button class="btn-roll" (click)="rollD12()">d12</button>
+      <button class="btn-roll" (click)="rollD20()">d20</button>
+      <button class="btn-roll" (click)="roll3D6()">3d6</button>
+      <button class="btn-roll" (click)="rollPercentile()">d%</button>
+    </div>
+
+    <div class="current-result" *ngIf="currentResult !== null">
+      <div class="result-display">
+        <span class="result-type">{{ currentType }}</span>
+        <span class="result-value">{{ currentResult }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="roll-history" *ngIf="rollHistory.length > 0">
+    <div class="history-header">
+      <h3>{{ translationService.get('diceRoller.history', 'Roll History') }}</h3>
+      <button class="btn-clear" (click)="clearHistory()">{{ translationService.get('button.clear', 'Clear') }}</button>
+    </div>
+    <div class="history-list">
+      <div *ngFor="let roll of rollHistory" class="history-item">
+        <span class="history-type">{{ roll.type }}</span>
+        <span class="history-result">{{ roll.result }}</span>
+      </div>
+    </div>
+  </div>
+</div>

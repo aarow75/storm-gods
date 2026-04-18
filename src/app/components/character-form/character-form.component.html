@@ -1,0 +1,194 @@
+<div class="character-form" [class.edit-mode]="editMode">
+  <h3>{{ editMode ? translationService.get('form.editCharacter', 'Edit Character') : translationService.get('form.createNew', 'Create New Character') }}</h3>
+  <div *ngIf="editMode" class="edit-banner">
+    {{ translationService.get('form.editing', 'Editing') }}: {{ character.name }}
+  </div>
+
+  <div *ngIf="showValidationErrors" class="validation-banner">
+    <div class="validation-banner-header">
+      <span class="validation-banner-title">{{ translationService.get('validation.title', 'Required fields missing') }}</span>
+      <button type="button" class="btn-dismiss" (click)="dismissValidationErrors()">×</button>
+    </div>
+    <div class="validation-banner-content">
+      <p>{{ translationService.get('validation.message', 'Please fill in the following required fields:') }}</p>
+      <ul>
+        <li *ngFor="let error of validationErrorList">{{ error }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <form (ngSubmit)="saveCharacter()">
+    <div *ngIf="!editMode" class="randomize-section">
+      <button type="button" class="btn-randomize" (click)="randomizeCharacter()">
+        {{ translationService.get('button.randomize', 'Randomize Character') }}
+      </button>
+      <p class="randomize-hint">{{ translationService.get('form.randomizeHint', 'Generates random stats, cult, occupation, and homeland') }}</p>
+    </div>
+
+    <div class="form-group">
+      <label for="name"
+        [class.required-label]="isFieldInvalid('name')"
+        [class.success-label]="isFieldRandomized('name') && !isFieldInvalid('name')">
+        {{ translationService.get('form.characterName', 'Character Name') }}: <span class="required-star">*</span>
+      </label>
+      <input
+        type="text"
+        id="name"
+        [(ngModel)]="character.name"
+        name="name"
+        required
+        [placeholder]="translationService.get('form.characterNamePlaceholder', 'Enter character name')"
+        [class.invalid-field]="isFieldInvalid('name')"
+        [class.success-field]="isFieldRandomized('name') && !isFieldInvalid('name')"
+      />
+      <span *ngIf="isFieldInvalid('name')" class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+      <span *ngIf="isFieldRandomized('name') && !isFieldInvalid('name')" class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+    </div>
+
+    <!-- Background Component -->
+    <app-character-background
+      [background]="character.background!"
+      [cults]="gameSystemService.getCults()"
+      [occupations]="gameSystemService.getOccupations()"
+      [homelands]="gameSystemService.getHomelands()"
+      [isFieldInvalid]="isFieldInvalid.bind(this)"
+      [isFieldRandomized]="isFieldRandomized.bind(this)"
+      (cultChange)="onCultChange()"
+    ></app-character-background>
+
+    <!-- Family History Component (RuneQuest only) -->
+    @if (gameSystemService.gameSystem() === 'runequest') {
+    <app-character-family-history
+      [familyHistory]="character.familyHistory!"
+      (addEvent)="addFamilyEvent()"
+      (removeEvent)="removeFamilyEvent($event)"
+    ></app-character-family-history>
+    }
+
+    <!-- Characteristics Component -->
+    <app-character-characteristics
+      [stats]="character.stats!"
+      [isFieldInvalid]="isFieldInvalid.bind(this)"
+      [isFieldRandomized]="isFieldRandomized.bind(this)"
+      (rollAll)="rollAll3D6()"
+      (rollStat)="roll3D6($event)"
+    ></app-character-characteristics>
+
+    <!-- Skills Component -->
+    <app-character-skills
+      [skills]="character.skills!"
+      [skillCategories]="skillCategories"
+      [getCategoryKeys]="getCategoryKeys.bind(this)"
+      [getSkillKeys]="getSkillKeys.bind(this)"
+      (applyBonuses)="applyAllSkillBonuses()"
+    ></app-character-skills>
+
+    <!-- Derived Stats Component -->
+    <app-character-derived-stats
+      [derivedStats]="character.derivedStats!"
+      [stats]="character.stats"
+      (calculate)="calculateDerivedValues()"
+    ></app-character-derived-stats>
+
+    <!-- Hit Locations Component (RuneQuest only) -->
+    @if (gameSystemService.gameSystem() === 'runequest') {
+    <app-character-hit-locations
+      [hitLocations]="character.hitLocations!"
+      (calculate)="calculateHitPoints()"
+    ></app-character-hit-locations>
+    }
+
+    <!-- Armor Component -->
+    <app-character-armor
+      [armor]="character.armor!"
+      (applyToAll)="applyArmorToAll()"
+    ></app-character-armor>
+
+    <!-- Weapons Component -->
+    <app-character-weapons
+      [weapons]="character.weapons!"
+      [weaponList]="weaponList"
+      [combatSkills]="combatSkills"
+      (addWeapon)="addWeapon()"
+      (removeWeapon)="removeWeapon($event)"
+      (weaponChange)="onWeaponChange($event)"
+    ></app-character-weapons>
+
+    <!-- Runes Component (RuneQuest only) -->
+    @if (gameSystemService.gameSystem() === 'runequest') {
+    <app-character-runes
+      [runes]="character.runes!"
+      [getOpposedRuneValue]="getOpposedRuneValue.bind(this)"
+      (runeChange)="onRuneChange()"
+    ></app-character-runes>
+    }
+
+    <!-- Cult Status Component (RuneQuest only) -->
+    @if (gameSystemService.gameSystem() === 'runequest') {
+    <app-character-cult-status
+      [cultStatus]="character.cultStatus!"
+      [cultRanks]="cultRanks"
+    ></app-character-cult-status>
+    }
+
+    <!-- Passions Component (RuneQuest only) -->
+    @if (gameSystemService.gameSystem() === 'runequest') {
+    <app-character-passions
+      [passions]="character.passions!"
+      [commonPassions]="commonPassions"
+      [isCustomPassion]="isCustomPassion.bind(this)"
+      [getPassionDropdownValue]="getPassionDropdownValue.bind(this)"
+      (addPassion)="addPassion()"
+      (removePassion)="removePassion($event)"
+    ></app-character-passions>
+    }
+
+    <!-- Magic Component -->
+    <app-character-magic
+      [magic]="character.magic!"
+      [spiritMagicSpells]="spiritMagicSpells"
+      [sorcerySpells]="sorcerySpells"
+      [getAvailableRuneSpells]="getAvailableRuneSpells.bind(this)"
+      [isCustomSpell]="isCustomSpell.bind(this)"
+      [getSpiritSpellDropdownValue]="getSpiritSpellDropdownValue.bind(this)"
+      [getSorcerySpellDropdownValue]="getSorcerySpellDropdownValue.bind(this)"
+      [isCustomRuneSpell]="isCustomRuneSpell.bind(this)"
+      [getRuneSpellDropdownValue]="getRuneSpellDropdownValue.bind(this)"
+      (addSpell)="addSpell($event)"
+      (removeSpell)="removeSpell($event.type, $event.index)"
+      (addRuneSpell)="addRuneSpell()"
+      (removeRuneSpell)="removeRuneSpell($event)"
+    ></app-character-magic>
+
+    <!-- Resources Component -->
+    <app-character-resources
+      [resources]="character.resources!"
+    ></app-character-resources>
+
+    <!-- Equipment Component -->
+    <app-character-equipment
+      [equipment]="character.equipment!"
+      (addEquipment)="addEquipment()"
+      (removeEquipment)="removeEquipment($event)"
+    ></app-character-equipment>
+
+    <!-- Notes Component -->
+    <app-character-notes
+      [notes]="character.notes!"
+    ></app-character-notes>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ editMode ? translationService.get('button.save', 'Save Character') : translationService.get('button.save', 'Save Character') }}
+      </button>
+      <button
+        *ngIf="editMode"
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancelEdit()"
+      >
+        {{ translationService.get('button.cancel', 'Cancel') }}
+      </button>
+    </div>
+  </form>
+</div>

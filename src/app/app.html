@@ -1,0 +1,55 @@
+<div class="app-container" [class.runequest-theme]="gameSystemService.gameSystem() === 'runequest'" [class.dragonbane-theme]="gameSystemService.gameSystem() === 'dragonbane'">
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <h1>{{ gameSystemService.getSystemName() }} {{ translationService.get('app.title', 'Character Manager') }}</h1>
+      </div>
+      <div class="header-right">
+        <div class="system-switcher">
+          <label>{{ translationService.get('system.toggle', 'Game System') }}:</label>
+          <div class="button-group">
+            <button
+              (click)="toggleGameSystem()"
+              [class.active]="gameSystemService.gameSystem() === 'runequest'"
+              class="system-toggle-btn system-toggle-rq">
+              {{ translationService.get('system.runequest', 'RuneQuest') }}
+            </button>
+            <button
+              (click)="toggleGameSystem()"
+              [class.active]="gameSystemService.gameSystem() === 'dragonbane'"
+              class="system-toggle-btn system-toggle-db">
+              {{ translationService.get('system.dragonbane', 'Dragonbane') }}
+            </button>
+          </div>
+        </div>
+        <div class="language-switcher">
+          <label>Language:</label>
+          <div class="button-group">
+            <button (click)="switchLanguage('en')" [class.active]="translationService.locale() === 'en'">EN</button>
+            <button (click)="switchLanguage('sv')" [class.active]="translationService.locale() === 'sv'">SV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="main-nav">
+    <a routerLink="/characters" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon">&#x1F465;</span>
+      <span>Characters</span>
+    </a>
+    <a routerLink="/create" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon">&#x2795;</span>
+      <span>Create Character</span>
+    </a>
+    <a routerLink="/combat" routerLinkActive="active" class="nav-link">
+      <span class="nav-icon">&#x2694;&#xFE0F;</span>
+      <span>Combat Tracker</span>
+    </a>
+  </nav>
+
+  <main>
+    <app-dice-roller *appShowIfTranslation="'diceRoller.title'"></app-dice-roller>
+    <router-outlet></router-outlet>
+  </main>
+</div>

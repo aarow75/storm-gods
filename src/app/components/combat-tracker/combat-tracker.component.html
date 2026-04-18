@@ -1,0 +1,270 @@
+<div class="combat-tracker">
+  <div class="header">
+    <h2>Combat Tracker</h2>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openAddParticipantModal()">Add Participant</button>
+      <button class="btn btn-secondary" (click)="openAddMonsterModal()">Create Monster</button>
+      <button class="btn btn-secondary" (click)="toggleLogHistory()">
+        {{ showLogHistory ? 'Hide History' : 'Show History' }}
+      </button>
+      <button class="btn btn-danger" (click)="clearCombat()">Clear Combat</button>
+    </div>
+  </div>
+
+  <!-- Current Combat Log -->
+  <div class="combat-log" *ngIf="combatLog.length > 0 && !showLogHistory">
+    <div class="log-header">
+      <h3>Combat Log</h3>
+      <div class="log-actions">
+        <button class="btn btn-small" (click)="clearCombatLog()">Save & Clear Log</button>
+      </div>
+    </div>
+
+    <div class="log-entries">
+      <div class="log-entry" *ngFor="let entry of combatLog" [class.death]="entry.includes('[SLAIN]')">
+        {{ entry }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Combat Log History -->
+  <div class="combat-log" *ngIf="showLogHistory">
+    <div class="log-header">
+      <h3>Combat Log History</h3>
+      <div class="log-actions">
+        <button class="btn btn-small btn-danger" (click)="clearAllHistory()" *ngIf="getCombatLogHistory().length > 0">
+          Clear All History
+        </button>
+      </div>
+    </div>
+
+    <div class="log-history">
+      <div class="history-list" *ngIf="getCombatLogHistory().length > 0">
+        <div class="history-item" *ngFor="let log of getCombatLogHistory()">
+          <div class="history-item-header">
+            <span class="history-date">{{ log.date }}</span>
+            <button class="btn-remove-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
+          </div>
+          <div class="history-entries">
+            <div class="log-entry" *ngFor="let entry of log.entries" [class.death]="entry.includes('[SLAIN]')">
+              {{ entry }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="empty-history" *ngIf="getCombatLogHistory().length === 0">
+        <p>No combat log history saved yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="combat-list" *ngIf="combatParticipants.length > 0">
+    <div class="combat-participant" *ngFor="let participant of combatParticipants"
+         [class.monster]="participant.type === 'monster'"
+         [class.dead]="participant.isDead"
+         [style.border-left]="'6px solid ' + (participant.color || '#000000')">
+      <div class="participant-header">
+        <div class="participant-info">
+          <div class="participant-name-row">
+            <span class="color-indicator" [style.background-color]="participant.color || '#000000'"></span>
+            <h3>{{ participant.name }}</h3>
+          </div>
+          <span class="participant-type">{{ participant.type === 'character' ? 'Character' : 'Monster' }}</span>
+          <span class="death-badge" *ngIf="participant.isDead">DEAD</span>
+          <span class="kills-badge" *ngIf="participant.kills && participant.kills > 0">Kills: {{ participant.kills }}</span>
+        </div>
+        <button class="btn-remove" (click)="removeParticipant(participant.id)">&times;</button>
+      </div>
+
+      <div class="participant-details">
+        <div class="detail-group">
+          <label>Strike Rank: <strong>{{ participant.finalStrikeRank }}</strong></label>
+          <span class="sr-breakdown">(Base: {{ participant.baseStrikeRank }})</span>
+        </div>
+
+        <div class="detail-group">
+          <label>Armor: <strong [attr.title]="getArmorTooltip(participant)">{{ getArmorDisplay(participant) }}</strong></label>
+        </div>
+
+        <div class="detail-group">
+          <label for="opponent-{{ participant.id }}">Target:</label>
+          <select id="opponent-{{ participant.id }}"
+                  [(ngModel)]="participant.selectedOpponentId"
+                  (change)="onOpponentChange(participant)"
+                  [disabled]="!!participant.isDead">
+            <option value="">-- Select Target --</option>
+            <option *ngFor="let opponent of getAvailableOpponents(participant)" [value]="opponent.id">
+              {{ opponent.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="detail-group weapon-group">
+          <label for="weapon-{{ participant.id }}">Weapon:</label>
+          <div class="weapon-control">
+            <select id="weapon-{{ participant.id }}"
+                    [(ngModel)]="participant.selectedWeapon"
+                    (change)="onWeaponChange(participant)">
+              <option *ngFor="let weapon of getParticipantWeapons(participant)" [value]="weapon">
+                {{ weapon }}
+              </option>
+            </select>
+            <div class="weapon-damage">
+              <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
+              <button class="btn-roll-damage"
+                      (click)="rollWeaponDamage(participant)"
+                      title="Roll damage">
+                Roll
+              </button>
+            </div>
+          </div>
+          <div class="damage-result" *ngIf="getLastDamageRoll(participant.id)">
+            <div class="damage-info">
+              <span class="result-target">vs {{ getLastDamageRoll(participant.id)?.targetName }}</span>
+              <span class="result-total">{{ getLastDamageRoll(participant.id)?.finalDamage }} damage dealt</span>
+              <span class="result-breakdown">
+                ({{ getLastDamageRoll(participant.id)?.breakdown }} = {{ getLastDamageRoll(participant.id)?.total }}
+                - {{ getLastDamageRoll(participant.id)?.armorAbsorbed }} armor)
+              </span>
+            </div>
+            <button class="btn-clear-result" (click)="clearDamageRoll(participant.id)">&times;</button>
+          </div>
+        </div>
+
+        <div class="detail-group">
+          <label>HP Remaining: <strong [class.negative-hp]="getHitPointsRemaining(participant) < 0" [class.zero-hp]="getHitPointsRemaining(participant) === 0">{{ getHitPointsDisplay(participant) }}</strong></label>
+        </div>
+      </div>
+
+      <div class="hit-points">
+        <div class="hp-checkboxes">
+          <label *ngFor="let hp of participant.currentHitPoints; let i = index"
+                 class="hp-checkbox"
+                 [class.checked]="hp">
+            <input type="checkbox"
+                   [checked]="hp"
+                   (change)="toggleHitPoint(participant, i)">
+            <span class="checkbox-label">{{ i + 1 }}</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="combatParticipants.length === 0">
+    <p>No participants in combat. Add characters or monsters to begin tracking.</p>
+  </div>
+</div>
+
+<!-- Add Participant Modal -->
+<div class="modal" *ngIf="showAddParticipantModal" (click)="closeAddParticipantModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Add Combat Participant</h3>
+      <button class="btn-close" (click)="closeAddParticipantModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Type:</label>
+        <select [(ngModel)]="selectedEntityType" (change)="onEntityTypeChange()">
+          <option value="character">Character</option>
+          <option value="monster">Monster</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="selectedEntityType === 'character'">
+        <label>Character:</label>
+        <select [(ngModel)]="selectedCharacterId" (change)="onCharacterSelect()">
+          <option value="">-- Select Character --</option>
+          <option *ngFor="let char of characters" [value]="char.id">{{ char.name }}</option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="selectedEntityType === 'monster'">
+        <label>Monster:</label>
+        <select [(ngModel)]="selectedMonsterId" (change)="onMonsterSelect()">
+          <option value="">-- Select Monster --</option>
+          <option *ngFor="let monster of monsters" [value]="monster.id">
+            {{ monster.name }}
+            <span *ngIf="isCustomMonster(monster.id)"> (Custom)</span>
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group" *ngIf="getAvailableWeapons().length > 0">
+        <label>Weapon:</label>
+        <select [(ngModel)]="selectedWeapon">
+          <option *ngFor="let weapon of getAvailableWeapons()" [value]="weapon">{{ weapon }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAddParticipantModal()">Cancel</button>
+      <button class="btn btn-primary"
+              (click)="addParticipant()"
+              [disabled]="!selectedWeapon || (!selectedCharacterId && !selectedMonsterId)">
+        Add to Combat
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Monster Modal -->
+<div class="modal" *ngIf="showAddMonsterModal" (click)="closeAddMonsterModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Create Custom Monster</h3>
+      <button class="btn-close" (click)="closeAddMonsterModal()">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Name:</label>
+        <input type="text" [(ngModel)]="newMonster.name" placeholder="Monster name">
+      </div>
+
+      <div class="form-group">
+        <label>Hit Points:</label>
+        <input type="number" [(ngModel)]="newMonster.hitPoints" min="1">
+      </div>
+
+      <div class="form-group">
+        <label>Base Strike Rank:</label>
+        <input type="number" [(ngModel)]="newMonster.strikeRank" min="0">
+      </div>
+
+      <div class="form-group">
+        <label>Armor Points:</label>
+        <input type="number" [(ngModel)]="newMonster.armor" min="0">
+      </div>
+
+      <div class="form-group">
+        <label>Weapons:</label>
+        <div class="weapons-list">
+          <div class="weapon-item" *ngFor="let weapon of newMonster.weapons; let i = index">
+            <span>{{ weapon.name }} ({{ weapon.damage }}, SR +{{ weapon.strikeRankModifier }})</span>
+            <button class="btn-remove-small" (click)="removeWeaponFromNewMonster(i)">&times;</button>
+          </div>
+        </div>
+
+        <div class="weapon-input">
+          <input type="text" [(ngModel)]="newMonsterWeapon.name" placeholder="Weapon name">
+          <input type="text" [(ngModel)]="newMonsterWeapon.damage" placeholder="Damage (e.g., 1d8+1)">
+          <input type="number" [(ngModel)]="newMonsterWeapon.strikeRankModifier" placeholder="SR Modifier" min="0">
+          <button class="btn btn-small" (click)="addWeaponToNewMonster()">Add Weapon</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAddMonsterModal()">Cancel</button>
+      <button class="btn btn-primary"
+              (click)="saveNewMonster()"
+              [disabled]="!newMonster.name || newMonster.weapons.length === 0">
+        Save Monster
+      </button>
+    </div>
+  </div>
+</div>

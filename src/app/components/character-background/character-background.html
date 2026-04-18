@@ -1,0 +1,75 @@
+@if (heading) {
+<h4>{{ heading }}</h4>
+}
+<div class="background-grid">
+  <div class="form-group">
+    <label for="cult"
+      [class.required-label]="isFieldInvalid('cult')"
+      [class.success-label]="isFieldRandomized('cult') && !isFieldInvalid('cult')">
+      {{ cultLabel }}: <span class="required-star">*</span>
+    </label>
+    <select
+      id="cult"
+      [(ngModel)]="background.cult"
+      name="cult"
+      (change)="cultChange.emit()"
+      [class.invalid-field]="isFieldInvalid('cult')"
+      [class.success-field]="isFieldRandomized('cult') && !isFieldInvalid('cult')">
+      <option value="">{{ selectCultLabel }}</option>
+      <option *ngFor="let cult of cults" [value]="cult">{{ cult }}</option>
+    </select>
+    <span *ngIf="isFieldInvalid('cult')" class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+    <span *ngIf="isFieldRandomized('cult') && !isFieldInvalid('cult')" class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+  </div>
+
+  <div class="form-group">
+    <label for="occupation"
+      [class.required-label]="isFieldInvalid('occupation')"
+      [class.success-label]="isFieldRandomized('occupation') && !isFieldInvalid('occupation')">
+      {{ occupationLabel }}: <span class="required-star">*</span>
+    </label>
+    <select
+      id="occupation"
+      [(ngModel)]="background.occupation"
+      name="occupation"
+      [class.invalid-field]="isFieldInvalid('occupation')"
+      [class.success-field]="isFieldRandomized('occupation') && !isFieldInvalid('occupation')">
+      <option value="">{{ selectOccupationLabel }}</option>
+      <option *ngFor="let occ of occupations" [value]="occ">{{ occ }}</option>
+    </select>
+    <span *ngIf="isFieldInvalid('occupation')" class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+    <span *ngIf="isFieldRandomized('occupation') && !isFieldInvalid('occupation')" class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+  </div>
+
+  <div class="form-group">
+    <label for="homeland"
+      [class.required-label]="isFieldInvalid('homeland')"
+      [class.success-label]="isFieldRandomized('homeland') && !isFieldInvalid('homeland')">
+      {{ homelandLabel }}: <span class="required-star">*</span>
+    </label>
+    <select
+      id="homeland"
+      [(ngModel)]="background.homeland"
+      name="homeland"
+      [class.invalid-field]="isFieldInvalid('homeland')"
+      [class.success-field]="isFieldRandomized('homeland') && !isFieldInvalid('homeland')">
+      <option value="">{{ selectHomelandLabel }}</option>
+      <option *ngFor="let land of homelands" [value]="land">{{ land }}</option>
+    </select>
+    <span *ngIf="isFieldInvalid('homeland')" class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+    <span *ngIf="isFieldRandomized('homeland') && !isFieldInvalid('homeland')" class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+  </div>
+
+  <div class="form-group">
+    <label for="age">{{ translationService.get('background.age', 'Age') }}:</label>
+    <input type="number" id="age" [(ngModel)]="background.age" name="age" min="14" max="100" />
+  </div>
+
+  <div class="form-group">
+    <label for="gender">{{ translationService.get('background.gender', 'Gender') }}:</label>
+    <select id="gender" [(ngModel)]="background.gender" name="gender">
+      <option value="">{{ translationService.get('background.selectGender', 'Select Gender') }}</option>
+      <option *ngFor="let gender of genderOptions" [value]="gender">{{ gender }}</option>
+    </select>
+  </div>
+</div>

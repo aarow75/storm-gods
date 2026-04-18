@@ -1,0 +1,122 @@
+@import '../../shared/styles/shared-form-styles.css';
+
+/* Character Form Container Styles */
+.character-form {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.character-form.edit-mode {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+}
+
+.edit-banner {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+}
+
+h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+}
+
+.character-form.edit-mode h3 {
+  border-bottom-color: #f59e0b;
+}
+
+.quick-roll {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.skills-section {
+  margin: 20px 0;
+}
+
+.skill-category {
+  margin-bottom: 30px;
+}
+
+.skill-category h5 {
+  color: #3498db;
+  font-size: 16px;
+  margin-bottom: 15px;
+  padding-left: 5px;
+  border-left: 4px solid #3498db;
+}
+
+.randomize-section {
+  text-align: center;
+  margin: 20px 0 30px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+}
+
+/* RuneQuest theme */
+:host-context(.runequest-theme) .randomize-section {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Dragonbane theme */
+:host-context(.dragonbane-theme) .randomize-section {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-randomize {
+  background: white;
+  color: #4b5563;
+  border: none;
+  border-radius: 6px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+:host-context(.runequest-theme) .btn-randomize {
+  color: #d97706;
+}
+
+:host-context(.dragonbane-theme) .btn-randomize {
+  color: #059669;
+}
+
+.btn-randomize:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.btn-randomize:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.randomize-hint {
+  margin: 10px 0 0 0;
+  color: white;
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.9;
+}

@@ -1,0 +1,12 @@
+@if (heading) {
+<h4>{{ heading }}</h4>
+}
+<div class="form-group">
+  <textarea
+    id="notes"
+    [(ngModel)]="notes"
+    name="notes"
+    rows="6"
+    [placeholder]="translationService.get('notes.placeholder', 'Additional notes about the character...')"
+  ></textarea>
+</div>

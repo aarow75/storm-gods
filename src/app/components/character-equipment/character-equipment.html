@@ -1,0 +1,20 @@
+@if (heading) {
+<h4>{{ heading }}</h4>
+}
+<div class="equipment-section">
+  @if (equipment.length === 0) {
+    <p class="no-items">No equipment added yet.</p>
+  }
+  @for (item of equipment; track $index) {
+    <div class="equipment-row">
+      <input
+        type="text"
+        [(ngModel)]="equipment[$index]"
+        [name]="'equipment-' + $index"
+        [placeholder]="translationService.get('equipment.itemPlaceholder', 'Equipment item')"
+      />
+      <button type="button" class="btn-remove-small" (click)="onRemoveEquipment($index)">×</button>
+    </div>
+  }
+  <button type="button" class="btn-add-small" (click)="onAddEquipment()">{{ translationService.get('button.add', 'Add') }}</button>
+</div>

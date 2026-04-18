@@ -1,0 +1,63 @@
+@if (heading) {
+<h4>{{ heading }}</h4>
+}
+<div class="runes-section">
+  <h5>{{ translationService.get('runes.elemental', 'Elemental Runes') }} <span class="rune-hint">({{ translationService.get('runes.opposed', 'Opposed') }})</span></h5>
+  <div class="runes-grid">
+    @for (rune of getRuneKeys('elemental'); track rune) {
+      <div class="form-group">
+        <label [attr.for]="'rune-elemental-' + rune">{{ rune }}</label>
+        <div class="rune-input-row">
+          <input
+            type="number"
+            [id]="'rune-elemental-' + rune"
+            [(ngModel)]="runes.elemental[rune]"
+            [name]="'rune-elemental-' + rune"
+            min="0"
+            max="100"
+            (change)="onRuneChange()"
+          />
+          <span class="rune-hint">{{ getOpposedRuneValue(rune, 'elemental') }}%</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <h5>{{ translationService.get('runes.power', 'Power/Form Runes') }} <span class="rune-hint">({{ translationService.get('runes.opposed', 'Opposed') }})</span></h5>
+  <div class="runes-grid">
+    @for (rune of getRuneKeys('power'); track rune) {
+      <div class="form-group">
+        <label [attr.for]="'rune-power-' + rune">{{ rune }}</label>
+        <div class="rune-input-row">
+          <input
+            type="number"
+            [id]="'rune-power-' + rune"
+            [(ngModel)]="runes.power[rune]"
+            [name]="'rune-power-' + rune"
+            min="0"
+            max="100"
+            (change)="onRuneChange()"
+          />
+          <span class="rune-hint">{{ getOpposedRuneValue(rune, 'power') }}%</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <h5>{{ translationService.get('runes.form', 'Form Runes') }}</h5>
+  <div class="runes-grid">
+    @for (rune of getRuneKeys('form'); track rune) {
+      <div class="form-group">
+        <label [attr.for]="'rune-form-' + rune">{{ rune }}</label>
+        <input
+          type="number"
+          [id]="'rune-form-' + rune"
+          [(ngModel)]="runes.form[rune]"
+          [name]="'rune-form-' + rune"
+          min="0"
+          max="100"
+        />
+      </div>
+    }
+  </div>
+</div>
