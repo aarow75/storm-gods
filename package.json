@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "android": "npx cap sync;npx cap open android"
+    "android": "npx cap sync;npx cap open android",
+    "icons": "npx capacitor-assets generate"
   },
   "private": true,
   "packageManager": "npm@11.6.2",
@@ -30,6 +31,7 @@
     "@angular/build": "^21.2.7",
     "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.0",
+    "@capacitor/assets": "^3.0.5",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
