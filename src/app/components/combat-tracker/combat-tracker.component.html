@@ -7,264 +7,457 @@
       <button class="btn btn-secondary" (click)="toggleLogHistory()">
         {{ showLogHistory ? 'Hide History' : 'Show History' }}
       </button>
+      <button class="btn btn-secondary" (click)="resetRound()" title="Reset missile shot counts for a new round">New Round</button>
       <button class="btn btn-danger" (click)="clearCombat()">Clear Combat</button>
     </div>
   </div>
 
   <!-- Current Combat Log -->
-  <div class="combat-log" *ngIf="combatLog.length > 0 && !showLogHistory">
-    <div class="log-header">
-      <h3>Combat Log</h3>
-      <div class="log-actions">
-        <button class="btn btn-small" (click)="clearCombatLog()">Save & Clear Log</button>
+  @if (combatLog.length > 0 && !showLogHistory) {
+    <div class="combat-log">
+      <div class="log-header">
+        <h3>Combat Log</h3>
+        <div class="log-actions">
+          <button class="btn btn-small" (click)="clearCombatLog()">Save & Clear Log</button>
+        </div>
+      </div>
+      <div class="log-entries">
+        @for (entry of combatLog; track $index) {
+          <div class="log-entry"
+               [class.death]="entry.includes('[SLAIN]')"
+               [class.parry]="entry.includes('[PARRY]')"
+               [class.dodge]="entry.includes('[DODGE]')"
+               [class.failed]="entry.includes('FAILED')">
+            {{ entry }}
+          </div>
+        }
       </div>
     </div>
+  }
 
-    <div class="log-entries">
-      <div class="log-entry" *ngFor="let entry of combatLog" [class.death]="entry.includes('[SLAIN]')">
-        {{ entry }}
+  <!-- Combat Log History -->
+  @if (showLogHistory) {
+    <div class="combat-log">
+      <div class="log-header">
+        <h3>Combat Log History</h3>
+        <div class="log-actions">
+          @if (getCombatLogHistory().length > 0) {
+            <button class="btn btn-small btn-danger" (click)="clearAllHistory()">Clear All History</button>
+          }
+        </div>
+      </div>
+      <div class="log-history">
+        @if (getCombatLogHistory().length > 0) {
+          <div class="history-list">
+            @for (log of getCombatLogHistory(); track log.timestamp) {
+              <div class="history-item">
+                <div class="history-item-header">
+                  <span class="history-date">{{ log.date }}</span>
+                  <button class="btn-remove-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
+                </div>
+                <div class="history-entries">
+                  @for (entry of log.entries; track $index) {
+                    <div class="log-entry"
+                         [class.death]="entry.includes('[SLAIN]')"
+                         [class.parry]="entry.includes('[PARRY]')"
+                         [class.dodge]="entry.includes('[DODGE]')">
+                      {{ entry }}
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-history"><p>No combat log history saved yet.</p></div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Participant Cards -->
+  @if (combatParticipants.length > 0) {
+    <div class="combat-list">
+      @for (participant of combatParticipants; track participant.id) {
+        <div class="combat-participant"
+             [class.monster]="participant.type === 'monster'"
+             [class.dead]="participant.isDead"
+             [style.border-left]="'6px solid ' + (participant.color || '#000000')">
+          <div class="participant-header">
+            <div class="participant-info">
+              <div class="participant-name-row">
+                <span class="color-indicator" [style.background-color]="participant.color || '#000000'"></span>
+                <h3>{{ participant.name }}</h3>
+              </div>
+              <span class="participant-type">{{ participant.type === 'character' ? 'Character' : 'Monster' }}</span>
+              @if (participant.isDead) {
+                <span class="death-badge">DEAD</span>
+              }
+              @if (participant.kills && participant.kills > 0) {
+                <span class="kills-badge">Kills: {{ participant.kills }}</span>
+              }
+            </div>
+            <button class="btn-remove" (click)="removeParticipant(participant.id)">&times;</button>
+          </div>
+
+          <div class="participant-details">
+            <div class="detail-group">
+              <label>Strike Rank: <strong>{{ participant.finalStrikeRank }}</strong></label>
+              <span class="sr-breakdown">(Base: {{ participant.baseStrikeRank }})</span>
+            </div>
+
+            <div class="detail-group">
+              <label>Armor: <strong [attr.title]="getArmorTooltip(participant)">{{ getArmorDisplay(participant) }}</strong></label>
+            </div>
+
+            <div class="detail-group">
+              <label for="opponent-{{ participant.id }}">Target:</label>
+              <select id="opponent-{{ participant.id }}"
+                      [(ngModel)]="participant.selectedOpponentId"
+                      (change)="onOpponentChange(participant)"
+                      [disabled]="!!participant.isDead">
+                <option value="">-- Select Target --</option>
+                @for (opponent of getAvailableOpponents(participant); track opponent.id) {
+                  <option [value]="opponent.id">{{ opponent.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="detail-group weapon-group">
+              <label for="weapon-{{ participant.id }}">Weapon:</label>
+              <div class="weapon-control">
+                <select id="weapon-{{ participant.id }}"
+                        [(ngModel)]="participant.selectedWeapon"
+                        (change)="onWeaponChange(participant)">
+                  @for (weapon of getParticipantWeapons(participant); track weapon) {
+                    <option [value]="weapon">{{ weapon }}</option>
+                  }
+                </select>
+                <div class="weapon-damage">
+                  <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
+                  <button class="btn-roll-damage"
+                          (click)="rollWeaponDamage(participant)"
+                          [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant)"
+                          [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
+                    Roll
+                  </button>
+                </div>
+                @if (getWeaponMissileInfo(participant); as mi) {
+                  <div class="missile-info-combat">
+                    <span class="missile-label">Missile</span>
+                    <span>Range: {{ mi.range }}m</span>
+                    <span>ROF: {{ participant.attacksUsed ?? 0 }}/{{ mi.rof }} used</span>
+                  </div>
+                }
+              </div>
+
+              @if (getWeaponHPDisplay(participant)) {
+                <div class="weapon-hp-row">
+                  <span class="weapon-hp-label">Weapon HP:</span>
+                  <span class="weapon-hp-value"
+                        [class.weapon-damaged]="getParryWeaponCurrentHP(participant) < getParryWeaponMaxHP(participant)"
+                        [class.weapon-broken]="isWeaponBroken(participant)">
+                    {{ getWeaponHPDisplay(participant) }}
+                  </span>
+                  @if (isWeaponBroken(participant)) {
+                    <span class="broken-tag">BROKEN</span>
+                  }
+                </div>
+              }
+
+              @if (getLastDamageRoll(participant.id)) {
+                <div class="damage-result">
+                  <div class="damage-info">
+                    <span class="result-target">vs {{ getLastDamageRoll(participant.id)?.targetName }}</span>
+                    <span class="result-total">{{ getLastDamageRoll(participant.id)?.finalDamage }} damage dealt</span>
+                    <span class="result-breakdown">
+                      ({{ getLastDamageRoll(participant.id)?.breakdown }} = {{ getLastDamageRoll(participant.id)?.total }}
+                      - {{ getLastDamageRoll(participant.id)?.armorAbsorbed }} armor)
+                    </span>
+                  </div>
+                  <button class="btn-clear-result" (click)="clearDamageRoll(participant.id)">&times;</button>
+                </div>
+              }
+            </div>
+
+            <div class="detail-group">
+              <label>HP Remaining: <strong
+                [class.negative-hp]="getHitPointsRemaining(participant) < 0"
+                [class.zero-hp]="getHitPointsRemaining(participant) === 0">
+                {{ getHitPointsDisplay(participant) }}
+              </strong></label>
+            </div>
+          </div>
+
+          <div class="hit-points">
+            <div class="hp-checkboxes">
+              @for (hp of participant.currentHitPoints; track $index) {
+                <label class="hp-checkbox" [class.checked]="hp">
+                  <input type="checkbox" [checked]="hp" (change)="toggleHitPoint(participant, $index)">
+                  <span class="checkbox-label">{{ $index + 1 }}</span>
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Hit Locations -->
+          <div class="hit-locations">
+            <div class="hit-location-grid">
+              @for (loc of hitLocationsOrder; track loc) {
+                <div class="location-badge" [ngClass]="getLocationStatusClass(participant, loc)">
+                  <span class="loc-name">{{ getLocationShortName(loc) }}</span>
+                  <span class="loc-hp">
+                    {{ getLocationCurrentHP(participant, loc) }}/{{ getLocationMaxHP(participant, loc) }}
+                  </span>
+                  @if (isLocationMaxed(participant, loc)) {
+                    <span class="loc-effect">{{ getLocationEffectLabel(loc) }}</span>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p>No participants in combat. Add characters or monsters to begin tracking.</p>
+    </div>
+  }
+</div>
+
+<!-- Defense Modal -->
+@if (pendingAttack) {
+  <div class="modal defense-overlay">
+    <div class="modal-content defense-modal">
+      <div class="modal-header defense-header">
+        <h3>Attack!</h3>
+      </div>
+      <div class="modal-body">
+        <p class="attack-summary">
+          <strong>{{ pendingAttack.attacker.name }}</strong>
+          attacks
+          <strong>{{ pendingAttack.defender.name }}</strong>
+        </p>
+
+        <!-- Attack roll result -->
+        <div class="attack-roll-row">
+          <span class="attack-hit-chip">
+            Hit! Rolled {{ pendingAttack.attackRoll }} vs {{ pendingAttack.attackSkill }}%
+          </span>
+          @if (getTotalAttackBonus(pendingAttack.attacker) > 0) {
+            <span class="attack-bonus-chip">
+              +{{ getAttackerStrBonus(pendingAttack.attacker) }} STR
+              +{{ getAttackerIntBonus(pendingAttack.attacker) }} INT
+              +{{ getAttackerPowBonus(pendingAttack.attacker) }} POW
+              +{{ getAttackerDexBonus(pendingAttack.attacker) }} DEX
+            </span>
+          }
+        </div>
+
+        <div class="attack-details-row">
+          <span class="damage-rolled">
+            Rolled <strong class="damage-number">{{ pendingAttack.rawDamage }}</strong>
+            <span class="breakdown-text">({{ pendingAttack.damageBreakdown }})</span>
+          </span>
+          <span class="hit-location-chip"
+                [class.loc-fatal]="isLocationFatal(pendingAttack.hitLocation)"
+                [class.loc-useless]="isLocationMaxed(pendingAttack.defender, pendingAttack.hitLocation) && !isLocationFatal(pendingAttack.hitLocation)">
+            d20:{{ pendingAttack.locationRoll }} → {{ pendingAttack.hitLocation }}
+            @if (isLocationMaxed(pendingAttack.defender, pendingAttack.hitLocation)) {
+              ({{ getLocationEffectLabel(pendingAttack.hitLocation) }})
+            }
+          </span>
+        </div>
+
+        <div class="defense-options">
+          <p class="defense-prompt">{{ pendingAttack.defender.name }}'s response:</p>
+          <div class="defense-buttons">
+
+            <button class="btn btn-danger defense-btn" (click)="resolveNoDefense()">
+              <span class="defense-btn-title">Take Hit</span>
+              <span class="defense-btn-sub">No defense</span>
+            </button>
+
+            <button class="btn btn-parry defense-btn"
+                    (click)="resolveParry()"
+                    [disabled]="!pendingAttack.defender.selectedWeapon">
+              <span class="defense-btn-title">Parry</span>
+              <span class="defense-btn-sub">
+                {{ pendingAttack.defender.selectedWeapon || 'No weapon' }}
+                ({{ getEffectiveParrySkill(pendingAttack.defender) + getTotalParryBonus(pendingAttack.defender) - getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}%)
+              </span>
+              @if (getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) > 0) {
+                <span class="defense-btn-sub penalty-text">
+                  -{{ getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}% repeat parry penalty
+                </span>
+              }
+              @if (getWeaponHPDisplay(pendingAttack.defender)) {
+                <span class="defense-btn-sub weapon-hp-sub"
+                      [class.weapon-broken]="isWeaponBroken(pendingAttack.defender)">
+                  Weapon HP: {{ getWeaponHPDisplay(pendingAttack.defender) }}
+                  @if (isWeaponBroken(pendingAttack.defender)) { — BROKEN }
+                </span>
+              }
+            </button>
+
+            <button class="btn btn-dodge defense-btn" (click)="resolveDodge()">
+              <span class="defense-btn-title">Dodge</span>
+              <span class="defense-btn-sub">
+                ({{ getEffectiveDodgeSkill(pendingAttack.defender) + getDefenderDexBonus(pendingAttack.defender) + getDefenderIntBonus(pendingAttack.defender) }}%)
+              </span>
+            </button>
+
+          </div>
+
+          <div class="defense-stat-breakdown">
+            @if (pendingAttack.attacker.type === 'character') {
+              <div class="breakdown-section">
+                <span class="breakdown-label">Attack bonus ({{ pendingAttack.attacker.name }}):</span>
+                <span>STR +{{ getAttackerStrBonus(pendingAttack.attacker) }}%</span>
+                <span>INT +{{ getAttackerIntBonus(pendingAttack.attacker) }}%</span>
+                <span>POW +{{ getAttackerPowBonus(pendingAttack.attacker) }}%</span>
+                <span>DEX +{{ getAttackerDexBonus(pendingAttack.attacker) }}%</span>
+              </div>
+            }
+            @if (pendingAttack.defender.type === 'character') {
+              <div class="breakdown-section">
+                <span class="breakdown-label">Parry bonus ({{ pendingAttack.defender.name }}):</span>
+                <span>STR +{{ getDefenderStrBonus(pendingAttack.defender) }}%</span>
+                <span>SIZ +{{ getDefenderSizBonus(pendingAttack.defender) }}%</span>
+                <span>POW +{{ getDefenderPowBonus(pendingAttack.defender) }}%</span>
+                <span>DEX +{{ getDefenderDexBonus(pendingAttack.defender) }}%</span>
+                @if (getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) > 0) {
+                  <span class="penalty-text">-{{ getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}% repeat</span>
+                }
+              </div>
+              <div class="breakdown-section">
+                <span class="breakdown-label">Dodge bonus:</span>
+                <span>DEX +{{ getDefenderDexBonus(pendingAttack.defender) }}%</span>
+                <span>INT +{{ getDefenderIntBonus(pendingAttack.defender) }}%</span>
+              </div>
+            }
+          </div>
+        </div>
       </div>
     </div>
   </div>
+}
 
-  <!-- Combat Log History -->
-  <div class="combat-log" *ngIf="showLogHistory">
-    <div class="log-header">
-      <h3>Combat Log History</h3>
-      <div class="log-actions">
-        <button class="btn btn-small btn-danger" (click)="clearAllHistory()" *ngIf="getCombatLogHistory().length > 0">
-          Clear All History
+<!-- Add Participant Modal -->
+@if (showAddParticipantModal) {
+  <div class="modal" (click)="closeAddParticipantModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Combat Participant</h3>
+        <button class="btn-close" (click)="closeAddParticipantModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Type:</label>
+          <select [(ngModel)]="selectedEntityType" (change)="onEntityTypeChange()">
+            <option value="character">Character</option>
+            <option value="monster">Monster</option>
+          </select>
+        </div>
+        @if (selectedEntityType === 'character') {
+          <div class="form-group">
+            <label>Character:</label>
+            <select [(ngModel)]="selectedCharacterId" (change)="onCharacterSelect()">
+              <option value="">-- Select Character --</option>
+              @for (char of characters; track char.id) {
+                <option [value]="char.id">{{ char.name }}</option>
+              }
+            </select>
+          </div>
+        }
+        @if (selectedEntityType === 'monster') {
+          <div class="form-group">
+            <label>Monster:</label>
+            <select [(ngModel)]="selectedMonsterId" (change)="onMonsterSelect()">
+              <option value="">-- Select Monster --</option>
+              @for (monster of monsters; track monster.id) {
+                <option [value]="monster.id">
+                  {{ monster.name }}{{ isCustomMonster(monster.id) ? ' (Custom)' : '' }}
+                </option>
+              }
+            </select>
+          </div>
+        }
+        @if (getAvailableWeapons().length > 0) {
+          <div class="form-group">
+            <label>Weapon:</label>
+            <select [(ngModel)]="selectedWeapon">
+              @for (weapon of getAvailableWeapons(); track weapon) {
+                <option [value]="weapon">{{ weapon }}</option>
+              }
+            </select>
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddParticipantModal()">Cancel</button>
+        <button class="btn btn-primary"
+                (click)="addParticipant()"
+                [disabled]="!selectedWeapon || (!selectedCharacterId && !selectedMonsterId)">
+          Add to Combat
         </button>
       </div>
     </div>
-
-    <div class="log-history">
-      <div class="history-list" *ngIf="getCombatLogHistory().length > 0">
-        <div class="history-item" *ngFor="let log of getCombatLogHistory()">
-          <div class="history-item-header">
-            <span class="history-date">{{ log.date }}</span>
-            <button class="btn-remove-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
-          </div>
-          <div class="history-entries">
-            <div class="log-entry" *ngFor="let entry of log.entries" [class.death]="entry.includes('[SLAIN]')">
-              {{ entry }}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="empty-history" *ngIf="getCombatLogHistory().length === 0">
-        <p>No combat log history saved yet.</p>
-      </div>
-    </div>
   </div>
-
-  <div class="combat-list" *ngIf="combatParticipants.length > 0">
-    <div class="combat-participant" *ngFor="let participant of combatParticipants"
-         [class.monster]="participant.type === 'monster'"
-         [class.dead]="participant.isDead"
-         [style.border-left]="'6px solid ' + (participant.color || '#000000')">
-      <div class="participant-header">
-        <div class="participant-info">
-          <div class="participant-name-row">
-            <span class="color-indicator" [style.background-color]="participant.color || '#000000'"></span>
-            <h3>{{ participant.name }}</h3>
-          </div>
-          <span class="participant-type">{{ participant.type === 'character' ? 'Character' : 'Monster' }}</span>
-          <span class="death-badge" *ngIf="participant.isDead">DEAD</span>
-          <span class="kills-badge" *ngIf="participant.kills && participant.kills > 0">Kills: {{ participant.kills }}</span>
-        </div>
-        <button class="btn-remove" (click)="removeParticipant(participant.id)">&times;</button>
-      </div>
-
-      <div class="participant-details">
-        <div class="detail-group">
-          <label>Strike Rank: <strong>{{ participant.finalStrikeRank }}</strong></label>
-          <span class="sr-breakdown">(Base: {{ participant.baseStrikeRank }})</span>
-        </div>
-
-        <div class="detail-group">
-          <label>Armor: <strong [attr.title]="getArmorTooltip(participant)">{{ getArmorDisplay(participant) }}</strong></label>
-        </div>
-
-        <div class="detail-group">
-          <label for="opponent-{{ participant.id }}">Target:</label>
-          <select id="opponent-{{ participant.id }}"
-                  [(ngModel)]="participant.selectedOpponentId"
-                  (change)="onOpponentChange(participant)"
-                  [disabled]="!!participant.isDead">
-            <option value="">-- Select Target --</option>
-            <option *ngFor="let opponent of getAvailableOpponents(participant)" [value]="opponent.id">
-              {{ opponent.name }}
-            </option>
-          </select>
-        </div>
-
-        <div class="detail-group weapon-group">
-          <label for="weapon-{{ participant.id }}">Weapon:</label>
-          <div class="weapon-control">
-            <select id="weapon-{{ participant.id }}"
-                    [(ngModel)]="participant.selectedWeapon"
-                    (change)="onWeaponChange(participant)">
-              <option *ngFor="let weapon of getParticipantWeapons(participant)" [value]="weapon">
-                {{ weapon }}
-              </option>
-            </select>
-            <div class="weapon-damage">
-              <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
-              <button class="btn-roll-damage"
-                      (click)="rollWeaponDamage(participant)"
-                      title="Roll damage">
-                Roll
-              </button>
-            </div>
-          </div>
-          <div class="damage-result" *ngIf="getLastDamageRoll(participant.id)">
-            <div class="damage-info">
-              <span class="result-target">vs {{ getLastDamageRoll(participant.id)?.targetName }}</span>
-              <span class="result-total">{{ getLastDamageRoll(participant.id)?.finalDamage }} damage dealt</span>
-              <span class="result-breakdown">
-                ({{ getLastDamageRoll(participant.id)?.breakdown }} = {{ getLastDamageRoll(participant.id)?.total }}
-                - {{ getLastDamageRoll(participant.id)?.armorAbsorbed }} armor)
-              </span>
-            </div>
-            <button class="btn-clear-result" (click)="clearDamageRoll(participant.id)">&times;</button>
-          </div>
-        </div>
-
-        <div class="detail-group">
-          <label>HP Remaining: <strong [class.negative-hp]="getHitPointsRemaining(participant) < 0" [class.zero-hp]="getHitPointsRemaining(participant) === 0">{{ getHitPointsDisplay(participant) }}</strong></label>
-        </div>
-      </div>
-
-      <div class="hit-points">
-        <div class="hp-checkboxes">
-          <label *ngFor="let hp of participant.currentHitPoints; let i = index"
-                 class="hp-checkbox"
-                 [class.checked]="hp">
-            <input type="checkbox"
-                   [checked]="hp"
-                   (change)="toggleHitPoint(participant, i)">
-            <span class="checkbox-label">{{ i + 1 }}</span>
-          </label>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="empty-state" *ngIf="combatParticipants.length === 0">
-    <p>No participants in combat. Add characters or monsters to begin tracking.</p>
-  </div>
-</div>
-
-<!-- Add Participant Modal -->
-<div class="modal" *ngIf="showAddParticipantModal" (click)="closeAddParticipantModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Add Combat Participant</h3>
-      <button class="btn-close" (click)="closeAddParticipantModal()">&times;</button>
-    </div>
-
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Type:</label>
-        <select [(ngModel)]="selectedEntityType" (change)="onEntityTypeChange()">
-          <option value="character">Character</option>
-          <option value="monster">Monster</option>
-        </select>
-      </div>
-
-      <div class="form-group" *ngIf="selectedEntityType === 'character'">
-        <label>Character:</label>
-        <select [(ngModel)]="selectedCharacterId" (change)="onCharacterSelect()">
-          <option value="">-- Select Character --</option>
-          <option *ngFor="let char of characters" [value]="char.id">{{ char.name }}</option>
-        </select>
-      </div>
-
-      <div class="form-group" *ngIf="selectedEntityType === 'monster'">
-        <label>Monster:</label>
-        <select [(ngModel)]="selectedMonsterId" (change)="onMonsterSelect()">
-          <option value="">-- Select Monster --</option>
-          <option *ngFor="let monster of monsters" [value]="monster.id">
-            {{ monster.name }}
-            <span *ngIf="isCustomMonster(monster.id)"> (Custom)</span>
-          </option>
-        </select>
-      </div>
-
-      <div class="form-group" *ngIf="getAvailableWeapons().length > 0">
-        <label>Weapon:</label>
-        <select [(ngModel)]="selectedWeapon">
-          <option *ngFor="let weapon of getAvailableWeapons()" [value]="weapon">{{ weapon }}</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="closeAddParticipantModal()">Cancel</button>
-      <button class="btn btn-primary"
-              (click)="addParticipant()"
-              [disabled]="!selectedWeapon || (!selectedCharacterId && !selectedMonsterId)">
-        Add to Combat
-      </button>
-    </div>
-  </div>
-</div>
+}
 
 <!-- Add Monster Modal -->
-<div class="modal" *ngIf="showAddMonsterModal" (click)="closeAddMonsterModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Create Custom Monster</h3>
-      <button class="btn-close" (click)="closeAddMonsterModal()">&times;</button>
-    </div>
-
-    <div class="modal-body">
-      <div class="form-group">
-        <label>Name:</label>
-        <input type="text" [(ngModel)]="newMonster.name" placeholder="Monster name">
+@if (showAddMonsterModal) {
+  <div class="modal" (click)="closeAddMonsterModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create Custom Monster</h3>
+        <button class="btn-close" (click)="closeAddMonsterModal()">&times;</button>
       </div>
-
-      <div class="form-group">
-        <label>Hit Points:</label>
-        <input type="number" [(ngModel)]="newMonster.hitPoints" min="1">
-      </div>
-
-      <div class="form-group">
-        <label>Base Strike Rank:</label>
-        <input type="number" [(ngModel)]="newMonster.strikeRank" min="0">
-      </div>
-
-      <div class="form-group">
-        <label>Armor Points:</label>
-        <input type="number" [(ngModel)]="newMonster.armor" min="0">
-      </div>
-
-      <div class="form-group">
-        <label>Weapons:</label>
-        <div class="weapons-list">
-          <div class="weapon-item" *ngFor="let weapon of newMonster.weapons; let i = index">
-            <span>{{ weapon.name }} ({{ weapon.damage }}, SR +{{ weapon.strikeRankModifier }})</span>
-            <button class="btn-remove-small" (click)="removeWeaponFromNewMonster(i)">&times;</button>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name:</label>
+          <input type="text" [(ngModel)]="newMonster.name" placeholder="Monster name">
+        </div>
+        <div class="form-group">
+          <label>Hit Points:</label>
+          <input type="number" [(ngModel)]="newMonster.hitPoints" min="1">
+        </div>
+        <div class="form-group">
+          <label>Base Strike Rank:</label>
+          <input type="number" [(ngModel)]="newMonster.strikeRank" min="0">
+        </div>
+        <div class="form-group">
+          <label>Armor Points:</label>
+          <input type="number" [(ngModel)]="newMonster.armor" min="0">
+        </div>
+        <div class="form-group">
+          <label>Weapons:</label>
+          <div class="weapons-list">
+            @for (weapon of newMonster.weapons; track $index) {
+              <div class="weapon-item">
+                <span>{{ weapon.name }} ({{ weapon.damage }}, SR +{{ weapon.strikeRankModifier }})</span>
+                <button class="btn-remove-small" (click)="removeWeaponFromNewMonster($index)">&times;</button>
+              </div>
+            }
+          </div>
+          <div class="weapon-input">
+            <input type="text" [(ngModel)]="newMonsterWeapon.name" placeholder="Weapon name">
+            <input type="text" [(ngModel)]="newMonsterWeapon.damage" placeholder="Damage (e.g., 1d8+1)">
+            <input type="number" [(ngModel)]="newMonsterWeapon.strikeRankModifier" placeholder="SR Modifier" min="0">
+            <button class="btn btn-small" (click)="addWeaponToNewMonster()">Add Weapon</button>
           </div>
         </div>
-
-        <div class="weapon-input">
-          <input type="text" [(ngModel)]="newMonsterWeapon.name" placeholder="Weapon name">
-          <input type="text" [(ngModel)]="newMonsterWeapon.damage" placeholder="Damage (e.g., 1d8+1)">
-          <input type="number" [(ngModel)]="newMonsterWeapon.strikeRankModifier" placeholder="SR Modifier" min="0">
-          <button class="btn btn-small" (click)="addWeaponToNewMonster()">Add Weapon</button>
-        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddMonsterModal()">Cancel</button>
+        <button class="btn btn-primary"
+                (click)="saveNewMonster()"
+                [disabled]="!newMonster.name || newMonster.weapons.length === 0">
+          Save Monster
+        </button>
       </div>
     </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="closeAddMonsterModal()">Cancel</button>
-      <button class="btn btn-primary"
-              (click)="saveNewMonster()"
-              [disabled]="!newMonster.name || newMonster.weapons.length === 0">
-        Save Monster
-      </button>
-    </div>
   </div>
-</div>
+}

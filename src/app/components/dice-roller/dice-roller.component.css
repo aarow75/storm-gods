@@ -39,33 +39,37 @@ h2 {
 }
 
 /* d4 - Light Yellowish with black text */
-.btn-roll:nth-child(1) {
+.btn-roll:nth-child(1), .dice-d4 {
   background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
   color: #1f2937;
 }
 
 /* d6 - Orange-Red */
-.btn-roll:nth-child(2) {
+.btn-roll:nth-child(2), .dice-d6 {
   background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  color: white;
 }
 
 /* d8 - Green */
-.btn-roll:nth-child(3) {
+.btn-roll:nth-child(3), .dice-d8 {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
 }
 
 /* d10 - Different Red (darker/crimson) */
-.btn-roll:nth-child(4) {
+.btn-roll:nth-child(4), .dice-d10 {
   background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  color: white;
 }
 
 /* d12 - Light Blue */
-.btn-roll:nth-child(5) {
+.btn-roll:nth-child(5), .dice-d12 {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: white;
 }
 
 /* d20 - White with black border */
-.btn-roll:nth-child(6) {
+.btn-roll:nth-child(6), .dice-d20 {
   background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
   color: #1f2937;
   border: 2px solid #000000;
@@ -73,13 +77,15 @@ h2 {
 }
 
 /* 3d6 - Purple/Violet */
-.btn-roll:nth-child(7) {
+.btn-roll:nth-child(7), .dice-3d6 {
   background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  color: white;
 }
 
 /* d% - Brown */
-.btn-roll:nth-child(8) {
+.btn-roll:nth-child(8), .dice-d100 {
   background: linear-gradient(135deg, #a16207 0%, #78350f 100%);
+  color: white;
 }
 
 .btn-roll:hover {
@@ -103,7 +109,7 @@ h2 {
 }
 
 .result-display {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
   border-radius: 12px;
   padding: 30px 50px;
   display: flex;
@@ -128,14 +134,14 @@ h2 {
 .result-type {
   font-size: 18px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: inherit;
   text-transform: uppercase;
 }
 
 .result-value {
   font-size: 72px;
   font-weight: 800;
-  color: white;
+  color: inherit;
   line-height: 1;
 }
 

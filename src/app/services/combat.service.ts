@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { CombatParticipant, Monster, WEAPON_STRIKE_RANKS, CombatLogEntry } from '../models/combat.model';
+import { CombatParticipant, Monster, CombatLogEntry } from '../models/combat.model';
+import { WEAPON_LIST } from '../models/character.model';
 
 @Injectable({
   providedIn: 'root'
@@ -47,7 +48,7 @@ export class CombatService {
   calculateFinalStrikeRank(baseStrikeRank: number, weaponName?: string): number {
     if (!weaponName) return baseStrikeRank;
 
-    const modifier = WEAPON_STRIKE_RANKS[weaponName] || 0;
+    const modifier = WEAPON_LIST.find(w => w.name === weaponName)?.strikeRank ?? 0;
     return baseStrikeRank + modifier;
   }
 

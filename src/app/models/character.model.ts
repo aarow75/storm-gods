@@ -13,10 +13,26 @@ export interface Character {
   passions: Passion[];
   magic: Magic;
   resources: Resources;
-  equipment: string[];
+  equipment: EquipmentItem[];
   notes: string;
   familyHistory?: FamilyHistory;
   cultStatus?: CultStatus;
+}
+
+export interface EquipmentItem {
+  name: string;
+  quantity: number;
+  cost: number;
+  hitPoints: number;
+  encumbrance: number;
+}
+
+export interface EquipmentDefinition {
+  name: string;
+  category: string;
+  cost: number;
+  hitPoints: number;
+  encumbrance: number;
 }
 
 export interface CharacterBackground {
@@ -36,6 +52,8 @@ export interface DerivedStats {
   healingRate: number;
   movementRate: number;
   strikeRank: number;
+  maxEncumbrance: number;
+  encumbranceDefensePenalty: number;
 }
 
 export interface HitLocations {
@@ -66,6 +84,7 @@ export interface Weapon {
   name: string;
   damage: string;
   skill: string;
+  currentHitPoints?: number;
 }
 
 export interface Runes {
@@ -263,7 +282,9 @@ export const DEFAULT_DERIVED_STATS: DerivedStats = {
   spiritCombatDamage: '1d6',
   healingRate: 2,
   movementRate: 8,
-  strikeRank: 10
+  strikeRank: 10,
+  maxEncumbrance: 10,
+  encumbranceDefensePenalty: 0
 };
 
 export const DEFAULT_HIT_LOCATIONS: HitLocations = {
@@ -340,7 +361,7 @@ export function calculateHitLocations(con: number, siz: number): HitLocations {
   };
 }
 
-export function calculateDerivedStats(stats: CharacterStats): DerivedStats {
+export function calculateDerivedStats(stats: CharacterStats, equipment: EquipmentItem[] = []): DerivedStats {
   const totalHP = Math.round((stats.CON + stats.SIZ) / 2);
   const strSiz = stats.STR + stats.SIZ;
 
@@ -362,7 +383,17 @@ export function calculateDerivedStats(stats: CharacterStats): DerivedStats {
   else spiritCombatDamage = '1d6+2';
 
   // Strike Rank
-  const strikeRank = Math.round((stats.DEX + stats.INT) / 2);
+  let strikeRank = Math.round((stats.DEX + stats.INT) / 2);
+
+  // Encumbrance calculations
+  const maxEncumbrance = stats.STR;
+  const totalENC = equipment.reduce((sum, item) => sum + item.encumbrance * item.quantity, 0);
+  const overENC = Math.max(0, totalENC - maxEncumbrance);
+
+  // Apply encumbrance penalties
+  const movementRate = Math.max(0, 8 - overENC);
+  strikeRank += overENC;
+  const encumbranceDefensePenalty = overENC * 5;
 
   return {
     totalHitPoints: totalHP,
@@ -371,8 +402,10 @@ export function calculateDerivedStats(stats: CharacterStats): DerivedStats {
     damageBonus: damageBonus,
     spiritCombatDamage: spiritCombatDamage,
     healingRate: Math.max(1, Math.round(stats.CON / 6)),
-    movementRate: 8,
-    strikeRank: strikeRank
+    movementRate: movementRate,
+    strikeRank: strikeRank,
+    maxEncumbrance: maxEncumbrance,
+    encumbranceDefensePenalty: encumbranceDefensePenalty
   };
 }
 
@@ -380,47 +413,125 @@ export interface WeaponDefinition {
   name: string;
   damage: string;
   defaultSkill: string;
+  strikeRank: number;
+  encumbrance: number;
+  hitPoints: number;
+  minSTR: number;      // minimum STR to wield
+  minDEX: number;      // minimum DEX to wield
+  cost: number;        // cost in Lunars
+  isMissile: boolean;
+  range?: string;      // short/medium/long in metres, e.g. "40/80/160"
+  rateOfFire?: number; // shots per round (missile weapons only)
 }
 
 export const WEAPON_LIST: WeaponDefinition[] = [
   // Swords
-  { name: 'Broadsword', damage: '1d8+1', defaultSkill: 'Sword & Shield' },
-  { name: 'Shortsword', damage: '1d6+1', defaultSkill: 'Sword & Shield' },
-  { name: 'Greatsword', damage: '2d8', defaultSkill: 'Two-Handed Weapon' },
-  { name: 'Scimitar', damage: '1d8', defaultSkill: 'Sword & Shield' },
+  { name: 'Broadsword',    damage: '1d8+1',  defaultSkill: 'Sword & Shield',    strikeRank: 2, encumbrance: 1, hitPoints: 12, minSTR: 9,  minDEX: 7,  cost: 150, isMissile: false },
+  { name: 'Shortsword',    damage: '1d6+1',  defaultSkill: 'Sword & Shield',    strikeRank: 2, encumbrance: 1, hitPoints: 10, minSTR: 7,  minDEX: 7,  cost: 80,  isMissile: false },
+  { name: 'Greatsword',    damage: '2d8',    defaultSkill: 'Two-Handed Weapon', strikeRank: 1, encumbrance: 2, hitPoints: 16, minSTR: 13, minDEX: 9,  cost: 300, isMissile: false },
+  { name: 'Scimitar',      damage: '1d8',    defaultSkill: 'Sword & Shield',    strikeRank: 2, encumbrance: 1, hitPoints: 10, minSTR: 9,  minDEX: 9,  cost: 150, isMissile: false },
 
   // Axes
-  { name: 'Battle Axe', damage: '1d8+2', defaultSkill: 'Sword & Shield' },
-  { name: 'Great Axe', damage: '3d6', defaultSkill: 'Two-Handed Weapon' },
-  { name: 'Hand Axe', damage: '1d6+1', defaultSkill: 'Sword & Shield' },
+  { name: 'Battle Axe',    damage: '1d8+2',  defaultSkill: 'Sword & Shield',    strikeRank: 1, encumbrance: 1, hitPoints: 8,  minSTR: 9,  minDEX: 7,  cost: 75,  isMissile: false },
+  { name: 'Great Axe',     damage: '3d6',    defaultSkill: 'Two-Handed Weapon', strikeRank: 0, encumbrance: 2, hitPoints: 10, minSTR: 13, minDEX: 7,  cost: 125, isMissile: false },
+  { name: 'Hand Axe',      damage: '1d6+1',  defaultSkill: 'Sword & Shield',    strikeRank: 2, encumbrance: 1, hitPoints: 6,  minSTR: 9,  minDEX: 7,  cost: 50,  isMissile: false },
 
   // Polearms
-  { name: 'Spear', damage: '1d8+1', defaultSkill: 'Spear' },
-  { name: 'Javelin', damage: '1d8', defaultSkill: 'Spear' },
-  { name: 'Halberd', damage: '1d8+2', defaultSkill: 'Two-Handed Weapon' },
-  { name: 'Pike', damage: '1d10+2', defaultSkill: 'Spear' },
+  { name: 'Spear',         damage: '1d8+1',  defaultSkill: 'Spear',             strikeRank: 3, encumbrance: 1, hitPoints: 10, minSTR: 9,  minDEX: 7,  cost: 30,  isMissile: false },
+  { name: 'Javelin',       damage: '1d8',    defaultSkill: 'Spear',             strikeRank: 3, encumbrance: 1, hitPoints: 8,  minSTR: 9,  minDEX: 9,  cost: 20,  isMissile: true,  range: '20/40/-',     rateOfFire: 1 },
+  { name: 'Halberd',       damage: '1d8+2',  defaultSkill: 'Two-Handed Weapon', strikeRank: 1, encumbrance: 2, hitPoints: 12, minSTR: 13, minDEX: 9,  cost: 150, isMissile: false },
+  { name: 'Pike',          damage: '1d10+2', defaultSkill: 'Spear',             strikeRank: 4, encumbrance: 2, hitPoints: 12, minSTR: 13, minDEX: 7,  cost: 80,  isMissile: false },
 
   // Bows & Ranged
-  { name: 'Shortbow', damage: '1d6+1', defaultSkill: 'Bow' },
-  { name: 'Longbow', damage: '1d8+1', defaultSkill: 'Bow' },
-  { name: 'Composite Bow', damage: '1d8+2', defaultSkill: 'Bow' },
-  { name: 'Sling', damage: '1d6', defaultSkill: 'Sling' },
-  { name: 'Staff Sling', damage: '1d8', defaultSkill: 'Sling' },
+  { name: 'Shortbow',      damage: '1d6+1',  defaultSkill: 'Bow',               strikeRank: 3, encumbrance: 1, hitPoints: 6,  minSTR: 9,  minDEX: 11, cost: 75,  isMissile: true,  range: '40/80/160',   rateOfFire: 2 },
+  { name: 'Longbow',       damage: '1d8+1',  defaultSkill: 'Bow',               strikeRank: 2, encumbrance: 1, hitPoints: 8,  minSTR: 13, minDEX: 11, cost: 150, isMissile: true,  range: '50/100/200',  rateOfFire: 1 },
+  { name: 'Composite Bow', damage: '1d8+2',  defaultSkill: 'Bow',               strikeRank: 2, encumbrance: 1, hitPoints: 8,  minSTR: 11, minDEX: 11, cost: 300, isMissile: true,  range: '50/100/200',  rateOfFire: 1 },
+  { name: 'Sling',         damage: '1d6',    defaultSkill: 'Sling',             strikeRank: 3, encumbrance: 0, hitPoints: 4,  minSTR: 7,  minDEX: 9,  cost: 10,  isMissile: true,  range: '50/100/200',  rateOfFire: 1 },
+  { name: 'Staff Sling',   damage: '1d8',    defaultSkill: 'Sling',             strikeRank: 2, encumbrance: 1, hitPoints: 6,  minSTR: 9,  minDEX: 9,  cost: 20,  isMissile: true,  range: '60/120/240',  rateOfFire: 1 },
 
   // Clubs & Hammers
-  { name: 'Club', damage: '1d6', defaultSkill: 'Sword & Shield' },
-  { name: 'Mace', damage: '1d8+1', defaultSkill: 'Sword & Shield' },
-  { name: 'War Hammer', damage: '1d8+1', defaultSkill: 'Sword & Shield' },
-  { name: 'Maul', damage: '2d6+2', defaultSkill: 'Two-Handed Weapon' },
+  { name: 'Club',          damage: '1d6',    defaultSkill: 'Sword & Shield',    strikeRank: 2, encumbrance: 1, hitPoints: 8,  minSTR: 7,  minDEX: 5,  cost: 10,  isMissile: false },
+  { name: 'Mace',          damage: '1d8+1',  defaultSkill: 'Sword & Shield',    strikeRank: 1, encumbrance: 1, hitPoints: 10, minSTR: 9,  minDEX: 5,  cost: 75,  isMissile: false },
+  { name: 'War Hammer',    damage: '1d8+1',  defaultSkill: 'Sword & Shield',    strikeRank: 1, encumbrance: 1, hitPoints: 8,  minSTR: 9,  minDEX: 7,  cost: 100, isMissile: false },
+  { name: 'Maul',          damage: '2d6+2',  defaultSkill: 'Two-Handed Weapon', strikeRank: 0, encumbrance: 2, hitPoints: 12, minSTR: 13, minDEX: 7,  cost: 80,  isMissile: false },
 
   // Daggers
-  { name: 'Dagger', damage: '1d4+2', defaultSkill: 'Sword & Shield' },
-  { name: 'Main Gauche', damage: '1d4+1', defaultSkill: 'Sword & Shield' },
+  { name: 'Dagger',        damage: '1d4+2',  defaultSkill: 'Sword & Shield',    strikeRank: 3, encumbrance: 0, hitPoints: 6,  minSTR: 5,  minDEX: 5,  cost: 25,  isMissile: false },
+  { name: 'Main Gauche',   damage: '1d4+1',  defaultSkill: 'Sword & Shield',    strikeRank: 3, encumbrance: 0, hitPoints: 6,  minSTR: 5,  minDEX: 7,  cost: 30,  isMissile: false },
 
   // Unarmed
-  { name: 'Fist', damage: '1d3', defaultSkill: 'Unarmed' },
-  { name: 'Kick', damage: '1d6', defaultSkill: 'Unarmed' },
-  { name: 'Grapple', damage: 'Special', defaultSkill: 'Unarmed' }
+  { name: 'Fist',          damage: '1d3',    defaultSkill: 'Unarmed',           strikeRank: 3, encumbrance: 0, hitPoints: 0,  minSTR: 0,  minDEX: 0,  cost: 0,   isMissile: false },
+  { name: 'Kick',          damage: '1d6',    defaultSkill: 'Unarmed',           strikeRank: 2, encumbrance: 0, hitPoints: 0,  minSTR: 0,  minDEX: 0,  cost: 0,   isMissile: false },
+  { name: 'Grapple',       damage: 'Special',defaultSkill: 'Unarmed',           strikeRank: 2, encumbrance: 0, hitPoints: 0,  minSTR: 0,  minDEX: 0,  cost: 0,   isMissile: false }
+];
+
+export const EQUIPMENT_LIST: EquipmentDefinition[] = [
+  // Adventuring Gear
+  { name: 'Backpack', category: 'Adventuring Gear', cost: 3, hitPoints: 4, encumbrance: 1 },
+  { name: 'Bedroll', category: 'Adventuring Gear', cost: 2, hitPoints: 3, encumbrance: 1 },
+  { name: 'Blanket', category: 'Adventuring Gear', cost: 1, hitPoints: 2, encumbrance: 1 },
+  { name: 'Canteen', category: 'Adventuring Gear', cost: 1, hitPoints: 2, encumbrance: 0 },
+  { name: 'Flint & Steel', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Grappling Hook', category: 'Adventuring Gear', cost: 5, hitPoints: 6, encumbrance: 1 },
+  { name: 'Lantern', category: 'Adventuring Gear', cost: 5, hitPoints: 4, encumbrance: 0 },
+  { name: 'Oil Flask', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Rope (10m)', category: 'Adventuring Gear', cost: 2, hitPoints: 6, encumbrance: 1 },
+  { name: 'Sack', category: 'Adventuring Gear', cost: 1, hitPoints: 3, encumbrance: 0 },
+  { name: 'Torch', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Waterskin', category: 'Adventuring Gear', cost: 1, hitPoints: 2, encumbrance: 0 },
+  { name: 'Pole (3m)', category: 'Adventuring Gear', cost: 2, hitPoints: 6, encumbrance: 2 },
+  { name: 'Signal Whistle', category: 'Adventuring Gear', cost: 2, hitPoints: 1, encumbrance: 0 },
+  { name: 'Mirror (Small)', category: 'Adventuring Gear', cost: 5, hitPoints: 2, encumbrance: 0 },
+  { name: 'Bell', category: 'Adventuring Gear', cost: 2, hitPoints: 2, encumbrance: 0 },
+  { name: 'Candle', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Chain (1m)', category: 'Adventuring Gear', cost: 5, hitPoints: 8, encumbrance: 1 },
+
+  // Clothing
+  { name: 'Boots', category: 'Clothing', cost: 5, hitPoints: 6, encumbrance: 1 },
+  { name: 'Cloak', category: 'Clothing', cost: 2, hitPoints: 4, encumbrance: 1 },
+  { name: 'Common Clothes', category: 'Clothing', cost: 3, hitPoints: 4, encumbrance: 1 },
+  { name: 'Fine Clothes', category: 'Clothing', cost: 20, hitPoints: 4, encumbrance: 1 },
+  { name: 'Gloves', category: 'Clothing', cost: 2, hitPoints: 3, encumbrance: 0 },
+  { name: 'Hat', category: 'Clothing', cost: 1, hitPoints: 2, encumbrance: 0 },
+
+  // Food & Provisions
+  { name: 'Rations (1 day)', category: 'Food & Provisions', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Rations (1 week)', category: 'Food & Provisions', cost: 6, hitPoints: 1, encumbrance: 2 },
+  { name: 'Ale (mug)', category: 'Food & Provisions', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Wine (bottle)', category: 'Food & Provisions', cost: 3, hitPoints: 1, encumbrance: 0 },
+  { name: 'Dried Meat', category: 'Food & Provisions', cost: 2, hitPoints: 1, encumbrance: 0 },
+
+  // Tools
+  { name: 'Chisel', category: 'Tools', cost: 2, hitPoints: 4, encumbrance: 0 },
+  { name: 'Crowbar', category: 'Tools', cost: 4, hitPoints: 10, encumbrance: 1 },
+  { name: 'Hammer', category: 'Tools', cost: 2, hitPoints: 6, encumbrance: 1 },
+  { name: 'Pickaxe', category: 'Tools', cost: 5, hitPoints: 8, encumbrance: 2 },
+  { name: 'Saw', category: 'Tools', cost: 3, hitPoints: 6, encumbrance: 1 },
+  { name: 'Shovel', category: 'Tools', cost: 4, hitPoints: 6, encumbrance: 1 },
+  { name: 'Thieves\' Tools', category: 'Tools', cost: 20, hitPoints: 3, encumbrance: 0 },
+  { name: 'Lock', category: 'Tools', cost: 5, hitPoints: 6, encumbrance: 0 },
+  { name: 'Padlock', category: 'Tools', cost: 4, hitPoints: 4, encumbrance: 0 },
+
+  // Medical
+  { name: 'Bandages', category: 'Medical', cost: 2, hitPoints: 1, encumbrance: 0 },
+  { name: 'Healer\'s Kit', category: 'Medical', cost: 10, hitPoints: 1, encumbrance: 1 },
+  { name: 'Healing Herbs', category: 'Medical', cost: 5, hitPoints: 1, encumbrance: 0 },
+  { name: 'Antidote', category: 'Medical', cost: 10, hitPoints: 1, encumbrance: 0 },
+  { name: 'Poison Antidote', category: 'Medical', cost: 15, hitPoints: 1, encumbrance: 0 },
+
+  // Writing & Navigation
+  { name: 'Map', category: 'Writing & Navigation', cost: 5, hitPoints: 1, encumbrance: 0 },
+  { name: 'Compass', category: 'Writing & Navigation', cost: 10, hitPoints: 1, encumbrance: 0 },
+  { name: 'Ink', category: 'Writing & Navigation', cost: 2, hitPoints: 1, encumbrance: 0 },
+  { name: 'Parchment (sheet)', category: 'Writing & Navigation', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Quill', category: 'Writing & Navigation', cost: 1, hitPoints: 1, encumbrance: 0 },
+  { name: 'Spellbook', category: 'Writing & Navigation', cost: 30, hitPoints: 4, encumbrance: 1 },
+
+  // Transport & Storage
+  { name: 'Saddlebags', category: 'Transport & Storage', cost: 5, hitPoints: 6, encumbrance: 1 },
+  { name: 'Saddlebags (Large)', category: 'Transport & Storage', cost: 10, hitPoints: 8, encumbrance: 2 },
+  { name: 'Cart', category: 'Transport & Storage', cost: 50, hitPoints: 20, encumbrance: 0 },
+  { name: 'Small Boat', category: 'Transport & Storage', cost: 100, hitPoints: 30, encumbrance: 0 },
 ];
 
 export const COMBAT_SKILLS = [
@@ -743,14 +854,14 @@ export function applySkillBonuses(
 export const CHARACTER_COLORS = [
   '#3498db', // Blue
   '#ef4444', // Red
-  '#f59e0b', // Orange
-  '#eab308', // Yellow
+  '#f97316',  // Deep Orange
+  '#fde047 ', // Yellow
   '#10b981', // Green
   '#8b5cf6', // Purple
   '#ec4899', // Pink
   '#06b6d4', // Cyan
   '#84cc16', // Lime
-  '#f97316'  // Deep Orange
+  '#f59e0b', // Orange
 ];
 
 // Function to enforce opposed rune constraints

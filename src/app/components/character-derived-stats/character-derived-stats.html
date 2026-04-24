@@ -24,5 +24,15 @@
     <input type="number" [(ngModel)]="derivedStats.strikeRank" name="strikeRank" readonly />
     <span class="stat-breakdown">{{ strikeRankBreakdown }}</span>
   </div>
+  <div class="form-group">
+    <label>{{ translationService.get('derived.movementRate', 'Movement Rate') }}:</label>
+    <input type="number" [(ngModel)]="derivedStats.movementRate" name="movementRate" readonly />
+  </div>
+  }
+  @if (derivedStats.encumbranceDefensePenalty > 0) {
+  <div class="form-group penalty-warning">
+    <label>Encumbrance Penalty:</label>
+    <input type="text" [value]="'-' + derivedStats.encumbranceDefensePenalty + '% Dodge'" readonly />
+  </div>
   }
 </div>

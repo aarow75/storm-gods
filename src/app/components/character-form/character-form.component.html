@@ -109,6 +109,8 @@
       [weapons]="character.weapons!"
       [weaponList]="weaponList"
       [combatSkills]="combatSkills"
+      [stats]="character.stats"
+      [resources]="character.resources"
       (addWeapon)="addWeapon()"
       (removeWeapon)="removeWeapon($event)"
       (weaponChange)="onWeaponChange($event)"
@@ -168,7 +170,8 @@
     <!-- Equipment Component -->
     <app-character-equipment
       [equipment]="character.equipment!"
-      (addEquipment)="addEquipment()"
+      [maxEncumbrance]="character.derivedStats?.maxEncumbrance || 0"
+      (addEquipment)="addEquipment($event)"
       (removeEquipment)="removeEquipment($event)"
     ></app-character-equipment>
 

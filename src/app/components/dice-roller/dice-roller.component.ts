@@ -67,7 +67,7 @@ export class DiceRollerComponent {
 
   rollPercentile(): void {
     const result = this.diceService.rollPercentile();
-    this.addRoll('d%', result);
+    this.addRoll('d100', result);
   }
 
   private addRoll(type: string, result: number): void {

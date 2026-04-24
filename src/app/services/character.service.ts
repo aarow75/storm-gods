@@ -34,13 +34,21 @@ export class CharacterService {
     // Ensure derivedStats exist
     if (!char.derivedStats) {
       char.derivedStats = char.stats
-        ? calculateDerivedStats(char.stats)
+        ? calculateDerivedStats(char.stats, char.equipment || [])
         : { ...DEFAULT_DERIVED_STATS };
     }
 
     // Migrate maxHitPoints if missing
     if (char.derivedStats && char.derivedStats.maxHitPoints === undefined) {
       char.derivedStats.maxHitPoints = char.derivedStats.totalHitPoints;
+    }
+
+    // Migrate encumbrance fields if missing
+    if (char.derivedStats && char.derivedStats.maxEncumbrance === undefined) {
+      char.derivedStats.maxEncumbrance = char.stats?.STR || 10;
+    }
+    if (char.derivedStats && char.derivedStats.encumbranceDefensePenalty === undefined) {
+      char.derivedStats.encumbranceDefensePenalty = 0;
     }
 
     // Ensure hitLocations exist
@@ -80,9 +88,15 @@ export class CharacterService {
       char.resources = { ...DEFAULT_RESOURCES };
     }
 
-    // Ensure equipment array exists
+    // Ensure equipment array exists and migrate from legacy string[] format
     if (!char.equipment) {
       char.equipment = [];
+    } else {
+      char.equipment = char.equipment.map((item: any) =>
+        typeof item === 'string'
+          ? { name: item, quantity: 1, cost: 0, hitPoints: 0, encumbrance: 0 }
+          : item
+      );
     }
 
     // Ensure notes exist

@@ -12,6 +12,7 @@ export interface MonsterWeapon {
   name: string;
   damage: string;
   strikeRankModifier: number;
+  hitPoints?: number;
 }
 
 export interface CombatParticipant {
@@ -29,6 +30,9 @@ export interface CombatParticipant {
   isDead?: boolean;
   kills?: number;
   color?: string;
+  locationDamage?: { [location: string]: number };
+  attacksUsed?: number;    // shots fired this round (for missile rate-of-fire tracking)
+  parriesAgainst?: { [attackerId: string]: number }; // parry attempts vs each attacker this round
 }
 
 export interface CombatLogEntry {
@@ -36,52 +40,6 @@ export interface CombatLogEntry {
   date: string;
   entries: string[];
 }
-
-export interface WeaponStrikeRankModifier {
-  [weaponName: string]: number;
-}
-
-// Strike rank modifiers by weapon type (from RQ rules)
-export const WEAPON_STRIKE_RANKS: WeaponStrikeRankModifier = {
-  // Swords
-  'Broadsword': 2,
-  'Shortsword': 2,
-  'Greatsword': 1,
-  'Scimitar': 2,
-
-  // Axes
-  'Battle Axe': 1,
-  'Great Axe': 0,
-  'Hand Axe': 2,
-
-  // Polearms
-  'Spear': 3,
-  'Javelin': 3,
-  'Halberd': 1,
-  'Pike': 4,
-
-  // Bows & Ranged
-  'Shortbow': 3,
-  'Longbow': 2,
-  'Composite Bow': 2,
-  'Sling': 3,
-  'Staff Sling': 2,
-
-  // Clubs & Hammers
-  'Club': 2,
-  'Mace': 1,
-  'War Hammer': 1,
-  'Maul': 0,
-
-  // Daggers
-  'Dagger': 3,
-  'Main Gauche': 3,
-
-  // Unarmed
-  'Fist': 3,
-  'Kick': 2,
-  'Grapple': 2
-};
 
 // Default monsters for RuneQuest
 export const DEFAULT_MONSTERS: Monster[] = [

@@ -2,19 +2,82 @@
 <h4>{{ heading }}</h4>
 }
 <div class="equipment-section">
+  <div class="equipment-add-row">
+    <select [(ngModel)]="selectedItemName" name="equipment-select" class="equipment-select">
+      <option value="">— Select item —</option>
+      @for (category of categories; track category) {
+        <optgroup [label]="category">
+          @for (item of getItemsByCategory(category); track item.name) {
+            <option [value]="item.name">{{ item.name }}</option>
+          }
+        </optgroup>
+      }
+    </select>
+    <input
+      type="number"
+      [(ngModel)]="selectedQuantity"
+      name="equipment-qty-new"
+      min="1"
+      class="qty-input"
+    />
+    <button type="button" class="btn-add-small" (click)="onAddEquipment()" [disabled]="!selectedItemName">
+      {{ translationService.get('button.add', 'Add') }}
+    </button>
+  </div>
+
   @if (equipment.length === 0) {
     <p class="no-items">No equipment added yet.</p>
+  } @else {
+    <table class="equipment-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Qty</th>
+          <th>ENC</th>
+          <th>HP</th>
+          <th>Cost (L)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of equipment; track $index) {
+          <tr>
+            <td>{{ item.name }}</td>
+            <td>
+              <input
+                type="number"
+                [(ngModel)]="equipment[$index].quantity"
+                [name]="'equipment-qty-' + $index"
+                min="1"
+                class="qty-input"
+              />
+            </td>
+            <td class="stat-cell">{{ item.encumbrance }}</td>
+            <td class="stat-cell">{{ item.hitPoints }}</td>
+            <td class="stat-cell">{{ item.cost }}</td>
+            <td>
+              <button type="button" class="btn-remove-small" (click)="onRemoveEquipment($index)">×</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+      <tfoot>
+        <tr class="totals-row">
+          <td><strong>Total</strong></td>
+          <td></td>
+          <td class="stat-cell"><strong>{{ totalEncumbrance }} / {{ maxEncumbrance || '?' }}</strong></td>
+          <td></td>
+          <td class="stat-cell"><strong>{{ totalCost }}</strong></td>
+          <td></td>
+        </tr>
+        @if (overEncumbrance > 0) {
+          <tr class="penalty-row">
+            <td colspan="6" class="penalty-text">
+              <strong>Over-encumbered by {{ overEncumbrance }}:</strong> -{{ overEncumbrance }} Movement Rate, -{{ overEncumbrance * 5 }}% Dodge, +{{ overEncumbrance }} Strike Rank
+            </td>
+          </tr>
+        }
+      </tfoot>
+    </table>
   }
-  @for (item of equipment; track $index) {
-    <div class="equipment-row">
-      <input
-        type="text"
-        [(ngModel)]="equipment[$index]"
-        [name]="'equipment-' + $index"
-        [placeholder]="translationService.get('equipment.itemPlaceholder', 'Equipment item')"
-      />
-      <button type="button" class="btn-remove-small" (click)="onRemoveEquipment($index)">×</button>
-    </div>
-  }
-  <button type="button" class="btn-add-small" (click)="onAddEquipment()">{{ translationService.get('button.add', 'Add') }}</button>
 </div>

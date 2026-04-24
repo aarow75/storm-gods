@@ -16,9 +16,14 @@
           (change)="onWeaponChange($index)"
         >
           @for (weaponDef of weaponList; track weaponDef.name) {
-            <option [value]="weaponDef.name">{{ weaponDef.name }}</option>
+            <option [value]="weaponDef.name" [disabled]="isWeaponDisabled(weaponDef)">
+              {{ getWeaponOptionLabel(weaponDef) }}
+            </option>
           }
         </select>
+        @if (getWeaponWarning(weapon); as warning) {
+          <span class="weapon-warning">⚠ {{ warning }}</span>
+        }
       </div>
       <div class="form-group">
         <label [attr.for]="'weapon-damage-' + $index">{{ translationService.get('weapons.damage', 'Damage') }}</label>
@@ -41,6 +46,13 @@
           }
         </select>
       </div>
+      @if (getMissileDef(weapon); as md) {
+        <div class="missile-info">
+          <span class="missile-tag">Missile</span>
+          <span class="missile-detail">Range: {{ md.range }}m</span>
+          <span class="missile-detail">ROF: {{ md.rateOfFire }}/round</span>
+        </div>
+      }
       <button type="button" class="btn-remove" (click)="onRemoveWeapon($index)">{{ translationService.get('button.remove', 'Remove') }}</button>
     </div>
   }

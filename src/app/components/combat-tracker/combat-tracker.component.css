@@ -446,6 +446,21 @@
   color: #dc2626;
 }
 
+.log-entry.parry {
+  background: #eff6ff;
+  border-left-color: #3b82f6;
+}
+
+.log-entry.dodge {
+  background: #f0fdf4;
+  border-left-color: #22c55e;
+}
+
+.log-entry.failed {
+  background: #fff7ed;
+  border-left-color: #f97316;
+}
+
 /* Combat Log History */
 .log-history {
   display: flex;
@@ -668,4 +683,337 @@
   .weapon-input button {
     justify-self: start;
   }
+}
+
+/* Weapon HP display */
+.weapon-hp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.weapon-hp-label {
+  color: #666;
+}
+
+.weapon-hp-value {
+  font-weight: bold;
+  color: #333;
+}
+
+.weapon-hp-value.weapon-damaged {
+  color: #f59e0b;
+}
+
+.weapon-hp-value.weapon-broken {
+  color: #ef4444;
+}
+
+.broken-tag {
+  background: #ef4444;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 1px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.05em;
+}
+
+/* Defense modal */
+.defense-overlay {
+  background-color: rgba(0, 0, 0, 0.65);
+}
+
+.defense-modal {
+  max-width: 480px;
+  border: 3px solid #dc2626;
+}
+
+.defense-header {
+  background: #dc2626;
+  border-radius: 6px 6px 0 0;
+}
+
+.defense-header h3 {
+  color: white;
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.05em;
+}
+
+.attack-summary {
+  font-size: 18px;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
+.damage-rolled {
+  text-align: center;
+  font-size: 15px;
+  color: #555;
+  margin: 0 0 20px;
+}
+
+.damage-number {
+  font-size: 28px;
+  color: #dc2626;
+  margin: 0 4px;
+}
+
+.breakdown-text {
+  font-family: monospace;
+  color: #888;
+  font-size: 13px;
+}
+
+.defense-prompt {
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 12px;
+  text-align: center;
+}
+
+.defense-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.defense-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  min-width: 120px;
+  height: auto;
+}
+
+.defense-btn-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.defense-btn-sub {
+  font-size: 12px;
+  opacity: 0.9;
+  text-align: center;
+}
+
+.weapon-hp-sub.weapon-broken {
+  color: #fca5a5;
+  font-weight: bold;
+}
+
+.btn-parry {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-parry:hover:not(:disabled) {
+  background-color: #2563eb;
+}
+
+.btn-dodge {
+  background-color: #22c55e;
+  color: white;
+}
+
+.btn-dodge:hover:not(:disabled) {
+  background-color: #16a34a;
+}
+
+.defense-stat-breakdown {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #888;
+}
+
+/* Defense modal attack details row */
+.attack-details-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.damage-rolled {
+  font-size: 15px;
+  color: #555;
+}
+
+.hit-location-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  background: #f3f4f6;
+  border: 2px solid #d1d5db;
+  color: #374151;
+}
+
+.hit-location-chip.loc-fatal {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.hit-location-chip.loc-useless {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+/* Hit location section in participant card */
+.hit-locations {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+.hit-location-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.location-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  min-width: 56px;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.loc-name {
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.loc-hp {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.loc-effect {
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+
+/* Location status colours */
+.location-badge.loc-healthy {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #15803d;
+}
+
+.location-badge.loc-damaged {
+  background: #fff7ed;
+  border-color: #fdba74;
+  color: #92400e;
+}
+
+.location-badge.loc-useless {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #78350f;
+}
+
+.location-badge.loc-fatal {
+  background: #fee2e2;
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+/* Attack roll row in defense modal */
+.attack-roll-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.attack-hit-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.attack-bonus-chip {
+  font-size: 12px;
+  color: #374151;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+
+/* Repeat parry penalty */
+.penalty-text {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* Stat breakdown sections in modal */
+.breakdown-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.breakdown-label {
+  font-weight: 600;
+  color: #374151;
+  margin-right: 2px;
+}
+
+/* Missile weapon info in combat card */
+.missile-info-combat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: #ebf8ff;
+  border: 1px solid #bee3f8;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #2c5282;
+}
+
+.missile-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: #2b6cb0;
 }

@@ -304,7 +304,7 @@ export class CharacterFormComponent implements OnInit {
 
   calculateDerivedValues(): void {
     if (this.character.stats) {
-      this.character.derivedStats = calculateDerivedStats(this.character.stats);
+      this.character.derivedStats = calculateDerivedStats(this.character.stats, this.character.equipment || []);
       this.calculateHitPoints();
     }
   }
@@ -317,7 +317,8 @@ export class CharacterFormComponent implements OnInit {
     this.character.weapons.push({
       name: firstWeapon.name,
       damage: firstWeapon.damage,
-      skill: firstWeapon.defaultSkill
+      skill: firstWeapon.defaultSkill,
+      currentHitPoints: firstWeapon.hitPoints
     });
   }
 
@@ -336,6 +337,7 @@ export class CharacterFormComponent implements OnInit {
     if (weaponDef) {
       weapon.damage = weaponDef.damage;
       weapon.skill = weaponDef.defaultSkill;
+      weapon.currentHitPoints = weaponDef.hitPoints;
     }
   }
 
@@ -380,16 +382,18 @@ export class CharacterFormComponent implements OnInit {
     }
   }
 
-  addEquipment(): void {
+  addEquipment(item: import('../../models/character.model').EquipmentItem): void {
     if (!this.character.equipment) {
       this.character.equipment = [];
     }
-    this.character.equipment.push('');
+    this.character.equipment.push(item);
+    this.calculateDerivedValues();
   }
 
   removeEquipment(index: number): void {
     if (this.character.equipment) {
       this.character.equipment.splice(index, 1);
+      this.calculateDerivedValues();
     }
   }
 

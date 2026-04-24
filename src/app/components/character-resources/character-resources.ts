@@ -22,9 +22,9 @@ export class CharacterResources {
 
   getResourceKeys(): { key: keyof Resources; label: string }[] {
     return [
-      { key: 'lunars', label: 'Lunars' },
-      { key: 'wheels', label: 'Wheels' },
-      { key: 'clacks', label: 'Clacks' },
+      { key: 'wheels', label: 'Wheels (2 Gold)' },
+      { key: 'lunars', label: 'Lunars (Silver)' },
+      { key: 'clacks', label: 'Clacks (Copper)' },
       { key: 'reputation', label: 'Reputation' },
       { key: 'ransom', label: 'Ransom' }
     ];
