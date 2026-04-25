@@ -22,6 +22,14 @@
             </button>
           </div>
         </div>
+        <div class="font-size-adjuster">
+          <label>Text Size:</label>
+          <div class="button-group">
+            <button (click)="decreaseFontSize()" class="font-size-btn" title="Decrease font size">−</button>
+            <button (click)="resetFontSize()" class="font-size-btn font-size-reset" title="Reset to default">Reset</button>
+            <button (click)="increaseFontSize()" class="font-size-btn" title="Increase font size">+</button>
+          </div>
+        </div>
         <div class="language-switcher">
           <label>Language:</label>
           <div class="button-group">

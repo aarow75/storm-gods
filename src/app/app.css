@@ -48,6 +48,7 @@ header {
 }
 
 .system-switcher,
+.font-size-adjuster,
 .language-switcher {
   display: flex;
   align-items: center;
@@ -55,6 +56,7 @@ header {
 }
 
 .system-switcher label,
+.font-size-adjuster label,
 .language-switcher label {
   font-size: var(--font-size-lg);
   color: var(--color-text-primary);
@@ -132,6 +134,30 @@ header {
 .language-switcher button.active {
   background: var(--color-gray-600);
   color: var(--color-bg-white);
+}
+
+.font-size-btn {
+  padding: var(--spacing-lg) var(--spacing-3xl);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-lg);
+  background: var(--color-bg-white);
+  color: var(--color-gray-600);
+  border-right: 1px solid #e0e0e0;
+}
+
+.font-size-btn:last-child {
+  border-right: none;
+}
+
+.font-size-btn:hover {
+  background: var(--color-bg-light);
+}
+
+.font-size-btn.font-size-reset {
+  font-size: var(--font-size-sm);
 }
 
 /* Responsive design */

@@ -1,8 +1,14 @@
 <div class="dice-roller">
-  @if (heading) {
-  <h2>{{ heading }}</h2>
-  }
+  <div class="dice-roller-header">
+    @if (heading) {
+    <h2>{{ heading }}</h2>
+    }
+    <button class="btn-collapse" (click)="toggleCollapsed()" [class.collapsed]="isCollapsed" title="Toggle dice roller">
+      <span class="collapse-icon">{{ isCollapsed ? '▶' : '▼' }}</span>
+    </button>
+  </div>
 
+  @if (!isCollapsed) {
   <div class="roller-container">
     <div class="dice-controls">
       <button class="btn-roll dice-d4" (click)="rollD4()">d4</button>
@@ -102,5 +108,6 @@
       }
     </div>
   </div>
+  }
   }
 </div>

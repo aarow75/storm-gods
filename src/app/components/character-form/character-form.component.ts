@@ -14,6 +14,7 @@ import { CharacterService } from '../../services/character.service';
 import { DiceService } from '../../services/dice.service';
 import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
+import { UIStateService } from '../../services/ui-state.service';
 import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
 import { CHARACTER_COLORS } from '../../constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
@@ -121,8 +122,17 @@ export class CharacterFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     public translationService: TranslationService,
-    public gameSystemService: GameSystemService
+    public gameSystemService: GameSystemService,
+    public uiStateService: UIStateService
   ) {}
+
+  toggleSection(sectionId: string): void {
+    this.uiStateService.toggleSection(sectionId);
+  }
+
+  isSectionCollapsed(sectionId: string): boolean {
+    return this.uiStateService.isSectionCollapsed(sectionId);
+  }
 
   ngOnInit(): void {
     // Check if we're editing an existing character

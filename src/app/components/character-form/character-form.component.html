@@ -86,150 +86,310 @@
     </div>
 
     <!-- Background Component -->
-    <app-character-background
-      [background]="character.background!"
-      [cults]="gameSystemService.getCults()"
-      [occupations]="gameSystemService.getOccupations()"
-      [homelands]="gameSystemService.getHomelands()"
-      [isFieldInvalid]="isFieldInvalid.bind(this)"
-      [isFieldRandomized]="isFieldRandomized.bind(this)"
-      (cultChange)="onCultChange()"
-    ></app-character-background>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('background')">
+      <div class="section-header" (click)="toggleSection('background')">
+        <h4>Background</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('background') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('background')) {
+      <div class="section-content">
+        <app-character-background
+          [background]="character.background!"
+          [cults]="gameSystemService.getCults()"
+          [occupations]="gameSystemService.getOccupations()"
+          [homelands]="gameSystemService.getHomelands()"
+          [isFieldInvalid]="isFieldInvalid.bind(this)"
+          [isFieldRandomized]="isFieldRandomized.bind(this)"
+          (cultChange)="onCultChange()"
+        ></app-character-background>
+      </div>
+      }
+    </div>
 
     <!-- Family History Component (RuneQuest only) -->
     @if (gameSystemService.gameSystem() === 'runequest') {
-    <app-character-family-history
-      [familyHistory]="character.familyHistory!"
-      (addEvent)="addFamilyEvent()"
-      (removeEvent)="removeFamilyEvent($event)"
-    ></app-character-family-history>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('familyHistory')">
+      <div class="section-header" (click)="toggleSection('familyHistory')">
+        <h4>Family History</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('familyHistory') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('familyHistory')) {
+      <div class="section-content">
+        <app-character-family-history
+          [familyHistory]="character.familyHistory!"
+          (addEvent)="addFamilyEvent()"
+          (removeEvent)="removeFamilyEvent($event)"
+        ></app-character-family-history>
+      </div>
+      }
+    </div>
     }
 
     <!-- Characteristics Component -->
-    <app-character-characteristics
-      [stats]="character.stats!"
-      [isFieldInvalid]="isFieldInvalid.bind(this)"
-      [isFieldRandomized]="isFieldRandomized.bind(this)"
-      (rollAll)="rollAll3D6()"
-      (rollStat)="roll3D6($event)"
-    ></app-character-characteristics>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('characteristics')">
+      <div class="section-header" (click)="toggleSection('characteristics')">
+        <h4>Characteristics</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('characteristics') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('characteristics')) {
+      <div class="section-content">
+        <app-character-characteristics
+          [stats]="character.stats!"
+          [isFieldInvalid]="isFieldInvalid.bind(this)"
+          [isFieldRandomized]="isFieldRandomized.bind(this)"
+          (rollAll)="rollAll3D6()"
+          (rollStat)="roll3D6($event)"
+        ></app-character-characteristics>
+      </div>
+      }
+    </div>
 
     <!-- Skills Component -->
-    <app-character-skills
-      [skills]="character.skills!"
-      [skillCategories]="skillCategories"
-      [getCategoryKeys]="getCategoryKeys.bind(this)"
-      [getSkillKeys]="getSkillKeys.bind(this)"
-      (applyBonuses)="applyAllSkillBonuses()"
-    ></app-character-skills>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('skills')">
+      <div class="section-header" (click)="toggleSection('skills')">
+        <h4>Skills</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('skills') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('skills')) {
+      <div class="section-content">
+        <app-character-skills
+          [skills]="character.skills!"
+          [skillCategories]="skillCategories"
+          [getCategoryKeys]="getCategoryKeys.bind(this)"
+          [getSkillKeys]="getSkillKeys.bind(this)"
+          (applyBonuses)="applyAllSkillBonuses()"
+        ></app-character-skills>
+      </div>
+      }
+    </div>
 
     <!-- Derived Stats Component -->
-    <app-character-derived-stats
-      [derivedStats]="character.derivedStats!"
-      [stats]="character.stats"
-      (calculate)="calculateDerivedValues()"
-    ></app-character-derived-stats>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('derivedStats')">
+      <div class="section-header" (click)="toggleSection('derivedStats')">
+        <h4>Derived Stats</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('derivedStats') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('derivedStats')) {
+      <div class="section-content">
+        <app-character-derived-stats
+          [derivedStats]="character.derivedStats!"
+          [stats]="character.stats"
+          (calculate)="calculateDerivedValues()"
+        ></app-character-derived-stats>
+      </div>
+      }
+    </div>
 
     <!-- Hit Locations Component (RuneQuest only) -->
     @if (gameSystemService.gameSystem() === 'runequest') {
-    <app-character-hit-locations
-      [hitLocations]="character.hitLocations!"
-      (calculate)="calculateHitPoints()"
-    ></app-character-hit-locations>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('hitLocations')">
+      <div class="section-header" (click)="toggleSection('hitLocations')">
+        <h4>Hit Locations</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('hitLocations') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('hitLocations')) {
+      <div class="section-content">
+        <app-character-hit-locations
+          [hitLocations]="character.hitLocations!"
+          (calculate)="calculateHitPoints()"
+        ></app-character-hit-locations>
+      </div>
+      }
+    </div>
     }
 
     <!-- Armor Component -->
-    <app-character-armor
-      [armor]="character.armor!"
-      (applyToAll)="applyArmorToAll()"
-    ></app-character-armor>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('armor')">
+      <div class="section-header" (click)="toggleSection('armor')">
+        <h4>Armor</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('armor') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('armor')) {
+      <div class="section-content">
+        <app-character-armor
+          [armor]="character.armor!"
+          (applyToAll)="applyArmorToAll()"
+        ></app-character-armor>
+      </div>
+      }
+    </div>
 
     <!-- Shields Component (RuneQuest only) -->
     @if (gameSystemService.gameSystem() === 'runequest') {
-    <app-character-shields
-      [shields]="character.shields!"
-      [shieldList]="shieldList"
-      (addShield)="addShield()"
-      (removeShield)="removeShield($event)"
-      (shieldChange)="onShieldChange($event)"
-    ></app-character-shields>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('shields')">
+      <div class="section-header" (click)="toggleSection('shields')">
+        <h4>Shields</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('shields') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('shields')) {
+      <div class="section-content">
+        <app-character-shields
+          [shields]="character.shields!"
+          [shieldList]="shieldList"
+          (addShield)="addShield()"
+          (removeShield)="removeShield($event)"
+          (shieldChange)="onShieldChange($event)"
+        ></app-character-shields>
+      </div>
+      }
+    </div>
     }
 
     <!-- Weapons Component -->
-    <app-character-weapons
-      [weapons]="character.weapons!"
-      [weaponList]="weaponList"
-      [combatSkills]="combatSkills"
-      [stats]="character.stats"
-      [resources]="character.resources"
-      (addWeapon)="addWeapon()"
-      (removeWeapon)="removeWeapon($event)"
-      (weaponChange)="onWeaponChange($event)"
-    ></app-character-weapons>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('weapons')">
+      <div class="section-header" (click)="toggleSection('weapons')">
+        <h4>Weapons</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('weapons') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('weapons')) {
+      <div class="section-content">
+        <app-character-weapons
+          [weapons]="character.weapons!"
+          [weaponList]="weaponList"
+          [combatSkills]="combatSkills"
+          [stats]="character.stats"
+          [resources]="character.resources"
+          (addWeapon)="addWeapon()"
+          (removeWeapon)="removeWeapon($event)"
+          (weaponChange)="onWeaponChange($event)"
+        ></app-character-weapons>
+      </div>
+      }
+    </div>
 
     <!-- Runes Component (RuneQuest only) -->
     @if (gameSystemService.gameSystem() === 'runequest') {
-    <app-character-runes
-      [runes]="character.runes!"
-      [getOpposedRuneValue]="getOpposedRuneValue.bind(this)"
-      (runeChange)="onRuneChange()"
-    ></app-character-runes>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('runes')">
+      <div class="section-header" (click)="toggleSection('runes')">
+        <h4>Runes</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('runes') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('runes')) {
+      <div class="section-content">
+        <app-character-runes
+          [runes]="character.runes!"
+          [getOpposedRuneValue]="getOpposedRuneValue.bind(this)"
+          (runeChange)="onRuneChange()"
+        ></app-character-runes>
+      </div>
+      }
+    </div>
     }
 
     <!-- Cult Status Component (RuneQuest only) -->
     @if (gameSystemService.gameSystem() === 'runequest') {
-    <app-character-cult-status
-      [cultStatus]="character.cultStatus!"
-      [cultRanks]="cultRanks"
-    ></app-character-cult-status>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('cultStatus')">
+      <div class="section-header" (click)="toggleSection('cultStatus')">
+        <h4>Cult Status</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('cultStatus') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('cultStatus')) {
+      <div class="section-content">
+        <app-character-cult-status
+          [cultStatus]="character.cultStatus!"
+          [cultRanks]="cultRanks"
+        ></app-character-cult-status>
+      </div>
+      }
+    </div>
     }
 
     <!-- Passions Component (RuneQuest only) -->
     @if (gameSystemService.gameSystem() === 'runequest') {
-    <app-character-passions
-      [passions]="character.passions!"
-      [commonPassions]="commonPassions"
-      [isCustomPassion]="isCustomPassion.bind(this)"
-      [getPassionDropdownValue]="getPassionDropdownValue.bind(this)"
-      (addPassion)="addPassion()"
-      (removePassion)="removePassion($event)"
-    ></app-character-passions>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('passions')">
+      <div class="section-header" (click)="toggleSection('passions')">
+        <h4>Passions</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('passions') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('passions')) {
+      <div class="section-content">
+        <app-character-passions
+          [passions]="character.passions!"
+          [commonPassions]="commonPassions"
+          [isCustomPassion]="isCustomPassion.bind(this)"
+          [getPassionDropdownValue]="getPassionDropdownValue.bind(this)"
+          (addPassion)="addPassion()"
+          (removePassion)="removePassion($event)"
+        ></app-character-passions>
+      </div>
+      }
+    </div>
     }
 
     <!-- Magic Component -->
-    <app-character-magic
-      [magic]="character.magic!"
-      [spiritMagicSpells]="spiritMagicSpells"
-      [sorcerySpells]="sorcerySpells"
-      [getAvailableRuneSpells]="getAvailableRuneSpells.bind(this)"
-      [isCustomSpell]="isCustomSpell.bind(this)"
-      [getSpiritSpellDropdownValue]="getSpiritSpellDropdownValue.bind(this)"
-      [getSorcerySpellDropdownValue]="getSorcerySpellDropdownValue.bind(this)"
-      [isCustomRuneSpell]="isCustomRuneSpell.bind(this)"
-      [getRuneSpellDropdownValue]="getRuneSpellDropdownValue.bind(this)"
-      (addSpell)="addSpell($event)"
-      (removeSpell)="removeSpell($event.type, $event.index)"
-      (addRuneSpell)="addRuneSpell()"
-      (removeRuneSpell)="removeRuneSpell($event)"
-    ></app-character-magic>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('magic')">
+      <div class="section-header" (click)="toggleSection('magic')">
+        <h4>Magic</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('magic') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('magic')) {
+      <div class="section-content">
+        <app-character-magic
+          [magic]="character.magic!"
+          [spiritMagicSpells]="spiritMagicSpells"
+          [sorcerySpells]="sorcerySpells"
+          [getAvailableRuneSpells]="getAvailableRuneSpells.bind(this)"
+          [isCustomSpell]="isCustomSpell.bind(this)"
+          [getSpiritSpellDropdownValue]="getSpiritSpellDropdownValue.bind(this)"
+          [getSorcerySpellDropdownValue]="getSorcerySpellDropdownValue.bind(this)"
+          [isCustomRuneSpell]="isCustomRuneSpell.bind(this)"
+          [getRuneSpellDropdownValue]="getRuneSpellDropdownValue.bind(this)"
+          (addSpell)="addSpell($event)"
+          (removeSpell)="removeSpell($event.type, $event.index)"
+          (addRuneSpell)="addRuneSpell()"
+          (removeRuneSpell)="removeRuneSpell($event)"
+        ></app-character-magic>
+      </div>
+      }
+    </div>
 
     <!-- Resources Component -->
-    <app-character-resources
-      [resources]="character.resources!"
-    ></app-character-resources>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('resources')">
+      <div class="section-header" (click)="toggleSection('resources')">
+        <h4>Resources</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('resources') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('resources')) {
+      <div class="section-content">
+        <app-character-resources
+          [resources]="character.resources!"
+        ></app-character-resources>
+      </div>
+      }
+    </div>
 
     <!-- Equipment Component -->
-    <app-character-equipment
-      [equipment]="character.equipment!"
-      [maxEncumbrance]="character.derivedStats?.maxEncumbrance || 0"
-      (addEquipment)="addEquipment($event)"
-      (removeEquipment)="removeEquipment($event)"
-    ></app-character-equipment>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('equipment')">
+      <div class="section-header" (click)="toggleSection('equipment')">
+        <h4>Equipment</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('equipment') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('equipment')) {
+      <div class="section-content">
+        <app-character-equipment
+          [equipment]="character.equipment!"
+          [maxEncumbrance]="character.derivedStats?.maxEncumbrance || 0"
+          (addEquipment)="addEquipment($event)"
+          (removeEquipment)="removeEquipment($event)"
+        ></app-character-equipment>
+      </div>
+      }
+    </div>
 
     <!-- Notes Component -->
-    <app-character-notes
-      [notes]="character.notes!"
-    ></app-character-notes>
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('notes')">
+      <div class="section-header" (click)="toggleSection('notes')">
+        <h4>Notes</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('notes') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('notes')) {
+      <div class="section-content">
+        <app-character-notes
+          [notes]="character.notes!"
+        ></app-character-notes>
+      </div>
+      }
+    </div>
 
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">

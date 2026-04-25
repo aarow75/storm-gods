@@ -5,6 +5,7 @@ import { Title } from '@angular/platform-browser';
 import { DiceRollerComponent } from './components/dice-roller/dice-roller.component';
 import { TranslationService } from './services/translation.service';
 import { GameSystemService } from './services/game-system.service';
+import { UIStateService } from './services/ui-state.service';
 import { ShowIfTranslationDirective } from './directives/show-if-translation.directive';
 
 @Component({
@@ -17,6 +18,7 @@ export class App implements OnInit {
   constructor(
     public translationService: TranslationService,
     public gameSystemService: GameSystemService,
+    public uiStateService: UIStateService,
     private titleService: Title
   ) {
     // Update document title whenever game system or language changes
@@ -43,5 +45,17 @@ export class App implements OnInit {
   toggleGameSystem(): void {
     this.gameSystemService.toggleGameSystem();
     this.updateTitle();
+  }
+
+  increaseFontSize(): void {
+    this.uiStateService.increaseFontSize();
+  }
+
+  decreaseFontSize(): void {
+    this.uiStateService.decreaseFontSize();
+  }
+
+  resetFontSize(): void {
+    this.uiStateService.resetFontSize();
   }
 }

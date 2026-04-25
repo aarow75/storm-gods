@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiceService } from '../../services/dice.service';
 import { TranslationService } from '../../services/translation.service';
+import { UIStateService } from '../../services/ui-state.service';
 
 interface RollResult {
   type: string;
@@ -32,8 +33,17 @@ export class DiceRollerComponent {
 
   constructor(
     private diceService: DiceService,
-    public translationService: TranslationService
+    public translationService: TranslationService,
+    public uiStateService: UIStateService
   ) {}
+
+  toggleCollapsed(): void {
+    this.uiStateService.toggleSection('dice-roller');
+  }
+
+  get isCollapsed(): boolean {
+    return this.uiStateService.isSectionCollapsed('dice-roller');
+  }
 
   get heading(): string | undefined {
     return this.translationService.translate('diceRoller.title');
