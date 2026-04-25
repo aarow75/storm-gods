@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
-  Character, CharacterStats, CharacterSkills, Weapon, WeaponDefinition, Passion, Spell, RuneSpell,
+  Character, CharacterStats, CharacterSkills, Weapon, WeaponDefinition, Shield, ShieldDefinition, Passion, Spell, RuneSpell,
   DEFAULT_STATS, DEFAULT_SKILLS, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES, DEFAULT_FAMILY_HISTORY, DEFAULT_CULT_STATUS,
-  calculateHitLocations, calculateDerivedStats, WEAPON_LIST, COMBAT_SKILLS,
+  calculateHitLocations, calculateDerivedStats, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
   CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS, ARMOR_TYPES,
   applySkillBonuses, enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES
 } from '../../models/character.model';
@@ -23,6 +23,7 @@ import { CharacterSkills as CharacterSkillsComponent } from '../character-skills
 import { CharacterDerivedStats } from '../character-derived-stats/character-derived-stats';
 import { CharacterHitLocations } from '../character-hit-locations/character-hit-locations';
 import { CharacterArmor } from '../character-armor/character-armor';
+import { CharacterShields } from '../character-shields/character-shields';
 import { CharacterWeapons } from '../character-weapons/character-weapons';
 import { CharacterRunes } from '../character-runes/character-runes';
 import { CharacterCultStatus } from '../character-cult-status/character-cult-status';
@@ -45,6 +46,7 @@ import { CharacterNotes } from '../character-notes/character-notes';
     CharacterDerivedStats,
     CharacterHitLocations,
     CharacterArmor,
+    CharacterShields,
     CharacterWeapons,
     CharacterRunes,
     CharacterCultStatus,
@@ -66,6 +68,7 @@ export class CharacterFormComponent implements OnInit {
     skills: { ...DEFAULT_SKILLS },
     hitLocations: { ...DEFAULT_HIT_LOCATIONS },
     armor: { ...DEFAULT_ARMOR },
+    shields: [],
     weapons: [],
     runes: JSON.parse(JSON.stringify(DEFAULT_RUNES)),
     passions: [],
@@ -84,6 +87,7 @@ export class CharacterFormComponent implements OnInit {
 
   skillCategories = SKILL_CATEGORIES;
   weaponList = WEAPON_LIST;
+  shieldList = SHIELD_LIST;
   combatSkills = COMBAT_SKILLS;
   characterColors = CHARACTER_COLORS;
   cults = CULTS;
@@ -149,6 +153,7 @@ export class CharacterFormComponent implements OnInit {
       skills: this.character.skills!,
       hitLocations: this.character.hitLocations!,
       armor: this.character.armor!,
+      shields: this.character.shields,
       weapons: this.character.weapons!,
       runes: this.character.runes!,
       passions: this.character.passions!,
@@ -182,6 +187,7 @@ export class CharacterFormComponent implements OnInit {
         skills: { ...character.skills },
         hitLocations: { ...character.hitLocations },
         armor: { ...character.armor },
+        shields: character.shields ? [...character.shields.map(s => ({ ...s }))] : [],
         weapons: character.weapons ? [...character.weapons.map(w => ({ ...w }))] : [],
         runes: JSON.parse(JSON.stringify(character.runes)),
         passions: character.passions ? [...character.passions.map(p => ({ ...p }))] : [],
@@ -342,6 +348,35 @@ export class CharacterFormComponent implements OnInit {
       weapon.damage = weaponDef.damage;
       weapon.skill = weaponDef.defaultSkill;
       weapon.currentHitPoints = weaponDef.hitPoints;
+    }
+  }
+
+  addShield(): void {
+    if (!this.character.shields) {
+      this.character.shields = [];
+    }
+    const firstShield = this.shieldList[0];
+    this.character.shields.push({
+      name: firstShield.name,
+      skill: 'Shield',
+      currentHitPoints: firstShield.hitPoints
+    });
+  }
+
+  removeShield(index: number): void {
+    if (this.character.shields) {
+      this.character.shields.splice(index, 1);
+    }
+  }
+
+  onShieldChange(index: number): void {
+    if (!this.character.shields) return;
+
+    const shield = this.character.shields[index];
+    const shieldDef = this.shieldList.find(s => s.name === shield.name);
+
+    if (shieldDef) {
+      shield.currentHitPoints = shieldDef.hitPoints;
     }
   }
 
@@ -657,6 +692,7 @@ export class CharacterFormComponent implements OnInit {
       skills: { ...DEFAULT_SKILLS },
       hitLocations: { ...DEFAULT_HIT_LOCATIONS },
       armor: { ...DEFAULT_ARMOR },
+      shields: [],
       weapons: [],
       runes: JSON.parse(JSON.stringify(DEFAULT_RUNES)),
       passions: [],

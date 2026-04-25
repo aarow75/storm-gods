@@ -25,6 +25,7 @@ export interface CombatParticipant {
   currentHitPoints: boolean[]; // Array of checkboxes for tracking HP
   baseStrikeRank: number;
   selectedWeapon?: string;
+  selectedParryItem?: string; // weapon or shield name for parrying
   finalStrikeRank: number;
   selectedOpponentId?: string;
   isDead?: boolean;

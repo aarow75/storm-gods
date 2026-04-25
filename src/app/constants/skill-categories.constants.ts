@@ -2,7 +2,7 @@
  * Skill categories for organizing character skills in the UI
  */
 export const SKILL_CATEGORIES = {
-  'Combat Skills': ['Sword & Shield', 'Two-Handed Weapon', 'Spear', 'Bow', 'Sling', 'Unarmed'],
+  'Combat Skills': ['Sword & Shield', 'Two-Handed Weapon', 'Spear', 'Bow', 'Sling', 'Unarmed', 'Shield'],
   'Magic Skills': ['Spirit Combat', 'Sorcery', 'Rune Magic'],
   'Knowledge Skills': ['Lore (World)', 'Lore (Animal)', 'Lore (Plant)'],
   'Communication Skills': ['Speak (Native)', 'Speak (Other)', 'Read/Write'],

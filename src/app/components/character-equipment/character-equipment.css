@@ -21,7 +21,7 @@
 .equipment-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.875rem;
+  font-size: var(--font-size-lg);
 }
 
 .equipment-table th {
@@ -52,6 +52,6 @@
 }
 
 .penalty-text {
-  color: #ff8c00;
+  color: var(--color-warning);
   font-weight: 500;
 }

@@ -15,8 +15,8 @@
 }
 
 header {
-  background: white;
-  padding: 20px 30px;
+  background: var(--color-bg-white);
+  padding: var(--spacing-5xl) var(--spacing-6xl);
   box-shadow: 0 2px 8px var(--shadow-black-10);
 }
 
@@ -36,7 +36,7 @@ header {
 .header-left h1 {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: 2rem;
+  font-size: var(--font-size-3xl);
   line-height: 1.2;
 }
 
@@ -56,7 +56,7 @@ header {
 
 .system-switcher label,
 .language-switcher label {
-  font-size: 0.85rem;
+  font-size: var(--font-size-lg);
   color: var(--color-text-primary);
   font-weight: 600;
   white-space: nowrap;
@@ -72,17 +72,17 @@ header {
 
 .system-toggle-btn,
 .language-switcher button {
-  padding: 8px 16px;
+  padding: var(--spacing-lg) var(--spacing-4xl);
   border: none;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
-  font-size: 0.85rem;
+  font-size: var(--font-size-lg);
   position: relative;
 }
 
 .system-toggle-btn {
-  background: white;
+  background: var(--color-bg-white);
   color: var(--color-gray-600);
   border-right: 1px solid #e0e0e0;
 }
@@ -102,7 +102,7 @@ header {
 
 .system-toggle-rq.active {
   background: linear-gradient(135deg, var(--color-primary-orange) 0%, var(--color-primary-orange-dark) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 /* Dragonbane button - green */
@@ -112,11 +112,11 @@ header {
 
 .system-toggle-db.active {
   background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .language-switcher button {
-  background: white;
+  background: var(--color-bg-white);
   color: var(--color-gray-600);
   border-right: 1px solid #e0e0e0;
 }
@@ -131,7 +131,7 @@ header {
 
 .language-switcher button.active {
   background: var(--color-gray-600);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 /* Responsive design */
@@ -146,7 +146,7 @@ header {
   }
 
   .header-left h1 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-2xl);
   }
 
   .header-right {
@@ -165,7 +165,7 @@ header {
 .main-nav {
   display: flex;
   gap: 0;
-  background: white;
+  background: var(--color-bg-white);
   box-shadow: 0 2px 8px var(--shadow-black-10);
   padding: 0;
   border-bottom: 3px solid var(--color-gray-500);
@@ -184,11 +184,11 @@ header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 24px;
+  padding: 1rem 1.5rem;
   color: var(--color-gray-600);
   text-decoration: none;
   font-weight: 500;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   transition: all 0.3s ease;
   border-bottom: 3px solid transparent;
   background: transparent;
@@ -202,7 +202,7 @@ header {
 
 .nav-link.active {
   background: var(--color-dark);
-  color: white;
+  color: var(--color-bg-white);
   border-bottom-color: var(--color-gray-500);
   transition: background 0.3s ease;
 }
@@ -216,7 +216,7 @@ header {
 }
 
 .nav-icon {
-  font-size: 20px;
+  font-size: var(--font-size-2xl-sm);
   display: flex;
   align-items: center;
 }
@@ -226,7 +226,7 @@ main {
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px;
+  padding: var(--spacing-5xl);
 }
 
 .app-container.runequest-theme main {

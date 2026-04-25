@@ -33,7 +33,7 @@
 }
 
 .d20-equivalent {
-  font-size: 0.75rem;
+  font-size: var(--font-size-md);
   color: var(--color-text-tertiary);
   font-weight: 600;
   white-space: nowrap;

@@ -6,7 +6,7 @@
   display: block;
   margin-top: 4px;
   color: #e53e3e;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: 500;
 }
 
@@ -14,11 +14,11 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 4px 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: #ebf8ff;
   border: 1px solid #bee3f8;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   margin-top: 4px;
 }
 
@@ -26,7 +26,7 @@
   font-weight: 700;
   color: #2b6cb0;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: var(--font-size-sm);
 }
 
 .missile-detail {

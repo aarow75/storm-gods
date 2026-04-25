@@ -1,5 +1,5 @@
 .combat-tracker {
-  padding: 20px;
+  padding: var(--spacing-5xl);
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -25,17 +25,17 @@
 }
 
 .btn {
-  padding: 8px 16px;
+  padding: var(--spacing-lg) var(--spacing-4xl);
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   transition: background-color 0.2s;
 }
 
 .btn-primary {
   background-color: var(--color-success);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -44,7 +44,7 @@
 
 .btn-secondary {
   background-color: #6b7280;
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .btn-secondary:hover {
@@ -53,7 +53,7 @@
 
 .btn-danger {
   background-color: var(--color-error);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .btn-danger:hover {
@@ -72,10 +72,10 @@
 }
 
 .combat-participant {
-  background: white;
+  background: var(--color-bg-white);
   border: 2px solid #e0e0e0;
   border-radius: 8px;
-  padding: 15px;
+  padding: var(--spacing-3xl);
   box-shadow: 0 2px 4px var(--shadow-black-10);
   position: relative;
 }
@@ -122,35 +122,35 @@
 .participant-info h3 {
   margin: 0;
   color: #333;
-  font-size: 20px;
+  font-size: var(--font-size-2xl-sm);
   flex: 1;
 }
 
 .participant-type {
   background-color: #e0e0e0;
-  padding: 2px 8px;
+  padding: var(--spacing-xs) var(--spacing-lg);
   border-radius: 12px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: bold;
   text-transform: uppercase;
 }
 
 .death-badge {
   background-color: #424242;
-  color: white;
-  padding: 2px 8px;
+  color: var(--color-bg-white);
+  padding: var(--spacing-xs) var(--spacing-lg);
   border-radius: 12px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: bold;
   text-transform: uppercase;
 }
 
 .kills-badge {
   background-color: var(--color-error-dark);
-  color: white;
-  padding: 2px 8px;
+  color: var(--color-bg-white);
+  padding: var(--spacing-xs) var(--spacing-lg);
   border-radius: 12px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: bold;
 }
 
@@ -162,7 +162,7 @@
 .btn-remove {
   background: none;
   border: none;
-  font-size: 28px;
+  font-size: var(--font-size-3xl);
   cursor: pointer;
   color: var(--color-gray-350-alt);
   line-height: 1;
@@ -202,13 +202,13 @@
 }
 
 .detail-group label {
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   color: var(--color-text-tertiary);
 }
 
 .detail-group strong {
   color: #333;
-  font-size: 18px;
+  font-size: var(--font-size-xl-lg);
   cursor: help;
 }
 
@@ -228,15 +228,15 @@
 }
 
 .sr-breakdown {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: var(--color-gray-350-alt);
 }
 
 .detail-group select {
-  padding: 8px;
+  padding: var(--spacing-lg);
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
 }
 
 .weapon-group {
@@ -259,7 +259,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--color-bg-light);
   border-radius: 4px;
 }
@@ -272,13 +272,13 @@
 }
 
 .btn-roll-damage {
-  padding: 6px 12px;
+  padding: var(--spacing-md) var(--spacing-2xl);
   background-color: var(--color-primary-blue);
-  color: white;
+  color: var(--color-bg-white);
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: bold;
   transition: background-color 0.2s;
 }
@@ -292,7 +292,7 @@
   align-items: center;
   gap: 10px;
   margin-top: 8px;
-  padding: 8px 12px;
+  padding: var(--spacing-lg) var(--spacing-2xl);
   background: #fef3c7;
   border: 2px solid var(--color-primary-orange);
   border-radius: 4px;
@@ -306,20 +306,20 @@
 }
 
 .result-target {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: var(--color-text-tertiary);
   font-weight: bold;
 }
 
 .result-total {
   font-weight: bold;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   color: var(--color-error-dark);
 }
 
 .result-breakdown {
   font-family: monospace;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: var(--color-text-tertiary);
 }
 
@@ -327,7 +327,7 @@
   margin-left: auto;
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: var(--font-size-2xl-sm);
   cursor: pointer;
   color: var(--color-gray-350-alt);
   line-height: 1;
@@ -340,7 +340,7 @@
 
 .hit-points {
   border-top: 1px solid #e0e0e0;
-  padding-top: 15px;
+  padding-top: var(--spacing-3xl);
 }
 
 .hp-checkboxes {
@@ -369,7 +369,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: bold;
   color: var(--color-text-tertiary);
   pointer-events: none;
@@ -393,10 +393,10 @@
 
 /* Combat Log */
 .combat-log {
-  background: white;
+  background: var(--color-bg-white);
   border: 2px solid var(--color-primary-blue);
   border-radius: 8px;
-  padding: 15px;
+  padding: var(--spacing-3xl);
   margin-bottom: 20px;
   box-shadow: 0 2px 4px var(--shadow-black-10);
 }
@@ -406,14 +406,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  padding-bottom: 10px;
+  padding-bottom: var(--spacing-xl);
   border-bottom: 2px solid #e0e0e0;
 }
 
 .log-header h3 {
   margin: 0;
   color: var(--color-primary-blue);
-  font-size: 18px;
+  font-size: var(--font-size-xl-lg);
 }
 
 .log-actions {
@@ -430,11 +430,11 @@
 }
 
 .log-entry {
-  padding: 8px 12px;
+  padding: var(--spacing-lg) var(--spacing-2xl);
   background: var(--color-bg-light);
   border-radius: 4px;
   font-family: monospace;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   color: #333;
   border-left: 3px solid var(--color-primary-blue);
 }
@@ -472,14 +472,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
+  padding-bottom: var(--spacing-xl);
   border-bottom: 1px solid #e0e0e0;
 }
 
 .history-header h4 {
   margin: 0;
   color: var(--color-text-tertiary);
-  font-size: 16px;
+  font-size: var(--font-size-xl);
 }
 
 .history-list {
@@ -494,7 +494,7 @@
   background: #fafafa;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
-  padding: 12px;
+  padding: var(--spacing-2xl);
 }
 
 .history-item-header {
@@ -502,14 +502,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
-  padding-bottom: 8px;
+  padding-bottom: var(--spacing-lg);
   border-bottom: 1px solid #e0e0e0;
 }
 
 .history-date {
   font-weight: bold;
   color: var(--color-text-tertiary);
-  font-size: 14px;
+  font-size: var(--font-size-lg);
 }
 
 .history-entries {
@@ -519,13 +519,13 @@
 }
 
 .history-entries .log-entry {
-  font-size: 12px;
-  padding: 6px 10px;
+  font-size: var(--font-size-md);
+  padding: var(--spacing-md) var(--spacing-xl);
 }
 
 .empty-history {
   text-align: center;
-  padding: 20px;
+  padding: var(--spacing-5xl);
   color: var(--color-gray-350-alt);
   font-style: italic;
 }
@@ -545,7 +545,7 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-bg-white);
   border-radius: 8px;
   width: 90%;
   max-width: 600px;
@@ -558,7 +558,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: var(--spacing-5xl);
   border-bottom: 1px solid #e0e0e0;
 }
 
@@ -570,7 +570,7 @@
 .btn-close {
   background: none;
   border: none;
-  font-size: 32px;
+  font-size: var(--font-size-4xl);
   cursor: pointer;
   color: var(--color-gray-350-alt);
   line-height: 1;
@@ -582,14 +582,14 @@
 }
 
 .modal-body {
-  padding: 20px;
+  padding: var(--spacing-5xl);
 }
 
 .modal-footer {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  padding: 20px;
+  padding: var(--spacing-5xl);
   border-top: 1px solid #e0e0e0;
 }
 
@@ -607,10 +607,10 @@
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 8px;
+  padding: var(--spacing-lg);
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
 }
 
 .weapons-list {
@@ -626,7 +626,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
+  padding: var(--spacing-lg);
   background: var(--color-bg-light);
   border-radius: 4px;
 }
@@ -634,7 +634,7 @@
 .btn-remove-small {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: var(--font-size-2xl-sm);
   cursor: pointer;
   color: var(--color-gray-350-alt);
   padding: 0;
@@ -653,8 +653,8 @@
 }
 
 .btn-small {
-  padding: 8px 12px;
-  font-size: 13px;
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  font-size: var(--font-size-base);
   white-space: nowrap;
 }
 
@@ -691,7 +691,7 @@
   align-items: center;
   gap: 6px;
   margin-top: 4px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
 }
 
 .weapon-hp-label {
@@ -713,8 +713,8 @@
 
 .broken-tag {
   background: var(--color-error);
-  color: white;
-  font-size: 11px;
+  color: var(--color-bg-white);
+  font-size: var(--font-size-sm);
   font-weight: bold;
   padding: 1px 6px;
   border-radius: 10px;
@@ -737,27 +737,27 @@
 }
 
 .defense-header h3 {
-  color: white;
+  color: var(--color-bg-white);
   margin: 0;
-  font-size: 22px;
+  font-size: var(--font-size-2xl-md);
   letter-spacing: 0.05em;
 }
 
 .attack-summary {
-  font-size: 18px;
+  font-size: var(--font-size-xl-lg);
   margin: 0 0 6px;
   text-align: center;
 }
 
 .damage-rolled {
   text-align: center;
-  font-size: 15px;
+  font-size: var(--font-size-xl-plus);
   color: var(--color-gray-600-alt);
   margin: 0 0 20px;
 }
 
 .damage-number {
-  font-size: 28px;
+  font-size: var(--font-size-3xl);
   color: var(--color-error-dark);
   margin: 0 4px;
 }
@@ -765,7 +765,7 @@
 .breakdown-text {
   font-family: monospace;
   color: #888;
-  font-size: 13px;
+  font-size: var(--font-size-base);
 }
 
 .defense-prompt {
@@ -787,18 +787,18 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 12px 16px;
+  padding: var(--spacing-2xl) var(--spacing-4xl);
   min-width: 120px;
   height: auto;
 }
 
 .defense-btn-title {
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   font-weight: bold;
 }
 
 .defense-btn-sub {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   opacity: 0.9;
   text-align: center;
 }
@@ -810,7 +810,7 @@
 
 .btn-parry {
   background-color: #3b82f6;
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .btn-parry:hover:not(:disabled) {
@@ -819,7 +819,7 @@
 
 .btn-dodge {
   background-color: #22c55e;
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .btn-dodge:hover:not(:disabled) {
@@ -831,7 +831,7 @@
   gap: 16px;
   justify-content: center;
   margin-top: 12px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: #888;
 }
 
@@ -840,13 +840,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: var(--font-size-lg);
   flex-wrap: wrap;
   margin-bottom: 20px;
 }
 
 .damage-rolled {
-  font-size: 15px;
+  font-size: var(--font-size-xl-plus);
   color: var(--color-gray-600-alt);
 }
 
@@ -854,9 +854,9 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 12px;
+  padding: var(--spacing-sm) var(--spacing-2xl);
   border-radius: 20px;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   font-weight: bold;
   background: #f3f4f6;
   border: 2px solid #d1d5db;
@@ -878,7 +878,7 @@
 /* Hit location section in participant card */
 .hit-locations {
   border-top: 1px solid #e0e0e0;
-  padding-top: 12px;
+  padding-top: var(--spacing-2xl);
   margin-top: 8px;
 }
 
@@ -892,29 +892,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: 6px;
   border: 1px solid transparent;
   min-width: 56px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   transition: background 0.2s;
 }
 
 .loc-name {
   font-weight: 600;
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .loc-hp {
   font-family: monospace;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: bold;
 }
 
 .loc-effect {
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -961,18 +961,18 @@
   background: #d1fae5;
   border: 1px solid #6ee7b7;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: #065f46;
 }
 
 .attack-bonus-chip {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: #374151;
   background: #f3f4f6;
   border: 1px solid #d1d5db;
   border-radius: 10px;
-  padding: 2px 8px;
+  padding: var(--spacing-xs) var(--spacing-lg);
 }
 
 /* Repeat parry penalty */
@@ -987,7 +987,7 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: baseline;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: #4b5563;
 }
 
@@ -1003,17 +1003,17 @@
   align-items: center;
   gap: 10px;
   margin-top: 6px;
-  padding: 4px 8px;
+  padding: var(--spacing-sm) var(--spacing-lg);
   background: #ebf8ff;
   border: 1px solid #bee3f8;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: #2c5282;
 }
 
 .missile-label {
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 11px;
+  font-size: var(--font-size-sm);
   color: #2b6cb0;
 }

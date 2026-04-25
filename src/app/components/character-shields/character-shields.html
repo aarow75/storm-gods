@@ -1,0 +1,57 @@
+<h4>Shields</h4>
+<div class="shields-section">
+  @if (shields.length === 0) {
+    <p class="no-shields">No shields</p>
+  }
+  @for (shield of shields; track shield) {
+    <div class="shield-row">
+      <div class="form-group">
+        <label [attr.for]="'shield-name-' + $index">Shield Name</label>
+        <select
+          [id]="'shield-name-' + $index"
+          [(ngModel)]="shield.name"
+          [name]="'shield-name-' + $index"
+          (change)="shieldChange.emit($index)"
+        >
+          <option value="">-- Select Shield --</option>
+          @for (shieldDef of shieldList; track shieldDef) {
+            <option [value]="shieldDef.name">
+              {{ shieldDef.name }}
+            </option>
+          }
+        </select>
+      </div>
+      @if (getShieldDefinition(shield.name); as shieldDef) {
+        <div class="shield-stats">
+          <div class="stat-group">
+            <span class="stat-label">AP:</span>
+            <span class="stat-value">{{ shieldDef.armorPoints }}</span>
+          </div>
+          <div class="stat-group">
+            <span class="stat-label">HP:</span>
+            <span class="stat-value">{{ shield.currentHitPoints !== undefined ? shield.currentHitPoints : shieldDef.hitPoints }}/{{ shieldDef.hitPoints }}</span>
+          </div>
+          <div class="stat-group">
+            <span class="stat-label">ENC:</span>
+            <span class="stat-value">{{ shieldDef.encumbrance }}</span>
+          </div>
+          <div class="stat-group">
+            <span class="stat-label">Skill:</span>
+            <span class="stat-value">Shield</span>
+          </div>
+        </div>
+        @if (shieldDef.protectedLocations.length > 0) {
+          <div class="protected-locations">
+            <span class="location-label">Covers:</span>
+            <span class="location-list">{{ shieldDef.protectedLocations.join(', ') }}</span>
+          </div>
+        }
+      }
+      <button type="button" class="btn-remove" (click)="removeShield.emit($index)">Remove</button>
+    </div>
+  }
+  <button type="button" class="btn-add" (click)="addShield.emit()">Add Shield</button>
+</div>
+<div class="shield-note">
+  <p><small>Shields use the <strong>Shield</strong> skill for parrying in combat.</small></p>
+</div>

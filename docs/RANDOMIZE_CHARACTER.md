@@ -262,7 +262,7 @@ randomizeCharacter(): void {
   border: none;
   border-radius: 6px;
   padding: 14px 28px;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;

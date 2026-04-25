@@ -1,0 +1,160 @@
+<div class="rules-reference">
+  <h2>RuneQuest Rules Reference</h2>
+
+  <div class="reference-container">
+    <!-- Characteristics Table -->
+    <div class="reference-section">
+      <h3>Characteristics</h3>
+      <table class="reference-table">
+        <thead>
+          <tr>
+            <th>Stat</th>
+            <th>Abbreviation</th>
+            <th>Roll</th>
+            <th>Primary Uses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Strength</td><td>STR</td><td>3D6</td><td>Damage bonus, melee power</td></tr>
+          <tr><td>Constitution</td><td>CON</td><td>3D6</td><td>Hit points, healing rate</td></tr>
+          <tr><td>Size</td><td>SIZ</td><td>3D6</td><td>Hit points, damage bonus</td></tr>
+          <tr><td>Dexterity</td><td>DEX</td><td>3D6</td><td>Strike rank, parry bonus</td></tr>
+          <tr><td>Intelligence</td><td>INT</td><td>3D6</td><td>Strike rank, skill bonus</td></tr>
+          <tr><td>Power</td><td>POW</td><td>3D6</td><td>Magic points, spirit combat</td></tr>
+          <tr><td>Charisma</td><td>CHA</td><td>3D6</td><td>Social interactions, loyalty</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Damage Bonus Table -->
+    <div class="reference-section">
+      <h3>Damage Bonus (from STR+SIZ)</h3>
+      <table class="reference-table">
+        <thead>
+          <tr>
+            <th>STR+SIZ</th>
+            <th>Bonus</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>≤12</td><td>-1d4</td></tr>
+          <tr><td>13-24</td><td>0</td></tr>
+          <tr><td>25-32</td><td>+1d4</td></tr>
+          <tr><td>33-40</td><td>+1d6</td></tr>
+          <tr><td>41-56</td><td>+2d6</td></tr>
+          <tr><td>57-72</td><td>+3d6</td></tr>
+          <tr><td>73+</td><td>+4d6</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Hit Location Table -->
+    <div class="reference-section">
+      <h3>Hit Location (d20 Roll)</h3>
+      <table class="reference-table">
+        <thead>
+          <tr>
+            <th>Roll</th>
+            <th>Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1-4</td><td>Right Leg</td></tr>
+          <tr><td>5-8</td><td>Left Leg</td></tr>
+          <tr><td>9-11</td><td>Abdomen</td></tr>
+          <tr><td>12</td><td>Chest</td></tr>
+          <tr><td>13-15</td><td>Right Arm</td></tr>
+          <tr><td>16-18</td><td>Left Arm</td></tr>
+          <tr><td>19-20</td><td>Head</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Hit Location Effects -->
+    <div class="reference-section">
+      <h3>Hit Location Effects (when max damage reached)</h3>
+      <table class="reference-table">
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Head</td><td>Instant Death (fatal)</td></tr>
+          <tr><td>Chest</td><td>Incapacitated</td></tr>
+          <tr><td>Abdomen</td><td>Incapacitated</td></tr>
+          <tr><td>Right Arm</td><td>Arm Useless</td></tr>
+          <tr><td>Left Arm</td><td>Arm Useless</td></tr>
+          <tr><td>Right Leg</td><td>Leg Useless</td></tr>
+          <tr><td>Left Leg</td><td>Leg Useless</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Shields Quick Reference -->
+    <div class="reference-section">
+      <h3>Shields</h3>
+      <table class="reference-table">
+        <thead>
+          <tr>
+            <th>Shield Type</th>
+            <th>AP</th>
+            <th>HP</th>
+            <th>ENC</th>
+            <th>Cost (L)</th>
+            <th>Covers</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Target Shield</td><td>6</td><td>9</td><td>1</td><td>30</td><td>L.Arm, Chest</td></tr>
+          <tr><td>Heater Shield</td><td>10</td><td>12</td><td>2</td><td>60</td><td>Both Arms, Chest</td></tr>
+          <tr><td>Kite Shield</td><td>12</td><td>14</td><td>3</td><td>100</td><td>Both Arms, Chest, Abdomen</td></tr>
+          <tr><td>Tower Shield</td><td>14</td><td>16</td><td>4</td><td>150</td><td>Both Arms, Chest, Abdomen, Head</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Defense Summary -->
+    <div class="reference-section">
+      <h3>Defense Mechanics</h3>
+      <div class="mechanics-summary">
+        <div class="mechanic-item">
+          <h4>Parry</h4>
+          <p><strong>Skill:</strong> Weapon or Shield skill</p>
+          <p><strong>Effect:</strong> Weapon/shield absorbs damage up to its AP. Excess hits character minus armor.</p>
+          <p><strong>Penalty:</strong> -20% per additional parry vs same attacker per round</p>
+        </div>
+        <div class="mechanic-item">
+          <h4>Dodge</h4>
+          <p><strong>Skill:</strong> Dodge + DEX bonus + INT bonus - ENC penalty</p>
+          <p><strong>Effect:</strong> Full evade on success. Full damage on failure, minus armor.</p>
+        </div>
+        <div class="mechanic-item">
+          <h4>Aimed Attack</h4>
+          <p><strong>Penalty:</strong> -20% to hit</p>
+          <p><strong>Effect:</strong> Choose specific hit location before rolling</p>
+        </div>
+        <div class="mechanic-item">
+          <h4>Disarm</h4>
+          <p><strong>Penalty:</strong> -20% to hit</p>
+          <p><strong>Effect:</strong> Damage targets opponent's weapon HP instead of body</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strike Rank -->
+    <div class="reference-section">
+      <h3>Strike Rank</h3>
+      <p><strong>Formula:</strong> (DEX + INT) / 2 + weapon modifier</p>
+      <p><strong>Resolution:</strong> Lower SR acts first in combat. Encumbrance adds to strike rank.</p>
+    </div>
+
+    <!-- Healing -->
+    <div class="reference-section">
+      <h3>Healing Rate</h3>
+      <p><strong>Formula:</strong> CON / 6 (rounded up, minimum 1)</p>
+      <p><strong>Recovery:</strong> 1 hit point per week per healing rate</p>
+    </div>
+  </div>
+</div>

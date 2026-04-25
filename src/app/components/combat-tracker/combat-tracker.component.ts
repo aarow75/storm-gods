@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CombatParticipant, Monster, DEFAULT_MONSTERS } from '../../models/combat.model';
-import { Character, WEAPON_LIST, calculateHitLocations } from '../../models/character.model';
+import { Character, WEAPON_LIST, SHIELD_LIST, calculateHitLocations } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
 import { CombatService } from '../../services/combat.service';
 import { DiceService } from '../../services/dice.service';
@@ -148,7 +148,7 @@ export class CombatTrackerComponent implements OnInit {
       const hpArray = new Array(maxHP).fill(false);
       for (let i = 0; i < damageTaken; i++) hpArray[i] = true;
 
-      this.combatParticipants.push({
+      const participant: CombatParticipant = {
         id: this.combatService.generateId(),
         name: character.name,
         type: 'character',
@@ -157,12 +157,14 @@ export class CombatTrackerComponent implements OnInit {
         currentHitPoints: hpArray,
         baseStrikeRank,
         selectedWeapon: this.selectedWeapon,
+        selectedParryItem: this.selectedWeapon,
         finalStrikeRank,
         isDead: currentHP <= 0,
         kills: 0,
         color: character.color || '#3498db',
         locationDamage: {}
-      });
+      };
+      this.combatParticipants.push(participant);
     } else if (this.selectedEntityType === 'monster' && this.selectedMonsterId) {
       const monster = this.monsters.find(m => m.id === this.selectedMonsterId);
       if (!monster) return;
@@ -171,7 +173,7 @@ export class CombatTrackerComponent implements OnInit {
       const weapon = monster.weapons.find(w => w.name === this.selectedWeapon);
       const finalStrikeRank = baseStrikeRank + (weapon?.strikeRankModifier || 0);
 
-      this.combatParticipants.push({
+      const participant: CombatParticipant = {
         id: this.combatService.generateId(),
         name: monster.name,
         type: 'monster',
@@ -180,12 +182,14 @@ export class CombatTrackerComponent implements OnInit {
         currentHitPoints: new Array(monster.hitPoints).fill(false),
         baseStrikeRank,
         selectedWeapon: this.selectedWeapon,
+        selectedParryItem: this.selectedWeapon,
         finalStrikeRank,
         isDead: false,
         kills: 0,
         color: '#000000',
         locationDamage: {}
-      });
+      };
+      this.combatParticipants.push(participant);
     }
 
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
@@ -453,7 +457,7 @@ export class CombatTrackerComponent implements OnInit {
     if (!this.pendingAttack) return;
     const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
 
-    const armor = this.getArmorValue(defender);
+    const armor = this.getArmorValue(defender, hitLocation);
     const finalDamage = Math.max(0, rawDamage - armor);
 
     this.combatLog.unshift(
@@ -499,7 +503,7 @@ export class CombatTrackerComponent implements OnInit {
     defender.parriesAgainst[attacker.id] = (defender.parriesAgainst[attacker.id] ?? 0) + 1;
 
     const weaponHP = this.getParryWeaponCurrentHP(defender);
-    const armor = this.getArmorValue(defender);
+    const armor = this.getArmorValue(defender, hitLocation);
 
     // Build human-readable label for the log
     const bonusParts = [
@@ -519,11 +523,11 @@ export class CombatTrackerComponent implements OnInit {
 
       let logEntry = `[PARRY] ${defender.name} parries! (rolled ${roll} vs ${skillLabel}) → ${hitLocation} (d20:${locationRoll})`;
       if (excessDamage > 0) {
-        logEntry += ` — ${defender.selectedWeapon} absorbs ${weaponHP}, ${excessDamage} excess - ${armor} armor = ${finalDamage} through`;
+        logEntry += ` — ${defender.selectedParryItem} absorbs ${weaponHP}, ${excessDamage} excess - ${armor} armor = ${finalDamage} through`;
         this.damageParryWeapon(defender, excessDamage);
-        logEntry += `. ${defender.selectedWeapon} takes ${excessDamage} HP!`;
+        logEntry += `. ${defender.selectedParryItem} takes ${excessDamage} HP!`;
       } else {
-        logEntry += ` — fully absorbed by ${defender.selectedWeapon}`;
+        logEntry += ` — fully absorbed by ${defender.selectedParryItem}`;
       }
 
       this.combatLog.unshift(logEntry);
@@ -569,12 +573,18 @@ export class CombatTrackerComponent implements OnInit {
     const dodgeSkill = this.getEffectiveDodgeSkill(defender);
     const dexBonus = this.getDefenderDexBonus(defender);
     const intBonus = this.getDefenderIntBonus(defender);
-    const effectiveSkill = dodgeSkill + dexBonus + intBonus;
+    const encPenalty = this.getEncPenalty(defender);
+    const effectiveSkill = Math.max(5, dodgeSkill + dexBonus + intBonus - encPenalty);
     const roll = Math.floor(Math.random() * 100) + 1;
     const success = roll <= effectiveSkill;
 
-    const bonusPart = (dexBonus + intBonus) > 0
-      ? ` + ${dexBonus} DEX + ${intBonus} INT = ${effectiveSkill}%`
+    const bonusParts = [
+      dexBonus > 0 ? `+${dexBonus} DEX` : '',
+      intBonus > 0 ? `+${intBonus} INT` : '',
+      encPenalty > 0 ? `-${encPenalty} ENC` : ''
+    ].filter(Boolean).join(' ');
+    const bonusPart = bonusParts
+      ? ` + ${bonusParts} = ${effectiveSkill}%`
       : `${effectiveSkill}%`;
 
     if (success) {
@@ -586,7 +596,7 @@ export class CombatTrackerComponent implements OnInit {
         finalDamage: 0, armorAbsorbed: 0, targetName: defender.name
       });
     } else {
-      const armor = this.getArmorValue(defender);
+      const armor = this.getArmorValue(defender, hitLocation);
       const finalDamage = Math.max(0, rawDamage - armor);
       this.combatLog.unshift(
         `[DODGE FAILED] ${defender.name} fails dodge (rolled ${roll} vs ${dodgeSkill}${bonusPart}) → ${hitLocation} (d20:${locationRoll}): ${finalDamage} damage`
@@ -665,7 +675,11 @@ export class CombatTrackerComponent implements OnInit {
     if (participant.type === 'character') {
       const character = this.characters.find(c => c.id === participant.characterId);
       if (!character) return 0;
-      const weapon = character.weapons.find(w => w.name === participant.selectedWeapon);
+      const parryItem = participant.selectedParryItem;
+      if (!parryItem) return 0;
+      const shield = character.shields?.find(s => s.name === parryItem);
+      if (shield) return character.skills['Shield'] || 0;
+      const weapon = character.weapons.find(w => w.name === parryItem);
       return weapon ? (character.skills[weapon.skill] || 0) : 0;
     }
     return 40;
@@ -676,6 +690,13 @@ export class CombatTrackerComponent implements OnInit {
       return this.characters.find(c => c.id === participant.characterId)?.skills['Dodge'] || 0;
     }
     return 15;
+  }
+
+  getEncPenalty(participant: CombatParticipant): number {
+    if (participant.type === 'character') {
+      return this.characters.find(c => c.id === participant.characterId)?.derivedStats.encumbranceDefensePenalty ?? 0;
+    }
+    return 0;
   }
 
   getDefenderDexBonus(participant: CombatParticipant): number {
@@ -733,6 +754,19 @@ export class CombatTrackerComponent implements OnInit {
     return baseSkill + this.getTotalAttackBonus(participant);
   }
 
+  getParticipantParryItems(participant: CombatParticipant): string[] {
+    if (participant.type === 'character') {
+      const character = this.characters.find(c => c.id === participant.characterId);
+      if (!character) return [];
+      const shields = (character.shields || []).map(s => s.name);
+      const weapons = (character.weapons || []).map(w => w.name);
+      return [...shields, ...weapons];
+    } else {
+      const monster = this.monsters.find(m => m.id === participant.monsterId);
+      return (monster?.weapons || []).map(w => w.name);
+    }
+  }
+
   // ── Defender parry characteristic bonuses (STR, SIZ, POW, DEX) ───────────
 
   getDefenderStrBonus(participant: CombatParticipant): number {
@@ -775,14 +809,21 @@ export class CombatTrackerComponent implements OnInit {
   getParryWeaponCurrentHP(participant: CombatParticipant): number {
     if (participant.type === 'character') {
       const character = this.characters.find(c => c.id === participant.characterId);
-      const weapon = character?.weapons.find(w => w.name === participant.selectedWeapon);
+      const parryItem = participant.selectedParryItem;
+      if (!parryItem || !character) return 0;
+      const shield = character.shields?.find(s => s.name === parryItem);
+      if (shield) {
+        const maxHP = SHIELD_LIST.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
+        return shield.currentHitPoints ?? maxHP;
+      }
+      const weapon = character.weapons.find(w => w.name === parryItem);
       if (weapon) {
         const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 0;
         return weapon.currentHitPoints ?? maxHP;
       }
     } else {
       const monster = this.monsters.find(m => m.id === participant.monsterId);
-      const weapon = monster?.weapons.find(w => w.name === participant.selectedWeapon);
+      const weapon = monster?.weapons.find(w => w.name === participant.selectedParryItem);
       if (weapon) {
         const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 8;
         return weapon.hitPoints ?? maxHP;
@@ -794,7 +835,13 @@ export class CombatTrackerComponent implements OnInit {
   getParryWeaponMaxHP(participant: CombatParticipant): number {
     if (participant.type === 'character') {
       const character = this.characters.find(c => c.id === participant.characterId);
-      const weapon = character?.weapons.find(w => w.name === participant.selectedWeapon);
+      const parryItem = participant.selectedParryItem;
+      if (!parryItem || !character) return 0;
+      const shield = character.shields?.find(s => s.name === parryItem);
+      if (shield) {
+        return SHIELD_LIST.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
+      }
+      const weapon = character.weapons.find(w => w.name === parryItem);
       return weapon ? (WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 0) : 0;
     }
     const monster = this.monsters.find(m => m.id === participant.monsterId);
@@ -816,8 +863,18 @@ export class CombatTrackerComponent implements OnInit {
   damageParryWeapon(participant: CombatParticipant, damage: number): void {
     if (participant.type === 'character') {
       const character = this.characters.find(c => c.id === participant.characterId);
-      const weapon = character?.weapons.find(w => w.name === participant.selectedWeapon);
-      if (weapon && character) {
+      const parryItem = participant.selectedParryItem;
+      if (!parryItem || !character) return;
+      const shield = character.shields?.find(s => s.name === parryItem);
+      if (shield) {
+        const maxHP = SHIELD_LIST.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
+        shield.currentHitPoints = Math.max(0, (shield.currentHitPoints ?? maxHP) - damage);
+        this.characterService.updateCharacter(character);
+        this.characters = this.characterService.getCharacters();
+        return;
+      }
+      const weapon = character.weapons.find(w => w.name === parryItem);
+      if (weapon) {
         const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 0;
         weapon.currentHitPoints = Math.max(0, (weapon.currentHitPoints ?? maxHP) - damage);
         this.characterService.updateCharacter(character);
@@ -825,7 +882,7 @@ export class CombatTrackerComponent implements OnInit {
       }
     } else {
       const monster = this.monsters.find(m => m.id === participant.monsterId);
-      const weapon = monster?.weapons.find(w => w.name === participant.selectedWeapon);
+      const weapon = monster?.weapons.find(w => w.name === participant.selectedParryItem);
       if (weapon && monster) {
         const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 8;
         weapon.hitPoints = Math.max(0, (weapon.hitPoints ?? maxHP) - damage);
@@ -850,10 +907,13 @@ export class CombatTrackerComponent implements OnInit {
     return this.lastDamageRolls.get(participantId);
   }
 
-  getArmorValue(participant: CombatParticipant): number {
+  getArmorValue(participant: CombatParticipant, location?: string): number {
     if (participant.type === 'character' && participant.characterId) {
       const character = this.characters.find(c => c.id === participant.characterId);
       if (!character) return 0;
+      if (location && character.armor[location as keyof typeof character.armor] !== undefined) {
+        return character.armor[location as keyof typeof character.armor];
+      }
       const values = Object.values(character.armor);
       return Math.round(values.reduce((s, v) => s + v, 0) / values.length);
     }

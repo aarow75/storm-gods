@@ -70,6 +70,11 @@ export class CharacterService {
       char.weapons = [];
     }
 
+    // Ensure shields array exists
+    if (!char.shields) {
+      char.shields = [];
+    }
+
     // Ensure runes exist
     if (!char.runes) {
       char.runes = JSON.parse(JSON.stringify(DEFAULT_RUNES));

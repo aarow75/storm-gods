@@ -148,4 +148,48 @@
 
   /* Orange accent with opacity */
   --color-orange-accent-10: rgba(255, 165, 0, 0.1);
+
+  /* Font Variables */
+  --font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-family-mono: monospace;
+
+  /* Font Sizes (base: 14px = 1rem) */
+  --font-size-xs: 0.625rem;      /* 10px */
+  --font-size-sm: 0.688rem;      /* 11px */
+  --font-size-md: 0.75rem;       /* 12px */
+  --font-size-base: 0.813rem;    /* 13px */
+  --font-size-lg: 0.875rem;      /* 14px */
+  --font-size-xl: 1rem;          /* 16px (base) */
+  --font-size-xl-plus: 1.071rem; /* 15px */
+  --font-size-xl-lg: 1.286rem;   /* 18px */
+  --font-size-2xl: 1.5rem;       /* 24px */
+  --font-size-2xl-sm: 1.143rem;  /* 20px */
+  --font-size-2xl-md: 1.571rem;  /* 22px */
+  --font-size-3xl: 2rem;         /* 28px */
+  --font-size-4xl: 2.286rem;     /* 32px */
+  --font-size-5xl: 5.143rem;     /* 72px */
+
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing Variables */
+  --spacing-xs: 2px;
+  --spacing-sm: 4px;
+  --spacing-md: 6px;
+  --spacing-lg: 8px;
+  --spacing-xl: 10px;
+  --spacing-2xl: 12px;
+  --spacing-3xl: 15px;
+  --spacing-4xl: 16px;
+  --spacing-5xl: 20px;
+  --spacing-6xl: 30px;
+
+  /* Border Radius */
+  --border-radius-sm: 3px;
+  --border-radius-md: 4px;
+  --border-radius-lg: 6px;
+  --border-radius-xl: 8px;
 }

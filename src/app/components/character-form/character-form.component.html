@@ -144,6 +144,17 @@
       (applyToAll)="applyArmorToAll()"
     ></app-character-armor>
 
+    <!-- Shields Component (RuneQuest only) -->
+    @if (gameSystemService.gameSystem() === 'runequest') {
+    <app-character-shields
+      [shields]="character.shields!"
+      [shieldList]="shieldList"
+      (addShield)="addShield()"
+      (removeShield)="removeShield($event)"
+      (shieldChange)="onShieldChange($event)"
+    ></app-character-shields>
+    }
+
     <!-- Weapons Component -->
     <app-character-weapons
       [weapons]="character.weapons!"

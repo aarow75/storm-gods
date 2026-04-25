@@ -117,6 +117,23 @@ All game data (cults, skills, weapons, runes, passions, equipment definitions) a
 - **Variables file** — `src/app/shared/styles/variables.css` (colors, spacing, responsive breakpoints)
 - **Shared form styles** — `src/app/shared/styles/shared-form-styles.css` (reusable form input classes)
 
+**CSS Variable Usage**: All new CSS must use CSS variables from `variables.css` for colors and font properties. Do not hardcode color values (`#fff`, `rgb()`, named colors) or font properties (`font-size`, `font-weight`, `font-family`) in component `.css` files. Always reference variables via `var(--variable-name)` to ensure consistency and simplify future theme changes.
+
+**Font Size Scaling**: Font sizes use `rem` units (base: 14px = 1rem) with semantic names:
+- `--font-size-xs` (10px) — Extra small, hints
+- `--font-size-sm` (11px) — Small, labels
+- `--font-size-md` (12px) — Medium-small
+- `--font-size-base` (13px) — Base variant
+- `--font-size-lg` (14px) — Large, default body text
+- `--font-size-xl` (16px) — Extra large, headings
+- `--font-size-2xl` (24px) — 2x large, main headings
+
+**Spacing Variables**: All padding, margin, and gap values use semantic spacing variables:
+- `--spacing-xs` (2px), `--spacing-sm` (4px), `--spacing-md` (6px), `--spacing-lg` (8px), `--spacing-xl` (10px)
+- `--spacing-2xl` (12px), `--spacing-3xl` (15px), `--spacing-4xl` (16px), `--spacing-5xl` (20px), `--spacing-6xl` (30px)
+
+**Border Radius**: Border radius values use `--border-radius-sm` (3px), `--border-radius-md` (4px), `--border-radius-lg` (6px), `--border-radius-xl` (8px)
+
 Color scheme is configurable per character (`character.color` property). Form edit mode uses orange border/banner visual indicator.
 
 ### Routing

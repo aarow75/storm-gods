@@ -4,7 +4,7 @@
 
 .stat-breakdown {
   display: block;
-  font-size: 0.85rem;
+  font-size: var(--font-size-lg);
   color: var(--color-text-tertiary);
   margin-top: 4px;
   font-style: italic;
@@ -12,6 +12,6 @@
 
 .penalty-warning input {
   background-color: var(--color-orange-accent-10);
-  color: #ff8c00;
-  border-color: #ff8c00;
+  color: var(--color-warning);
+  border-color: var(--color-warning);
 }

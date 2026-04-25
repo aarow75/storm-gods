@@ -8,6 +8,7 @@ export interface Character {
   skills: CharacterSkills;
   hitLocations: HitLocations;
   armor: ArmorLocations;
+  shields?: Shield[];
   weapons: Weapon[];
   runes: Runes;
   passions: Passion[];
@@ -85,6 +86,21 @@ export interface Weapon {
   damage: string;
   skill: string;
   currentHitPoints?: number;
+}
+
+export interface Shield {
+  name: string;
+  skill: string;
+  currentHitPoints?: number;
+}
+
+export interface ShieldDefinition {
+  name: string;
+  armorPoints: number;
+  hitPoints: number;
+  encumbrance: number;
+  cost: number;
+  protectedLocations: string[];
 }
 
 export interface Runes {
@@ -188,6 +204,7 @@ export interface CharacterSkills {
   'Bow': number;
   'Sling': number;
   'Unarmed': number;
+  'Shield': number;
 
   // Magic Skills
   'Spirit Combat': number;
@@ -243,6 +260,7 @@ export const DEFAULT_SKILLS: CharacterSkills = {
   'Bow': 5,
   'Sling': 5,
   'Unarmed': 25,
+  'Shield': 15,
   'Spirit Combat': 20,
   'Sorcery': 0,
   'Rune Magic': 0,
@@ -465,6 +483,13 @@ export const WEAPON_LIST: WeaponDefinition[] = [
   { name: 'Grapple',       damage: 'Special',defaultSkill: 'Unarmed',           strikeRank: 2, encumbrance: 0, hitPoints: 0,  minSTR: 0,  minDEX: 0,  cost: 0,   isMissile: false }
 ];
 
+export const SHIELD_LIST: ShieldDefinition[] = [
+  { name: 'Target Shield',  armorPoints: 6,  hitPoints: 9,  encumbrance: 1, cost: 30,  protectedLocations: ['Left Arm', 'Chest'] },
+  { name: 'Heater Shield',  armorPoints: 10, hitPoints: 12, encumbrance: 2, cost: 60,  protectedLocations: ['Left Arm', 'Right Arm', 'Chest'] },
+  { name: 'Kite Shield',    armorPoints: 12, hitPoints: 14, encumbrance: 3, cost: 100, protectedLocations: ['Left Arm', 'Right Arm', 'Chest', 'Abdomen'] },
+  { name: 'Tower Shield',   armorPoints: 14, hitPoints: 16, encumbrance: 4, cost: 150, protectedLocations: ['Left Arm', 'Right Arm', 'Chest', 'Abdomen', 'Head'] }
+];
+
 export const EQUIPMENT_LIST: EquipmentDefinition[] = [
   // Adventuring Gear
   { name: 'Backpack', category: 'Adventuring Gear', cost: 3, hitPoints: 4, encumbrance: 1 },
@@ -540,7 +565,8 @@ export const COMBAT_SKILLS = [
   'Spear',
   'Bow',
   'Sling',
-  'Unarmed'
+  'Unarmed',
+  'Shield'
 ];
 
 export const CULTS = [

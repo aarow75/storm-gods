@@ -2,7 +2,7 @@
   background: var(--color-bg-white);
   border: 2px solid var(--color-border);
   border-radius: 8px;
-  padding: 20px;
+  padding: var(--spacing-5xl);
   margin: 20px;
   box-shadow: 0 2px 4px var(--shadow-black-10);
 }
@@ -11,7 +11,7 @@ h2 {
   margin-top: 0;
   color: var(--color-text-primary);
   border-bottom: 2px solid var(--color-red-burnt);
-  padding-bottom: 10px;
+  padding-bottom: var(--spacing-xl);
 }
 
 .roller-container {
@@ -27,13 +27,13 @@ h2 {
 }
 
 .btn-roll {
-  padding: 15px 20px;
+  padding: 0.9375rem 1.25rem;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--font-size-xl);
   font-weight: 700;
-  color: white;
+  color: var(--color-bg-white);
   transition: all 0.3s;
   box-shadow: 0 4px 6px var(--shadow-black-10);
 }
@@ -47,25 +47,25 @@ h2 {
 /* d6 - Orange-Red */
 .btn-roll:nth-child(2), .dice-d6 {
   background: linear-gradient(135deg, var(--color-orange-bright) 0%, var(--color-orange-bright-dark) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 /* d8 - Green */
 .btn-roll:nth-child(3), .dice-d8 {
   background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 /* d10 - Different Red (darker/crimson) */
 .btn-roll:nth-child(4), .dice-d10 {
   background: linear-gradient(135deg, var(--color-error-dark) 0%, var(--color-red-dark-burnt) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 /* d12 - Light Blue */
 .btn-roll:nth-child(5), .dice-d12 {
   background: linear-gradient(135deg, var(--color-blue-light) 0%, var(--color-blue-medium) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 /* d20 - White with black border */
@@ -79,13 +79,13 @@ h2 {
 /* 3d6 - Purple/Violet */
 .btn-roll:nth-child(7), .dice-3d6 {
   background: linear-gradient(135deg, var(--color-purple-bright) 0%, var(--color-purple-bright-dark) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 /* d% - Brown */
 .btn-roll:nth-child(8), .dice-d100 {
   background: linear-gradient(135deg, var(--color-brown-light) 0%, var(--color-brown-dark) 100%);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .btn-roll:hover {
@@ -132,14 +132,14 @@ h2 {
 }
 
 .result-type {
-  font-size: 18px;
+  font-size: var(--font-size-xl-lg);
   font-weight: 600;
   color: inherit;
   text-transform: uppercase;
 }
 
 .result-value {
-  font-size: 72px;
+  font-size: var(--font-size-5xl);
   font-weight: 800;
   color: inherit;
   line-height: 1;
@@ -148,7 +148,7 @@ h2 {
 .roll-history {
   margin-top: 30px;
   border-top: 2px solid var(--color-gray-lighter);
-  padding-top: 20px;
+  padding-top: var(--spacing-5xl);
 }
 
 .history-header {
@@ -161,24 +161,24 @@ h2 {
 .history-header h3 {
   margin: 0;
   color: var(--color-gray-600-alt);
-  font-size: 16px;
+  font-size: var(--font-size-xl);
 }
 
 .btn-clear {
-  padding: 6px 12px;
+  padding: var(--spacing-md) var(--spacing-2xl);
   border: 1px solid var(--color-red-burnt);
   background: var(--color-bg-white);
   color: var(--color-red-burnt);
   border-radius: 4px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   transition: all 0.3s;
 }
 
 .btn-clear:hover {
   background: var(--color-red-burnt);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .history-list {
@@ -190,10 +190,10 @@ h2 {
 .history-item {
   display: flex;
   justify-content: space-between;
-  padding: 10px 15px;
+  padding: var(--spacing-xl) var(--spacing-3xl);
   background: var(--color-bg-lighter);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
 }
 
 .history-type {
@@ -211,7 +211,7 @@ h2 {
   background: var(--color-bg-lighter);
   border: 1px solid var(--color-gray-light);
   border-radius: 8px;
-  padding: 20px;
+  padding: var(--spacing-5xl);
   margin-bottom: 30px;
 }
 
@@ -230,17 +230,17 @@ h2 {
 }
 
 .input-group label {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--color-gray-600-alt);
   text-transform: uppercase;
 }
 
 .input-field {
-  padding: 8px 12px;
+  padding: var(--spacing-lg) var(--spacing-2xl);
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  font-size: 14px;
+  font-size: var(--font-size-lg);
   min-width: 80px;
 }
 
@@ -252,9 +252,9 @@ h2 {
 
 .btn-custom {
   background: linear-gradient(135deg, var(--color-indigo) 0%, var(--color-indigo-dark) 100%);
-  color: white;
-  padding: 8px 20px;
-  font-size: 14px;
+  color: var(--color-bg-white);
+  padding: 8px 1.25rem;
+  font-size: var(--font-size-lg);
 }
 
 .btn-custom:hover {
@@ -263,14 +263,14 @@ h2 {
 }
 
 .result-breakdown {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: var(--shadow-black-60);
   margin-top: 8px;
   font-weight: 500;
 }
 
 .history-breakdown {
-  font-size: 12px;
+  font-size: var(--font-size-md);
   color: var(--color-gray-350-alt);
   margin-left: 10px;
 }
