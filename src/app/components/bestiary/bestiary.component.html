@@ -1,0 +1,190 @@
+<div class="bestiary-container">
+  <div class="bestiary-header">
+    <h1>Monster Bestiary</h1>
+    <p class="subtitle">Explore creatures from across RuneQuest and DragonBane</p>
+  </div>
+
+  <div class="controls-section">
+    <!-- System Filter -->
+    <div class="filter-group">
+      <label class="filter-label">Game System:</label>
+      <div class="filter-bar">
+        <button
+          class="filter-btn"
+          [class.active]="systemFilter() === 'all'"
+          (click)="toggleSystemFilter('all')">
+          All
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="systemFilter() === 'runequest'"
+          (click)="toggleSystemFilter('runequest')">
+          RuneQuest
+        </button>
+        <button
+          class="filter-btn"
+          [class.active]="systemFilter() === 'dragonbane'"
+          (click)="toggleSystemFilter('dragonbane')">
+          DragonBane
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-group">
+      <label for="search-input" class="filter-label">Search:</label>
+      <input
+        id="search-input"
+        type="text"
+        class="search-input"
+        placeholder="Search monster name..."
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)">
+    </div>
+
+    <!-- Category Filter -->
+    <div class="category-group">
+      <label class="filter-label">Category:</label>
+      <div class="category-pills">
+        <button
+          class="category-pill"
+          [class.active]="categoryFilter() === 'all'"
+          (click)="toggleCategoryFilter('all')">
+          All
+        </button>
+        @for (category of categories; track category) {
+          <button
+            class="category-pill"
+            [class.active]="categoryFilter() === category"
+            (click)="toggleCategoryFilter(category)">
+            {{ getCategoryLabel(category) }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="results-summary">
+    <p>{{ filteredMonsters().length }} monster(s) found</p>
+  </div>
+
+  <!-- Monsters Grid -->
+  @if (filteredMonsters().length > 0) {
+    <div class="monsters-grid">
+      @for (monster of filteredMonsters(); track monster.id) {
+        <div class="monster-card">
+          <!-- Card Header -->
+          <div class="card-header">
+            <div class="name-and-badges">
+              <h3 class="monster-name">{{ monster.name }}</h3>
+              <div class="badges">
+                <span [class]="'system-badge ' + getSystemBadgeClass(monster.gameSystem)">
+                  {{ getGameSystemName(monster.gameSystem) }}
+                </span>
+                <span class="category-badge">{{ getCategoryLabel(monster.category) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Row -->
+          <div class="stats-row">
+            <div class="stat-box">
+              <span class="stat-label">STR</span>
+              <span class="stat-value">{{ monster.stats.STR }}</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">CON</span>
+              <span class="stat-value">{{ monster.stats.CON }}</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">SIZ</span>
+              <span class="stat-value">{{ monster.stats.SIZ }}</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">DEX</span>
+              <span class="stat-value">{{ monster.stats.DEX }}</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">INT</span>
+              <span class="stat-value">{{ monster.stats.INT }}</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">POW</span>
+              <span class="stat-value">{{ monster.stats.POW }}</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">CHA</span>
+              <span class="stat-value">{{ monster.stats.CHA }}</span>
+            </div>
+          </div>
+
+          <!-- HP, Armor, Movement Row -->
+          <div class="combat-stats-row">
+            <div class="combat-stat">
+              <span class="stat-label">HP:</span>
+              <span class="stat-value">{{ monster.hitPoints }}</span>
+            </div>
+            <div class="combat-stat">
+              <span class="stat-label">Armor:</span>
+              <span class="stat-value">{{ monster.armor }}</span>
+              @if (monster.armorDescription) {
+                <span class="description-text">({{ monster.armorDescription }})</span>
+              }
+            </div>
+            <div class="combat-stat">
+              <span class="stat-label">Movement:</span>
+              <span class="stat-value">{{ monster.movement }}</span>
+            </div>
+          </div>
+
+          <!-- Attacks Section -->
+          <div class="attacks-section">
+            <h4 class="section-title">Attacks</h4>
+            <div class="attacks-list">
+              @for (attack of monster.attacks; track attack.name) {
+                <div class="attack-item">
+                  <span class="attack-name">{{ attack.name }}</span>
+                  <span class="attack-skill">{{ attack.skill }}%</span>
+                  <span class="attack-damage">{{ attack.damage }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Special Abilities Section -->
+          @if (monster.specialAbilities && monster.specialAbilities.length > 0) {
+            <div class="abilities-section">
+              <h4 class="section-title">Special Abilities</h4>
+              <div class="abilities-list">
+                @for (ability of monster.specialAbilities; track ability) {
+                  <span class="ability-chip">{{ ability }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Description (Expandable) -->
+          <div class="description-container">
+            <button
+              class="expand-btn"
+              (click)="toggleExpanded(monster.id)"
+              [class.expanded]="expandedMonsterId() === monster.id">
+              {{ expandedMonsterId() === monster.id ? '▼' : '▶' }}
+              <span>{{ expandedMonsterId() === monster.id ? 'Hide' : 'Show' }} Description</span>
+            </button>
+            @if (expandedMonsterId() === monster.id) {
+              <div class="description-text">
+                {{ monster.description }}
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="empty-state">
+      <p>No monsters match your filters. Try adjusting your search or category selection.</p>
+    </div>
+  }
+</div>

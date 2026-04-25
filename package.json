@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "android": "npx cap sync;npx cap open android",
+    "android": "ng build;npx cap sync;npx cap open android",
     "icons": "npx capacitor-assets generate"
   },
   "private": true,

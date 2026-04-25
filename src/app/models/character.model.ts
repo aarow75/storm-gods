@@ -55,6 +55,7 @@ export interface DerivedStats {
   movementRate: number;
   strikeRank: number;
   maxEncumbrance: number;
+  totalEncumbrance: number;
   encumbranceDefensePenalty: number;
 }
 
@@ -301,8 +302,9 @@ export const DEFAULT_DERIVED_STATS: DerivedStats = {
   spiritCombatDamage: '1d6',
   healingRate: 2,
   movementRate: 8,
-  strikeRank: 10,
+  strikeRank: 0,
   maxEncumbrance: 10,
+  totalEncumbrance: 0,
   encumbranceDefensePenalty: 0
 };
 
@@ -380,7 +382,46 @@ export function calculateHitLocations(con: number, siz: number): HitLocations {
   };
 }
 
-export function calculateDerivedStats(stats: CharacterStats, equipment: EquipmentItem[] = []): DerivedStats {
+export function calculateArmorFromShields(shields: Shield[]): ArmorLocations {
+  const shieldArmor: ArmorLocations = {
+    'Right Leg': 0,
+    'Left Leg': 0,
+    'Abdomen': 0,
+    'Chest': 0,
+    'Right Arm': 0,
+    'Left Arm': 0,
+    'Head': 0
+  };
+
+  shields.forEach(shield => {
+    const shieldDef = SHIELD_LIST.find(s => s.name === shield.name);
+    if (shieldDef) {
+      shieldDef.protectedLocations.forEach(location => {
+        shieldArmor[location as keyof ArmorLocations] += shieldDef.armorPoints;
+      });
+    }
+  });
+
+  return shieldArmor;
+}
+
+export function getSizeModifier(siz: number): number {
+  if (siz >= 22) return 0;
+  if (siz >= 15) return 1;
+  if (siz >= 7) return 2;
+  return 3;
+}
+
+export function getDexterityModifier(dex: number): number {
+  if (dex >= 19) return 0;
+  if (dex >= 16) return 1;
+  if (dex >= 13) return 2;
+  if (dex >= 9) return 3;
+  if (dex >= 6) return 4;
+  return 5;
+}
+
+export function calculateDerivedStats(stats: CharacterStats, equipment: EquipmentItem[] = [], weapons: Weapon[] = [], shields: Shield[] = []): DerivedStats {
   const totalHP = Math.round((stats.CON + stats.SIZ) / 2);
   const strSiz = stats.STR + stats.SIZ;
 
@@ -401,12 +442,15 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
   else if (stats.POW <= 18) spiritCombatDamage = '1d6+1';
   else spiritCombatDamage = '1d6+2';
 
-  // Strike Rank
-  let strikeRank = Math.round((stats.DEX + stats.INT) / 2);
+  // Strike Rank: base 0 + SIZ modifier + DEX modifier
+  let strikeRank = getSizeModifier(stats.SIZ) + getDexterityModifier(stats.DEX);
 
-  // Encumbrance calculations
+  // Encumbrance calculations: equipment + weapons + shields
   const maxEncumbrance = stats.STR;
-  const totalENC = equipment.reduce((sum, item) => sum + item.encumbrance * item.quantity, 0);
+  const equipmentENC = equipment.reduce((sum, item) => sum + item.encumbrance * item.quantity, 0);
+  const weaponsENC = weapons.reduce((sum, w) => sum + (WEAPON_LIST.find(wd => wd.name === w.name)?.encumbrance || 0), 0);
+  const shieldsENC = shields.reduce((sum, s) => sum + (SHIELD_LIST.find(sd => sd.name === s.name)?.encumbrance || 0), 0);
+  const totalENC = equipmentENC + weaponsENC + shieldsENC;
   const overENC = Math.max(0, totalENC - maxEncumbrance);
 
   // Apply encumbrance penalties
@@ -424,6 +468,7 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
     movementRate: movementRate,
     strikeRank: strikeRank,
     maxEncumbrance: maxEncumbrance,
+    totalEncumbrance: totalENC,
     encumbranceDefensePenalty: encumbranceDefensePenalty
   };
 }

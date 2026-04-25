@@ -158,7 +158,7 @@ Uses Angular Router's standalone APIs; no module-based routing.
 ### Derived Stats & Combat Rules
 
 - **Damage Bonus** — Formula: `(STR + SIZ) / 8` → maps to d4/d6/d8/d10/d12 increments
-- **Strike Rank** — `(DEX + INT) / 2`, affects turn order in combat
+- **Strike Rank** — `SIZ modifier + DEX modifier` (from Runequest Strike Rank Modifier Table); affects turn order in combat. Base 0, modified by SIZ (22+=0, 15-21=+1, 7-14=+2, 1-6=+3) and DEX (19+=0, 16-18=+1, 13-15=+2, 9-12=+3, 6-8=+4, 1-5=+5)
 - **Hit Points per Location** — `(CON + SIZ) / 2`, distributed by location (head=1/4, limbs=1/4 each, torso=2/4)
 - **Healing Rate** — `(CON / 4)` per week
 - **Encumbrance** — Total equipment weight; if over STR limit, applies defense penalty

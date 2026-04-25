@@ -39,7 +39,7 @@ export class CharacterService {
     // Ensure derivedStats exist
     if (!char.derivedStats) {
       char.derivedStats = char.stats
-        ? calculateDerivedStats(char.stats, char.equipment || [])
+        ? calculateDerivedStats(char.stats, char.equipment || [], char.weapons || [], char.shields || [])
         : { ...DEFAULT_DERIVED_STATS };
     }
 
@@ -51,6 +51,9 @@ export class CharacterService {
     // Migrate encumbrance fields if missing
     if (char.derivedStats && char.derivedStats.maxEncumbrance === undefined) {
       char.derivedStats.maxEncumbrance = char.stats?.STR || 10;
+    }
+    if (char.derivedStats && char.derivedStats.totalEncumbrance === undefined) {
+      char.derivedStats.totalEncumbrance = 0;
     }
     if (char.derivedStats && char.derivedStats.encumbranceDefensePenalty === undefined) {
       char.derivedStats.encumbranceDefensePenalty = 0;

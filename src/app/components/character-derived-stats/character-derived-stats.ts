@@ -33,9 +33,27 @@ export class CharacterDerivedStats {
   // Strike Rank breakdown for RuneQuest
   get strikeRankBreakdown(): string {
     if (!this.stats) return '';
+    const siz = this.stats.SIZ;
     const dex = this.stats.DEX;
-    const int = this.stats.INT;
+    const sizMod = this.getSizeModifier(siz);
+    const dexMod = this.getDexterityModifier(dex);
     const total = this.derivedStats.strikeRank;
-    return `(DEX ${dex} + INT ${int}) / 2 = ${total}`;
+    return `SIZ ${siz}→${sizMod} + DEX ${dex}→${dexMod} = ${total}`;
+  }
+
+  private getSizeModifier(siz: number): number {
+    if (siz >= 22) return 0;
+    if (siz >= 15) return 1;
+    if (siz >= 7) return 2;
+    return 3;
+  }
+
+  private getDexterityModifier(dex: number): number {
+    if (dex >= 19) return 0;
+    if (dex >= 16) return 1;
+    if (dex >= 13) return 2;
+    if (dex >= 9) return 3;
+    if (dex >= 6) return 4;
+    return 5;
   }
 }

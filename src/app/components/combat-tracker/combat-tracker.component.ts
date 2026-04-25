@@ -2,7 +2,9 @@ import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorR
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CombatParticipant, Monster, DEFAULT_MONSTERS } from '../../models/combat.model';
-import { Character, WEAPON_LIST, SHIELD_LIST, calculateHitLocations } from '../../models/character.model';
+import { Character, WEAPON_LIST, SHIELD_LIST, calculateHitLocations, getSizeModifier, getDexterityModifier } from '../../models/character.model';
+import { Monster as BestiaryMonster } from '../../models/monster.model';
+import { MONSTERS as BESTIARY_MONSTERS } from '../../constants/monsters.constants';
 import { CharacterService } from '../../services/character.service';
 import { CombatService } from '../../services/combat.service';
 import { DiceService } from '../../services/dice.service';
@@ -55,6 +57,9 @@ export class CombatTrackerComponent implements OnInit {
 
   characters: Character[] = [];
   monsters: Monster[] = [];
+  defaultMonsters: Monster[] = [];
+  bestiaryMonsters: Monster[] = [];
+  customMonsters: Monster[] = [];
   combatParticipants: CombatParticipant[] = [];
   lastAttackerId: string | null = null;
 
@@ -66,7 +71,7 @@ export class CombatTrackerComponent implements OnInit {
   selectedWeapon = '';
 
   newMonster: Monster = {
-    id: '', name: '', hitPoints: 10, strikeRank: 10, armor: 0, weapons: []
+    id: '', name: '', hitPoints: 10, strikeRank: 0, armor: 0, weapons: []
   };
   newMonsterWeapon = { name: '', damage: '', strikeRankModifier: 0 };
 
@@ -93,9 +98,13 @@ export class CombatTrackerComponent implements OnInit {
 
   loadData(): void {
     this.characters = this.characterService.getCharacters();
+    this.defaultMonsters = DEFAULT_MONSTERS.map(m => JSON.parse(JSON.stringify(m)));
+    this.bestiaryMonsters = BESTIARY_MONSTERS.map(m => this.convertBestiaryMonster(m));
+    this.customMonsters = this.combatService.getMonsters();
     this.monsters = [
-      ...DEFAULT_MONSTERS.map(m => JSON.parse(JSON.stringify(m))),
-      ...this.combatService.getMonsters()
+      ...this.defaultMonsters,
+      ...this.bestiaryMonsters,
+      ...this.customMonsters
     ];
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(
       this.combatService.getCombatParticipants()
@@ -253,7 +262,7 @@ export class CombatTrackerComponent implements OnInit {
 
   openAddMonsterModal(): void {
     this.showAddMonsterModal = true;
-    this.newMonster = { id: this.combatService.generateId(), name: '', hitPoints: 10, strikeRank: 10, armor: 0, weapons: [] };
+    this.newMonster = { id: this.combatService.generateId(), name: '', hitPoints: 10, strikeRank: 0, armor: 0, weapons: [] };
     this.newMonsterWeapon = { name: '', damage: '', strikeRankModifier: 0 };
   }
 
@@ -284,7 +293,23 @@ export class CombatTrackerComponent implements OnInit {
   }
 
   isCustomMonster(monsterId: string): boolean {
-    return !DEFAULT_MONSTERS.find(m => m.id === monsterId);
+    return !DEFAULT_MONSTERS.find(m => m.id === monsterId)
+      && !monsterId.startsWith('bestiary-');
+  }
+
+  private convertBestiaryMonster(bm: BestiaryMonster): Monster {
+    return {
+      id: `bestiary-${bm.id}`,
+      name: bm.name,
+      hitPoints: bm.hitPoints,
+      strikeRank: getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX),
+      armor: bm.armor,
+      weapons: bm.attacks.map(a => ({
+        name: a.name,
+        damage: a.damage,
+        strikeRankModifier: 0
+      }))
+    };
   }
 
   getParticipantWeapons(participant: CombatParticipant): string[] {
@@ -718,7 +743,7 @@ export class CombatTrackerComponent implements OnInit {
   getDefenderDexBonus(participant: CombatParticipant): number {
     if (participant.type === 'character') {
       const character = this.characters.find(c => c.id === participant.characterId);
-      return Math.max(0, (character?.stats.DEX ?? 10) - 10);
+      return this.getParryDexBonus(character?.stats.DEX ?? 10);
     }
     return 0;
   }
@@ -728,25 +753,25 @@ export class CombatTrackerComponent implements OnInit {
   getAttackerStrBonus(participant: CombatParticipant): number {
     if (participant.type !== 'character') return 0;
     const char = this.characters.find(c => c.id === participant.characterId);
-    return Math.max(0, (char?.stats.STR ?? 10) - 10);
+    return this.getAttackStrBonus(char?.stats.STR ?? 10);
   }
 
   getAttackerIntBonus(participant: CombatParticipant): number {
     if (participant.type !== 'character') return 0;
     const char = this.characters.find(c => c.id === participant.characterId);
-    return Math.floor(Math.max(0, (char?.stats.INT ?? 10) - 10) / 2);
+    return this.getAttackIntBonus(char?.stats.INT ?? 10);
   }
 
   getAttackerPowBonus(participant: CombatParticipant): number {
     if (participant.type !== 'character') return 0;
     const char = this.characters.find(c => c.id === participant.characterId);
-    return Math.floor(Math.max(0, (char?.stats.POW ?? 10) - 10) / 2);
+    return this.getAttackPowBonus(char?.stats.POW ?? 10);
   }
 
   getAttackerDexBonus(participant: CombatParticipant): number {
     if (participant.type !== 'character') return 0;
     const char = this.characters.find(c => c.id === participant.characterId);
-    return Math.max(0, (char?.stats.DEX ?? 10) - 10);
+    return this.getAttackDexBonus(char?.stats.DEX ?? 10);
   }
 
   getTotalAttackBonus(participant: CombatParticipant): number {
@@ -788,19 +813,19 @@ export class CombatTrackerComponent implements OnInit {
   getDefenderStrBonus(participant: CombatParticipant): number {
     if (participant.type !== 'character') return 0;
     const char = this.characters.find(c => c.id === participant.characterId);
-    return Math.max(0, (char?.stats.STR ?? 10) - 10);
+    return this.getParryStrBonus(char?.stats.STR ?? 10);
   }
 
   getDefenderSizBonus(participant: CombatParticipant): number {
     if (participant.type !== 'character') return 0;
     const char = this.characters.find(c => c.id === participant.characterId);
-    return Math.floor(Math.max(0, (char?.stats.SIZ ?? 10) - 10) / 2);
+    return this.getParrySizBonus(char?.stats.SIZ ?? 10);
   }
 
   getDefenderPowBonus(participant: CombatParticipant): number {
     if (participant.type !== 'character') return 0;
     const char = this.characters.find(c => c.id === participant.characterId);
-    return Math.floor(Math.max(0, (char?.stats.POW ?? 10) - 10) / 2);
+    return this.getParryPowBonus(char?.stats.POW ?? 10);
   }
 
   getTotalParryBonus(participant: CombatParticipant): number {
@@ -817,7 +842,7 @@ export class CombatTrackerComponent implements OnInit {
   getDefenderIntBonus(participant: CombatParticipant): number {
     if (participant.type === 'character') {
       const character = this.characters.find(c => c.id === participant.characterId);
-      return Math.floor(Math.max(0, (character?.stats.INT ?? 10) - 10) / 2);
+      return this.getAttackIntBonus(character?.stats.INT ?? 10);
     }
     return 0;
   }
@@ -1050,5 +1075,75 @@ export class CombatTrackerComponent implements OnInit {
       ].join(', ');
     }
     return '';
+  }
+
+  // ── Characteristic Bonus Lookup Tables ───────────────────────────────────
+
+  private getAttackStrBonus(str: number): number {
+    if (str <= 4) return -5;
+    if (str <= 8) return -5;
+    if (str <= 12) return 0;
+    if (str <= 16) return 5;
+    if (str <= 20) return 10;
+    return 10 + Math.floor((str - 20) / 4) * 5;
+  }
+
+  private getAttackIntBonus(int: number): number {
+    if (int <= 4) return 0;
+    if (int <= 8) return -10;
+    if (int <= 12) return -5;
+    if (int <= 16) return 5;
+    if (int <= 20) return 10;
+    return 10 + Math.floor((int - 20) / 4) * 5;
+  }
+
+  private getAttackPowBonus(pow: number): number {
+    if (pow <= 12) return 0;
+    if (pow <= 16) return 5;
+    if (pow <= 20) return 5;
+    return 5 + Math.floor((pow - 20) / 4) * 5;
+  }
+
+  private getAttackDexBonus(dex: number): number {
+    if (dex <= 4) return -10;
+    if (dex <= 8) return -5;
+    if (dex <= 12) return 0;
+    if (dex <= 16) return 5;
+    if (dex <= 20) return 10;
+    return 10 + Math.floor((dex - 20) / 4) * 5;
+  }
+
+  private getParryStrBonus(str: number): number {
+    if (str <= 4) return -5;
+    if (str <= 8) return 0;
+    if (str <= 12) return 0;
+    if (str <= 16) return 5;
+    if (str <= 20) return 5;
+    return 5 + Math.floor((str - 20) / 4) * 5;
+  }
+
+  private getParrySizBonus(siz: number): number {
+    if (siz <= 4) return 5;
+    if (siz <= 12) return 0;
+    if (siz <= 16) return 0;
+    if (siz <= 20) return -5;
+    return -5 - Math.floor((siz - 20) / 4) * 5;
+  }
+
+  private getParryPowBonus(pow: number): number {
+    if (pow <= 4) return -5;
+    if (pow <= 12) return 0;
+    if (pow <= 16) return 5;
+    if (pow <= 20) return 5;
+    return 5 + Math.floor((pow - 20) / 4) * 5;
+  }
+
+  private getParryDexBonus(dex: number): number {
+    if (dex <= 4) return -10;
+    if (dex <= 8) return -5;
+    if (dex <= 12) return 0;
+    if (dex <= 16) return 5;
+    if (dex <= 20) return 10;
+    return 10 + Math.floor((dex - 20) / 4) * 5;
   }
 }

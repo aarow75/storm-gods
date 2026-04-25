@@ -18,6 +18,10 @@
     <label>{{ translationService.get('derived.healingRate', 'Healing Rate') }}:</label>
     <input type="number" [(ngModel)]="derivedStats.healingRate" name="healingRate" readonly />
   </div>
+  <div class="form-group">
+    <label>{{ translationService.get('derived.encumbrance', 'Encumbrance') }}:</label>
+    <input type="text" [value]="derivedStats.totalEncumbrance + ' / ' + derivedStats.maxEncumbrance" readonly />
+  </div>
   @if (isRuneQuest) {
   <div class="form-group">
     <label>{{ translationService.get('derived.strikeRank', 'Strike Rank') }}:</label>

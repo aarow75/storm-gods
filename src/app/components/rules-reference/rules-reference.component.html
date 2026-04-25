@@ -145,9 +145,42 @@
 
     <!-- Strike Rank -->
     <div class="reference-section">
-      <h3>Strike Rank</h3>
-      <p><strong>Formula:</strong> (DEX + INT) / 2 + weapon modifier</p>
-      <p><strong>Resolution:</strong> Lower SR acts first in combat. Encumbrance adds to strike rank.</p>
+      <h3>Strike Rank Calculation</h3>
+      <p><strong>Base Formula:</strong> SIZ Modifier + DEX Modifier (from Strike Rank Modifier Table)</p>
+      <p><strong>Resolution:</strong> Lower SR acts first in combat. Encumbrance penalty adds to strike rank.</p>
+      <table class="reference-table">
+        <thead>
+          <tr>
+            <th>SIZ</th>
+            <th>SR Modifier</th>
+            <th>DEX</th>
+            <th>SR Modifier</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>22+</td><td>0</td><td>19+</td><td>0</td></tr>
+          <tr><td>15-21</td><td>+1</td><td>16-18</td><td>+1</td></tr>
+          <tr><td>7-14</td><td>+2</td><td>13-15</td><td>+2</td></tr>
+          <tr><td>1-6</td><td>+3</td><td>9-12</td><td>+3</td></tr>
+          <tr><td></td><td></td><td>6-8</td><td>+4</td></tr>
+          <tr><td></td><td></td><td>1-5</td><td>+5</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Example:</strong> SIZ 10 = +2, DEX 14 = +2, Base SR = 4. With 2 ENC over limit, Final SR = 6.</p>
+    </div>
+
+    <!-- Encumbrance -->
+    <div class="reference-section">
+      <h3>Encumbrance Calculation</h3>
+      <p><strong>Total Weight:</strong> Sum of all equipment, weapons, and shields</p>
+      <p><strong>Max Capacity:</strong> STR stat</p>
+      <p><strong>Penalties:</strong> For each point over capacity:</p>
+      <ul>
+        <li>Strike Rank increases by +1</li>
+        <li>Movement Rate decreases by 1 (minimum 0)</li>
+        <li>Dodge skill penalty: -5% per point over capacity</li>
+      </ul>
+      <p><strong>Example:</strong> STR 10, Total ENC 12 = 2 over. SR +2, Movement -2, Dodge -10%.</p>
     </div>
 
     <!-- Healing -->

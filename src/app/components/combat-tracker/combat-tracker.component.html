@@ -404,10 +404,22 @@
             <label>Monster:</label>
             <select [(ngModel)]="selectedMonsterId" (change)="onMonsterSelect()">
               <option value="">-- Select Monster --</option>
-              @for (monster of monsters; track monster) {
-                <option [value]="monster.id">
-                  {{ monster.name }}{{ isCustomMonster(monster.id) ? ' (Custom)' : '' }}
-                </option>
+              <optgroup label="Default">
+                @for (monster of defaultMonsters; track monster.id) {
+                  <option [value]="monster.id">{{ monster.name }}</option>
+                }
+              </optgroup>
+              <optgroup label="Bestiary">
+                @for (monster of bestiaryMonsters; track monster.id) {
+                  <option [value]="monster.id">{{ monster.name }}</option>
+                }
+              </optgroup>
+              @if (customMonsters.length > 0) {
+                <optgroup label="Custom">
+                  @for (monster of customMonsters; track monster.id) {
+                    <option [value]="monster.id">{{ monster.name }} (Custom)</option>
+                  }
+                </optgroup>
               }
             </select>
           </div>

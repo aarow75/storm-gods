@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import {
-  Character, CharacterStats, CharacterSkills, Weapon, WeaponDefinition, Shield, ShieldDefinition, Passion, Spell, RuneSpell,
+  Character, CharacterStats, CharacterSkills, ArmorLocations, Weapon, WeaponDefinition, Shield, ShieldDefinition, Passion, Spell, RuneSpell,
   DEFAULT_STATS, DEFAULT_SKILLS, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES, DEFAULT_FAMILY_HISTORY, DEFAULT_CULT_STATUS,
-  calculateHitLocations, calculateDerivedStats, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
+  calculateHitLocations, calculateDerivedStats, calculateArmorFromShields, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
   CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS, ARMOR_TYPES,
   applySkillBonuses, enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES
 } from '../../models/character.model';
@@ -108,6 +108,9 @@ export class CharacterFormComponent implements OnInit {
 
   // Track which fields have been randomized for success styling
   randomizedFields = new Set<string>();
+
+  // Track shield armor to properly calculate changes
+  lastShieldArmor: ArmorLocations | null = null;
 
   cultRanks = CULT_RANKS;
   fantasyNames = FANTASY_NAMES;
@@ -211,6 +214,7 @@ export class CharacterFormComponent implements OnInit {
       };
       this.editingId = id;
       this.editMode = true;
+      this.updateArmorFromShields();
 
       // Scroll to top of form
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -314,7 +318,7 @@ export class CharacterFormComponent implements OnInit {
 
   calculateDerivedValues(): void {
     if (this.character.stats) {
-      this.character.derivedStats = calculateDerivedStats(this.character.stats, this.character.equipment || []);
+      this.character.derivedStats = calculateDerivedStats(this.character.stats, this.character.equipment || [], this.character.weapons || [], this.character.shields || []);
       this.calculateHitPoints();
     }
   }
@@ -361,11 +365,13 @@ export class CharacterFormComponent implements OnInit {
       skill: 'Shield',
       currentHitPoints: firstShield.hitPoints
     });
+    this.updateArmorFromShields();
   }
 
   removeShield(index: number): void {
     if (this.character.shields) {
       this.character.shields.splice(index, 1);
+      this.updateArmorFromShields();
     }
   }
 
@@ -378,6 +384,24 @@ export class CharacterFormComponent implements OnInit {
     if (shieldDef) {
       shield.currentHitPoints = shieldDef.hitPoints;
     }
+    this.updateArmorFromShields();
+  }
+
+  private updateArmorFromShields(): void {
+    if (!this.character.armor) {
+      this.character.armor = { ...DEFAULT_ARMOR };
+    }
+    const shieldArmor = calculateArmorFromShields(this.character.shields || []);
+    this.character.armor = {
+      'Right Leg': (this.character.armor['Right Leg'] || 0) - (this.lastShieldArmor?.['Right Leg'] || 0) + shieldArmor['Right Leg'],
+      'Left Leg': (this.character.armor['Left Leg'] || 0) - (this.lastShieldArmor?.['Left Leg'] || 0) + shieldArmor['Left Leg'],
+      'Abdomen': (this.character.armor['Abdomen'] || 0) - (this.lastShieldArmor?.['Abdomen'] || 0) + shieldArmor['Abdomen'],
+      'Chest': (this.character.armor['Chest'] || 0) - (this.lastShieldArmor?.['Chest'] || 0) + shieldArmor['Chest'],
+      'Right Arm': (this.character.armor['Right Arm'] || 0) - (this.lastShieldArmor?.['Right Arm'] || 0) + shieldArmor['Right Arm'],
+      'Left Arm': (this.character.armor['Left Arm'] || 0) - (this.lastShieldArmor?.['Left Arm'] || 0) + shieldArmor['Left Arm'],
+      'Head': (this.character.armor['Head'] || 0) - (this.lastShieldArmor?.['Head'] || 0) + shieldArmor['Head']
+    };
+    this.lastShieldArmor = shieldArmor;
   }
 
   getSkillKeys(category: string): string[] {
