@@ -25,4 +25,6 @@ export interface Monster {
   movement: number;
   attacks: MonsterAttack[];
   specialAbilities?: string[];
+  isCustom?: boolean;
+  strikeRank?: number;
 }

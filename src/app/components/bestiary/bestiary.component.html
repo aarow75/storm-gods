@@ -79,12 +79,21 @@
             <div class="name-and-badges">
               <h3 class="monster-name">{{ monster.name }}</h3>
               <div class="badges">
+                @if (isCustomMonster(monster)) {
+                  <span class="custom-badge">Custom</span>
+                }
                 <span [class]="'system-badge ' + getSystemBadgeClass(monster.gameSystem)">
                   {{ getGameSystemName(monster.gameSystem) }}
                 </span>
                 <span class="category-badge">{{ getCategoryLabel(monster.category) }}</span>
               </div>
             </div>
+            @if (isCustomMonster(monster)) {
+              <div class="monster-actions">
+                <a [routerLink]="['/monster-creator']" [queryParams]="{ edit: monster.id }" class="action-btn edit-btn" title="Edit">✏️</a>
+                <button class="action-btn delete-btn" (click)="deleteCustomMonster(monster.id)" title="Delete">🗑️</button>
+              </div>
+            }
           </div>
 
           <!-- Stats Row -->

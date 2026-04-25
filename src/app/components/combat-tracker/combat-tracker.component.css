@@ -190,8 +190,6 @@
 }
 
 .participant-details {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
   gap: 15px;
   margin-bottom: 15px;
 }
@@ -379,6 +377,29 @@
   font-size: var(--font-size-md);
   color: var(--color-text-tertiary);
   flex: 1;
+}
+
+.participant-and-hit-locations {
+  display: grid;
+  gap: 16px;
+  grid-template-areas: 'detailContainer hitLocationsContainer';
+}
+
+.participant-details {
+  grid-area: detailContainer;
+}
+
+.hit-locations-container {
+  display: grid;
+  grid-area: hitLocationsContainer;
+  grid-template-areas: '...' 'hpRemaining';
+}
+
+.hit-locations-container .detail-group {
+  display: grid;
+  grid-area: hpRemaining;
+  text-align: center;
+
 }
 
 .hit-points {
@@ -950,9 +971,31 @@
 }
 
 .hit-location-grid {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-areas: '... ... head ... ...' '... rarm chest larm ...' '... ... abdomen ... ...' '... rleg ... lleg ...';
   gap: 6px;
+}
+
+.location-badge:nth-child(1) {
+  grid-area: head;
+}
+.location-badge:nth-child(2) {
+  grid-area: rarm;
+}
+.location-badge:nth-child(3) {
+  grid-area: chest;
+}
+.location-badge:nth-child(4) {
+  grid-area: larm;
+}
+.location-badge:nth-child(5) {
+  grid-area: abdomen;
+}
+.location-badge:nth-child(6) {
+  grid-area: rleg;
+}
+.location-badge:nth-child(7) {
+  grid-area: lleg;
 }
 
 .location-badge {
@@ -972,9 +1015,19 @@
   font-size: var(--font-size-sm);
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  text-align: center;
 }
 
-.loc-hp {
+.loc-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: center;
+  width: 100%;
+}
+
+.loc-hp,
+.loc-ap {
   font-family: monospace;
   font-size: var(--font-size-base);
   font-weight: bold;

@@ -1,20 +1,22 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MONSTERS } from '../../constants/monsters.constants';
 import { Monster } from '../../models/monster.model';
+import { CustomMonsterService } from '../../services/custom-monster.service';
 import { GameSystemService } from '../../services/game-system.service';
 import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-bestiary',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './bestiary.component.html',
   styleUrls: ['./bestiary.component.css']
 })
 export class BestiaryComponent implements OnInit {
-  monsters = MONSTERS;
+  monsters: Monster[] = [];
   systemFilter = signal<'all' | 'runequest' | 'dragonbane'>('all');
   searchQuery = signal('');
   categoryFilter = signal<string>('all');
@@ -49,11 +51,30 @@ export class BestiaryComponent implements OnInit {
   categories = ['humanoid', 'beast', 'undead', 'chaos', 'dragon', 'spirit'];
 
   constructor(
+    private customMonsterService: CustomMonsterService,
     private gameSystemService: GameSystemService,
     private translationService: TranslationService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadMonsters();
+  }
+
+  loadMonsters(): void {
+    const customMonsters = this.customMonsterService.getMonsters();
+    this.monsters = [...MONSTERS, ...customMonsters];
+  }
+
+  deleteCustomMonster(id: string): void {
+    if (window.confirm('Are you sure you want to delete this custom monster?')) {
+      this.customMonsterService.deleteMonster(id);
+      this.loadMonsters();
+    }
+  }
+
+  isCustomMonster(monster: Monster): boolean {
+    return monster.isCustom === true;
+  }
 
   toggleSystemFilter(system: 'all' | 'runequest' | 'dragonbane'): void {
     this.systemFilter.set(system);

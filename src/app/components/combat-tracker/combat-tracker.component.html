@@ -3,7 +3,7 @@
     <h2>Combat Tracker</h2>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="openAddParticipantModal()">Add Participant</button>
-      <button class="btn btn-secondary" (click)="openAddMonsterModal()">Create Monster</button>
+      <a routerLink="/monster-creator" class="btn btn-secondary">Monster Creator</a>
       <button class="btn btn-secondary" (click)="toggleLogHistory()">
         {{ showLogHistory ? 'Hide History' : 'Show History' }}
       </button>
@@ -107,113 +107,139 @@
             <button class="btn-remove" (click)="removeParticipant(participant.id)">&times;</button>
           </div>
 
-          <div class="participant-details">
-            <div class="detail-group">
-              <label>Strike Rank: <strong>{{ participant.finalStrikeRank }}</strong></label>
-              <span class="sr-breakdown">(Base: {{ participant.baseStrikeRank }})</span>
-            </div>
+          <div class="participant-and-hit-locations">
+            <div class="participant-details">
+              <div class="detail-group">
+                <label>Strike Rank: <strong>{{ participant.finalStrikeRank }}</strong></label>
+                <span class="sr-breakdown">(Base: {{ participant.baseStrikeRank }})</span>
+              </div>
 
-            <div class="detail-group">
-              <label>Armor: <strong [attr.title]="getArmorTooltip(participant)">{{ getArmorDisplay(participant) }}</strong></label>
-            </div>
+              <div class="detail-group">
+                <label>Armor: <strong [attr.title]="getArmorTooltip(participant)">{{ getArmorDisplay(participant) }}</strong></label>
+              </div>
 
-            <div class="detail-group">
-              <label for="opponent-{{ participant.id }}">Target:</label>
-              <select id="opponent-{{ participant.id }}"
-                      [(ngModel)]="participant.selectedOpponentId"
-                      (change)="onOpponentChange(participant)"
-                      [disabled]="!!participant.isDead">
-                <option value="">-- Select Target --</option>
-                @for (opponent of getAvailableOpponents(participant); track opponent.id) {
-                  <option [value]="opponent.id">{{ opponent.name }}</option>
-                }
-              </select>
-            </div>
-
-            <div class="detail-group weapon-group">
-              <label for="weapon-{{ participant.id }}">Weapon:</label>
-              <div class="weapon-control">
-                <select id="weapon-{{ participant.id }}"
-                        [(ngModel)]="participant.selectedWeapon"
-                        (change)="onWeaponChange(participant)">
-                  @for (weapon of getParticipantWeapons(participant); track weapon) {
-                    <option [value]="weapon">{{ weapon }}</option>
+              <div class="detail-group">
+                <label for="opponent-{{ participant.id }}">Target:</label>
+                <select id="opponent-{{ participant.id }}"
+                        [(ngModel)]="participant.selectedOpponentId"
+                        (change)="onOpponentChange(participant)"
+                        [disabled]="!!participant.isDead">
+                  <option value="">-- Select Target --</option>
+                  @for (opponent of getAvailableOpponents(participant); track opponent.id) {
+                    <option [value]="opponent.id">{{ opponent.name }}</option>
                   }
                 </select>
-                <div class="weapon-damage">
-                  <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
-                  <button #rollDamageBtn
-                          class="btn-roll-damage"
-                          [attr.data-participant-id]="participant.id"
-                          (click)="rollWeaponDamage(participant)"
-                          [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant)"
-                          [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
-                    Roll
-                  </button>
+              </div>
+
+              <div class="detail-group weapon-group">
+                <label for="weapon-{{ participant.id }}">Weapon:</label>
+                <div class="weapon-control">
+                  <select id="weapon-{{ participant.id }}"
+                          [(ngModel)]="participant.selectedWeapon"
+                          (change)="onWeaponChange(participant)">
+                    @for (weapon of getParticipantWeapons(participant); track weapon) {
+                      <option [value]="weapon">{{ weapon }}</option>
+                    }
+                  </select>
+                  <div class="weapon-damage">
+                    <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
+                    <button #rollDamageBtn
+                            class="btn-roll-damage"
+                            [attr.data-participant-id]="participant.id"
+                            (click)="rollWeaponDamage(participant)"
+                            [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant)"
+                            [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
+                      Roll
+                    </button>
+                  </div>
+                  @if (getWeaponMissileInfo(participant); as mi) {
+                    <div class="missile-info-combat">
+                      <span class="missile-label">Missile</span>
+                      <span>Range: {{ mi.range }}m</span>
+                      <span>ROF: {{ participant.attacksUsed ?? 0 }}/{{ mi.rof }} used</span>
+                    </div>
+                  }
                 </div>
-                @if (getWeaponMissileInfo(participant); as mi) {
-                  <div class="missile-info-combat">
-                    <span class="missile-label">Missile</span>
-                    <span>Range: {{ mi.range }}m</span>
-                    <span>ROF: {{ participant.attacksUsed ?? 0 }}/{{ mi.rof }} used</span>
+
+                <label for="parry-{{ participant.id }}" class="parry-label">Parry With:</label>
+                <select id="parry-{{ participant.id }}"
+                        [(ngModel)]="participant.selectedParryItem"
+                        [disabled]="!!participant.isDead"
+                        class="parry-select">
+                  <option value="">-- Select --</option>
+                  @for (item of getParticipantParryItems(participant); track item) {
+                    <option [value]="item">{{ item }}</option>
+                  }
+                </select>
+
+                @if (getWeaponHPDisplay(participant)) {
+                  <div class="weapon-hp-row">
+                    <span class="weapon-hp-label">Parry Item HP:</span>
+                    <span class="weapon-hp-value"
+                          [class.weapon-damaged]="getParryWeaponCurrentHP(participant) < getParryWeaponMaxHP(participant)"
+                          [class.weapon-broken]="isWeaponBroken(participant)">
+                      {{ getWeaponHPDisplay(participant) }}
+                    </span>
+                    @if (isWeaponBroken(participant)) {
+                      <span class="broken-tag">BROKEN</span>
+                    }
+                  </div>
+                }
+
+                @if (getLastDamageRoll(participant.id)) {
+                  <div class="damage-result">
+                    <div class="damage-info">
+                      <span class="result-target">vs {{ getLastDamageRoll(participant.id)?.targetName }}</span>
+                      <span class="result-total">{{ getLastDamageRoll(participant.id)?.finalDamage }} damage dealt</span>
+                      <span class="result-breakdown">
+                        ({{ getLastDamageRoll(participant.id)?.breakdown }} = {{ getLastDamageRoll(participant.id)?.total }}
+                        - {{ getLastDamageRoll(participant.id)?.armorAbsorbed }} armor)
+                      </span>
+                    </div>
+                    <button class="btn-clear-result" (click)="clearDamageRoll(participant.id)">&times;</button>
+                  </div>
+                }
+
+                @if (getLastMiss(participant.id); as miss) {
+                  <div class="miss-result">
+                    <span class="miss-badge">MISS</span>
+                    <span class="miss-info">vs {{ miss.targetName }} (rolled {{ miss.attackRoll }} vs {{ miss.attackSkill }}%)</span>
+                    <button class="btn-clear-result" (click)="clearMissResult(participant.id)">&times;</button>
                   </div>
                 }
               </div>
-
-              <label for="parry-{{ participant.id }}" class="parry-label">Parry With:</label>
-              <select id="parry-{{ participant.id }}"
-                      [(ngModel)]="participant.selectedParryItem"
-                      [disabled]="!!participant.isDead"
-                      class="parry-select">
-                <option value="">-- Select --</option>
-                @for (item of getParticipantParryItems(participant); track item) {
-                  <option [value]="item">{{ item }}</option>
-                }
-              </select>
-
-              @if (getWeaponHPDisplay(participant)) {
-                <div class="weapon-hp-row">
-                  <span class="weapon-hp-label">Parry Item HP:</span>
-                  <span class="weapon-hp-value"
-                        [class.weapon-damaged]="getParryWeaponCurrentHP(participant) < getParryWeaponMaxHP(participant)"
-                        [class.weapon-broken]="isWeaponBroken(participant)">
-                    {{ getWeaponHPDisplay(participant) }}
-                  </span>
-                  @if (isWeaponBroken(participant)) {
-                    <span class="broken-tag">BROKEN</span>
-                  }
-                </div>
-              }
-
-              @if (getLastDamageRoll(participant.id)) {
-                <div class="damage-result">
-                  <div class="damage-info">
-                    <span class="result-target">vs {{ getLastDamageRoll(participant.id)?.targetName }}</span>
-                    <span class="result-total">{{ getLastDamageRoll(participant.id)?.finalDamage }} damage dealt</span>
-                    <span class="result-breakdown">
-                      ({{ getLastDamageRoll(participant.id)?.breakdown }} = {{ getLastDamageRoll(participant.id)?.total }}
-                      - {{ getLastDamageRoll(participant.id)?.armorAbsorbed }} armor)
-                    </span>
-                  </div>
-                  <button class="btn-clear-result" (click)="clearDamageRoll(participant.id)">&times;</button>
-                </div>
-              }
-
-              @if (getLastMiss(participant.id); as miss) {
-                <div class="miss-result">
-                  <span class="miss-badge">MISS</span>
-                  <span class="miss-info">vs {{ miss.targetName }} (rolled {{ miss.attackRoll }} vs {{ miss.attackSkill }}%)</span>
-                  <button class="btn-clear-result" (click)="clearMissResult(participant.id)">&times;</button>
-                </div>
-              }
             </div>
 
-            <div class="detail-group">
-              <label>HP Remaining: <strong
-                [class.negative-hp]="getHitPointsRemaining(participant) < 0"
-                [class.zero-hp]="getHitPointsRemaining(participant) === 0">
-                {{ getHitPointsDisplay(participant) }}
-              </strong></label>
+            <div class="hit-locations-container">
+              <!-- Hit Locations -->
+              <div class="hit-locations">
+                <div class="hit-location-grid">
+                  @for (loc of hitLocationsOrder; track loc) {
+                    <div class="location-badge" [ngClass]="getLocationStatusClass(participant, loc)">
+                      <span class="loc-name">{{ getLocationShortName(loc) }}</span>
+                      <div class="loc-stats">
+                        <span class="loc-hp">
+                          HP: {{ getLocationCurrentHP(participant, loc) }}/{{ getLocationMaxHP(participant, loc) }}
+                        </span>
+                        <span class="loc-ap">
+                          AP: {{ getArmorValue(participant, loc) }}
+                        </span>
+                      </div>
+                      @if (isLocationMaxed(participant, loc)) {
+                        <span class="loc-effect">{{ getLocationEffectLabel(loc) }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="detail-group">
+                <label>HP Remaining: <strong
+                  [class.negative-hp]="getHitPointsRemaining(participant) < 0"
+                  [class.zero-hp]="getHitPointsRemaining(participant) === 0">
+                  {{ getHitPointsDisplay(participant) }}
+                </strong></label>
+              </div>
             </div>
           </div>
 
@@ -228,22 +254,6 @@
             </div>
           </div>
 
-          <!-- Hit Locations -->
-          <div class="hit-locations">
-            <div class="hit-location-grid">
-              @for (loc of hitLocationsOrder; track loc) {
-                <div class="location-badge" [ngClass]="getLocationStatusClass(participant, loc)">
-                  <span class="loc-name">{{ getLocationShortName(loc) }}</span>
-                  <span class="loc-hp">
-                    {{ getLocationCurrentHP(participant, loc) }}/{{ getLocationMaxHP(participant, loc) }}
-                  </span>
-                  @if (isLocationMaxed(participant, loc)) {
-                    <span class="loc-effect">{{ getLocationEffectLabel(loc) }}</span>
-                  }
-                </div>
-              }
-            </div>
-          </div>
         </div>
       }
     </div>
@@ -441,61 +451,6 @@
                 (click)="addParticipant()"
                 [disabled]="!selectedWeapon || (!selectedCharacterId && !selectedMonsterId)">
           Add to Combat
-        </button>
-      </div>
-    </div>
-  </div>
-}
-
-<!-- Add Monster Modal -->
-@if (showAddMonsterModal) {
-  <div class="modal" (click)="closeAddMonsterModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Create Custom Monster</h3>
-        <button class="btn-close" (click)="closeAddMonsterModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Name:</label>
-          <input type="text" [(ngModel)]="newMonster.name" placeholder="Monster name">
-        </div>
-        <div class="form-group">
-          <label>Hit Points:</label>
-          <input type="number" [(ngModel)]="newMonster.hitPoints" min="1">
-        </div>
-        <div class="form-group">
-          <label>Base Strike Rank:</label>
-          <input type="number" [(ngModel)]="newMonster.strikeRank" min="0">
-        </div>
-        <div class="form-group">
-          <label>Armor Points:</label>
-          <input type="number" [(ngModel)]="newMonster.armor" min="0">
-        </div>
-        <div class="form-group">
-          <label>Weapons:</label>
-          <div class="weapons-list">
-            @for (weapon of newMonster.weapons; track weapon) {
-              <div class="weapon-item">
-                <span>{{ weapon.name }} ({{ weapon.damage }}, SR +{{ weapon.strikeRankModifier }})</span>
-                <button class="btn-remove-small" (click)="removeWeaponFromNewMonster($index)">&times;</button>
-              </div>
-            }
-          </div>
-          <div class="weapon-input">
-            <input type="text" [(ngModel)]="newMonsterWeapon.name" placeholder="Weapon name">
-            <input type="text" [(ngModel)]="newMonsterWeapon.damage" placeholder="Damage (e.g., 1d8+1)">
-            <input type="number" [(ngModel)]="newMonsterWeapon.strikeRankModifier" placeholder="SR Modifier" min="0">
-            <button class="btn btn-small" (click)="addWeaponToNewMonster()">Add Weapon</button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="closeAddMonsterModal()">Cancel</button>
-        <button class="btn btn-primary"
-                (click)="saveNewMonster()"
-                [disabled]="!newMonster.name || newMonster.weapons.length === 0">
-          Save Monster
         </button>
       </div>
     </div>

@@ -194,7 +194,7 @@ h2 {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin: 15px 0;
 }
@@ -252,11 +252,46 @@ h2 {
   font-size: var(--font-size-base);
 }
 
+.characteristics-and-hit-locations-container {
+  display: grid;
+  grid-template-areas: 'characteristics hitLocations';
+}
+
+.characteristics-container {
+  grid-area: characteristics;
+}
+
+.hit-locations-container {
+  grid-area: hitLocations;
+}
+
 .hit-locations {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas: '... ... head ... ...' '... rarm chest larm ...' '... ... abdomen ... ...' '... rleg ... lleg ...';
   gap: 8px;
   margin: 10px 0;
+}
+
+.hit-item:nth-child(1) {
+  grid-area: head;
+}
+.hit-item:nth-child(2) {
+  grid-area: rarm;
+}
+.hit-item:nth-child(3) {
+  grid-area: chest;
+}
+.hit-item:nth-child(4) {
+  grid-area: larm;
+}
+.hit-item:nth-child(5) {
+  grid-area: abdomen;
+}
+.hit-item:nth-child(6) {
+  grid-area: rleg;
+}
+.hit-item:nth-child(7) {
+  grid-area: lleg;
 }
 
 .hit-item {
@@ -265,6 +300,16 @@ h2 {
   border-radius: 4px;
   font-size: var(--font-size-md);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.hit-values {
+  font-family: monospace;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-tertiary);
 }
 
 .weapons-list {

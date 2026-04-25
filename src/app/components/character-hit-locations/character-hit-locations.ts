@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HitLocations } from '../../models/character.model';
+import { HitLocations, ArmorLocations } from '../../models/character.model';
 import { TranslationService } from '../../services/translation.service';
 
 @Component({
@@ -13,6 +13,7 @@ import { TranslationService } from '../../services/translation.service';
 })
 export class CharacterHitLocations {
   @Input() hitLocations!: HitLocations;
+  @Input() armor?: ArmorLocations;
   @Output() calculate = new EventEmitter<void>();
 
   constructor(public translationService: TranslationService) {}

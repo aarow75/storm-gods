@@ -1,0 +1,189 @@
+<div class="monster-creator">
+  <div class="header">
+    <div>
+      <h2>Monster Creator</h2>
+      <p style="margin: var(--spacing-sm) 0 0 0; color: var(--color-text-secondary); font-size: var(--font-size-lg);">Create and manage custom monsters for your adventures</p>
+    </div>
+    <a routerLink="/bestiary" class="btn btn-secondary">Back to Bestiary</a>
+  </div>
+
+  <!-- Monster Form -->
+  @if (!showForm) {
+    <div class="form-actions">
+      <button class="btn btn-primary" (click)="startNew()">Create New Monster</button>
+    </div>
+  }
+
+  @if (showForm) {
+    <div class="monster-form">
+      <h3>{{ editingMonster ? 'Edit Monster' : 'Create Monster' }}</h3>
+
+      <!-- Basic Information Section -->
+      <div class="form-section">
+        <h4>Basic Information</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Name *</label>
+            <input id="name" type="text" [(ngModel)]="form.name" placeholder="e.g., Broo Warrior, Giant Spider" />
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" [(ngModel)]="form.category">
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ getCategoryLabel(cat) }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="gameSystem">Game System</label>
+            <select id="gameSystem" [(ngModel)]="form.gameSystem">
+              @for (sys of gameSystems; track sys.value) {
+                <option [value]="sys.value">{{ sys.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" [(ngModel)]="form.description" placeholder="Describe the monster's appearance, behavior, and background..."></textarea>
+        </div>
+      </div>
+
+      <!-- Combat Stats Section -->
+      <div class="form-section">
+        <h4>Combat Stats</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="hitPoints">Hit Points</label>
+            <input id="hitPoints" type="number" [(ngModel)]="form.hitPoints" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="armor">Armor Points</label>
+            <input id="armor" type="number" [(ngModel)]="form.armor" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="armorDescription">Armor Type</label>
+            <input id="armorDescription" type="text" [(ngModel)]="form.armorDescription" placeholder="e.g., Thick hide, Plate armor" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="movement">Movement Rate</label>
+            <input id="movement" type="number" [(ngModel)]="form.movement" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="strikeRank">Strike Rank (Base)</label>
+            <input id="strikeRank" type="number" [(ngModel)]="form.strikeRank" min="0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Stats Section -->
+      <div class="form-section">
+        <h4>Stats</h4>
+        <div class="stats-grid">
+          @for (stat of ['STR', 'CON', 'SIZ', 'DEX', 'INT', 'POW', 'CHA']; track stat) {
+            <div class="form-group">
+              <label [for]="'stat-' + stat">{{ stat }}</label>
+              <input [id]="'stat-' + stat" type="number" [ngModel]="getStat(stat)" (ngModelChange)="setStat(stat, $event)" min="1" max="21" />
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Attacks Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <h4>Attacks</h4>
+          <button class="btn btn-small btn-primary" (click)="addAttack()">Add Attack</button>
+        </div>
+        @for (attack of form.attacks; track $index) {
+          <div class="attack-row">
+            <div class="form-group">
+              <label [for]="'attack-name-' + $index">Name</label>
+              <input [id]="'attack-name-' + $index" type="text" [(ngModel)]="attack.name" placeholder="e.g., Shortsword" />
+            </div>
+            <div class="form-group">
+              <label [for]="'attack-damage-' + $index">Damage</label>
+              <input [id]="'attack-damage-' + $index" type="text" [(ngModel)]="attack.damage" placeholder="e.g., 1d6+1" />
+            </div>
+            <div class="form-group">
+              <label [for]="'attack-skill-' + $index">Skill %</label>
+              <input [id]="'attack-skill-' + $index" type="number" [(ngModel)]="attack.skill" min="0" max="100" />
+            </div>
+            @if (form.attacks.length > 1) {
+              <button class="btn btn-danger btn-small" (click)="removeAttack($index)" type="button">Remove</button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Special Abilities Section -->
+      <div class="form-section">
+        <div class="section-header">
+          <h4>Special Abilities</h4>
+          <button class="btn btn-small btn-primary" (click)="addAbility()">Add Ability</button>
+        </div>
+        @for (ability of form.specialAbilities; track $index; let i = $index) {
+          <div class="ability-row">
+            <div class="form-group">
+              <input type="text" [ngModel]="ability" (ngModelChange)="updateAbility(i, $event)" placeholder="e.g., Regeneration, Spirit Combat" />
+            </div>
+            @if (form.specialAbilities.length > 1) {
+              <button class="btn btn-danger btn-small" (click)="removeAbility(i)" type="button">Remove</button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button class="btn btn-primary" (click)="saveMonster()">
+          {{ editingMonster ? '✓ Update Monster' : '+ Create Monster' }}
+        </button>
+        <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+      </div>
+    </div>
+  }
+
+  <!-- Monsters List -->
+  @if (monsters.length > 0) {
+    <div class="monsters-list">
+      <h3>📋 Your Monsters ({{ monsters.length }})</h3>
+      <div class="monsters-grid">
+        @for (monster of monsters; track monster.id) {
+          <div class="monster-card">
+            <div class="card-header">
+              <div class="card-title-row">
+                <h4>{{ monster.name }}</h4>
+                <span class="category-badge">{{ getCategoryLabel(monster.category) }}</span>
+              </div>
+              <span class="game-system-badge" [class]="'system-' + monster.gameSystem">
+                {{ getGameSystemLabel(monster.gameSystem) }}
+              </span>
+            </div>
+            @if (monster.description) {
+              <p class="card-description">{{ monster.description }}</p>
+            }
+            <div class="card-stats">
+              <span class="stat">HP: {{ monster.hitPoints }}</span>
+              <span class="stat">Armor: {{ monster.armor }}</span>
+              <span class="stat">Movement: {{ monster.movement }}</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-primary btn-small" (click)="editMonster(monster)">Edit</button>
+              <button class="btn btn-danger btn-small" (click)="deleteMonster(monster.id)">Delete</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (!showForm) {
+    <div class="empty-state">
+      <p>No custom monsters created yet.</p>
+      <p>Click "Create New Monster" to get started!</p>
+    </div>
+  }
+</div>

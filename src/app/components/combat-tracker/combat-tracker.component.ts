@@ -1,11 +1,13 @@
 import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { CombatParticipant, Monster, DEFAULT_MONSTERS } from '../../models/combat.model';
-import { Character, WEAPON_LIST, SHIELD_LIST, calculateHitLocations, getSizeModifier, getDexterityModifier } from '../../models/character.model';
+import { Character, WEAPON_LIST, SHIELD_LIST, calculateHitLocations, getSizeModifier, getDexterityModifier, canWeaponParry } from '../../models/character.model';
 import { Monster as BestiaryMonster } from '../../models/monster.model';
 import { MONSTERS as BESTIARY_MONSTERS } from '../../constants/monsters.constants';
 import { CharacterService } from '../../services/character.service';
+import { CustomMonsterService } from '../../services/custom-monster.service';
 import { CombatService } from '../../services/combat.service';
 import { DiceService } from '../../services/dice.service';
 import { CharacterUpdateService } from '../../services/character-update.service';
@@ -32,7 +34,7 @@ const LOCATION_EFFECTS: { [location: string]: { label: string; fatal: boolean } 
   'Left Leg':  { label: 'Leg Useless',   fatal: false },
 };
 
-const HIT_LOCATIONS_ORDER = ['Head', 'Chest', 'Abdomen', 'Right Arm', 'Left Arm', 'Right Leg', 'Left Leg'];
+const HIT_LOCATIONS_ORDER = ['Head', 'Right Arm (Weapon)', 'Chest', 'Left Arm (Shield)', 'Abdomen', 'Right Leg', 'Left Leg'];
 
 interface PendingAttack {
   attacker: CombatParticipant;
@@ -48,7 +50,7 @@ interface PendingAttack {
 @Component({
   standalone: true,
   selector: 'app-combat-tracker',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './combat-tracker.component.html',
   styleUrl: './combat-tracker.component.css'
 })
@@ -64,16 +66,10 @@ export class CombatTrackerComponent implements OnInit {
   lastAttackerId: string | null = null;
 
   showAddParticipantModal = false;
-  showAddMonsterModal = false;
   selectedEntityType: 'character' | 'monster' = 'character';
   selectedCharacterId = '';
   selectedMonsterId = '';
   selectedWeapon = '';
-
-  newMonster: Monster = {
-    id: '', name: '', hitPoints: 10, strikeRank: 0, armor: 0, weapons: []
-  };
-  newMonsterWeapon = { name: '', damage: '', strikeRankModifier: 0 };
 
   lastDamageRolls: Map<string, { total: number; breakdown: string; finalDamage: number; armorAbsorbed: number; targetName: string }> = new Map();
   lastMissResult: Map<string, { targetName: string; attackRoll: number; attackSkill: number }> = new Map();
@@ -86,6 +82,7 @@ export class CombatTrackerComponent implements OnInit {
 
   constructor(
     private characterService: CharacterService,
+    private customMonsterService: CustomMonsterService,
     private combatService: CombatService,
     private diceService: DiceService,
     private characterUpdateService: CharacterUpdateService,
@@ -100,7 +97,7 @@ export class CombatTrackerComponent implements OnInit {
     this.characters = this.characterService.getCharacters();
     this.defaultMonsters = DEFAULT_MONSTERS.map(m => JSON.parse(JSON.stringify(m)));
     this.bestiaryMonsters = BESTIARY_MONSTERS.map(m => this.convertBestiaryMonster(m));
-    this.customMonsters = this.combatService.getMonsters();
+    this.customMonsters = this.customMonsterService.getMonsters().map(m => this.convertBestiaryMonster(m));
     this.monsters = [
       ...this.defaultMonsters,
       ...this.bestiaryMonsters,
@@ -230,6 +227,10 @@ export class CombatTrackerComponent implements OnInit {
       const weapon = monster?.weapons.find(w => w.name === participant.selectedWeapon);
       participant.finalStrikeRank = participant.baseStrikeRank + (weapon?.strikeRankModifier || 0);
     }
+    if (!this.isValidParryItem(participant)) {
+      const validItems = this.getParticipantParryItems(participant);
+      participant.selectedParryItem = validItems.length > 0 ? validItems[0] : '';
+    }
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
     this.saveCombat();
   }
@@ -260,37 +261,6 @@ export class CombatTrackerComponent implements OnInit {
 
   saveCombat(): void { this.combatService.saveCombatParticipants(this.combatParticipants); }
 
-  openAddMonsterModal(): void {
-    this.showAddMonsterModal = true;
-    this.newMonster = { id: this.combatService.generateId(), name: '', hitPoints: 10, strikeRank: 0, armor: 0, weapons: [] };
-    this.newMonsterWeapon = { name: '', damage: '', strikeRankModifier: 0 };
-  }
-
-  closeAddMonsterModal(): void { this.showAddMonsterModal = false; }
-
-  addWeaponToNewMonster(): void {
-    if (this.newMonsterWeapon.name && this.newMonsterWeapon.damage) {
-      this.newMonster.weapons.push({ ...this.newMonsterWeapon });
-      this.newMonsterWeapon = { name: '', damage: '', strikeRankModifier: 0 };
-    }
-  }
-
-  removeWeaponFromNewMonster(index: number): void { this.newMonster.weapons.splice(index, 1); }
-
-  saveNewMonster(): void {
-    if (this.newMonster.name && this.newMonster.weapons.length > 0) {
-      this.combatService.saveMonster(this.newMonster);
-      this.loadData();
-      this.closeAddMonsterModal();
-    }
-  }
-
-  deleteCustomMonster(id: string): void {
-    if (confirm('Delete this custom monster?')) {
-      this.combatService.deleteMonster(id);
-      this.loadData();
-    }
-  }
 
   isCustomMonster(monsterId: string): boolean {
     return !DEFAULT_MONSTERS.find(m => m.id === monsterId)
@@ -522,9 +492,49 @@ export class CombatTrackerComponent implements OnInit {
     this.focusNextRollButton();
   }
 
+  isValidParryItem(participant: CombatParticipant): boolean {
+    if (participant.type === 'character') {
+      const character = this.characters.find(c => c.id === participant.characterId);
+      if (!character) return false;
+      const parryItem = participant.selectedParryItem;
+      if (!parryItem) return false;
+      const shield = character.shields?.find(s => s.name === parryItem);
+      if (shield) return true;
+      const weapon = character.weapons.find(w => w.name === parryItem);
+      return weapon ? canWeaponParry(weapon.name) : false;
+    }
+    const monster = this.monsters.find(m => m.id === participant.monsterId);
+    if (!monster) return false;
+    const parryItem = participant.selectedParryItem;
+    return monster.weapons.some(w => w.name === parryItem && canWeaponParry(w.name));
+  }
+
+  getParryRestrictionReason(weaponName: string): string {
+    const weapon = WEAPON_LIST.find(w => w.name === weaponName);
+    if (!weapon) return '';
+    if (weapon.canParry) return '';
+    if (weapon.isMissile) return 'Ranged weapons cannot parry';
+    if (weapon.name.includes('Greatsword') || weapon.name.includes('Great') ||
+        weapon.name.includes('Pike') || weapon.name.includes('Maul') ||
+        weapon.name.includes('Halberd')) {
+      return 'Two-handed weapons require both hands and cannot parry';
+    }
+    if (weapon.defaultSkill === 'Unarmed') return 'Unarmed attacks cannot parry';
+    return 'This weapon cannot parry';
+  }
+
   resolveParry(): void {
     if (!this.pendingAttack) return;
     const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
+
+    if (!this.isValidParryItem(defender)) {
+      this.combatLog.unshift(
+        `[ERROR] ${defender.name} cannot parry with ${defender.selectedParryItem}!`
+      );
+      this.pendingAttack = null;
+      this.saveCombat();
+      return;
+    }
 
     const baseParrySkill = this.getEffectiveParrySkill(defender);
     const strB = this.getDefenderStrBonus(defender);
@@ -800,11 +810,11 @@ export class CombatTrackerComponent implements OnInit {
       const character = this.characters.find(c => c.id === participant.characterId);
       if (!character) return [];
       const shields = (character.shields || []).map(s => s.name);
-      const weapons = (character.weapons || []).map(w => w.name);
+      const weapons = (character.weapons || []).filter(w => canWeaponParry(w.name)).map(w => w.name);
       return [...shields, ...weapons];
     } else {
       const monster = this.monsters.find(m => m.id === participant.monsterId);
-      return (monster?.weapons || []).map(w => w.name);
+      return (monster?.weapons || []).filter(w => canWeaponParry(w.name)).map(w => w.name);
     }
   }
 
@@ -998,9 +1008,14 @@ export class CombatTrackerComponent implements OnInit {
     if (participant.type === 'character' && participant.characterId) {
       const character = this.characters.find(c => c.id === participant.characterId);
       if (!character) return 0;
-      if (location && character.armor[location as keyof typeof character.armor] !== undefined) {
-        return character.armor[location as keyof typeof character.armor];
+
+      // If location is provided, always use location-specific armor
+      if (location) {
+        const locArmor = character.armor[location as keyof typeof character.armor];
+        return locArmor !== undefined ? locArmor : 0;
       }
+
+      // No location provided, return average
       const values = Object.values(character.armor);
       return Math.round(values.reduce((s, v) => s + v, 0) / values.length);
     }

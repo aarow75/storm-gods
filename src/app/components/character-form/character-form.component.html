@@ -85,6 +85,25 @@
       }
     </div>
 
+    <!-- Characteristics Component -->
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('characteristics')">
+      <div class="section-header" (click)="toggleSection('characteristics')">
+        <h4>Characteristics</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('characteristics') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('characteristics')) {
+      <div class="section-content">
+        <app-character-characteristics
+          [stats]="character.stats!"
+          [isFieldInvalid]="isFieldInvalid.bind(this)"
+          [isFieldRandomized]="isFieldRandomized.bind(this)"
+          (rollAll)="rollAll3D6()"
+          (rollStat)="roll3D6($event)"
+        ></app-character-characteristics>
+      </div>
+      }
+    </div>
+
     <!-- Background Component -->
     <div class="form-section" [class.collapsed]="isSectionCollapsed('background')">
       <div class="section-header" (click)="toggleSection('background')">
@@ -124,25 +143,6 @@
       }
     </div>
     }
-
-    <!-- Characteristics Component -->
-    <div class="form-section" [class.collapsed]="isSectionCollapsed('characteristics')">
-      <div class="section-header" (click)="toggleSection('characteristics')">
-        <h4>Characteristics</h4>
-        <span class="collapse-toggle">{{ isSectionCollapsed('characteristics') ? '▶' : '▼' }}</span>
-      </div>
-      @if (!isSectionCollapsed('characteristics')) {
-      <div class="section-content">
-        <app-character-characteristics
-          [stats]="character.stats!"
-          [isFieldInvalid]="isFieldInvalid.bind(this)"
-          [isFieldRandomized]="isFieldRandomized.bind(this)"
-          (rollAll)="rollAll3D6()"
-          (rollStat)="roll3D6($event)"
-        ></app-character-characteristics>
-      </div>
-      }
-    </div>
 
     <!-- Skills Component -->
     <div class="form-section" [class.collapsed]="isSectionCollapsed('skills')">
