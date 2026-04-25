@@ -28,6 +28,7 @@ export class DiceRollerComponent {
   numDice: number = 1;
   diceType: number = 20;
   modifier: number = 0;
+  boonBaneMode: 'none' | 'boon' | 'bane' = 'none';
 
   constructor(
     private diceService: DiceService,
@@ -79,6 +80,15 @@ export class DiceRollerComponent {
   }
 
   rollCustom(): void {
+    if (this.boonBaneMode === 'boon') {
+      this.rollCustomWithBoon();
+      return;
+    }
+    if (this.boonBaneMode === 'bane') {
+      this.rollCustomWithBane();
+      return;
+    }
+
     let notation = `${this.numDice}d${this.diceType}`;
     if (this.modifier !== 0) {
       notation += this.modifier > 0 ? `+${this.modifier}` : `${this.modifier}`;
@@ -86,6 +96,42 @@ export class DiceRollerComponent {
 
     const rollResult = this.diceService.rollDiceNotation(notation);
     this.addRoll(notation, rollResult.total, rollResult.breakdown);
+  }
+
+  rollD20WithBoon(): void {
+    const result = this.diceService.rollWithBoon(1, 20);
+    this.addRoll('d20 [Boon]', result.total, result.breakdown);
+  }
+
+  rollD20WithBane(): void {
+    const result = this.diceService.rollWithBane(1, 20);
+    this.addRoll('d20 [Bane]', result.total, result.breakdown);
+  }
+
+  private rollCustomWithBoon(): void {
+    const result = this.diceService.rollWithBoon(this.numDice, this.diceType);
+    let breakdown = result.breakdown;
+    if (this.modifier !== 0) {
+      const sign = this.modifier > 0 ? '+' : '';
+      const total = result.total + this.modifier;
+      breakdown += ` ${sign}${this.modifier} = ${total}`;
+      this.addRoll(`${this.numDice}d${this.diceType} [Boon]`, total, breakdown);
+    } else {
+      this.addRoll(`${this.numDice}d${this.diceType} [Boon]`, result.total, breakdown);
+    }
+  }
+
+  private rollCustomWithBane(): void {
+    const result = this.diceService.rollWithBane(this.numDice, this.diceType);
+    let breakdown = result.breakdown;
+    if (this.modifier !== 0) {
+      const sign = this.modifier > 0 ? '+' : '';
+      const total = result.total + this.modifier;
+      breakdown += ` ${sign}${this.modifier} = ${total}`;
+      this.addRoll(`${this.numDice}d${this.diceType} [Bane]`, total, breakdown);
+    } else {
+      this.addRoll(`${this.numDice}d${this.diceType} [Bane]`, result.total, breakdown);
+    }
   }
 
   private addRoll(type: string, result: number, breakdown?: string): void {

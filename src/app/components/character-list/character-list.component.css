@@ -35,12 +35,42 @@ h2 {
   background: var(--color-bg-light);
 }
 
-.character-card h3 {
-  margin-top: 0;
-  color: var(--color-text-primary);
-  border-bottom: 2px solid var(--color-primary-blue);
-  padding-bottom: var(--spacing-xl);
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 15px;
+}
+
+.character-card h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.game-system-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.game-system-badge.system-runequest {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.game-system-badge.system-dragonbane {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
 }
 
 .hit-points-display {

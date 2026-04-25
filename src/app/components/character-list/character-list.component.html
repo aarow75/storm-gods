@@ -13,7 +13,14 @@
   <div class="characters-grid">
     @for (character of characters; track character) {
     <div class="character-card" [class.dead]="getCurrentHP(character) <= 0">
-      <h3>{{ character.name }}</h3>
+      <div class="card-header">
+        <h3>{{ character.name }}</h3>
+        @if (character.gameSystem) {
+          <span class="game-system-badge" [class]="'system-' + character.gameSystem">
+            {{ getGameSystemName(character.gameSystem) }}
+          </span>
+        }
+      </div>
 
       <div class="hit-points-display"
            [class.dead]="getCurrentHP(character) <= 0"

@@ -30,7 +30,12 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: var(--font-size-lg);
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, outline 0.2s;
+}
+
+.btn:focus {
+  outline: 3px solid #333;
+  outline-offset: 2px;
 }
 
 .btn-primary {
@@ -54,10 +59,16 @@
 .btn-danger {
   background-color: var(--color-error);
   color: var(--color-bg-white);
+  transition: background-color 0.2s, outline 0.2s;
 }
 
 .btn-danger:hover {
   background-color: var(--color-error-dark);
+}
+
+.btn-danger:focus {
+  outline: 3px solid #7f1d1d;
+  outline-offset: 2px;
 }
 
 .btn:disabled {
@@ -280,11 +291,16 @@
   cursor: pointer;
   font-size: var(--font-size-base);
   font-weight: bold;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, outline 0.2s;
 }
 
 .btn-roll-damage:hover {
   background-color: var(--color-primary-blue-dark);
+}
+
+.btn-roll-damage:focus {
+  outline: 3px solid #1e40af;
+  outline-offset: 2px;
 }
 
 .damage-result {
@@ -336,6 +352,33 @@
 
 .btn-clear-result:hover {
   color: var(--color-text-tertiary);
+}
+
+.miss-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  background: #f1f5f9;
+  border: 2px solid #94a3b8;
+  border-radius: 4px;
+}
+
+.miss-badge {
+  background: #64748b;
+  color: var(--color-bg-white);
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: var(--font-size-base);
+  letter-spacing: 0.05em;
+}
+
+.miss-info {
+  font-size: var(--font-size-md);
+  color: var(--color-text-tertiary);
+  flex: 1;
 }
 
 .hit-points {
@@ -454,6 +497,12 @@
 .log-entry.dodge {
   background: #f0fdf4;
   border-left-color: #22c55e;
+}
+
+.log-entry.miss {
+  background: #f1f5f9;
+  border-left-color: #64748b;
+  color: #475569;
 }
 
 .log-entry.failed {
@@ -790,6 +839,12 @@
   padding: var(--spacing-2xl) var(--spacing-4xl);
   min-width: 120px;
   height: auto;
+  transition: outline 0.2s;
+}
+
+.defense-btn:focus {
+  outline: 3px solid;
+  outline-offset: 2px;
 }
 
 .defense-btn-title {
@@ -811,19 +866,31 @@
 .btn-parry {
   background-color: #3b82f6;
   color: var(--color-bg-white);
+  transition: background-color 0.2s, outline 0.2s;
 }
 
 .btn-parry:hover:not(:disabled) {
   background-color: #2563eb;
 }
 
+.btn-parry:focus {
+  outline: 3px solid #1e40af;
+  outline-offset: 2px;
+}
+
 .btn-dodge {
   background-color: #22c55e;
   color: var(--color-bg-white);
+  transition: background-color 0.2s, outline 0.2s;
 }
 
 .btn-dodge:hover:not(:disabled) {
   background-color: #16a34a;
+}
+
+.btn-dodge:focus {
+  outline: 3px solid #15803d;
+  outline-offset: 2px;
 }
 
 .defense-stat-breakdown {
@@ -1016,4 +1083,29 @@
   text-transform: uppercase;
   font-size: var(--font-size-sm);
   color: #2b6cb0;
+}
+
+/* Game system badge in combat tracker */
+.game-system-badge-small {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: var(--font-size-xs);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.game-system-badge-small.system-runequest {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.game-system-badge-small.system-dragonbane {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
 }

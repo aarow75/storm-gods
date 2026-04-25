@@ -7,12 +7,15 @@ import {
 } from '../models/character.model';
 import { CHARACTER_COLORS } from '../constants/character-colors.constants';
 import { EQUIPMENT_DEFAULTS, MAGIC_DEFAULTS } from '../constants/equipment.constants';
+import { GameSystemService } from './game-system.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CharacterService {
   private readonly STORAGE_KEY = 'runequest-characters';
+
+  constructor(private gameSystemService: GameSystemService) {}
 
   getCharacters(): Character[] {
     const data = localStorage.getItem(this.STORAGE_KEY);
@@ -154,6 +157,12 @@ export class CharacterService {
       char.color = CHARACTER_COLORS[index % CHARACTER_COLORS.length].value;
     }
 
+    // Assign a gameSystem if missing (for existing characters created before this feature)
+    // Default to runequest for legacy characters since that was the original system
+    if (!char.gameSystem) {
+      char.gameSystem = 'runequest';
+    }
+
     return char as Character;
   }
 
@@ -165,6 +174,9 @@ export class CharacterService {
     if (!character.color) {
       character.color = this.getNextColor(characters.length);
     }
+
+    // Set the game system to the current system
+    character.gameSystem = this.gameSystemService.gameSystem();
 
     characters.push(character);
     this.saveCharacters(characters);

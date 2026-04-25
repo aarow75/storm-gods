@@ -27,6 +27,7 @@
                [class.death]="entry.includes('[SLAIN]')"
                [class.parry]="entry.includes('[PARRY]')"
                [class.dodge]="entry.includes('[DODGE]')"
+               [class.miss]="entry.includes('[MISS]')"
                [class.failed]="entry.includes('FAILED')">
             {{ entry }}
           </div>
@@ -82,12 +83,18 @@
         <div class="combat-participant"
              [class.monster]="participant.type === 'monster'"
              [class.dead]="participant.isDead"
-             [style.border-left]="'6px solid ' + (participant.color || '#000000')">
+             [style.border-left]="'6px solid ' + (participant.color || '#000000')"
+             [ngStyle]="{'background-color': getRgbaColor(participant.color, 0.08)}">
           <div class="participant-header">
             <div class="participant-info">
               <div class="participant-name-row">
                 <span class="color-indicator" [style.background-color]="participant.color || '#000000'"></span>
                 <h3>{{ participant.name }}</h3>
+                @if (participant.characterId && getParticipantGameSystem(participant)) {
+                  <span class="game-system-badge-small" [class]="'system-' + getParticipantGameSystem(participant)">
+                    {{ getGameSystemName(getParticipantGameSystem(participant)) }}
+                  </span>
+                }
               </div>
               <span class="participant-type">{{ participant.type === 'character' ? 'Character' : 'Monster' }}</span>
               @if (participant.isDead) {
@@ -135,7 +142,9 @@
                 </select>
                 <div class="weapon-damage">
                   <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
-                  <button class="btn-roll-damage"
+                  <button #rollDamageBtn
+                          class="btn-roll-damage"
+                          [attr.data-participant-id]="participant.id"
                           (click)="rollWeaponDamage(participant)"
                           [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant)"
                           [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
@@ -187,6 +196,14 @@
                     </span>
                   </div>
                   <button class="btn-clear-result" (click)="clearDamageRoll(participant.id)">&times;</button>
+                </div>
+              }
+
+              @if (getLastMiss(participant.id); as miss) {
+                <div class="miss-result">
+                  <span class="miss-badge">MISS</span>
+                  <span class="miss-info">vs {{ miss.targetName }} (rolled {{ miss.attackRoll }} vs {{ miss.attackSkill }}%)</span>
+                  <button class="btn-clear-result" (click)="clearMissResult(participant.id)">&times;</button>
                 </div>
               }
             </div>

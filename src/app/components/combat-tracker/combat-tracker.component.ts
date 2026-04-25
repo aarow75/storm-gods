@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CombatParticipant, Monster, DEFAULT_MONSTERS } from '../../models/combat.model';
@@ -51,9 +51,12 @@ interface PendingAttack {
   styleUrl: './combat-tracker.component.css'
 })
 export class CombatTrackerComponent implements OnInit {
+  @ViewChildren('rollDamageBtn', { read: ElementRef }) rollButtons!: QueryList<ElementRef<HTMLButtonElement>>;
+
   characters: Character[] = [];
   monsters: Monster[] = [];
   combatParticipants: CombatParticipant[] = [];
+  lastAttackerId: string | null = null;
 
   showAddParticipantModal = false;
   showAddMonsterModal = false;
@@ -68,6 +71,7 @@ export class CombatTrackerComponent implements OnInit {
   newMonsterWeapon = { name: '', damage: '', strikeRankModifier: 0 };
 
   lastDamageRolls: Map<string, { total: number; breakdown: string; finalDamage: number; armorAbsorbed: number; targetName: string }> = new Map();
+  lastMissResult: Map<string, { targetName: string; attackRoll: number; attackSkill: number }> = new Map();
   combatLog: string[] = [];
   showLogHistory = false;
 
@@ -406,6 +410,8 @@ export class CombatTrackerComponent implements OnInit {
       return;
     }
 
+    this.lastAttackerId = participant.id;
+
     // Consume one shot for missile weapons (miss or hit, shot is spent)
     const rof = this.getWeaponRateOfFire(participant);
     if (isFinite(rof)) {
@@ -434,7 +440,13 @@ export class CombatTrackerComponent implements OnInit {
         `(rolled ${attackRoll} vs ${attackSkill}%` +
         (bonusParts ? `: ${baseSkill} skill ${bonusParts}` : '') + `)`
       );
+      this.lastMissResult.set(participant.id, {
+        targetName: opponent.name,
+        attackRoll,
+        attackSkill
+      });
       this.saveCombat();
+      this.focusNextRollButton();
       return;
     }
 
@@ -451,6 +463,7 @@ export class CombatTrackerComponent implements OnInit {
       attackRoll,
       attackSkill,
     };
+    this.lastMissResult.delete(participant.id);
   }
 
   resolveNoDefense(): void {
@@ -481,6 +494,7 @@ export class CombatTrackerComponent implements OnInit {
 
     this.pendingAttack = null;
     this.saveCombat();
+    this.focusNextRollButton();
   }
 
   resolveParry(): void {
@@ -564,6 +578,7 @@ export class CombatTrackerComponent implements OnInit {
 
     this.pendingAttack = null;
     this.saveCombat();
+    this.focusNextRollButton();
   }
 
   resolveDodge(): void {
@@ -617,6 +632,7 @@ export class CombatTrackerComponent implements OnInit {
 
     this.pendingAttack = null;
     this.saveCombat();
+    this.focusNextRollButton();
   }
 
   // ── Core damage application ──────────────────────────────────────────────
@@ -905,6 +921,52 @@ export class CombatTrackerComponent implements OnInit {
 
   getLastDamageRoll(participantId: string) {
     return this.lastDamageRolls.get(participantId);
+  }
+
+  getLastMiss(participantId: string) {
+    return this.lastMissResult.get(participantId);
+  }
+
+  clearMissResult(participantId: string): void {
+    this.lastMissResult.delete(participantId);
+  }
+
+  private focusNextRollButton(): void {
+    if (!this.lastAttackerId) return;
+
+    const attackerIndex = this.combatParticipants.findIndex(p => p.id === this.lastAttackerId);
+    if (attackerIndex === -1) return;
+
+    const nextIndex = (attackerIndex + 1) % this.combatParticipants.length;
+    const nextParticipant = this.combatParticipants[nextIndex];
+
+    setTimeout(() => {
+      const buttons = this.rollButtons?.toArray() || [];
+      const nextButton = buttons.find(btn => btn.nativeElement.getAttribute('data-participant-id') === nextParticipant.id);
+      if (nextButton) {
+        nextButton.nativeElement.focus();
+      }
+    }, 0);
+  }
+
+  getRgbaColor(hexColor: string | undefined, opacity: number): string {
+    const color = hexColor || '#ffffff';
+    const r = parseInt(color.slice(1, 3), 16);
+    const g = parseInt(color.slice(3, 5), 16);
+    const b = parseInt(color.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+
+  getParticipantGameSystem(participant: CombatParticipant): string | undefined {
+    if (participant.characterId) {
+      const character = this.characters.find(c => c.id === participant.characterId);
+      return character?.gameSystem;
+    }
+    return undefined;
+  }
+
+  getGameSystemName(system: string | undefined): string {
+    return system === 'dragonbane' ? 'Dragonbane' : 'RuneQuest';
   }
 
   getArmorValue(participant: CombatParticipant, location?: string): number {

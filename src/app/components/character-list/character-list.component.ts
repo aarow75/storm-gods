@@ -6,6 +6,7 @@ import { Character } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
 import { CharacterUpdateService } from '../../services/character-update.service';
 import { TranslationService } from '../../services/translation.service';
+import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
   selector: 'app-character-list',
@@ -22,7 +23,8 @@ export class CharacterListComponent implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private characterUpdateService: CharacterUpdateService,
     private router: Router,
-    public translationService: TranslationService
+    public translationService: TranslationService,
+    private gameSystemService: GameSystemService
   ) {}
 
   get heading(): string | undefined {
@@ -67,5 +69,9 @@ export class CharacterListComponent implements OnInit, OnDestroy {
 
   getMaxHP(character: Character): number {
     return character.derivedStats.maxHitPoints || character.derivedStats.totalHitPoints;
+  }
+
+  getGameSystemName(system: string): string {
+    return system === 'dragonbane' ? 'Dragonbane' : 'RuneQuest';
   }
 }

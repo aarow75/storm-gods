@@ -274,3 +274,103 @@ h2 {
   color: var(--color-gray-350-alt);
   margin-left: 10px;
 }
+
+/* Boon/Bane d20 buttons */
+.d20-boon-bane {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.btn-boon-bane {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px var(--shadow-black-10);
+}
+
+.btn-boon-bane.boon {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: var(--color-bg-white);
+}
+
+.btn-boon-bane.boon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px var(--shadow-black-15);
+}
+
+.btn-boon-bane.bane {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: var(--color-bg-white);
+}
+
+.btn-boon-bane.bane:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px var(--shadow-black-15);
+}
+
+/* Boon/Bane toggle controls for custom rolls */
+.boon-bane-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 15px;
+  padding: 12px;
+  background: var(--color-bg-white);
+  border-radius: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.boon-bane-label {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-gray-600-alt);
+  text-transform: uppercase;
+}
+
+.btn-boon-bane-toggle {
+  padding: 6px 14px;
+  border: 2px solid var(--color-gray-light);
+  background: var(--color-bg-white);
+  color: var(--color-text-tertiary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-boon-bane-toggle.active {
+  border-color: var(--color-indigo);
+  background: var(--color-indigo);
+  color: var(--color-bg-white);
+}
+
+.btn-boon-bane-toggle.boon {
+  border-color: #10b981;
+}
+
+.btn-boon-bane-toggle.boon.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: #059669;
+}
+
+.btn-boon-bane-toggle.bane {
+  border-color: #ef4444;
+}
+
+.btn-boon-bane-toggle.bane.active {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #dc2626;
+}
+
+.btn-boon-bane-toggle:hover:not(.active) {
+  border-color: var(--color-gray-medium);
+  background: var(--color-bg-lighter);
+}

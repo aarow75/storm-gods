@@ -44,6 +44,43 @@ export class DiceService {
     return total;
   }
 
+  private rollDiceWithBreakdown(count: number, sides: number): { rolls: number[]; total: number } {
+    const rolls: number[] = [];
+    for (let i = 0; i < count; i++) {
+      rolls.push(Math.floor(Math.random() * sides) + 1);
+    }
+    return {
+      rolls,
+      total: rolls.reduce((a, b) => a + b, 0)
+    };
+  }
+
+  /**
+   * Roll with Boon - roll one extra die and keep the highest
+   * Returns the final result and breakdown showing all rolls
+   */
+  rollWithBoon(count: number, sides: number): { total: number; breakdown: string; rolls: number[] } {
+    const result = this.rollDiceWithBreakdown(count + 1, sides);
+    const sorted = [...result.rolls].sort((a, b) => b - a);
+    const highest = sorted[0];
+    const total = result.rolls.reduce((a, b) => a + b, 0) - Math.min(...result.rolls);
+    const breakdown = `${count}d${sides}[Boon] = ${result.rolls.join(',')} → keep ${highest}`;
+    return { total, breakdown, rolls: result.rolls };
+  }
+
+  /**
+   * Roll with Bane - roll one extra die and keep the lowest
+   * Returns the final result and breakdown showing all rolls
+   */
+  rollWithBane(count: number, sides: number): { total: number; breakdown: string; rolls: number[] } {
+    const result = this.rollDiceWithBreakdown(count + 1, sides);
+    const sorted = [...result.rolls].sort((a, b) => a - b);
+    const lowest = sorted[0];
+    const total = result.rolls.reduce((a, b) => a + b, 0) - Math.max(...result.rolls);
+    const breakdown = `${count}d${sides}[Bane] = ${result.rolls.join(',')} → keep ${lowest}`;
+    return { total, breakdown, rolls: result.rolls };
+  }
+
   /**
    * Parse and roll complex dice notation like "1d8+1", "2d6+1d4", "1d6+poison"
    * Returns the total rolled value and a detailed breakdown

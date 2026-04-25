@@ -15,6 +15,15 @@
       <button class="btn-roll dice-d100" (click)="rollPercentile()">d%</button>
     </div>
 
+    <div class="d20-boon-bane">
+      <button class="btn-boon-bane boon" (click)="rollD20WithBoon()" title="d20 with Boon - roll 2d20, keep highest">
+        d20 Boon ↑
+      </button>
+      <button class="btn-boon-bane bane" (click)="rollD20WithBane()" title="d20 with Bane - roll 2d20, keep lowest">
+        d20 Bane ↓
+      </button>
+    </div>
+
     <div class="custom-roll-builder">
       <div class="custom-roll-inputs">
         <div class="input-group">
@@ -37,8 +46,29 @@
           <label for="modifier">Modifier:</label>
           <input type="number" id="modifier" [(ngModel)]="modifier" class="input-field">
         </div>
-        <button class="btn-roll btn-custom" (click)="rollCustom()">Roll Custom</button>
       </div>
+      <div class="boon-bane-controls">
+        <div class="boon-bane-label">Boon/Bane:</div>
+        <button class="btn-boon-bane-toggle"
+                [class.active]="boonBaneMode === 'none'"
+                (click)="boonBaneMode = 'none'"
+                title="Normal roll">
+          Normal
+        </button>
+        <button class="btn-boon-bane-toggle boon"
+                [class.active]="boonBaneMode === 'boon'"
+                (click)="boonBaneMode = 'boon'"
+                title="Roll one extra die, keep highest">
+          Boon ↑
+        </button>
+        <button class="btn-boon-bane-toggle bane"
+                [class.active]="boonBaneMode === 'bane'"
+                (click)="boonBaneMode = 'bane'"
+                title="Roll one extra die, keep lowest">
+          Bane ↓
+        </button>
+      </div>
+      <button class="btn-roll btn-custom" (click)="rollCustom()">Roll Custom</button>
     </div>
 
     @if (currentResult !== null) {

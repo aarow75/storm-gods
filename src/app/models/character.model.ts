@@ -2,6 +2,7 @@ export interface Character {
   id: string;
   name: string;
   color?: string;
+  gameSystem?: 'runequest' | 'dragonbane';
   background: CharacterBackground;
   stats: CharacterStats;
   derivedStats: DerivedStats;
