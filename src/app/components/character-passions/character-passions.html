@@ -2,7 +2,7 @@
 <h4>{{ heading }}</h4>
 }
 <div class="passions-section">
-  @for (passion of passions; track $index) {
+  @for (passion of passions; track passion) {
     <div class="passion-row">
       <div class="passion-name-group">
         <label [attr.for]="'passion-name-' + $index">{{ translationService.get('passion.name', 'Passion Name') }}</label>

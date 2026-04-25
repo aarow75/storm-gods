@@ -1,18 +1,20 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { DiceService } from '../../services/dice.service';
 import { TranslationService } from '../../services/translation.service';
 
 interface RollResult {
   type: string;
   result: number;
+  breakdown?: string;
   timestamp: Date;
 }
 
 @Component({
   selector: 'app-dice-roller',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './dice-roller.component.html',
   styleUrl: './dice-roller.component.css'
 })
@@ -20,6 +22,12 @@ export class DiceRollerComponent {
   rollHistory: RollResult[] = [];
   currentResult: number | null = null;
   currentType: string = '';
+  currentBreakdown: string = '';
+
+  // Custom roll inputs
+  numDice: number = 1;
+  diceType: number = 20;
+  modifier: number = 0;
 
   constructor(
     private diceService: DiceService,
@@ -70,12 +78,24 @@ export class DiceRollerComponent {
     this.addRoll('d100', result);
   }
 
-  private addRoll(type: string, result: number): void {
+  rollCustom(): void {
+    let notation = `${this.numDice}d${this.diceType}`;
+    if (this.modifier !== 0) {
+      notation += this.modifier > 0 ? `+${this.modifier}` : `${this.modifier}`;
+    }
+
+    const rollResult = this.diceService.rollDiceNotation(notation);
+    this.addRoll(notation, rollResult.total, rollResult.breakdown);
+  }
+
+  private addRoll(type: string, result: number, breakdown?: string): void {
     this.currentResult = result;
     this.currentType = type;
+    this.currentBreakdown = breakdown || '';
     this.rollHistory.unshift({
       type,
       result,
+      breakdown,
       timestamp: new Date()
     });
     if (this.rollHistory.length > 10) {
@@ -87,5 +107,6 @@ export class DiceRollerComponent {
     this.rollHistory = [];
     this.currentResult = null;
     this.currentType = '';
+    this.currentBreakdown = '';
   }
 }

@@ -15,6 +15,7 @@ import { DiceService } from '../../services/dice.service';
 import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
+import { CHARACTER_COLORS } from '../../constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
 import { CharacterFamilyHistory } from '../character-family-history/character-family-history';
 import { CharacterCharacteristics } from '../character-characteristics/character-characteristics';
@@ -84,6 +85,7 @@ export class CharacterFormComponent implements OnInit {
   skillCategories = SKILL_CATEGORIES;
   weaponList = WEAPON_LIST;
   combatSkills = COMBAT_SKILLS;
+  characterColors = CHARACTER_COLORS;
   cults = CULTS;
   homelands = HOMELANDS;
   occupations = OCCUPATIONS;
@@ -140,6 +142,7 @@ export class CharacterFormComponent implements OnInit {
     const characterData: Character = {
       id: this.editMode && this.editingId ? this.editingId : '',
       name: this.character.name!,
+      color: this.character.color,
       background: this.character.background!,
       stats: this.character.stats!,
       derivedStats: this.character.derivedStats!,
@@ -172,6 +175,7 @@ export class CharacterFormComponent implements OnInit {
     if (character) {
       this.character = {
         name: character.name,
+        color: character.color,
         background: { ...character.background },
         stats: { ...character.stats },
         derivedStats: { ...character.derivedStats },

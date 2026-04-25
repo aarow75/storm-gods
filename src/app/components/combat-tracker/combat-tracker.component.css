@@ -34,12 +34,12 @@
 }
 
 .btn-primary {
-  background-color: #10b981;
+  background-color: var(--color-success);
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: #059669;
+  background-color: var(--color-success-dark);
 }
 
 .btn-secondary {
@@ -52,12 +52,12 @@
 }
 
 .btn-danger {
-  background-color: #ef4444;
+  background-color: var(--color-error);
   color: white;
 }
 
 .btn-danger:hover {
-  background-color: #dc2626;
+  background-color: var(--color-error-dark);
 }
 
 .btn:disabled {
@@ -76,7 +76,7 @@
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   padding: 15px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-black-10);
   position: relative;
 }
 
@@ -91,19 +91,19 @@
   height: 24px;
   border-radius: 50%;
   border: 2px solid white;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+  box-shadow: 0 0 0 1px var(--shadow-black-20);
   flex-shrink: 0;
 }
 
 .combat-participant.dead {
   opacity: 0.6;
-  border-color: #999;
-  background: #f5f5f5;
+  border-color: var(--color-gray-350-alt);
+  background: var(--color-bg-light);
 }
 
 .combat-participant.dead .participant-header h3 {
   text-decoration: line-through;
-  color: #999;
+  color: var(--color-gray-350-alt);
 }
 
 .participant-header {
@@ -146,7 +146,7 @@
 }
 
 .kills-badge {
-  background-color: #dc2626;
+  background-color: var(--color-error-dark);
   color: white;
   padding: 2px 8px;
   border-radius: 12px;
@@ -156,7 +156,7 @@
 
 .combat-participant.monster .participant-type {
   background-color: #fee2e2;
-  color: #dc2626;
+  color: var(--color-error-dark);
 }
 
 .btn-remove {
@@ -164,7 +164,7 @@
   border: none;
   font-size: 28px;
   cursor: pointer;
-  color: #999;
+  color: var(--color-gray-350-alt);
   line-height: 1;
   padding: 0;
   width: 30px;
@@ -175,7 +175,7 @@
 }
 
 .btn-remove:hover {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .participant-details {
@@ -203,7 +203,7 @@
 
 .detail-group label {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-tertiary);
 }
 
 .detail-group strong {
@@ -213,28 +213,28 @@
 }
 
 .detail-group strong[title] {
-  border-bottom: 1px dotted #999;
+  border-bottom: 1px dotted var(--color-gray-350-alt);
 }
 
 .detail-group strong.zero-hp {
-  color: #f59e0b;
+  color: var(--color-primary-orange);
   font-weight: bold;
 }
 
 .detail-group strong.negative-hp {
-  color: #ef4444;
+  color: var(--color-error);
   font-weight: bold;
   text-decoration: underline;
 }
 
 .sr-breakdown {
   font-size: 12px;
-  color: #999;
+  color: var(--color-gray-350-alt);
 }
 
 .detail-group select {
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 14px;
 }
@@ -260,20 +260,20 @@
   align-items: center;
   gap: 8px;
   padding: 4px 8px;
-  background: #f5f5f5;
+  background: var(--color-bg-light);
   border-radius: 4px;
 }
 
 .damage-dice {
   font-family: monospace;
   font-weight: bold;
-  color: #666;
+  color: var(--color-text-tertiary);
   min-width: 60px;
 }
 
 .btn-roll-damage {
   padding: 6px 12px;
-  background-color: #3498db;
+  background-color: var(--color-primary-blue);
   color: white;
   border: none;
   border-radius: 4px;
@@ -284,7 +284,7 @@
 }
 
 .btn-roll-damage:hover {
-  background-color: #2980b9;
+  background-color: var(--color-primary-blue-dark);
 }
 
 .damage-result {
@@ -294,7 +294,7 @@
   margin-top: 8px;
   padding: 8px 12px;
   background: #fef3c7;
-  border: 2px solid #f59e0b;
+  border: 2px solid var(--color-primary-orange);
   border-radius: 4px;
 }
 
@@ -307,20 +307,20 @@
 
 .result-target {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary);
   font-weight: bold;
 }
 
 .result-total {
   font-weight: bold;
   font-size: 16px;
-  color: #dc2626;
+  color: var(--color-error-dark);
 }
 
 .result-breakdown {
   font-family: monospace;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-tertiary);
 }
 
 .btn-clear-result {
@@ -329,13 +329,13 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #999;
+  color: var(--color-gray-350-alt);
   line-height: 1;
   padding: 0;
 }
 
 .btn-clear-result:hover {
-  color: #666;
+  color: var(--color-text-tertiary);
 }
 
 .hit-points {
@@ -371,7 +371,7 @@
   transform: translate(-50%, -50%);
   font-size: 12px;
   font-weight: bold;
-  color: #666;
+  color: var(--color-text-tertiary);
   pointer-events: none;
 }
 
@@ -380,25 +380,25 @@
 }
 
 .hp-checkbox input[type="checkbox"]:checked {
-  accent-color: #ef4444;
+  accent-color: var(--color-error);
 }
 
 .empty-state {
   text-align: center;
   padding: 40px;
-  color: #999;
-  background: #f5f5f5;
+  color: var(--color-gray-350-alt);
+  background: var(--color-bg-light);
   border-radius: 8px;
 }
 
 /* Combat Log */
 .combat-log {
   background: white;
-  border: 2px solid #3498db;
+  border: 2px solid var(--color-primary-blue);
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-black-10);
 }
 
 .log-header {
@@ -412,7 +412,7 @@
 
 .log-header h3 {
   margin: 0;
-  color: #3498db;
+  color: var(--color-primary-blue);
   font-size: 18px;
 }
 
@@ -431,19 +431,19 @@
 
 .log-entry {
   padding: 8px 12px;
-  background: #f5f5f5;
+  background: var(--color-bg-light);
   border-radius: 4px;
   font-family: monospace;
   font-size: 13px;
   color: #333;
-  border-left: 3px solid #3498db;
+  border-left: 3px solid var(--color-primary-blue);
 }
 
 .log-entry.death {
   background: #fee2e2;
-  border-left-color: #dc2626;
+  border-left-color: var(--color-error-dark);
   font-weight: bold;
-  color: #dc2626;
+  color: var(--color-error-dark);
 }
 
 .log-entry.parry {
@@ -478,7 +478,7 @@
 
 .history-header h4 {
   margin: 0;
-  color: #666;
+  color: var(--color-text-tertiary);
   font-size: 16px;
 }
 
@@ -508,7 +508,7 @@
 
 .history-date {
   font-weight: bold;
-  color: #666;
+  color: var(--color-text-tertiary);
   font-size: 14px;
 }
 
@@ -526,7 +526,7 @@
 .empty-history {
   text-align: center;
   padding: 20px;
-  color: #999;
+  color: var(--color-gray-350-alt);
   font-style: italic;
 }
 
@@ -537,7 +537,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: var(--shadow-black-50);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -551,7 +551,7 @@
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 20px var(--shadow-black-30);
 }
 
 .modal-header {
@@ -572,7 +572,7 @@
   border: none;
   font-size: 32px;
   cursor: pointer;
-  color: #999;
+  color: var(--color-gray-350-alt);
   line-height: 1;
   padding: 0;
 }
@@ -608,7 +608,7 @@
 .form-group select {
   width: 100%;
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 14px;
 }
@@ -627,7 +627,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px;
-  background: #f5f5f5;
+  background: var(--color-bg-light);
   border-radius: 4px;
 }
 
@@ -636,13 +636,13 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #999;
+  color: var(--color-gray-350-alt);
   padding: 0;
   line-height: 1;
 }
 
 .btn-remove-small:hover {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .weapon-input {
@@ -695,7 +695,7 @@
 }
 
 .weapon-hp-label {
-  color: #666;
+  color: var(--color-text-tertiary);
 }
 
 .weapon-hp-value {
@@ -704,15 +704,15 @@
 }
 
 .weapon-hp-value.weapon-damaged {
-  color: #f59e0b;
+  color: var(--color-primary-orange);
 }
 
 .weapon-hp-value.weapon-broken {
-  color: #ef4444;
+  color: var(--color-error);
 }
 
 .broken-tag {
-  background: #ef4444;
+  background: var(--color-error);
   color: white;
   font-size: 11px;
   font-weight: bold;
@@ -723,16 +723,16 @@
 
 /* Defense modal */
 .defense-overlay {
-  background-color: rgba(0, 0, 0, 0.65);
+  background-color: var(--shadow-black-65);
 }
 
 .defense-modal {
   max-width: 480px;
-  border: 3px solid #dc2626;
+  border: 3px solid var(--color-error-dark);
 }
 
 .defense-header {
-  background: #dc2626;
+  background: var(--color-error-dark);
   border-radius: 6px 6px 0 0;
 }
 
@@ -752,13 +752,13 @@
 .damage-rolled {
   text-align: center;
   font-size: 15px;
-  color: #555;
+  color: var(--color-gray-600-alt);
   margin: 0 0 20px;
 }
 
 .damage-number {
   font-size: 28px;
-  color: #dc2626;
+  color: var(--color-error-dark);
   margin: 0 4px;
 }
 
@@ -847,7 +847,7 @@
 
 .damage-rolled {
   font-size: 15px;
-  color: #555;
+  color: var(--color-gray-600-alt);
 }
 
 .hit-location-chip {
@@ -865,13 +865,13 @@
 
 .hit-location-chip.loc-fatal {
   background: #fee2e2;
-  border-color: #dc2626;
-  color: #dc2626;
+  border-color: var(--color-error-dark);
+  color: var(--color-error-dark);
 }
 
 .hit-location-chip.loc-useless {
   background: #fef3c7;
-  border-color: #f59e0b;
+  border-color: var(--color-primary-orange);
   color: #92400e;
 }
 
@@ -936,13 +936,13 @@
 
 .location-badge.loc-useless {
   background: #fef3c7;
-  border-color: #f59e0b;
+  border-color: var(--color-primary-orange);
   color: #78350f;
 }
 
 .location-badge.loc-fatal {
   background: #fee2e2;
-  border-color: #dc2626;
+  border-color: var(--color-error-dark);
   color: #991b1b;
 }
 
@@ -977,7 +977,7 @@
 
 /* Repeat parry penalty */
 .penalty-text {
-  color: #dc2626;
+  color: var(--color-error-dark);
   font-weight: 600;
 }
 

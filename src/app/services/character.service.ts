@@ -3,8 +3,10 @@ import {
   Character, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES,
   DEFAULT_FAMILY_HISTORY, DEFAULT_CULT_STATUS,
-  calculateHitLocations, calculateDerivedStats, CHARACTER_COLORS
+  calculateHitLocations, calculateDerivedStats
 } from '../models/character.model';
+import { CHARACTER_COLORS } from '../constants/character-colors.constants';
+import { EQUIPMENT_DEFAULTS, MAGIC_DEFAULTS } from '../constants/equipment.constants';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +18,8 @@ export class CharacterService {
     const data = localStorage.getItem(this.STORAGE_KEY);
     if (!data) return [];
 
-    const characters = JSON.parse(data);
-    return characters.map((char: any) => this.migrateCharacter(char));
+    const characters: any[] = JSON.parse(data);
+    return characters.map(char => this.migrateCharacter(char));
   }
 
   getCharacter(id: string): Character | undefined {
@@ -94,7 +96,13 @@ export class CharacterService {
     } else {
       char.equipment = char.equipment.map((item: any) =>
         typeof item === 'string'
-          ? { name: item, quantity: 1, cost: 0, hitPoints: 0, encumbrance: 0 }
+          ? {
+              name: item,
+              quantity: EQUIPMENT_DEFAULTS.QUANTITY,
+              cost: EQUIPMENT_DEFAULTS.COST,
+              hitPoints: EQUIPMENT_DEFAULTS.HIT_POINTS,
+              encumbrance: EQUIPMENT_DEFAULTS.ENCUMBRANCE
+            }
           : item
       );
     }
@@ -126,8 +134,8 @@ export class CharacterService {
           return {
             name: spell.name,
             runePointCost: spell.points,
-            associatedRune: 'Air',
-            reusable: true
+            associatedRune: MAGIC_DEFAULTS.DEFAULT_RUNE,
+            reusable: MAGIC_DEFAULTS.DEFAULT_REUSABLE
           };
         }
         return spell;
@@ -138,7 +146,7 @@ export class CharacterService {
     if (!char.color) {
       const allChars = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '[]');
       const index = allChars.findIndex((c: any) => c.id === char.id);
-      char.color = CHARACTER_COLORS[index % CHARACTER_COLORS.length];
+      char.color = CHARACTER_COLORS[index % CHARACTER_COLORS.length].value;
     }
 
     return char as Character;
@@ -158,7 +166,7 @@ export class CharacterService {
   }
 
   private getNextColor(characterCount: number): string {
-    return CHARACTER_COLORS[characterCount % CHARACTER_COLORS.length];
+    return CHARACTER_COLORS[characterCount % CHARACTER_COLORS.length].value;
   }
 
   updateCharacter(character: Character): void {

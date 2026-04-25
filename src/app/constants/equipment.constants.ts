@@ -1,0 +1,11 @@
+export const EQUIPMENT_DEFAULTS = {
+  QUANTITY: 1,
+  COST: 0,
+  HIT_POINTS: 0,
+  ENCUMBRANCE: 0,
+};
+
+export const MAGIC_DEFAULTS = {
+  DEFAULT_RUNE: 'Air',
+  DEFAULT_REUSABLE: true,
+};

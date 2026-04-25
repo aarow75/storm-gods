@@ -15,24 +15,62 @@
       <button class="btn-roll dice-d100" (click)="rollPercentile()">d%</button>
     </div>
 
-    <div class="current-result" *ngIf="currentResult !== null">
+    <div class="custom-roll-builder">
+      <div class="custom-roll-inputs">
+        <div class="input-group">
+          <label for="numDice">Number of Dice:</label>
+          <input type="number" id="numDice" min="1" max="20" [(ngModel)]="numDice" class="input-field">
+        </div>
+        <div class="input-group">
+          <label for="diceType">Dice Type:</label>
+          <select id="diceType" [(ngModel)]="diceType" class="input-field">
+            <option value="4">d4</option>
+            <option value="6">d6</option>
+            <option value="8">d8</option>
+            <option value="10">d10</option>
+            <option value="12">d12</option>
+            <option value="20">d20</option>
+            <option value="100">d100</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="modifier">Modifier:</label>
+          <input type="number" id="modifier" [(ngModel)]="modifier" class="input-field">
+        </div>
+        <button class="btn-roll btn-custom" (click)="rollCustom()">Roll Custom</button>
+      </div>
+    </div>
+
+    @if (currentResult !== null) {
+    <div class="current-result">
       <div class="result-display dice-{{ currentType }}">
         <span class="result-type">{{ currentType }}</span>
         <span class="result-value">{{ currentResult }}</span>
+        @if (currentBreakdown) {
+          <span class="result-breakdown">{{ currentBreakdown }}</span>
+        }
       </div>
     </div>
+    }
   </div>
 
-  <div class="roll-history" *ngIf="rollHistory.length > 0">
+  @if (rollHistory.length > 0) {
+  <div class="roll-history">
     <div class="history-header">
       <h3>{{ translationService.get('diceRoller.history', 'Roll History') }}</h3>
       <button class="btn-clear" (click)="clearHistory()">{{ translationService.get('button.clear', 'Clear') }}</button>
     </div>
     <div class="history-list">
-      <div *ngFor="let roll of rollHistory" class="history-item">
+      @for (roll of rollHistory; track roll) {
+      <div class="history-item">
         <span class="history-type">{{ roll.type }}</span>
         <span class="history-result">{{ roll.result }}</span>
+        @if (roll.breakdown) {
+          <span class="history-breakdown">{{ roll.breakdown }}</span>
+        }
       </div>
+      }
     </div>
   </div>
+  }
 </div>

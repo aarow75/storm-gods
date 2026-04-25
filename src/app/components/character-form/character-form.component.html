@@ -1,10 +1,13 @@
 <div class="character-form" [class.edit-mode]="editMode">
   <h3>{{ editMode ? translationService.get('form.editCharacter', 'Edit Character') : translationService.get('form.createNew', 'Create New Character') }}</h3>
-  <div *ngIf="editMode" class="edit-banner">
+  @if (editMode) {
+  <div class="edit-banner" [style.background]="character.color || '#f59e0b'">
     {{ translationService.get('form.editing', 'Editing') }}: {{ character.name }}
   </div>
+  }
 
-  <div *ngIf="showValidationErrors" class="validation-banner">
+  @if (showValidationErrors) {
+  <div class="validation-banner">
     <div class="validation-banner-header">
       <span class="validation-banner-title">{{ translationService.get('validation.title', 'Required fields missing') }}</span>
       <button type="button" class="btn-dismiss" (click)="dismissValidationErrors()">×</button>
@@ -12,18 +15,23 @@
     <div class="validation-banner-content">
       <p>{{ translationService.get('validation.message', 'Please fill in the following required fields:') }}</p>
       <ul>
-        <li *ngFor="let error of validationErrorList">{{ error }}</li>
+        @for (error of validationErrorList; track error) {
+        <li>{{ error }}</li>
+        }
       </ul>
     </div>
   </div>
+  }
 
   <form (ngSubmit)="saveCharacter()">
-    <div *ngIf="!editMode" class="randomize-section">
+    @if (!editMode) {
+    <div class="randomize-section">
       <button type="button" class="btn-randomize" (click)="randomizeCharacter()">
         {{ translationService.get('button.randomize', 'Randomize Character') }}
       </button>
       <p class="randomize-hint">{{ translationService.get('form.randomizeHint', 'Generates random stats, cult, occupation, and homeland') }}</p>
     </div>
+    }
 
     <div class="form-group">
       <label for="name"
@@ -41,8 +49,40 @@
         [class.invalid-field]="isFieldInvalid('name')"
         [class.success-field]="isFieldRandomized('name') && !isFieldInvalid('name')"
       />
-      <span *ngIf="isFieldInvalid('name')" class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
-      <span *ngIf="isFieldRandomized('name') && !isFieldInvalid('name')" class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+      @if (isFieldInvalid('name')) {
+      <span class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+      }
+      @if (isFieldRandomized('name') && !isFieldInvalid('name')) {
+      <span class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label>{{ translationService.get('form.characterColor', 'Character Color') }}:</label>
+      <div class="color-picker">
+        @for (color of characterColors; track color) {
+        <button
+          type="button"
+          class="color-swatch"
+          [style.background]="color.value"
+          [class.selected]="character.color === color.value"
+          (click)="character.color = color.value"
+          [title]="color.name"
+          aria-label="Select {{ color.name }} color"
+        >
+          <span class="color-name">{{ color.name }}</span>
+          @if (character.color === color.value) {
+          <span class="checkmark">✓</span>
+          }
+        </button>
+        }
+      </div>
+      @if (character.color) {
+      <div class="selected-color">
+        <span class="color-label">Selected: </span>
+        <span class="color-value" [style.background]="character.color"></span>
+      </div>
+      }
     </div>
 
     <!-- Background Component -->
@@ -184,14 +224,15 @@
       <button type="submit" class="btn btn-primary">
         {{ editMode ? translationService.get('button.save', 'Save Character') : translationService.get('button.save', 'Save Character') }}
       </button>
+      @if (editMode) {
       <button
-        *ngIf="editMode"
         type="button"
         class="btn btn-secondary"
         (click)="cancelEdit()"
       >
         {{ translationService.get('button.cancel', 'Cancel') }}
       </button>
+      }
     </div>
   </form>
 </div>

@@ -3,11 +3,14 @@
 
 <div class="character-form" [class.edit-mode]="editMode">
   <h3>{{ editMode ? 'Edit Character' : 'Create New Character' }}</h3>
-  <div *ngIf="editMode" class="edit-banner">
+  @if (editMode) {
+  <div class="edit-banner">
     Editing: {{ character.name }}
   </div>
+  }
 
-  <div *ngIf="showValidationErrors" class="validation-banner">
+  @if (showValidationErrors) {
+  <div class="validation-banner">
     <div class="validation-banner-header">
       <span class="validation-banner-title">Required fields missing</span>
       <button type="button" class="btn-dismiss" (click)="dismissValidationErrors()">×</button>
@@ -15,18 +18,23 @@
     <div class="validation-banner-content">
       <p>Please fill in the following required fields:</p>
       <ul>
-        <li *ngFor="let error of validationErrorList">{{ error }}</li>
+        @for (error of validationErrorList; track error) {
+        <li>{{ error }}</li>
+        }
       </ul>
     </div>
   </div>
+  }
 
   <form (ngSubmit)="saveCharacter()">
-    <div *ngIf="!editMode" class="randomize-section">
+    @if (!editMode) {
+    <div class="randomize-section">
       <button type="button" class="btn-randomize" (click)="randomizeCharacter()">
         Randomize Character
       </button>
       <p class="randomize-hint">Generates random stats, cult, occupation, and homeland</p>
     </div>
+    }
 
     <!-- Character Name (still in main form) -->
     <div class="form-group">
@@ -45,8 +53,12 @@
         [class.invalid-field]="isFieldInvalid('name')"
         [class.success-field]="isFieldRandomized('name') && !isFieldInvalid('name')"
       />
-      <span *ngIf="isFieldInvalid('name')" class="validation-error">Required field</span>
-      <span *ngIf="isFieldRandomized('name') && !isFieldInvalid('name')" class="success-message">Randomized</span>
+      @if (isFieldInvalid('name')) {
+      <span class="validation-error">Required field</span>
+      }
+      @if (isFieldRandomized('name') && !isFieldInvalid('name')) {
+      <span class="success-message">Randomized</span>
+      }
     </div>
 
     <!-- Background Component -->
@@ -146,9 +158,11 @@
       <button type="submit" class="btn-primary">
         {{ editMode ? 'Update Character' : 'Save Character' }}
       </button>
-      <button *ngIf="editMode" type="button" class="btn-secondary" (click)="cancelEdit()">
+      @if (editMode) {
+      <button type="button" class="btn-secondary" (click)="cancelEdit()">
         Cancel
       </button>
+      }
     </div>
   </form>
 </div>

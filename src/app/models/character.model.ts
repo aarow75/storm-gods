@@ -850,20 +850,6 @@ export function applySkillBonuses(
   return skills;
 }
 
-// Character color palette
-export const CHARACTER_COLORS = [
-  '#3498db', // Blue
-  '#ef4444', // Red
-  '#f97316',  // Deep Orange
-  '#fde047 ', // Yellow
-  '#10b981', // Green
-  '#8b5cf6', // Purple
-  '#ec4899', // Pink
-  '#06b6d4', // Cyan
-  '#84cc16', // Lime
-  '#f59e0b', // Orange
-];
-
 // Function to enforce opposed rune constraints
 export function enforceOpposedRunes(runes: Runes): Runes {
   const updated = JSON.parse(JSON.stringify(runes));

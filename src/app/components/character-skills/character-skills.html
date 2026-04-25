@@ -2,10 +2,12 @@
 <h4>{{ heading }} <button type="button" class="btn-calculate" (click)="applyBonuses.emit()">{{ translationService.get('button.applyBonuses', 'Apply Skill Bonuses') }}</button></h4>
 }
 <div class="skills-section">
-  <div *ngFor="let category of getCategoryKeys()" class="skill-category">
+  @for (category of getCategoryKeys(); track category) {
+  <div class="skill-category">
     <h5>{{ category }}</h5>
     <div class="skills-grid">
-      <div *ngFor="let skill of getSkillKeys(category)" class="form-group skill-group">
+      @for (skill of getSkillKeys(category); track skill) {
+      <div class="form-group skill-group">
         <label [for]="skill">{{ skill }}:</label>
         <div class="skill-input-wrapper">
           <input
@@ -19,6 +21,8 @@
           <span class="d20-equivalent">d20: {{ percentageToD20(skills[skill]) }}</span>
         </div>
       </div>
+      }
     </div>
   </div>
+  }
 </div>

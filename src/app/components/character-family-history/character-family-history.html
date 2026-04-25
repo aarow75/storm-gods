@@ -22,12 +22,16 @@
   </div>
   <h5>{{ translationService.get('familyHistory.events', 'Family Events') }} <button type="button" class="btn-add-small" (click)="addEvent.emit()">{{ translationService.get('button.add', 'Add') }}</button></h5>
   <div class="family-events">
-    <div *ngIf="!familyHistory.events || familyHistory.events.length === 0" class="no-items">
+    @if (!familyHistory.events || familyHistory.events.length === 0) {
+    <div class="no-items">
       {{ translationService.get('familyHistory.noEvents', 'No family events recorded.') }}
     </div>
-    <div *ngFor="let event of familyHistory.events; let i = index" class="event-row">
+    }
+    @for (event of familyHistory.events; let i = $index; track i) {
+    <div class="event-row">
       <input type="text" [(ngModel)]="familyHistory.events[i]" [name]="'event-' + i" [placeholder]="translationService.get('familyHistory.eventPlaceholder', 'Family event description')" />
       <button type="button" class="btn-remove-small" (click)="removeEvent.emit(i)">×</button>
     </div>
+    }
   </div>
 </div>

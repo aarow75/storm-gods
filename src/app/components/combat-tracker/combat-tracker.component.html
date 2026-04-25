@@ -22,7 +22,7 @@
         </div>
       </div>
       <div class="log-entries">
-        @for (entry of combatLog; track $index) {
+        @for (entry of combatLog; track entry) {
           <div class="log-entry"
                [class.death]="entry.includes('[SLAIN]')"
                [class.parry]="entry.includes('[PARRY]')"
@@ -56,7 +56,7 @@
                   <button class="btn-remove-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
                 </div>
                 <div class="history-entries">
-                  @for (entry of log.entries; track $index) {
+                  @for (entry of log.entries; track entry) {
                     <div class="log-entry"
                          [class.death]="entry.includes('[SLAIN]')"
                          [class.parry]="entry.includes('[PARRY]')"
@@ -78,7 +78,7 @@
   <!-- Participant Cards -->
   @if (combatParticipants.length > 0) {
     <div class="combat-list">
-      @for (participant of combatParticipants; track participant.id) {
+      @for (participant of combatParticipants; track participant) {
         <div class="combat-participant"
              [class.monster]="participant.type === 'monster'"
              [class.dead]="participant.isDead"
@@ -191,7 +191,7 @@
 
           <div class="hit-points">
             <div class="hp-checkboxes">
-              @for (hp of participant.currentHitPoints; track $index) {
+              @for (hp of participant.currentHitPoints; track hp) {
                 <label class="hp-checkbox" [class.checked]="hp">
                   <input type="checkbox" [checked]="hp" (change)="toggleHitPoint(participant, $index)">
                   <span class="checkbox-label">{{ $index + 1 }}</span>
@@ -365,7 +365,7 @@
             <label>Character:</label>
             <select [(ngModel)]="selectedCharacterId" (change)="onCharacterSelect()">
               <option value="">-- Select Character --</option>
-              @for (char of characters; track char.id) {
+              @for (char of characters; track char) {
                 <option [value]="char.id">{{ char.name }}</option>
               }
             </select>
@@ -376,7 +376,7 @@
             <label>Monster:</label>
             <select [(ngModel)]="selectedMonsterId" (change)="onMonsterSelect()">
               <option value="">-- Select Monster --</option>
-              @for (monster of monsters; track monster.id) {
+              @for (monster of monsters; track monster) {
                 <option [value]="monster.id">
                   {{ monster.name }}{{ isCustomMonster(monster.id) ? ' (Custom)' : '' }}
                 </option>
@@ -435,7 +435,7 @@
         <div class="form-group">
           <label>Weapons:</label>
           <div class="weapons-list">
-            @for (weapon of newMonster.weapons; track $index) {
+            @for (weapon of newMonster.weapons; track weapon) {
               <div class="weapon-item">
                 <span>{{ weapon.name }} ({{ weapon.damage }}, SR +{{ weapon.strikeRankModifier }})</span>
                 <button class="btn-remove-small" (click)="removeWeaponFromNewMonster($index)">&times;</button>

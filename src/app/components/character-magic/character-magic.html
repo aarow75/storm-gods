@@ -15,7 +15,7 @@
 
   <h5>{{ translationService.get('magic.spiritMagic', 'Spirit Magic') }}</h5>
   <div class="spells-list">
-    @for (spell of magic.spiritMagic; track $index) {
+    @for (spell of magic.spiritMagic; track spell) {
       <div class="spell-row">
         <div class="spell-name-wrapper">
           <select
@@ -53,7 +53,7 @@
 
   <h5>{{ translationService.get('magic.runeMagic', 'Rune Magic') }}</h5>
   <div class="spells-list">
-    @for (spell of magic.runeMagic; track $index) {
+    @for (spell of magic.runeMagic; track spell) {
       <div class="rune-spell-row">
         <div class="rune-spell-name-group">
           <label [attr.for]="'rune-spell-' + $index">{{ translationService.get('cult.spellName', 'Spell Name') }}</label>
@@ -114,7 +114,7 @@
 
   <h5>{{ translationService.get('magic.sorcery', 'Sorcery') }}</h5>
   <div class="spells-list">
-    @for (spell of magic.sorcery; track $index) {
+    @for (spell of magic.sorcery; track spell) {
       <div class="spell-row">
         <div class="spell-name-wrapper">
           <select

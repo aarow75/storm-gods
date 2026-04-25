@@ -5,7 +5,7 @@
   @if (weapons.length === 0) {
     <p class="no-weapons">{{ translationService.get('weapons.noWeapons', 'No weapons') }}</p>
   }
-  @for (weapon of weapons; track $index) {
+  @for (weapon of weapons; track weapon) {
     <div class="weapon-row">
       <div class="form-group">
         <label [attr.for]="'weapon-name-' + $index">{{ translationService.get('weapons.name', 'Weapon Name') }}</label>
@@ -15,7 +15,7 @@
           [name]="'weapon-name-' + $index"
           (change)="onWeaponChange($index)"
         >
-          @for (weaponDef of weaponList; track weaponDef.name) {
+          @for (weaponDef of weaponList; track weaponDef) {
             <option [value]="weaponDef.name" [disabled]="isWeaponDisabled(weaponDef)">
               {{ getWeaponOptionLabel(weaponDef) }}
             </option>

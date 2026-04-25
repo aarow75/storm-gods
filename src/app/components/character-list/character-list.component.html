@@ -3,12 +3,16 @@
   <h2>{{ heading }}</h2>
   }
 
-  <div *ngIf="characters.length === 0" class="no-characters">
+  @if (characters.length === 0) {
+  <div class="no-characters">
     <p>{{ translationService.get('characterList.noCharacters', 'No characters yet. Create your first character below!') }}</p>
   </div>
+  }
 
-  <div *ngIf="characters.length > 0" class="characters-grid">
-    <div *ngFor="let character of characters" class="character-card" [class.dead]="getCurrentHP(character) <= 0">
+  @if (characters.length > 0) {
+  <div class="characters-grid">
+    @for (character of characters; track character) {
+    <div class="character-card" [class.dead]="getCurrentHP(character) <= 0">
       <h3>{{ character.name }}</h3>
 
       <div class="hit-points-display"
@@ -24,7 +28,9 @@
         </span>
         <span class="hp-separator">/</span>
         <span class="hp-max">{{ getMaxHP(character) }}</span>
-        <span class="dead-badge" *ngIf="getCurrentHP(character) <= 0">DEAD</span>
+        @if (getCurrentHP(character) <= 0) {
+        <span class="dead-badge">DEAD</span>
+        }
       </div>
 
       <h4>{{ translationService.get('characterList.characteristics', 'Characteristics') }}</h4>
@@ -51,12 +57,16 @@
 
       <h4>{{ translationService.get('characterList.weapons', 'Weapons') }}</h4>
       <div class="weapons-list">
-        <div *ngIf="!character.weapons || character.weapons.length === 0" class="no-items">
+        @if (!character.weapons || character.weapons.length === 0) {
+        <div class="no-items">
           {{ translationService.get('weapons.noWeapons', 'No weapons') }}
         </div>
-        <div *ngFor="let weapon of character.weapons" class="weapon-item">
+        }
+        @for (weapon of character.weapons; track weapon) {
+        <div class="weapon-item">
           <strong>{{ weapon.name }}</strong>: {{ weapon.damage }} ({{ weapon.skill }})
         </div>
+        }
       </div>
 
       <div class="actions">
@@ -64,5 +74,7 @@
         <button class="btn btn-delete" (click)="deleteCharacter(character.id)">{{ translationService.get('button.delete', 'Delete') }}</button>
       </div>
     </div>
+    }
   </div>
+  }
 </div>

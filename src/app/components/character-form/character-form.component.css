@@ -3,38 +3,39 @@
 /* Character Form Container Styles */
 .character-form {
   background: white;
-  border: 2px solid #ddd;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 20px;
   margin: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-black-10);
 }
 
 .character-form.edit-mode {
-  border-color: #f59e0b;
-  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+  border-color: var(--color-primary-orange);
+  box-shadow: 0 4px 8px var(--color-primary-orange-20);
 }
 
 .edit-banner {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white;
-  padding: 10px 15px;
+  padding: 12px 15px;
   border-radius: 4px;
   margin-bottom: 15px;
   font-weight: 600;
   font-size: 14px;
   text-align: center;
+  box-shadow: 0 2px 4px var(--shadow-black-20);
+  text-shadow: 0 1px 2px var(--shadow-black-30);
 }
 
 h3 {
   margin-top: 0;
-  color: #2c3e50;
-  border-bottom: 2px solid #3498db;
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-primary-blue);
   padding-bottom: 10px;
 }
 
 .character-form.edit-mode h3 {
-  border-bottom-color: #f59e0b;
+  border-bottom-color: var(--color-primary-orange);
 }
 
 .quick-roll {
@@ -51,37 +52,37 @@ h3 {
 }
 
 .skill-category h5 {
-  color: #3498db;
+  color: var(--color-primary-blue);
   font-size: 16px;
   margin-bottom: 15px;
   padding-left: 5px;
-  border-left: 4px solid #3498db;
+  border-left: 4px solid var(--color-primary-blue);
 }
 
 .randomize-section {
   text-align: center;
   margin: 20px 0 30px 0;
   padding: 20px;
-  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  background: linear-gradient(135deg, var(--color-gray-500) 0%, var(--color-gray-600) 100%);
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+  box-shadow: 0 4px 12px var(--color-gray-500-30);
 }
 
 /* RuneQuest theme */
 :host-context(.runequest-theme) .randomize-section {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+  background: linear-gradient(135deg, var(--color-primary-orange) 0%, var(--color-primary-orange-dark) 100%);
+  box-shadow: 0 4px 12px var(--color-primary-orange-30);
 }
 
 /* Dragonbane theme */
 :host-context(.dragonbane-theme) .randomize-section {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
+  box-shadow: 0 4px 12px var(--color-success-30);
 }
 
 .btn-randomize {
   background: white;
-  color: #4b5563;
+  color: var(--color-gray-600);
   border: none;
   border-radius: 6px;
   padding: 14px 28px;
@@ -89,28 +90,28 @@ h3 {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px var(--shadow-black-20);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 :host-context(.runequest-theme) .btn-randomize {
-  color: #d97706;
+  color: var(--color-primary-orange-dark);
 }
 
 :host-context(.dragonbane-theme) .btn-randomize {
-  color: #059669;
+  color: var(--color-success-dark);
 }
 
 .btn-randomize:hover {
-  background: #f8f9fa;
+  background: var(--color-bg-lighter);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 12px var(--shadow-black-30);
 }
 
 .btn-randomize:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 4px var(--shadow-black-20);
 }
 
 .randomize-hint {
@@ -119,4 +120,108 @@ h3 {
   font-size: 12px;
   font-style: italic;
   opacity: 0.9;
+}
+
+/* Color Picker Styles */
+.color-picker {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.color-swatch {
+  position: relative;
+  height: 50px;
+  border: 2px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px var(--shadow-black-10);
+  overflow: hidden;
+}
+
+.color-swatch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--shadow-black-15);
+}
+
+.color-swatch:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--color-primary-blue-40);
+}
+
+.color-swatch.selected {
+  border-color: white;
+  box-shadow: 0 0 0 3px currentColor;
+}
+
+.color-swatch .color-name {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px var(--shadow-black-50);
+  background: var(--shadow-black-30);
+  padding: 2px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.color-swatch .checkmark {
+  position: absolute;
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 4px var(--shadow-black-50);
+  pointer-events: none;
+}
+
+.selected-color {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px;
+  background: var(--color-bg-lighter);
+  border-radius: 4px;
+}
+
+.color-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-gray-600-alt);
+}
+
+.color-value {
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 4px var(--shadow-black-10);
+}
+
+@media (max-width: 768px) {
+  .color-picker {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .color-picker {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .color-swatch {
+    height: 45px;
+  }
 }

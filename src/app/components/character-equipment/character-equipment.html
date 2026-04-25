@@ -40,7 +40,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of equipment; track $index) {
+        @for (item of equipment; track item) {
           <tr>
             <td>{{ item.name }}</td>
             <td>

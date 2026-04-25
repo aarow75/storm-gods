@@ -3,14 +3,14 @@
 }
 
 h2 {
-  color: #333;
+  color: var(--color-text-dark);
   margin-bottom: 20px;
 }
 
 .no-characters {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--color-text-tertiary);
 }
 
 .characters-grid {
@@ -22,23 +22,23 @@ h2 {
 
 .character-card {
   background: white;
-  border: 2px solid #ddd;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px var(--shadow-black-10);
   transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
 .character-card.dead {
   opacity: 0.6;
   filter: grayscale(30%);
-  background: #f5f5f5;
+  background: var(--color-bg-light);
 }
 
 .character-card h3 {
   margin-top: 0;
-  color: #2c3e50;
-  border-bottom: 2px solid #3498db;
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-primary-blue);
   padding-bottom: 10px;
   margin-bottom: 15px;
 }
@@ -50,7 +50,7 @@ h2 {
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px var(--shadow-black-20);
 }
 
 .hp-label {
@@ -64,35 +64,35 @@ h2 {
 .hp-current {
   font-size: 24px;
   font-weight: bold;
-  color: #10b981;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(16, 185, 129, 0.8);
+  color: var(--color-success);
+  text-shadow: 0 2px 4px var(--shadow-black-50), 0 0 8px var(--color-success-80);
   min-width: 40px;
   text-align: center;
 }
 
 .hp-current.wounded {
-  color: #f59e0b;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(245, 158, 11, 0.8);
+  color: var(--color-primary-orange);
+  text-shadow: 0 2px 4px var(--shadow-black-50), 0 0 8px var(--color-primary-orange-80);
 }
 
 .hp-current.critical {
-  color: #ef4444;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 8px rgba(239, 68, 68, 0.8);
+  color: var(--color-error);
+  text-shadow: 0 2px 4px var(--shadow-black-50), 0 0 8px var(--color-error-80);
   animation: pulse 2s ease-in-out infinite;
 }
 
 .hp-current.zero {
-  color: #fef2f2;
+  color: var(--color-text-inverse);
   font-size: 28px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 0 12px rgba(254, 242, 242, 0.9);
+  text-shadow: 0 2px 4px var(--shadow-black-70), 0 0 12px var(--color-pink-light-90);
   animation: pulse-fast 1s ease-in-out infinite;
 }
 
 .hp-current.negative {
-  color: #fef2f2;
+  color: var(--color-text-inverse);
   font-size: 28px;
   text-decoration: underline;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7), 0 0 12px rgba(254, 242, 242, 0.9);
+  text-shadow: 0 2px 4px var(--shadow-black-70), 0 0 12px var(--color-pink-light-90);
   animation: pulse-fast 1s ease-in-out infinite;
 }
 
@@ -118,9 +118,9 @@ h2 {
 
 .hp-separator {
   font-size: 20px;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-white-90);
   font-weight: bold;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 2px var(--shadow-black-50);
 }
 
 .hp-max {
@@ -129,33 +129,33 @@ h2 {
   color: white;
   min-width: 40px;
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 1px 2px var(--shadow-black-50);
 }
 
 .hit-points-display.dead {
   opacity: 0.6;
   filter: grayscale(40%);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  border: 2px solid #1f2937;
+  box-shadow: 0 2px 8px var(--shadow-black-50);
+  border: 2px solid var(--color-dark);
 }
 
 .dead-badge {
   margin-left: auto;
-  background-color: #1f2937;
-  color: #fef2f2;
+  background-color: var(--color-dark);
+  color: var(--color-text-inverse);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 13px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border: 2px solid #fef2f2;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  border: 2px solid var(--color-text-inverse);
+  text-shadow: 0 1px 2px var(--shadow-black-70);
 }
 
 .character-card h4 {
   font-size: 14px;
-  color: #555;
+  color: var(--color-gray-600-alt);
   margin-top: 15px;
   margin-bottom: 10px;
   text-transform: uppercase;
@@ -171,7 +171,7 @@ h2 {
 
 .stat {
   padding: 8px;
-  background: #f8f9fa;
+  background: var(--color-bg-lighter);
   border-radius: 4px;
 }
 
@@ -191,21 +191,21 @@ h2 {
 }
 
 .btn-edit {
-  background-color: #f59e0b;
+  background-color: var(--color-primary-orange);
   color: white;
 }
 
 .btn-edit:hover {
-  background-color: #d97706;
+  background-color: var(--color-primary-orange-dark);
 }
 
 .btn-delete {
-  background-color: #ef4444;
+  background-color: var(--color-error);
   color: white;
 }
 
 .btn-delete:hover {
-  background-color: #dc2626;
+  background-color: var(--color-error-dark);
 }
 
 .skills-preview {
@@ -217,7 +217,7 @@ h2 {
 
 .skill-item {
   padding: 6px;
-  background: #e8f4f8;
+  background: var(--color-bg-blue-light);
   border-radius: 4px;
   font-size: 13px;
 }
@@ -231,7 +231,7 @@ h2 {
 
 .hit-item {
   padding: 6px;
-  background: #ffe8e8;
+  background: var(--color-bg-red-lighter);
   border-radius: 4px;
   font-size: 12px;
   text-align: center;
@@ -243,14 +243,14 @@ h2 {
 
 .weapon-item {
   padding: 8px;
-  background: #fff3cd;
+  background: var(--color-yellow-light);
   border-radius: 4px;
   font-size: 13px;
   margin-bottom: 6px;
 }
 
 .no-items {
-  color: #999;
+  color: var(--color-gray-350-alt);
   font-style: italic;
   font-size: 13px;
 }
