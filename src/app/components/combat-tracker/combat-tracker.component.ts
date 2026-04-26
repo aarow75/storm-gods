@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChildren, QueryList, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -55,7 +55,7 @@ interface PendingAttack {
   templateUrl: './combat-tracker.component.html',
   styleUrl: './combat-tracker.component.css'
 })
-export class CombatTrackerComponent implements OnInit {
+export class CombatTrackerComponent implements OnInit, OnDestroy {
   @ViewChildren('rollDamageBtn', { read: ElementRef }) rollButtons!: QueryList<ElementRef<HTMLButtonElement>>;
 
   characters: Character[] = [];
@@ -82,6 +82,9 @@ export class CombatTrackerComponent implements OnInit {
 
   readonly hitLocationsOrder = HIT_LOCATIONS_ORDER;
 
+  private saveTimeout: ReturnType<typeof setTimeout> | null = null;
+  private readonly SAVE_DELAY_MS = 300;
+
   constructor(
     private characterService: CharacterService,
     private customMonsterService: CustomMonsterService,
@@ -96,13 +99,49 @@ export class CombatTrackerComponent implements OnInit {
     return this.combatLogService.getEntries();
   }
 
+  // ── Strike Rank Helpers ──────────────────────────────────────────────────────
+
+  private debouncedSaveCombat(): void {
+    if (this.saveTimeout) clearTimeout(this.saveTimeout);
+    this.saveTimeout = setTimeout(() => {
+      this.combatService.saveCombatParticipants(this.combatParticipants);
+      this.saveTimeout = null;
+    }, this.SAVE_DELAY_MS);
+  }
+
+  private flushPendingSave(): void {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+      this.combatService.saveCombatParticipants(this.combatParticipants);
+      this.saveTimeout = null;
+    }
+  }
+
+  private updateParticipantSR(participant: CombatParticipant): void {
+    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
+    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
+    this.debouncedSaveCombat();
+  }
+
+  private updateAllParticipantsSR(): void {
+    this.combatParticipants.forEach(p => {
+      p.effectiveSR = this.combatService.calculateEffectiveSR(p);
+    });
+    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
+    this.debouncedSaveCombat();
+  }
+
   ngOnInit(): void {
     this.loadData();
   }
 
+  ngOnDestroy(): void {
+    this.flushPendingSave();
+  }
+
   loadData(): void {
     this.characters = this.characterService.getCharacters();
-    this.defaultMonsters = DEFAULT_MONSTERS.map(m => JSON.parse(JSON.stringify(m)));
+    this.defaultMonsters = structuredClone(DEFAULT_MONSTERS);
     this.bestiaryMonsters = BESTIARY_MONSTERS.map(m => this.convertBestiaryMonster(m));
     this.customMonsters = this.customMonsterService.getMonsters().map(m => this.convertBestiaryMonster(m));
     this.monsters = [
@@ -192,7 +231,6 @@ export class CombatTrackerComponent implements OnInit {
         movementThisRound: 0,
         isSurprised: this.addParticipantSurprised
       };
-      participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
       this.combatParticipants.push(participant);
     } else if (this.selectedEntityType === 'monster' && this.selectedMonsterId) {
       const monster = this.monsters.find(m => m.id === this.selectedMonsterId);
@@ -221,13 +259,11 @@ export class CombatTrackerComponent implements OnInit {
         movementThisRound: 0,
         isSurprised: this.addParticipantSurprised
       };
-      participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
       this.combatParticipants.push(participant);
     }
 
-    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
+    this.updateAllParticipantsSR();
     this.autoAssignOpponentsIfNeeded();
-    this.saveCombat();
     this.closeAddParticipantModal();
   }
 
@@ -237,7 +273,7 @@ export class CombatTrackerComponent implements OnInit {
       if (p.selectedOpponentId === id) p.selectedOpponentId = undefined;
     });
     this.autoAssignOpponentsIfNeeded();
-    this.saveCombat();
+    this.debouncedSaveCombat();
   }
 
   onWeaponChange(participant: CombatParticipant): void {
@@ -254,14 +290,12 @@ export class CombatTrackerComponent implements OnInit {
       const validItems = this.getParticipantParryItems(participant);
       participant.selectedParryItem = validItems.length > 0 ? validItems[0] : '';
     }
-    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
-    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
-    this.saveCombat();
+    this.updateParticipantSR(participant);
   }
 
   toggleHitPoint(participant: CombatParticipant, index: number): void {
     participant.currentHitPoints[index] = !participant.currentHitPoints[index];
-    this.saveCombat();
+    this.debouncedSaveCombat();
   }
 
   getHitPointsRemaining(participant: CombatParticipant): number {
@@ -283,7 +317,9 @@ export class CombatTrackerComponent implements OnInit {
     }
   }
 
-  saveCombat(): void { this.combatService.saveCombatParticipants(this.combatParticipants); }
+  saveCombat(): void {
+    this.combatService.saveCombatParticipants(this.combatParticipants);
+  }
 
 
   isCustomMonster(monsterId: string): boolean {
@@ -410,24 +446,18 @@ export class CombatTrackerComponent implements OnInit {
       p.parriesAgainst = {};
       p.movementThisRound = 0;
       p.isSurprised = false;
-      p.effectiveSR = this.combatService.calculateEffectiveSR(p);
     });
-    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
     this.pendingAttack = null;
-    this.saveCombat();
+    this.updateAllParticipantsSR();
   }
 
   updateMovement(participant: CombatParticipant): void {
-    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
-    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
-    this.saveCombat();
+    this.updateParticipantSR(participant);
   }
 
   toggleSurprise(participant: CombatParticipant): void {
     participant.isSurprised = !participant.isSurprised;
-    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
-    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
-    this.saveCombat();
+    this.updateParticipantSR(participant);
   }
 
   getMovementSRCost(participant: CombatParticipant): number {
@@ -1094,7 +1124,7 @@ export class CombatTrackerComponent implements OnInit {
     return this.combatParticipants.filter(p => p.type === targetType && !p.isDead);
   }
 
-  onOpponentChange(_participant: CombatParticipant): void { this.saveCombat(); }
+  onOpponentChange(_participant: CombatParticipant): void { this.debouncedSaveCombat(); }
 
   clearCombatLog(): void {
     if (this.combatLog.length > 0 && confirm('Save this combat log to history and clear?')) {
