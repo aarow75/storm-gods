@@ -12,69 +12,116 @@
     </div>
   </div>
 
-  <!-- Current Combat Log -->
-  @if (combatLog.length > 0 && !showLogHistory) {
-    <div class="combat-log">
-      <div class="log-header">
-        <h3>Combat Log</h3>
-        <div class="log-actions">
-          <button class="btn btn-small" (click)="clearCombatLog()">Save & Clear Log</button>
+  <!-- Right Column: Turn Control Bar + Combat Log -->
+  <div class="right-column">
+    <!-- Turn Control Bar -->
+    @if (combatParticipants.length > 0) {
+      <div class="turn-control-bar">
+        <div class="round-counter">
+          <span class="round-label">Round</span>
+          <span class="round-number">{{ currentRound > 0 ? currentRound : '—' }}</span>
         </div>
-      </div>
-      <div class="log-entries">
-        @for (entry of combatLog; track entry) {
-          <div class="log-entry"
-               [class.death]="entry.includes('[SLAIN]')"
-               [class.parry]="entry.includes('[PARRY]')"
-               [class.dodge]="entry.includes('[DODGE]')"
-               [class.miss]="entry.includes('[MISS]')"
-               [class.failed]="entry.includes('FAILED')">
-            {{ entry }}
+        <div class="turn-actions">
+          @if (!turnsStarted) {
+            <button class="btn btn-turn-start" (click)="startTurns()" [disabled]="!!pendingAttack">
+              ▶ Start Turns
+            </button>
+          } @else if (isRoundComplete()) {
+            <span class="turn-status-complete">All acted — click New Round or Next Round</span>
+            <button #nextRoundBtn class="btn btn-turn-next" (click)="startTurns()" [disabled]="!!pendingAttack">Next Round</button>
+          } @else if (activeTurnParticipantId !== null) {
+            <span class="turn-status-active">Acting: <strong>{{ getActiveTurnParticipant()?.name }}</strong></span>
+            <button class="btn btn-turn-next" (click)="advanceTurn()" [disabled]="!!pendingAttack">Next Turn →</button>
+          } @else {
+            <button class="btn btn-turn-start" (click)="advanceTurn()" [disabled]="!!pendingAttack">Resume Turns</button>
+          }
+          @if (turnsStarted) {
+            <button class="btn btn-turn-stop" (click)="clearTurns()" [disabled]="!!pendingAttack" title="Stop turn tracking">Stop Turns</button>
+          }
+        </div>
+        @if (turnsStarted) {
+          <div class="turn-order-queue">
+            @for (p of combatParticipants; track p.id) {
+              @if (canParticipantAct(p)) {
+                <span class="turn-queue-chip"
+                      [class.chip-acting]="isActiveTurn(p.id)"
+                      [class.chip-acted]="hasActed(p.id)"
+                      [title]="p.name + ' (SR ' + getDisplaySR(p) + ')'">
+                  {{ p.name }}
+                  @if (hasActed(p.id)) {<span class="chip-check">✓</span>}
+                  @if (isActiveTurn(p.id)) {<span class="chip-now">NOW</span>}
+                </span>
+              }
+            }
           </div>
         }
       </div>
-    </div>
-  }
+    }
 
-  <!-- Combat Log History -->
-  @if (showLogHistory) {
-    <div class="combat-log">
-      <div class="log-header">
-        <h3>Combat Log History</h3>
-        <div class="log-actions">
-          @if (getCombatLogHistory().length > 0) {
-            <button class="btn btn-small btn-danger" (click)="clearAllHistory()">Clear All History</button>
+    <!-- Current Combat Log -->
+    @if (combatLog.length > 0 && !showLogHistory) {
+      <div class="combat-log">
+        <div class="log-header">
+          <h3>Combat Log</h3>
+          <div class="log-actions">
+            <button class="btn btn-small" (click)="clearCombatLog()">Save & Clear Log</button>
+          </div>
+        </div>
+        <div class="log-entries">
+          @for (entry of combatLog; track entry) {
+            <div class="log-entry"
+                 [class.death]="entry.includes('[SLAIN]')"
+                 [class.parry]="entry.includes('[PARRY]')"
+                 [class.dodge]="entry.includes('[DODGE]')"
+                 [class.miss]="entry.includes('[MISS]')"
+                 [class.failed]="entry.includes('FAILED')">
+              {{ entry }}
+            </div>
           }
         </div>
       </div>
-      <div class="log-history">
-        @if (getCombatLogHistory().length > 0) {
-          <div class="history-list">
-            @for (log of getCombatLogHistory(); track log.timestamp) {
-              <div class="history-item">
-                <div class="history-item-header">
-                  <span class="history-date">{{ log.date }}</span>
-                  <button class="btn-remove-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
-                </div>
-                <div class="history-entries">
-                  @for (entry of log.entries; track entry) {
-                    <div class="log-entry"
-                         [class.death]="entry.includes('[SLAIN]')"
-                         [class.parry]="entry.includes('[PARRY]')"
-                         [class.dodge]="entry.includes('[DODGE]')">
-                      {{ entry }}
-                    </div>
-                  }
-                </div>
-              </div>
+    }
+
+    <!-- Combat Log History -->
+    @if (showLogHistory) {
+      <div class="combat-log">
+        <div class="log-header">
+          <h3>Combat Log History</h3>
+          <div class="log-actions">
+            @if (getCombatLogHistory().length > 0) {
+              <button class="btn btn-small btn-danger" (click)="clearAllHistory()">Clear All History</button>
             }
           </div>
-        } @else {
-          <div class="empty-history"><p>No combat log history saved yet.</p></div>
-        }
+        </div>
+        <div class="log-history">
+          @if (getCombatLogHistory().length > 0) {
+            <div class="history-list">
+              @for (log of getCombatLogHistory(); track log.timestamp) {
+                <div class="history-item">
+                  <div class="history-item-header">
+                    <span class="history-date">{{ log.date }}</span>
+                    <button class="btn-remove-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
+                  </div>
+                  <div class="history-entries">
+                    @for (entry of log.entries; track entry) {
+                      <div class="log-entry"
+                           [class.death]="entry.includes('[SLAIN]')"
+                           [class.parry]="entry.includes('[PARRY]')"
+                           [class.dodge]="entry.includes('[DODGE]')">
+                        {{ entry }}
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-history"><p>No combat log history saved yet.</p></div>
+          }
+        </div>
       </div>
-    </div>
-  }
+    }
+  </div>
 
   <!-- Participant Cards -->
   @if (combatParticipants.length > 0) {
@@ -84,6 +131,10 @@
              [class.monster]="participant.type === 'monster'"
              [class.dead]="participant.isDead"
              [class.surprised]="participant.isSurprised"
+             [class.active-turn]="isActiveTurn(participant.id)"
+             [class.acted-turn]="hasActed(participant.id) && !isActiveTurn(participant.id)"
+             [class.collapsed]="isParticipantCollapsed(participant.id)"
+             [attr.data-participant-id]="participant.id"
              [style.border-left]="'6px solid ' + (participant.color || '#000000')"
              [ngStyle]="{'background-color': getRgbaColor(participant.color, 0.08)}">
           <div class="participant-header">
@@ -104,11 +155,75 @@
               @if (participant.kills && participant.kills > 0) {
                 <span class="kills-badge">Kills: {{ participant.kills }}</span>
               }
+              @if (turnsStarted && isActiveTurn(participant.id)) {
+                <span class="acting-badge">ACTING</span>
+              }
+              @if (turnsStarted && hasActed(participant.id) && !isActiveTurn(participant.id)) {
+                <span class="acted-badge">ACTED</span>
+              }
             </div>
-            <button class="btn-remove" (click)="removeParticipant(participant.id)">&times;</button>
+            <div class="header-actions">
+              <button class="btn-collapse"
+                      [title]="isParticipantCollapsed(participant.id) ? 'Expand' : 'Collapse'"
+                      (click)="toggleCollapseParticipant(participant.id)">
+                {{ isParticipantCollapsed(participant.id) ? '▼' : '▲' }}
+              </button>
+              <button class="btn-remove" (click)="removeParticipant(participant.id)">&times;</button>
+            </div>
           </div>
 
-          <div class="participant-and-hit-locations">
+          <!-- Collapsed View -->
+          @if (isParticipantCollapsed(participant.id)) {
+            <div class="collapsed-view">
+              <div class="collapsed-row">
+                <div class="collapsed-stat">
+                  <span class="stat-label">HP:</span>
+                  <strong [class.negative-hp]="getHitPointsRemaining(participant) < 0"
+                          [class.zero-hp]="getHitPointsRemaining(participant) === 0">
+                    {{ getHitPointsDisplay(participant) }}
+                  </strong>
+                </div>
+                <div class="collapsed-stat">
+                  <span class="stat-label">SR:</span>
+                  <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
+                    {{ getDisplaySR(participant) }}
+                  </strong>
+                </div>
+                @if (participant.movementThisRound !== undefined && participant.movementThisRound > 0) {
+                  <div class="collapsed-stat">
+                    <span class="stat-label">Mov:</span>
+                    <span>{{ participant.movementThisRound }}m (+{{ getMovementSRCost(participant) }} SR)</span>
+                  </div>
+                }
+                @if (participant.distanceToOpponent !== undefined && participant.distanceToOpponent > 0) {
+                  <div class="collapsed-stat">
+                    <span class="stat-label">Dist:</span>
+                    <span>{{ participant.distanceToOpponent }}m</span>
+                  </div>
+                }
+              </div>
+              <div class="collapsed-actions">
+                <select [(ngModel)]="participant.selectedWeapon" (change)="onWeaponChange(participant)" class="weapon-select">
+                  @for (weapon of getParticipantWeapons(participant); track weapon) {
+                    <option [value]="weapon">{{ weapon }}</option>
+                  }
+                </select>
+                @if (!participant.isDead && !participant.isSurprised) {
+                  <button class="btn btn-roll-damage"
+                          #rollDamageBtn
+                          [attr.data-participant-id]="participant.id"
+                          (click)="rollWeaponDamage(participant)"
+                          [disabled]="!participant.selectedOpponentId || !!pendingAttack">
+                    🎲 Roll
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Full View -->
+          @if (!isParticipantCollapsed(participant.id)) {
+            <div class="participant-and-hit-locations">
             <div class="participant-details">
               <div class="detail-group">
                 <label>Strike Rank: <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
@@ -118,7 +233,7 @@
                   Base: {{ participant.baseStrikeRank }}
                   @if (participant.selectedWeapon) { + Wpn {{ participant.finalStrikeRank - participant.baseStrikeRank }} }
                   @if (getMovementSRCost(participant) > 0) { + Move {{ getMovementSRCost(participant) }} }
-                  @if (participant.isSurprised) { + Surprise 12 }
+                  @if (getSurpriseDistancePenalty(participant) > 0) { + Surprised ({{ participant.distanceToOpponent }}m) {{ getSurpriseDistancePenalty(participant) }} }
                 </span>
               </div>
 
@@ -140,6 +255,7 @@
               <div class="detail-group distance-row">
                 <label>Distance:
                   <input type="number" [(ngModel)]="participant.distanceToOpponent"
+                         (ngModelChange)="updateDistance(participant)"
                          min="0" step="1" class="distance-input">
                   <span class="distance-unit">m</span>
                 </label>
@@ -290,10 +406,11 @@
               }
             </div>
           </div>
-
+          }
         </div>
       }
     </div>
+
   } @else {
     <div class="empty-state">
       <p>No participants in combat. Add characters or monsters to begin tracking.</p>
@@ -349,7 +466,7 @@
           <p class="defense-prompt">{{ pendingAttack.defender.name }}'s response:</p>
           <div class="defense-buttons">
 
-            <button class="btn btn-danger defense-btn" (click)="resolveNoDefense()">
+            <button #takeHitBtn class="btn btn-danger defense-btn" (click)="resolveNoDefense()">
               <span class="defense-btn-title">Take Hit</span>
               <span class="defense-btn-sub">No defense</span>
             </button>

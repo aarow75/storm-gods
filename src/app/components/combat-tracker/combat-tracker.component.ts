@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChildren, ViewChild, QueryList, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -57,6 +57,8 @@ interface PendingAttack {
 })
 export class CombatTrackerComponent implements OnInit, OnDestroy {
   @ViewChildren('rollDamageBtn', { read: ElementRef }) rollButtons!: QueryList<ElementRef<HTMLButtonElement>>;
+  @ViewChild('nextRoundBtn', { read: ElementRef }) nextRoundBtn!: ElementRef<HTMLButtonElement>;
+  @ViewChild('takeHitBtn', { read: ElementRef }) takeHitBtn!: ElementRef<HTMLButtonElement>;
 
   characters: Character[] = [];
   monsters: Monster[] = [];
@@ -79,6 +81,16 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   showLogHistory = false;
 
   pendingAttack: PendingAttack | null = null;
+
+  // ── Turn State Machine ───────────────────────────────────────────────────────
+  currentRound = 0;
+  activeTurnParticipantId: string | null = null;
+  actedThisRound = new Set<string>();
+  turnsStarted = false;
+  strikeRankLocked = false;  // Locked once turns begin (prevents further movement/distance changes to SR)
+
+  // ── Participant Collapse State ─────────────────────────────────────────────────
+  collapsedParticipants = new Set<string>();
 
   readonly hitLocationsOrder = HIT_LOCATIONS_ORDER;
 
@@ -314,6 +326,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       this.combatLogService.clearLog();
       this.lastDamageRolls.clear();
       this.pendingAttack = null;
+      this.clearTurns();
+      this.currentRound = 0;
     }
   }
 
@@ -441,6 +455,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   resetRound(): void {
+    this.clearTurns();
     this.combatParticipants.forEach(p => {
       p.attacksUsed = 0;
       p.parriesAgainst = {};
@@ -449,19 +464,157 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     });
     this.pendingAttack = null;
     this.updateAllParticipantsSR();
+    if (this.currentRound > 0) this.currentRound++;
+  }
+
+  // ── Turn State Machine ──────────────────────────────────────────────────────
+
+  getActiveTurnParticipant(): CombatParticipant | null {
+    if (!this.activeTurnParticipantId) return null;
+    return this.combatParticipants.find(p => p.id === this.activeTurnParticipantId) ?? null;
+  }
+
+  startTurns(): void {
+    this.currentRound++;
+    this.actedThisRound.clear();
+    this.turnsStarted = true;
+    this.strikeRankLocked = true;  // Lock SR once turns begin
+    this.activeTurnParticipantId = null;
+    this.advanceTurn();
+    // advanceTurn() handles all focus management
+  }
+
+  advanceTurn(): void {
+    const eligible = this.combatParticipants.filter(
+      p => this.canParticipantAct(p) && !this.actedThisRound.has(p.id)
+    );
+    if (eligible.length === 0) {
+      this.activeTurnParticipantId = null;
+      this.focusNextRoundButton();
+      return;
+    }
+    this.activeTurnParticipantId = eligible[0].id;
+    setTimeout(() => {
+      const el = document.querySelector(`[data-participant-id="${this.activeTurnParticipantId}"]`);
+      el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      this.focusActiveParticipantRollButton();
+    }, 0);
+  }
+
+  endTurn(participantId: string): void {
+    if (!this.turnsStarted) return;
+    this.actedThisRound.add(participantId);
+    if (this.activeTurnParticipantId === participantId) {
+      // Focus the "Next Turn →" button after participant acts
+      this.focusNextTurnButton();
+    }
+  }
+
+  clearTurns(): void {
+    this.activeTurnParticipantId = null;
+    this.actedThisRound.clear();
+    this.turnsStarted = false;
+    this.strikeRankLocked = false;
+  }
+
+  isActiveTurn(participantId: string): boolean {
+    return this.activeTurnParticipantId === participantId;
+  }
+
+  hasActed(participantId: string): boolean {
+    return this.actedThisRound.has(participantId);
+  }
+
+  isRoundComplete(): boolean {
+    return this.turnsStarted &&
+      this.activeTurnParticipantId === null &&
+      this.combatParticipants.some(p => this.canParticipantAct(p));
+  }
+
+  private focusActiveParticipantRollButton(): void {
+    if (!this.activeTurnParticipantId) return;
+    // Find the roll button for the active participant
+    const buttons = this.rollButtons.toArray();
+    const activeButton = buttons.find(btn =>
+      btn.nativeElement.getAttribute('data-participant-id') === this.activeTurnParticipantId
+    );
+    if (activeButton) {
+      setTimeout(() => activeButton.nativeElement.focus(), 0);
+    }
+  }
+
+  private focusNextTurnButton(): void {
+    // Focus the "Next Turn →" button after a participant acts
+    setTimeout(() => {
+      const buttons = document.querySelectorAll('button.btn-turn-next');
+      // The Next Turn button contains the arrow and calls advanceTurn()
+      const nextTurnBtn = Array.from(buttons).find(btn =>
+        btn.textContent?.includes('→')
+      ) as HTMLButtonElement | undefined;
+
+      if (nextTurnBtn) {
+        nextTurnBtn.focus();
+      }
+    }, 50);
+  }
+
+  private focusNextRoundButton(): void {
+    // Wait for DOM to update and find the "Next Round" button
+    setTimeout(() => {
+      const buttons = document.querySelectorAll('button.btn-turn-next');
+      // The Next Round button appears when isRoundComplete() is true
+      // It's the one that calls startTurns() with text "Next Round"
+      const nextRoundBtn = Array.from(buttons).find(btn =>
+        btn.textContent?.trim() === 'Next Round'
+      ) as HTMLButtonElement | undefined;
+
+      if (nextRoundBtn) {
+        nextRoundBtn.focus();
+      }
+    }, 100);
+  }
+
+  toggleCollapseParticipant(participantId: string): void {
+    if (this.collapsedParticipants.has(participantId)) {
+      this.collapsedParticipants.delete(participantId);
+    } else {
+      this.collapsedParticipants.add(participantId);
+    }
+  }
+
+  isParticipantCollapsed(participantId: string): boolean {
+    // Auto-collapse non-active participants during turn tracking
+    if (this.turnsStarted && this.activeTurnParticipantId !== null && this.activeTurnParticipantId !== participantId) {
+      return true;
+    }
+    return this.collapsedParticipants.has(participantId);
   }
 
   updateMovement(participant: CombatParticipant): void {
-    this.updateParticipantSR(participant);
+    if (!this.strikeRankLocked) {
+      this.updateParticipantSR(participant);
+    }
+  }
+
+  updateDistance(participant: CombatParticipant): void {
+    if (!this.strikeRankLocked) {
+      this.updateParticipantSR(participant);
+    }
   }
 
   toggleSurprise(participant: CombatParticipant): void {
     participant.isSurprised = !participant.isSurprised;
-    this.updateParticipantSR(participant);
+    if (!this.strikeRankLocked) {
+      this.updateParticipantSR(participant);
+    }
   }
 
   getMovementSRCost(participant: CombatParticipant): number {
     return this.combatService.calculateMovementSRCost(participant.movementThisRound ?? 0);
+  }
+
+  getSurpriseDistancePenalty(participant: CombatParticipant): number {
+    return this.combatService.calculateSurpriseDistancePenalty(participant.distanceToOpponent, participant.isSurprised);
   }
 
   getDisplaySR(participant: CombatParticipant): number {
@@ -521,6 +674,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       });
       this.saveCombat();
       this.focusNextRollButton();
+      this.endTurn(participant.id);
       return;
     }
 
@@ -537,7 +691,10 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       attackRoll,
       attackSkill,
     };
+    this.endTurn(participant.id);
     this.lastMissResult.delete(participant.id);
+    // Focus "Take Hit" button in defense modal
+    setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
   }
 
   resolveNoDefense(): void {

@@ -58,10 +58,18 @@ export class CombatService {
     return Math.ceil(meters / 3);
   }
 
+  calculateSurpriseDistancePenalty(distance: number | undefined, isSurprised: boolean | undefined): number {
+    if (!isSurprised) return 0;
+    if (distance === undefined || distance <= 0) return 0;
+    if (distance <= 3) return 3;
+    if (distance <= 9) return 1;
+    return 0;
+  }
+
   calculateEffectiveSR(participant: CombatParticipant): number {
     const moveCost = this.calculateMovementSRCost(participant.movementThisRound ?? 0);
-    const surpriseCost = participant.isSurprised ? this.SURPRISE_SR_PENALTY : 0;
-    return participant.finalStrikeRank + moveCost + surpriseCost;
+    const distancePenalty = this.calculateSurpriseDistancePenalty(participant.distanceToOpponent, participant.isSurprised);
+    return participant.finalStrikeRank + moveCost + distancePenalty;
   }
 
   sortParticipantsByStrikeRank(participants: CombatParticipant[]): CombatParticipant[] {

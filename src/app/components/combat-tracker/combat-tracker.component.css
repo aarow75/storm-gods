@@ -11,10 +11,19 @@
   grid-column: 1 / -1;
 }
 
-.combat-tracker .combat-log {
+.combat-tracker .right-column {
   grid-column: 2;
   grid-row: 2 / 4;
   align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5xl);
+}
+
+.combat-tracker .combat-log {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .combat-tracker .combat-list {
@@ -929,8 +938,8 @@
   transition: outline 0.2s;
 }
 
-.defense-btn:focus {
-  outline: 3px solid;
+.btn-danger.defense-btn:focus {
+  outline: 3px solid #991b1b;
   outline-offset: 2px;
 }
 
@@ -1324,4 +1333,315 @@
   width: 18px;
   height: 18px;
   accent-color: var(--color-primary-blue);
+}
+
+/* ── Turn Control Bar ──────────────────────────────────────────────────── */
+.turn-control-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-5xl);
+  flex-wrap: wrap;
+  padding: var(--spacing-lg) var(--spacing-5xl);
+  background: var(--color-bg-lighter);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-xl);
+  margin-bottom: var(--spacing-5xl);
+}
+
+.round-counter {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-md);
+}
+
+.round-label {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.round-number {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.turn-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xl);
+  flex-wrap: wrap;
+}
+
+.turn-status-active {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+}
+
+.turn-status-active strong {
+  color: var(--color-success-dark);
+}
+
+.turn-status-complete {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.btn-turn-start {
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-lg) var(--spacing-4xl);
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: background-color 0.2s;
+}
+
+.btn-turn-start:hover:not(:disabled) {
+  background: var(--color-success-dark);
+}
+
+.btn-turn-start:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-turn-next {
+  background: var(--color-primary-orange);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-lg) var(--spacing-4xl);
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  transition: background-color 0.2s;
+}
+
+.btn-turn-next:hover:not(:disabled) {
+  background: var(--color-primary-orange-dark);
+}
+
+.btn-turn-next:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-turn-stop {
+  background: var(--color-gray-500);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-lg) var(--spacing-4xl);
+  border: none;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  transition: background-color 0.2s;
+}
+
+.btn-turn-stop:hover:not(:disabled) {
+  background: var(--color-gray-600);
+}
+
+.btn-turn-stop:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.turn-order-queue {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.turn-queue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-lg);
+  border-radius: 20px;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  border: 1px solid var(--color-gray-300);
+  background: var(--color-bg-white);
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.turn-queue-chip.chip-acting {
+  background: var(--color-success-20);
+  border-color: var(--color-success);
+  color: var(--color-success-dark);
+  font-weight: var(--font-weight-bold);
+  box-shadow: 0 0 0 2px var(--color-success-30);
+}
+
+.turn-queue-chip.chip-acted {
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-300);
+  color: var(--color-gray-400);
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+.chip-check {
+  color: var(--color-success);
+  font-size: var(--font-size-base);
+}
+
+.chip-now {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-success-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Participant Card: active-turn ──────────────────────────────────────── */
+.combat-participant.active-turn {
+  border-color: var(--color-success) !important;
+  box-shadow: 0 0 0 3px var(--color-success-20), 0 2px 8px var(--shadow-black-10);
+  background-color: var(--color-bg-green-light) !important;
+}
+
+/* ── Participant Card: acted-turn ──────────────────────────────────────── */
+.combat-participant.acted-turn {
+  opacity: 0.72;
+  filter: saturate(0.6);
+}
+
+/* ── Per-card Badges ────────────────────────────────────────────────────── */
+.acting-badge {
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+  padding: var(--spacing-xs) var(--spacing-lg);
+  border-radius: 12px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: pulse-acting 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-acting {
+  0%, 100% {
+    box-shadow: 0 0 0 0 var(--color-success-30);
+  }
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+.acted-badge {
+  background: var(--color-gray-300);
+  color: var(--color-gray-600);
+  padding: var(--spacing-xs) var(--spacing-lg);
+  border-radius: 12px;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Collapsible Participant Cards ──────────────────────────────────────── */
+
+.participant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-lg);
+  align-items: center;
+}
+
+.btn-collapse {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.btn-collapse:hover {
+  color: var(--color-text-dark);
+}
+
+/* Collapsed View */
+.collapsed-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) 0;
+}
+
+.collapsed-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  align-items: center;
+  font-size: var(--font-size-sm);
+}
+
+.collapsed-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  white-space: nowrap;
+}
+
+.stat-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.collapsed-actions {
+  display: flex;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.weapon-select {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: var(--font-size-sm);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--border-radius-md);
+  background: var(--color-bg-white);
+  cursor: pointer;
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Collapsed State */
+.combat-participant.collapsed {
+  gap: 0;
+}
+
+.combat-participant.collapsed .participant-and-hit-locations,
+.combat-participant.collapsed .hit-points {
+  display: none;
+}
+
+.combat-participant.collapsed .collapsed-view {
+  display: flex;
 }
