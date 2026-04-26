@@ -1,6 +1,6 @@
 # Runequest Character Manager
 
-A comprehensive Angular application for creating and managing Runequest RPG characters with complete character sheet functionality, dice rolling, and localStorage persistence.
+A comprehensive Angular application for creating and managing Runequest and Dragonbane RPG characters with complete character sheet functionality, combat tracking, dice rolling, and localStorage persistence.
 
 ![Angular](https://img.shields.io/badge/Angular-21.2.7-red)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
@@ -26,18 +26,41 @@ A comprehensive Angular application for creating and managing Runequest RPG char
 
 ### Dice Rolling Utility
 - **8 Dice Types**: d4, d6, d8, d10, d12, d20, 3d6, d% (percentile)
+- **Advanced Dice Features**: Boons and Banes with dual d20 rolling
 - **Animated Results**: Large display with roll animations
 - **Roll History**: Track last 10 rolls with clear function
 - **Color-coded Buttons**: Gradient-styled dice buttons
+- **Contextual Display**: Accessible on character/combat pages, hidden on reference pages
+
+### Combat Tracking
+- **Combat Tracker**: Full combat encounter management with initiative, damage, and hit location tracking
+- **Initiative System**: Automatic strike rank calculation for all combatants
+- **Damage Resolution**: Hit location-specific damage tracking with armor mitigation
+- **Movement Tracking**: Movement phase management during combat
+- **NPC/Monster Support**: Add custom monsters to combat encounters
+
+### Reference & Database
+- **Rules Reference**: Complete rules database with game system-specific content
+- **Bestiary**: Pre-populated monster database with creature stats and abilities (searchable and filterable by game system)
+- **Monster Creator**: Create and save custom monsters with full stat blocks
+- **Game System Filtering**: Filter creatures and rules by RuneQuest or Dragonbane system
+
+### Settings & Customization
+- **Game System Toggle**: Switch between RuneQuest and Dragonbane with system-specific rules and labels
+- **Text Size Adjustment**: Scalable UI with three text size options (decrease, reset, increase)
+- **Multi-Language Support**: English and Swedish localization with dynamic switching
+- **Settings Page**: Dedicated settings interface accessible from header gear icon
 
 ### User Experience
 - **localStorage Persistence**: All data saved locally in JSON format
+- **Character Color Coding**: Unique colors for character cards for easy visual identification
 - **Edit Mode**: Visual indicators with orange borders and character name banner
 - **Auto-calculations**: Derived stats and hit points calculated from characteristics
-- **Responsive Design**: Multi-column layouts (5-10 columns) with compact inputs
+- **Responsive Design**: Multi-column layouts (5-10 columns) with compact inputs on desktop, optimized for mobile
 - **Space-Optimized**: Numeric fields only 45-70px wide for efficiency
 - **Migration System**: Backward compatibility for data schema changes
 - **Form Validation**: Required fields and numeric range enforcement
+- **Optimized Navigation**: Context-sensitive page structure (Create Character on Characters page, Monster Creator on Bestiary page)
 
 ## Quick Start
 
@@ -66,19 +89,49 @@ runequest-characters/
 ├── src/
 │   ├── app/
 │   │   ├── components/
-│   │   │   ├── character-form/      # Character creation/editing form
-│   │   │   ├── character-list/      # Character cards display
-│   │   │   └── dice-roller/         # Standalone dice roller
+│   │   │   ├── character-form/        # Character creation/editing form
+│   │   │   ├── character-list/        # Character cards display with create button
+│   │   │   ├── dice-roller/           # Standalone dice roller with boons/banes
+│   │   │   ├── combat-tracker/        # Full combat encounter management
+│   │   │   ├── rules-reference/       # Game rules database
+│   │   │   ├── bestiary/              # Monster database with filtering
+│   │   │   ├── monster-creator/       # Custom monster creation tool
+│   │   │   └── settings/              # Settings page (language, text size, game system)
 │   │   ├── models/
-│   │   │   └── character.model.ts   # Data models & calculations
-│   │   └── services/
-│   │       ├── character.service.ts # localStorage & migration
-│   │       └── dice.service.ts      # Dice rolling logic
-│   ├── styles.css                   # Global styles
-│   └── index.html
-├── SESSION_REPORT.md                # Detailed development report
+│   │   │   ├── character.model.ts     # Character data models & calculations
+│   │   │   ├── combat.model.ts        # Combat mechanics and monster data
+│   │   │   └── monster.model.ts       # Monster definitions
+│   │   ├── services/
+│   │   │   ├── character.service.ts   # localStorage & migration
+│   │   │   ├── dice.service.ts        # Dice rolling logic
+│   │   │   ├── combat.service.ts      # Combat mechanics
+│   │   │   ├── game-system.service.ts # Game system state (RQ/Dragonbane)
+│   │   │   ├── translation.service.ts # i18n and localization
+│   │   │   └── ui-state.service.ts    # UI preferences (font size, etc.)
+│   │   ├── i18n/
+│   │   │   └── translations.ts        # English and Swedish translations
+│   │   ├── constants/
+│   │   │   ├── skill-categories.constants.ts
+│   │   │   ├── monsters.constants.ts
+│   │   │   └── [other game data constants]
+│   │   ├── styles.css                 # Global styles
+│   │   └── index.html
+├── CLAUDE.md                          # Project documentation for Claude Code
+├── SESSION_REPORT.md                  # Detailed development report
 └── README.md
 ```
+
+## Navigation Guide
+
+The main navigation provides quick access to core features:
+
+- **Characters** — View all characters, create new characters (button in header)
+- **Combat Tracker** — Manage active combat encounters and initiative
+- **Bestiary** — Browse creatures, create custom monsters (button in header)
+- **Rules Reference** — Look up game rules and mechanics
+- **⚙️ Settings** — Configure game system, text size, and language
+
+The Dice Roller is available on character management and combat pages for quick dice rolls.
 
 ## Usage
 
@@ -97,6 +150,7 @@ runequest-characters/
 ### Using the Dice Roller
 - Click any dice button (d4, d6, d8, d10, d12, d20, 3d6, d%)
 - View large animated result display
+- Add Boons (advantages) or Banes (disadvantages) to reroll dice
 - See roll history (last 10 rolls)
 - Use for skill checks, damage rolls, etc.
 
@@ -106,17 +160,47 @@ runequest-characters/
 - Modify any fields
 - Click "Update Character" to save changes
 
+### Combat Encounters
+1. Go to Combat Tracker
+2. Add characters or monsters to the encounter
+3. Initiative automatically calculated based on Strike Rank
+4. Apply damage to specific hit locations
+5. Track unconsciousness and death states
+6. Use dice roller for attack and damage rolls
+
+### Using the Bestiary & Monster Creator
+- **Bestiary**: Search and filter monsters by game system (RuneQuest/Dragonbane)
+- **Monster Creator**: Create custom creatures with full stat blocks and save them
+- Filter by system to see only relevant creatures
+
+### Customizing Settings
+- Click ⚙️ gear icon in the top-right header
+- **Game System**: Toggle between RuneQuest (orange) and Dragonbane (green)
+- **Text Size**: Adjust UI text size with −/Reset/+ buttons
+- **Language**: Switch between English and Swedish
+
 ## Game System Accuracy
 
-This application accurately implements Runequest rules:
+### RuneQuest Rules Implementation
 - ✅ Correct characteristic ranges (3-18 for 3d6)
-- ✅ Accurate damage bonus formula (STR + SIZ)
-- ✅ Proper hit location distribution
+- ✅ Accurate damage bonus formula ((STR + SIZ) / 8)
+- ✅ Proper hit location distribution (7 locations with specific HP allocation)
 - ✅ Spirit combat damage based on POW
-- ✅ Strike rank calculation (DEX + INT / 2)
+- ✅ Strike rank calculation with SIZ and DEX modifiers
 - ✅ Canonical Glorantha lore (cults, homelands, skills)
-- ✅ Three magic systems (Spirit, Rune, Sorcery)
-- ✅ Rune affinities system
+- ✅ Three magic systems (Spirit Magic, Rune Magic, Sorcery)
+- ✅ Rune affinities system (Elemental, Power, Form runes)
+- ✅ Encumbrance and movement penalties
+- ✅ Parry and dodge mechanics
+- ✅ Hit location-specific armor application
+
+### Dragonbane Support
+- ✅ Alternate characteristic names and ranges
+- ✅ Dragonbane-specific professions and beliefs
+- ✅ System-agnostic combat calculations with Dragonbane variants
+- ✅ Creature database with Dragonbane-specific monsters
+- ✅ Dynamic UI labels based on game system selection
+- ✅ Full character creation for both systems
 
 ## Data Storage
 
@@ -210,3 +294,22 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Future Features
+
+### High Priority
+- [ ] Parry restrictions based on arm injuries (if left arm useless, can't parry with shield; if right arm useless, must drop shield)
+- [ ] Enhanced Dragonbane-specific rules and mechanics
+- [ ] Character import/export functionality
+
+### Medium Priority
+- [ ] Game system-specific UI themes (images, fonts, color schemes)
+- [ ] Advanced character customization and visual appearance editor
+- [ ] Save/load combat encounters
+- [ ] Expanded bestiary with more creatures and variants
+
+### Low Priority
+- [ ] Cloud synchronization (optional account system)
+- [ ] Character sheet PDF export
+- [ ] Multi-player character management
+- [ ] Campaign/world management features

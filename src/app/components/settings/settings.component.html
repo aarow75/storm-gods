@@ -1,0 +1,57 @@
+<div class="settings-container">
+  <h1>⚙️ {{ translationService.get('settings.title', 'Settings') }}</h1>
+
+  <div class="settings-section">
+    <h2>{{ translationService.get('system.toggle', 'Game System') }}</h2>
+    <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
+      Choose which game system to use for your characters
+    </p>
+    <div class="button-group">
+      <button
+        (click)="toggleGameSystem()"
+        [class.active]="gameSystemService.gameSystem() === 'runequest'"
+        class="system-toggle-btn system-toggle-rq">
+        {{ translationService.get('system.runequest', 'RuneQuest') }}
+      </button>
+      <button
+        (click)="toggleGameSystem()"
+        [class.active]="gameSystemService.gameSystem() === 'dragonbane'"
+        class="system-toggle-btn system-toggle-db">
+        {{ translationService.get('system.dragonbane', 'Dragonbane') }}
+      </button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>{{ translationService.get('settings.textSize', 'Text Size') }}</h2>
+    <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
+      Adjust the text size for better readability
+    </p>
+    <div class="button-group">
+      <button (click)="decreaseFontSize()" class="font-size-btn" title="Decrease font size" aria-label="Decrease text size">−</button>
+      <button (click)="resetFontSize()" class="font-size-btn font-size-reset" title="Reset to default" aria-label="Reset text size to default">Reset</button>
+      <button (click)="increaseFontSize()" class="font-size-btn" title="Increase font size" aria-label="Increase text size">+</button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h2>{{ translationService.get('settings.language', 'Language') }}</h2>
+    <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
+      Select your preferred language
+    </p>
+    <div class="button-group">
+      <button
+        (click)="switchLanguage('en')"
+        [class.active]="translationService.locale() === 'en'"
+        class="system-toggle-btn">
+        {{ translationService.get('language.english', 'English') }}
+      </button>
+      <button
+        (click)="switchLanguage('sv')"
+        [class.active]="translationService.locale() === 'sv'"
+        class="system-toggle-btn">
+        {{ translationService.get('language.swedish', 'Swedish') }}
+      </button>
+    </div>
+  </div>
+</div>

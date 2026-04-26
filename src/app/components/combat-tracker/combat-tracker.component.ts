@@ -9,6 +9,7 @@ import { MONSTERS as BESTIARY_MONSTERS } from '../../constants/monsters.constant
 import { CharacterService } from '../../services/character.service';
 import { CustomMonsterService } from '../../services/custom-monster.service';
 import { CombatService } from '../../services/combat.service';
+import { CombatLogService } from '../../services/combat-log.service';
 import { DiceService } from '../../services/dice.service';
 import { CharacterUpdateService } from '../../services/character-update.service';
 import { TranslationService } from '../../services/translation.service';
@@ -70,10 +71,11 @@ export class CombatTrackerComponent implements OnInit {
   selectedCharacterId = '';
   selectedMonsterId = '';
   selectedWeapon = '';
+  addParticipantDistance = 0;
+  addParticipantSurprised = false;
 
   lastDamageRolls: Map<string, { total: number; breakdown: string; finalDamage: number; armorAbsorbed: number; targetName: string }> = new Map();
   lastMissResult: Map<string, { targetName: string; attackRoll: number; attackSkill: number }> = new Map();
-  combatLog: string[] = [];
   showLogHistory = false;
 
   pendingAttack: PendingAttack | null = null;
@@ -84,10 +86,15 @@ export class CombatTrackerComponent implements OnInit {
     private characterService: CharacterService,
     private customMonsterService: CustomMonsterService,
     private combatService: CombatService,
+    private combatLogService: CombatLogService,
     private diceService: DiceService,
     private characterUpdateService: CharacterUpdateService,
     public translationService: TranslationService
   ) {}
+
+  get combatLog() {
+    return this.combatLogService.getEntries();
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -109,6 +116,10 @@ export class CombatTrackerComponent implements OnInit {
     this.autoAssignOpponentsIfNeeded();
   }
 
+  getAliveCharacters(): Character[] {
+    return this.characters.filter(c => c.derivedStats.totalHitPoints > 0);
+  }
+
   openAddParticipantModal(): void {
     this.showAddParticipantModal = true;
     this.selectedEntityType = 'character';
@@ -117,7 +128,11 @@ export class CombatTrackerComponent implements OnInit {
     this.selectedWeapon = '';
   }
 
-  closeAddParticipantModal(): void { this.showAddParticipantModal = false; }
+  closeAddParticipantModal(): void {
+    this.showAddParticipantModal = false;
+    this.addParticipantDistance = 0;
+    this.addParticipantSurprised = false;
+  }
   onEntityTypeChange(): void {
     this.selectedCharacterId = '';
     this.selectedMonsterId = '';
@@ -172,8 +187,12 @@ export class CombatTrackerComponent implements OnInit {
         isDead: currentHP <= 0,
         kills: 0,
         color: character.color || '#3498db',
-        locationDamage: {}
+        locationDamage: {},
+        distanceToOpponent: this.addParticipantDistance || 0,
+        movementThisRound: 0,
+        isSurprised: this.addParticipantSurprised
       };
+      participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
       this.combatParticipants.push(participant);
     } else if (this.selectedEntityType === 'monster' && this.selectedMonsterId) {
       const monster = this.monsters.find(m => m.id === this.selectedMonsterId);
@@ -197,8 +216,12 @@ export class CombatTrackerComponent implements OnInit {
         isDead: false,
         kills: 0,
         color: '#000000',
-        locationDamage: {}
+        locationDamage: {},
+        distanceToOpponent: this.addParticipantDistance || 0,
+        movementThisRound: 0,
+        isSurprised: this.addParticipantSurprised
       };
+      participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
       this.combatParticipants.push(participant);
     }
 
@@ -231,6 +254,7 @@ export class CombatTrackerComponent implements OnInit {
       const validItems = this.getParticipantParryItems(participant);
       participant.selectedParryItem = validItems.length > 0 ? validItems[0] : '';
     }
+    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
     this.saveCombat();
   }
@@ -253,7 +277,7 @@ export class CombatTrackerComponent implements OnInit {
       if (this.combatLog.length > 0) this.combatService.saveCombatLog(this.combatLog);
       this.combatParticipants = [];
       this.combatService.clearCombat();
-      this.combatLog = [];
+      this.combatLogService.clearLog();
       this.lastDamageRolls.clear();
       this.pendingAttack = null;
     }
@@ -384,9 +408,34 @@ export class CombatTrackerComponent implements OnInit {
     this.combatParticipants.forEach(p => {
       p.attacksUsed = 0;
       p.parriesAgainst = {};
+      p.movementThisRound = 0;
+      p.isSurprised = false;
+      p.effectiveSR = this.combatService.calculateEffectiveSR(p);
     });
+    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
     this.pendingAttack = null;
     this.saveCombat();
+  }
+
+  updateMovement(participant: CombatParticipant): void {
+    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
+    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
+    this.saveCombat();
+  }
+
+  toggleSurprise(participant: CombatParticipant): void {
+    participant.isSurprised = !participant.isSurprised;
+    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
+    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
+    this.saveCombat();
+  }
+
+  getMovementSRCost(participant: CombatParticipant): number {
+    return this.combatService.calculateMovementSRCost(participant.movementThisRound ?? 0);
+  }
+
+  getDisplaySR(participant: CombatParticipant): number {
+    return participant.effectiveSR ?? participant.finalStrikeRank;
   }
 
   // ── Attack flow ──────────────────────────────────────────────────────────
@@ -430,7 +479,7 @@ export class CombatTrackerComponent implements OnInit {
         powB > 0 ? `+${powB} POW` : '',
         dexB > 0 ? `+${dexB} DEX` : '',
       ].filter(Boolean).join(' ');
-      this.combatLog.unshift(
+      this.combatLogService.addEntry(
         `[MISS] ${participant.name} → ${opponent.name}: attack failed! ` +
         `(rolled ${attackRoll} vs ${attackSkill}%` +
         (bonusParts ? `: ${baseSkill} skill ${bonusParts}` : '') + `)`
@@ -468,18 +517,18 @@ export class CombatTrackerComponent implements OnInit {
     const armor = this.getArmorValue(defender, hitLocation);
     const finalDamage = Math.max(0, rawDamage - armor);
 
-    this.combatLog.unshift(
+    this.combatLogService.addEntry(
       `[ATTACK] ${attacker.name} → ${defender.name} (d20:${locationRoll} = ${hitLocation}): ${rawDamage} (${damageBreakdown}) - ${armor} armor = ${finalDamage} damage`
     );
 
     const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
 
     if (locationMaxed) {
-      this.combatLog.unshift(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
+      this.combatLogService.addEntry(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
     }
     if (justDied) {
       attacker.kills = (attacker.kills || 0) + 1;
-      this.combatLog.unshift(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
+      this.combatLogService.addEntry(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
     }
 
     this.lastDamageRolls.set(attacker.id, {
@@ -528,7 +577,7 @@ export class CombatTrackerComponent implements OnInit {
     const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
 
     if (!this.isValidParryItem(defender)) {
-      this.combatLog.unshift(
+      this.combatLogService.addEntry(
         `[ERROR] ${defender.name} cannot parry with ${defender.selectedParryItem}!`
       );
       this.pendingAttack = null;
@@ -579,13 +628,13 @@ export class CombatTrackerComponent implements OnInit {
         logEntry += ` — fully absorbed by ${defender.selectedParryItem}`;
       }
 
-      this.combatLog.unshift(logEntry);
+      this.combatLogService.addEntry(logEntry);
 
       const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
-      if (locationMaxed) this.combatLog.unshift(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
+      if (locationMaxed) this.combatLogService.addEntry(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
       if (justDied) {
         attacker.kills = (attacker.kills || 0) + 1;
-        this.combatLog.unshift(`[SLAIN] ${defender.name} slain despite the parry!`);
+        this.combatLogService.addEntry(`[SLAIN] ${defender.name} slain despite the parry!`);
       }
 
       this.lastDamageRolls.set(attacker.id, {
@@ -594,15 +643,15 @@ export class CombatTrackerComponent implements OnInit {
       });
     } else {
       const finalDamage = Math.max(0, rawDamage - armor);
-      this.combatLog.unshift(
+      this.combatLogService.addEntry(
         `[PARRY FAILED] ${defender.name} failed to parry (rolled ${roll} vs ${skillLabel}) → ${hitLocation} (d20:${locationRoll}): ${finalDamage} damage`
       );
 
       const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
-      if (locationMaxed) this.combatLog.unshift(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
+      if (locationMaxed) this.combatLogService.addEntry(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
       if (justDied) {
         attacker.kills = (attacker.kills || 0) + 1;
-        this.combatLog.unshift(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
+        this.combatLogService.addEntry(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
       }
 
       this.lastDamageRolls.set(attacker.id, {
@@ -638,7 +687,7 @@ export class CombatTrackerComponent implements OnInit {
       : `${effectiveSkill}%`;
 
     if (success) {
-      this.combatLog.unshift(
+      this.combatLogService.addEntry(
         `[DODGE] ${defender.name} dodges! (rolled ${roll} vs ${dodgeSkill}${bonusPart}) — evades ${hitLocation} (d20:${locationRoll}) hit!`
       );
       this.lastDamageRolls.set(attacker.id, {
@@ -648,15 +697,15 @@ export class CombatTrackerComponent implements OnInit {
     } else {
       const armor = this.getArmorValue(defender, hitLocation);
       const finalDamage = Math.max(0, rawDamage - armor);
-      this.combatLog.unshift(
+      this.combatLogService.addEntry(
         `[DODGE FAILED] ${defender.name} fails dodge (rolled ${roll} vs ${dodgeSkill}${bonusPart}) → ${hitLocation} (d20:${locationRoll}): ${finalDamage} damage`
       );
 
       const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
-      if (locationMaxed) this.combatLog.unshift(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
+      if (locationMaxed) this.combatLogService.addEntry(`[WOUND] ${defender.name}'s ${hitLocation} — ${locationEffect}!`);
       if (justDied) {
         attacker.kills = (attacker.kills || 0) + 1;
-        this.combatLog.unshift(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
+        this.combatLogService.addEntry(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
       }
 
       this.lastDamageRolls.set(attacker.id, {
@@ -966,14 +1015,30 @@ export class CombatTrackerComponent implements OnInit {
     this.lastMissResult.delete(participantId);
   }
 
+  canParticipantAct(participant: CombatParticipant): boolean {
+    return !participant.isDead && !participant.isSurprised;
+  }
+
   private focusNextRollButton(): void {
     if (!this.lastAttackerId) return;
 
     const attackerIndex = this.combatParticipants.findIndex(p => p.id === this.lastAttackerId);
     if (attackerIndex === -1) return;
 
-    const nextIndex = (attackerIndex + 1) % this.combatParticipants.length;
-    const nextParticipant = this.combatParticipants[nextIndex];
+    let nextIndex = (attackerIndex + 1) % this.combatParticipants.length;
+    let nextParticipant = this.combatParticipants[nextIndex];
+    let attempts = 0;
+    const maxAttempts = this.combatParticipants.length;
+
+    // Skip participants who can't act (dead or surprised)
+    while (!this.canParticipantAct(nextParticipant) && attempts < maxAttempts) {
+      nextIndex = (nextIndex + 1) % this.combatParticipants.length;
+      nextParticipant = this.combatParticipants[nextIndex];
+      attempts++;
+    }
+
+    // If all participants can't act, don't focus anything
+    if (!this.canParticipantAct(nextParticipant)) return;
 
     setTimeout(() => {
       const buttons = this.rollButtons?.toArray() || [];
@@ -1034,7 +1099,7 @@ export class CombatTrackerComponent implements OnInit {
   clearCombatLog(): void {
     if (this.combatLog.length > 0 && confirm('Save this combat log to history and clear?')) {
       this.combatService.saveCombatLog(this.combatLog);
-      this.combatLog = [];
+      this.combatLogService.clearLog();
       this.saveCombat();
     }
   }

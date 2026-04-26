@@ -21,7 +21,7 @@
 }
 
 .reference-section {
-  background: var(--color-bg-white));
+  background: var(--color-bg-white);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-4xl);
@@ -110,6 +110,18 @@
 
 .mechanic-item strong {
   color: var(--color-text-primary);
+}
+
+.reference-section ul {
+  margin: var(--spacing-md) 0;
+  padding-left: var(--spacing-4xl);
+}
+
+.reference-section ul li {
+  margin: var(--spacing-sm) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-lg);
+  line-height: 1.4;
 }
 
 @media (max-width: 768px) {

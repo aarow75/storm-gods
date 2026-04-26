@@ -34,6 +34,10 @@ export interface CombatParticipant {
   locationDamage?: { [location: string]: number };
   attacksUsed?: number;    // shots fired this round (for missile rate-of-fire tracking)
   parriesAgainst?: { [attackerId: string]: number }; // parry attempts vs each attacker this round
+  distanceToOpponent?: number;  // meters to opponent at start of combat
+  movementThisRound?: number;   // meters moving this round (costs ceil(m/3) SR)
+  isSurprised?: boolean;        // +12 SR penalty; cleared on New Round
+  effectiveSR?: number;         // finalStrikeRank + movement cost + surprise penalty
 }
 
 export interface CombatLogEntry {

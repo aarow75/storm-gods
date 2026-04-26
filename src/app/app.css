@@ -47,117 +47,26 @@ header {
   flex-wrap: wrap;
 }
 
-.system-switcher,
-.font-size-adjuster,
-.language-switcher {
+.settings-link {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.system-switcher label,
-.font-size-adjuster label,
-.language-switcher label {
-  font-size: var(--font-size-lg);
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--border-radius-md);
   color: var(--color-text-primary);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.button-group {
-  display: flex;
-  gap: 0;
-  border-radius: 4px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px var(--shadow-black-10);
-}
-
-.system-toggle-btn,
-.language-switcher button {
-  padding: var(--spacing-lg) var(--spacing-4xl);
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
+  text-decoration: none;
   transition: all 0.2s ease;
-  font-size: var(--font-size-lg);
-  position: relative;
-}
-
-.system-toggle-btn {
-  background: var(--color-bg-white);
-  color: var(--color-gray-600);
-  border-right: 1px solid #e0e0e0;
-}
-
-.system-toggle-btn:last-child {
-  border-right: none;
-}
-
-.system-toggle-btn:hover:not(.active) {
   background: var(--color-bg-light);
 }
 
-/* RuneQuest button - amber/orange */
-.system-toggle-rq {
-  color: var(--color-primary-orange-dark);
+.settings-link:hover {
+  background: var(--color-gray-200);
+  transform: scale(1.1);
 }
 
-.system-toggle-rq.active {
-  background: linear-gradient(135deg, var(--color-primary-orange) 0%, var(--color-primary-orange-dark) 100%);
-  color: var(--color-bg-white);
-}
-
-/* Dragonbane button - green */
-.system-toggle-db {
-  color: var(--color-success-dark);
-}
-
-.system-toggle-db.active {
-  background: linear-gradient(135deg, var(--color-success) 0%, var(--color-success-dark) 100%);
-  color: var(--color-bg-white);
-}
-
-.language-switcher button {
-  background: var(--color-bg-white);
-  color: var(--color-gray-600);
-  border-right: 1px solid #e0e0e0;
-}
-
-.language-switcher button:last-child {
-  border-right: none;
-}
-
-.language-switcher button:hover:not(.active) {
-  background: var(--color-bg-light);
-}
-
-.language-switcher button.active {
-  background: var(--color-gray-600);
-  color: var(--color-bg-white);
-}
-
-.font-size-btn {
-  padding: var(--spacing-lg) var(--spacing-3xl);
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  font-size: var(--font-size-lg);
-  background: var(--color-bg-white);
-  color: var(--color-gray-600);
-  border-right: 1px solid #e0e0e0;
-}
-
-.font-size-btn:last-child {
-  border-right: none;
-}
-
-.font-size-btn:hover {
-  background: var(--color-bg-light);
-}
-
-.font-size-btn.font-size-reset {
-  font-size: var(--font-size-sm);
+.settings-icon {
+  font-size: var(--font-size-2xl);
 }
 
 /* Responsive design */
@@ -176,14 +85,10 @@ header {
   }
 
   .header-right {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .system-switcher,
-  .language-switcher {
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
+    gap: 12px;
   }
 }
 
@@ -252,7 +157,7 @@ main {
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-5xl);
+  /* padding: var(--spacing-5xl); */
 }
 
 .app-container.runequest-theme main {

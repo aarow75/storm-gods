@@ -9,6 +9,7 @@ export class CombatService {
   private readonly STORAGE_KEY = 'runequest-combat';
   private readonly MONSTERS_KEY = 'runequest-monsters';
   private readonly LOG_HISTORY_KEY = 'runequest-combat-log-history';
+  readonly SURPRISE_SR_PENALTY = 12;
 
   getCombatParticipants(): CombatParticipant[] {
     const data = localStorage.getItem(this.STORAGE_KEY);
@@ -52,8 +53,19 @@ export class CombatService {
     return baseStrikeRank + modifier;
   }
 
+  calculateMovementSRCost(meters: number): number {
+    if (!meters || meters <= 0) return 0;
+    return Math.ceil(meters / 3);
+  }
+
+  calculateEffectiveSR(participant: CombatParticipant): number {
+    const moveCost = this.calculateMovementSRCost(participant.movementThisRound ?? 0);
+    const surpriseCost = participant.isSurprised ? this.SURPRISE_SR_PENALTY : 0;
+    return participant.finalStrikeRank + moveCost + surpriseCost;
+  }
+
   sortParticipantsByStrikeRank(participants: CombatParticipant[]): CombatParticipant[] {
-    return [...participants].sort((a, b) => a.finalStrikeRank - b.finalStrikeRank);
+    return [...participants].sort((a, b) => (a.effectiveSR ?? a.finalStrikeRank) - (b.effectiveSR ?? b.finalStrikeRank));
   }
 
   generateId(): string {

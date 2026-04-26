@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Character } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
@@ -11,7 +11,7 @@ import { GameSystemService } from '../../services/game-system.service';
 @Component({
   selector: 'app-character-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './character-list.component.html',
   styleUrl: './character-list.component.css'
 })

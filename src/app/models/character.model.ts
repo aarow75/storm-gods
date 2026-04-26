@@ -362,7 +362,7 @@ export const DEFAULT_MAGIC: Magic = {
 };
 
 export const DEFAULT_RESOURCES: Resources = {
-  lunars: 0,
+  lunars: 200,
   wheels: 0,
   clacks: 0,
   reputation: 0,

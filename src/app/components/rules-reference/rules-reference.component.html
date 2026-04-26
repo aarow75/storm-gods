@@ -147,7 +147,8 @@
     <div class="reference-section">
       <h3>Strike Rank Calculation</h3>
       <p><strong>Base Formula:</strong> SIZ Modifier + DEX Modifier (from Strike Rank Modifier Table)</p>
-      <p><strong>Resolution:</strong> Lower SR acts first in combat. Encumbrance penalty adds to strike rank.</p>
+      <p><strong>Modifiers:</strong> Weapon modifier, Movement cost, Surprise penalty, Encumbrance penalty</p>
+      <p><strong>Resolution:</strong> Lower SR acts first in combat. Cumulative modifiers add to strike rank.</p>
       <table class="reference-table">
         <thead>
           <tr>
@@ -166,7 +167,51 @@
           <tr><td></td><td></td><td>1-5</td><td>+5</td></tr>
         </tbody>
       </table>
-      <p><strong>Example:</strong> SIZ 10 = +2, DEX 14 = +2, Base SR = 4. With 2 ENC over limit, Final SR = 6.</p>
+      <p><strong>Example:</strong> SIZ 10 = +2, DEX 14 = +2, Broadsword +2, 6m movement +2 = Final SR of 8.</p>
+    </div>
+
+    <!-- Movement in Combat -->
+    <div class="reference-section">
+      <h3>Movement in Combat</h3>
+      <p><strong>Movement Allowance:</strong> Before attacking, a participant may move up to their movement rate in meters</p>
+      <p><strong>Cost:</strong> Every 3 meters of movement costs +1 Strike Rank</p>
+      <table class="reference-table">
+        <thead>
+          <tr>
+            <th>Distance Moved</th>
+            <th>SR Cost</th>
+            <th>Distance Moved</th>
+            <th>SR Cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>1-3m</td><td>+1 SR</td><td>7-9m</td><td>+3 SR</td></tr>
+          <tr><td>4-6m</td><td>+2 SR</td><td>10-12m</td><td>+4 SR</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Effect:</strong> Movement delays a participant's action in the round, possibly preventing them from acting if their modified SR exceeds remaining combatants.</p>
+      <p><strong>Distance Tracking:</strong> Combat tracker tracks distance to opponent in meters for missile/ranged combat.</p>
+    </div>
+
+    <!-- Surprise Rules -->
+    <div class="reference-section">
+      <h3>Surprise Mechanics</h3>
+      <p><strong>When Surprised:</strong> A participant who is caught off-guard takes a +12 Strike Rank penalty</p>
+      <p><strong>Duration:</strong> Surprise effect applies only to the first round of combat</p>
+      <p><strong>Effect:</strong> +12 SR penalty typically prevents surprised participant from acting in round 1. When New Round is clicked, surprise clears.</p>
+      <div class="mechanics-summary">
+        <div class="mechanic-item">
+          <h4>Surprise Example</h4>
+          <p><strong>Warrior A:</strong> Base SR 5, moves 3m (+1) = Final SR 6</p>
+          <p><strong>Warrior B:</strong> Base SR 4, surprised (+12) = Final SR 16</p>
+          <p><strong>Result:</strong> Warrior A acts first (SR 6 before 16)</p>
+        </div>
+        <div class="mechanic-item">
+          <h4>Surprise + Movement</h4>
+          <p><strong>Warrior C:</strong> Base SR 5, surprised (+12), moves 6m (+2) = Final SR 19</p>
+          <p><strong>Result:</strong> Heavily delayed; very unlikely to act in round 1</p>
+        </div>
+      </div>
     </div>
 
     <!-- Encumbrance -->

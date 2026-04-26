@@ -83,6 +83,7 @@
         <div class="combat-participant"
              [class.monster]="participant.type === 'monster'"
              [class.dead]="participant.isDead"
+             [class.surprised]="participant.isSurprised"
              [style.border-left]="'6px solid ' + (participant.color || '#000000')"
              [ngStyle]="{'background-color': getRgbaColor(participant.color, 0.08)}">
           <div class="participant-header">
@@ -110,12 +111,47 @@
           <div class="participant-and-hit-locations">
             <div class="participant-details">
               <div class="detail-group">
-                <label>Strike Rank: <strong>{{ participant.finalStrikeRank }}</strong></label>
-                <span class="sr-breakdown">(Base: {{ participant.baseStrikeRank }})</span>
+                <label>Strike Rank: <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
+                  {{ getDisplaySR(participant) }}
+                </strong></label>
+                <span class="sr-breakdown">
+                  Base: {{ participant.baseStrikeRank }}
+                  @if (participant.selectedWeapon) { + Wpn {{ participant.finalStrikeRank - participant.baseStrikeRank }} }
+                  @if (getMovementSRCost(participant) > 0) { + Move {{ getMovementSRCost(participant) }} }
+                  @if (participant.isSurprised) { + Surprise 12 }
+                </span>
               </div>
 
               <div class="detail-group">
                 <label>Armor: <strong [attr.title]="getArmorTooltip(participant)">{{ getArmorDisplay(participant) }}</strong></label>
+              </div>
+
+              <div class="detail-group movement-row">
+                <label>Move:
+                  <input type="number" [(ngModel)]="participant.movementThisRound"
+                         (ngModelChange)="updateMovement(participant)"
+                         min="0" step="1" class="movement-input">
+                  <span class="sr-cost-badge" [class.has-cost]="getMovementSRCost(participant) > 0">
+                    m  (+{{ getMovementSRCost(participant) }} SR)
+                  </span>
+                </label>
+              </div>
+
+              <div class="detail-group distance-row">
+                <label>Distance:
+                  <input type="number" [(ngModel)]="participant.distanceToOpponent"
+                         min="0" step="1" class="distance-input">
+                  <span class="distance-unit">m</span>
+                </label>
+              </div>
+
+              <div class="detail-group surprise-row">
+                <label class="surprise-label">
+                  <input type="checkbox" [checked]="participant.isSurprised"
+                         (change)="toggleSurprise(participant)">
+                  Surprised
+                  @if (participant.isSurprised) { <span class="surprise-badge">+12 SR</span> }
+                </label>
               </div>
 
               <div class="detail-group">
@@ -145,10 +181,11 @@
                     <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
                     <button #rollDamageBtn
                             class="btn-roll-damage"
+                            [class.action-skipped]="participant.isSurprised"
                             [attr.data-participant-id]="participant.id"
                             (click)="rollWeaponDamage(participant)"
-                            [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant)"
-                            [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
+                            [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant) || participant.isSurprised"
+                            [title]="participant.isSurprised ? 'Surprised — round is skipped' : !hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
                       Roll
                     </button>
                   </div>
@@ -403,7 +440,7 @@
             <label>Character:</label>
             <select [(ngModel)]="selectedCharacterId" (change)="onCharacterSelect()">
               <option value="">-- Select Character --</option>
-              @for (char of characters; track char) {
+              @for (char of getAliveCharacters(); track char) {
                 <option [value]="char.id">{{ char.name }}</option>
               }
             </select>
@@ -444,6 +481,16 @@
             </select>
           </div>
         }
+        <div class="form-group">
+          <label>Starting Distance (meters):</label>
+          <input type="number" [(ngModel)]="addParticipantDistance" min="0" step="1" class="distance-input">
+        </div>
+        <div class="form-group surprise-form-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="addParticipantSurprised">
+            Surprised (acts last, +12 SR)
+          </label>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeAddParticipantModal()">Cancel</button>

@@ -5,6 +5,7 @@ import { CombatTrackerComponent } from './components/combat-tracker/combat-track
 import { RulesReferenceComponent } from './components/rules-reference/rules-reference.component';
 import { BestiaryComponent } from './components/bestiary/bestiary.component';
 import { MonsterCreatorComponent } from './components/monster-creator/monster-creator.component';
+import { SettingsComponent } from './components/settings/settings.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/characters', pathMatch: 'full' },
@@ -14,5 +15,6 @@ export const routes: Routes = [
   { path: 'rules', component: RulesReferenceComponent },
   { path: 'bestiary', component: BestiaryComponent },
   { path: 'monster-creator', component: MonsterCreatorComponent },
+  { path: 'settings', component: SettingsComponent },
   { path: '**', redirectTo: '/characters' }
 ];

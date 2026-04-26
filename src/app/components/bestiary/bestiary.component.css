@@ -6,8 +6,16 @@
 }
 
 .bestiary-header {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-4xl);
   margin-bottom: var(--spacing-2xl);
+}
+
+.bestiary-header > div {
+  flex: 1;
+  text-align: left;
 }
 
 .bestiary-header h1 {
@@ -21,6 +29,48 @@
   font-size: var(--font-size-lg);
   color: var(--color-text-muted);
   margin: 0;
+}
+
+.btn-monster-creator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-2xl) var(--spacing-4xl);
+  background: linear-gradient(135deg, var(--color-primary-orange) 0%, var(--color-primary-orange-dark) 100%);
+  color: var(--color-bg-white);
+  text-decoration: none;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  font-size: var(--font-size-lg);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
+}
+
+.btn-monster-creator:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4);
+}
+
+.btn-monster-creator .icon {
+  font-size: var(--font-size-xl);
+}
+
+@media (max-width: 768px) {
+  .bestiary-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .bestiary-header > div {
+    text-align: center;
+    width: 100%;
+  }
+
+  .btn-monster-creator {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .controls-section {

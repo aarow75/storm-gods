@@ -1,7 +1,45 @@
 .combat-tracker {
   padding: var(--spacing-5xl);
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px;
+}
+
+.combat-tracker .header {
+  grid-column: 1 / -1;
+}
+
+.combat-tracker .combat-log {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  align-self: start;
+}
+
+.combat-tracker .combat-list {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+@media (max-width: 1024px) {
+  .combat-tracker {
+    grid-template-columns: 1fr;
+  }
+
+  .combat-tracker .header {
+    grid-column: 1;
+  }
+
+  .combat-tracker .combat-log {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .combat-tracker .combat-list {
+    grid-column: 1;
+    grid-row: auto;
+  }
 }
 
 .header {
@@ -115,6 +153,14 @@
 .combat-participant.dead .participant-header h3 {
   text-decoration: line-through;
   color: var(--color-gray-350-alt);
+}
+
+.combat-participant.surprised {
+  position: relative;
+  opacity: 0.85;
+  background-color: rgba(249, 115, 22, 0.05) !important;
+  border-left-color: #f97316 !important;
+  border-left-width: 8px !important;
 }
 
 .participant-header {
@@ -237,8 +283,10 @@
 }
 
 .sr-breakdown {
-  font-size: var(--font-size-md);
-  color: var(--color-gray-350-alt);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-tertiary);
+  margin-top: var(--spacing-xs);
+  line-height: 1.4;
 }
 
 .detail-group select {
@@ -299,6 +347,21 @@
 .btn-roll-damage:focus {
   outline: 3px solid #1e40af;
   outline-offset: 2px;
+}
+
+.btn-roll-damage:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-roll-damage.action-skipped {
+  background-color: #9ca3af;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-roll-damage.action-skipped:hover {
+  background-color: #9ca3af;
 }
 
 .damage-result {
@@ -461,8 +524,11 @@
   border: 2px solid var(--color-primary-blue);
   border-radius: 8px;
   padding: var(--spacing-3xl);
-  margin-bottom: 20px;
   box-shadow: 0 2px 4px var(--shadow-black-10);
+  height: fit-content;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .log-header {
@@ -486,7 +552,7 @@
 }
 
 .log-entries {
-  max-height: 300px;
+  flex: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -1161,4 +1227,101 @@
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fca5a5;
+}
+
+/* Movement, Distance, and Surprise Controls */
+
+.movement-input, .distance-input {
+  width: 60px;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: var(--font-size-lg);
+  text-align: center;
+  background-color: var(--color-bg-white);
+  color: var(--color-text-primary);
+}
+
+.movement-input:focus, .distance-input:focus {
+  outline: none;
+  border-color: var(--color-primary-blue);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.sr-cost-badge {
+  color: var(--color-text-tertiary, #666);
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+}
+
+.sr-cost-badge.has-cost {
+  color: var(--color-primary-orange, #f59e0b);
+  font-weight: bold;
+  background: rgba(249, 115, 22, 0.1);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+}
+
+.surprise-badge {
+  background: var(--warning-color, #f59e0b);
+  color: var(--on-warning, #fff);
+  border-radius: var(--border-radius-sm);
+  padding: 0 var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  display: inline-block;
+  margin-left: var(--spacing-sm);
+}
+
+.sr-modified {
+  color: var(--warning-color, #f59e0b);
+}
+
+.movement-row, .distance-row, .surprise-row {
+  display: flex;
+  flex-wrap: wrap;
+  /* align-items: center; */
+  gap: var(--spacing-md);
+  padding: 0;
+}
+
+.movement-row label, .distance-row label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-lg);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+.distance-unit {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-tertiary);
+  margin-left: var(--spacing-xs);
+}
+
+.surprise-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-tertiary);
+}
+
+.surprise-label input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary-blue);
+}
+
+.surprise-form-group {
+  padding: var(--spacing-sm) 0;
+}
+
+.surprise-form-group input[type="checkbox"] {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-primary-blue);
 }

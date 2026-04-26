@@ -77,6 +77,13 @@ export const translations: { [locale: string]: TranslationDictionary } = {
     'system.runequest': 'RuneQuest',
     'system.dragonbane': 'Dragonbane',
 
+    // Settings
+    'settings.title': 'Settings',
+    'settings.textSize': 'Text Size',
+    'settings.language': 'Language',
+    'language.english': 'English',
+    'language.swedish': 'Swedish',
+
     // Family History
     'familyHistory.grandfather': 'Grandfather',
     'familyHistory.grandmother': 'Grandmother',
@@ -272,6 +279,13 @@ export const translations: { [locale: string]: TranslationDictionary } = {
     'system.toggle': 'Spelsystem',
     'system.runequest': 'RuneQuest',
     'system.dragonbane': 'Dragonbane',
+
+    // Settings
+    'settings.title': 'Inställningar',
+    'settings.textSize': 'Textstorlek',
+    'settings.language': 'Språk',
+    'language.english': 'Engelska',
+    'language.swedish': 'Svenska',
 
     // Family History
     'familyHistory.grandfather': 'Farfar',
