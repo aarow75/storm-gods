@@ -3,6 +3,7 @@
     <h2>Combat Tracker</h2>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="openAddParticipantModal()">Add Participant</button>
+      <a routerLink="/combat-map" class="btn btn-secondary">Combat Map</a>
       <a routerLink="/monster-creator" class="btn btn-secondary">Monster Creator</a>
       <button class="btn btn-secondary" (click)="toggleLogHistory()">
         {{ showLogHistory ? 'Hide History' : 'Show History' }}
@@ -195,12 +196,6 @@
                     <span>{{ participant.movementThisRound }}m (+{{ getMovementSRCost(participant) }} SR)</span>
                   </div>
                 }
-                @if (participant.distanceToOpponent !== undefined && participant.distanceToOpponent > 0) {
-                  <div class="collapsed-stat">
-                    <span class="stat-label">Dist:</span>
-                    <span>{{ participant.distanceToOpponent }}m</span>
-                  </div>
-                }
               </div>
               <div class="collapsed-actions">
                 <select [(ngModel)]="participant.selectedWeapon" (change)="onWeaponChange(participant)" class="weapon-select">
@@ -233,7 +228,7 @@
                   Base: {{ participant.baseStrikeRank }}
                   @if (participant.selectedWeapon) { + Wpn {{ participant.finalStrikeRank - participant.baseStrikeRank }} }
                   @if (getMovementSRCost(participant) > 0) { + Move {{ getMovementSRCost(participant) }} }
-                  @if (getSurpriseDistancePenalty(participant) > 0) { + Surprised ({{ participant.distanceToOpponent }}m) {{ getSurpriseDistancePenalty(participant) }} }
+                  @if (getSurpriseDistancePenalty(participant) > 0) { + Surprised ({{ getOpponentDistanceDisplay(participant) }}m) {{ getSurpriseDistancePenalty(participant) }} }
                 </span>
               </div>
 
@@ -252,14 +247,6 @@
                 </label>
               </div>
 
-              <div class="detail-group distance-row">
-                <label>Distance:
-                  <input type="number" [(ngModel)]="participant.distanceToOpponent"
-                         (ngModelChange)="updateDistance(participant)"
-                         min="0" step="1" class="distance-input">
-                  <span class="distance-unit">m</span>
-                </label>
-              </div>
 
               <div class="detail-group surprise-row">
                 <label class="surprise-label">
@@ -598,10 +585,6 @@
             </select>
           </div>
         }
-        <div class="form-group">
-          <label>Starting Distance (meters):</label>
-          <input type="number" [(ngModel)]="addParticipantDistance" min="0" step="1" class="distance-input">
-        </div>
         <div class="form-group surprise-form-group">
           <label>
             <input type="checkbox" [(ngModel)]="addParticipantSurprised">

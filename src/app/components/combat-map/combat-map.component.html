@@ -1,0 +1,145 @@
+<div class="combat-map-page">
+  <div class="map-header">
+    <div class="header-left">
+      <h2>Combat Map</h2>
+      <span class="round-display">Round {{ currentRound > 0 ? currentRound : '—' }}</span>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/combat" class="btn btn-secondary">← Combat Tracker</a>
+    </div>
+  </div>
+
+  <div class="wall-toolbar">
+    <button [class.active]="drawWallMode" (click)="toggleWallMode()" class="btn btn-secondary">
+      {{ drawWallMode ? 'Stop Drawing Walls' : 'Draw Walls' }}
+    </button>
+    @if (drawWallMode) {
+      <span class="toolbar-label">Color:</span>
+      <button [class.selected-wall]="selectedWallColor === 'black'" (click)="selectedWallColor = 'black'" class="btn btn-small">Black</button>
+      <button [class.selected-wall]="selectedWallColor === 'brown'" (click)="selectedWallColor = 'brown'" class="btn btn-small">Brown</button>
+      <button (click)="clearAllWalls()" class="btn btn-danger btn-small">Clear Walls</button>
+    }
+  </div>
+
+  @if (participants.length === 0) {
+    <p class="empty-state">No participants in combat. Add participants in the Combat Tracker first.</p>
+  } @else {
+    <div class="map-body">
+      <!-- Grid with SVG Overlay -->
+      <div class="grid-container">
+        <svg class="opponent-lines" #opponentSvg></svg>
+        <!-- Grid -->
+        <div class="grid-area" #gridArea>
+        <!-- Column axis (numbers 0–19) -->
+        <div class="col-axis">
+          <div class="axis-spacer"></div>
+          @for (col of gridCols; track col) {
+            <div class="axis-label">{{ col }}</div>
+          }
+        </div>
+
+        <!-- Grid rows -->
+        @for (row of gridRows; track row) {
+          <div class="grid-row-wrapper">
+            <div class="axis-label row-label">{{ row }}</div>
+            @for (col of gridCols; track col) {
+              <div class="grid-cell"
+                   [class.in-range]="isCellInRange(col, row)"
+                   [class.wall-cell]="!!getWallAt(col, row)"
+                   [class.draw-mode]="drawWallMode"
+                   [style.--range-bg]="getRangeOverlayColor()"
+                   (click)="onCellClick(col, row)">
+                @if (getWallAt(col, row); as wallColor) {
+                  <div class="wall-fill"
+                       [style.background-color]="wallColor === 'brown' ? '#6B3A2A' : '#1a1a1a'"></div>
+                } @else {
+                  @if (getParticipantAt(col, row); as p) {
+                    <div class="participant-token"
+                         [class.selected]="selectedParticipantId === p.id"
+                         [class.dead]="p.isDead"
+                         [style.background-color]="p.color ?? '#888'"
+                         [title]="p.name">
+                      {{ p.name[0] }}
+                    </div>
+                  }
+                }
+              </div>
+            }
+          </div>
+        }
+        </div>
+      </div>
+
+      <!-- Side Panel -->
+      <div class="side-panel">
+        @if (selectedParticipant; as sel) {
+          <div class="participant-card selected-card">
+            <div class="card-header" [style.border-color]="sel.color ?? '#888'">
+              <div class="color-dot" [style.background-color]="sel.color ?? '#888'"></div>
+              <strong>{{ sel.name }}</strong>
+              <span class="type-badge">{{ sel.type }}</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-row"><span>SR</span><span>{{ sel.finalStrikeRank }}</span></div>
+              <div class="stat-row"><span>Move</span><span>{{ sel.movementRate ?? 8 }} sq</span></div>
+              <div class="stat-row">
+                <span>Distance</span>
+                <span>{{ getDistanceToOpponent(sel) ?? '—' }}</span>
+              </div>
+              <div class="stat-row">
+                <span>Moved</span>
+                <span [class.moved-yes]="hasMoved(sel.id)">{{ hasMoved(sel.id) ? 'Yes' : 'No' }}</span>
+              </div>
+            </div>
+            <div class="card-actions">
+              <button
+                class="btn btn-primary attack-btn"
+                (click)="attackSelectedParticipant()"
+                [disabled]="sel.isDead">
+                ⚔ Attack
+              </button>
+            </div>
+          </div>
+        }
+
+        <div class="participant-list">
+          <div class="list-heading">Participants</div>
+          @for (p of participants; track p.id) {
+            <div class="participant-list-item"
+                 [class.selected]="selectedParticipantId === p.id"
+                 [class.dead]="p.isDead"
+                 (click)="selectParticipant(p.id)">
+              <div class="color-dot" [style.background-color]="p.color ?? '#888'"></div>
+              <span class="participant-name">{{ p.name }}</span>
+              @if (getDistanceToOpponent(p); as dist) {
+                <span class="dist-badge">{{ dist }}sq</span>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="combat-log-section">
+          <div class="log-header">
+            <h3>Combat Log</h3>
+          </div>
+          @if (combatLogEntries().length > 0) {
+            <div class="log-entries">
+              @for (entry of combatLogEntries(); track $index) {
+                <div class="log-entry"
+                     [class.death]="entry.includes('[SLAIN]')"
+                     [class.parry]="entry.includes('[PARRY]')"
+                     [class.dodge]="entry.includes('[DODGE]')"
+                     [class.miss]="entry.includes('[MISS]')"
+                     [class.failed]="entry.includes('FAILED')">
+                  {{ entry }}
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-log">No combat events yet</div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -42,7 +42,7 @@ export class App implements OnInit {
   }
 
   private updateDiceRollerVisibility(url: string): void {
-    const hideDiceRollerRoutes = ['/characters', '/settings', '/bestiary', '/rules'];
+    const hideDiceRollerRoutes = ['/characters', '/settings', '/bestiary', '/rules', '/combat-map'];
     this.showDiceRoller.set(!hideDiceRollerRoutes.some(route => url.startsWith(route)));
   }
 

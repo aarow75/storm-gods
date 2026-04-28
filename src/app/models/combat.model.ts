@@ -38,12 +38,24 @@ export interface CombatParticipant {
   movementThisRound?: number;   // meters moving this round (costs ceil(m/3) SR)
   isSurprised?: boolean;        // +12 SR penalty; cleared on New Round
   effectiveSR?: number;         // finalStrikeRank + movement cost + surprise penalty
+  movementRate?: number;        // squares/round; from character.derivedStats.movementRate; default 8
 }
 
 export interface CombatLogEntry {
   timestamp: number;
   date: string;
   entries: string[];
+}
+
+export interface CombatPosition {
+  x: number;
+  y: number;
+}
+
+export interface CombatMapState {
+  positions: Record<string, CombatPosition>;
+  movedThisRound: string[];
+  walls?: Record<string, 'black' | 'brown'>; // key: "x,y"
 }
 
 // Default monsters for RuneQuest

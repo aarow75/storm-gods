@@ -16,6 +16,7 @@ export interface Character {
   magic: Magic;
   resources: Resources;
   equipment: EquipmentItem[];
+  conditions?: string[]; // Active conditions like 'disease', 'poisoned', etc.
   notes: string;
   familyHistory?: FamilyHistory;
   cultStatus?: CultStatus;

@@ -13,6 +13,7 @@ import { CombatLogService } from '../../services/combat-log.service';
 import { DiceService } from '../../services/dice.service';
 import { CharacterUpdateService } from '../../services/character-update.service';
 import { TranslationService } from '../../services/translation.service';
+import { parseDamageWithConditions } from '../../utils/damage-parser';
 
 // d20 → hit location (RuneQuest standard table)
 const HIT_LOCATION_TABLE: { [roll: number]: string } = {
@@ -73,7 +74,6 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   selectedCharacterId = '';
   selectedMonsterId = '';
   selectedWeapon = '';
-  addParticipantDistance = 0;
   addParticipantSurprised = false;
 
   lastDamageRolls: Map<string, { total: number; breakdown: string; finalDamage: number; armorAbsorbed: number; targetName: string }> = new Map();
@@ -130,14 +130,16 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   private updateParticipantSR(participant: CombatParticipant): void {
-    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant);
+    const mapState = this.combatService.getCombatMapState();
+    participant.effectiveSR = this.combatService.calculateEffectiveSR(participant, this.combatParticipants, mapState);
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
     this.debouncedSaveCombat();
   }
 
   private updateAllParticipantsSR(): void {
+    const mapState = this.combatService.getCombatMapState();
     this.combatParticipants.forEach(p => {
-      p.effectiveSR = this.combatService.calculateEffectiveSR(p);
+      p.effectiveSR = this.combatService.calculateEffectiveSR(p, this.combatParticipants, mapState);
     });
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
     this.debouncedSaveCombat();
@@ -164,6 +166,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(
       this.combatService.getCombatParticipants()
     );
+    // Restore combat state from persistent storage
+    this.currentRound = this.combatService.getCurrentRound();
+    const activeId = this.combatService.getActiveParticipantId();
+    if (activeId && this.combatParticipants.find(p => p.id === activeId)) {
+      this.activeTurnParticipantId = activeId;
+      this.turnsStarted = true;
+    }
     this.autoAssignOpponentsIfNeeded();
   }
 
@@ -181,7 +190,6 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   closeAddParticipantModal(): void {
     this.showAddParticipantModal = false;
-    this.addParticipantDistance = 0;
     this.addParticipantSurprised = false;
   }
   onEntityTypeChange(): void {
@@ -239,9 +247,10 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         kills: 0,
         color: character.color || '#3498db',
         locationDamage: {},
-        distanceToOpponent: this.addParticipantDistance || 0,
+        distanceToOpponent: 0,
         movementThisRound: 0,
-        isSurprised: this.addParticipantSurprised
+        isSurprised: this.addParticipantSurprised,
+        movementRate: character.derivedStats.movementRate ?? 8
       };
       this.combatParticipants.push(participant);
     } else if (this.selectedEntityType === 'monster' && this.selectedMonsterId) {
@@ -267,9 +276,10 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         kills: 0,
         color: '#000000',
         locationDamage: {},
-        distanceToOpponent: this.addParticipantDistance || 0,
+        distanceToOpponent: 0,
         movementThisRound: 0,
-        isSurprised: this.addParticipantSurprised
+        isSurprised: this.addParticipantSurprised,
+        movementRate: 8
       };
       this.combatParticipants.push(participant);
     }
@@ -322,7 +332,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     if (confirm('Clear all combat participants? (Combat log will be saved to history)')) {
       if (this.combatLog.length > 0) this.combatService.saveCombatLog(this.combatLog);
       this.combatParticipants = [];
-      this.combatService.clearCombat();
+      this.combatService.clearAllCombatState();
       this.combatLogService.clearLog();
       this.lastDamageRolls.clear();
       this.pendingAttack = null;
@@ -476,6 +486,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   startTurns(): void {
     this.currentRound++;
+    this.combatService.setCurrentRound(this.currentRound);
     this.actedThisRound.clear();
     this.turnsStarted = true;
     this.strikeRankLocked = true;  // Lock SR once turns begin
@@ -490,10 +501,12 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     );
     if (eligible.length === 0) {
       this.activeTurnParticipantId = null;
+      this.combatService.setActiveParticipantId(null);
       this.focusNextRoundButton();
       return;
     }
     this.activeTurnParticipantId = eligible[0].id;
+    this.combatService.setActiveParticipantId(this.activeTurnParticipantId);
     setTimeout(() => {
       const el = document.querySelector(`[data-participant-id="${this.activeTurnParticipantId}"]`);
       el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -512,6 +525,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   clearTurns(): void {
     this.activeTurnParticipantId = null;
+    this.combatService.setActiveParticipantId(null);
     this.actedThisRound.clear();
     this.turnsStarted = false;
     this.strikeRankLocked = false;
@@ -596,16 +610,17 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateDistance(participant: CombatParticipant): void {
-    if (!this.strikeRankLocked) {
-      this.updateParticipantSR(participant);
-    }
-  }
-
   toggleSurprise(participant: CombatParticipant): void {
     participant.isSurprised = !participant.isSurprised;
+    // Sync surprise status across team
+    const teamType = participant.type;
+    this.combatParticipants.forEach(p => {
+      if (p.type === teamType) {
+        p.isSurprised = participant.isSurprised;
+      }
+    });
     if (!this.strikeRankLocked) {
-      this.updateParticipantSR(participant);
+      this.updateAllParticipantsSR();
     }
   }
 
@@ -614,7 +629,17 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   getSurpriseDistancePenalty(participant: CombatParticipant): number {
-    return this.combatService.calculateSurpriseDistancePenalty(participant.distanceToOpponent, participant.isSurprised);
+    if (!participant.isSurprised) return 0;
+    const mapState = this.combatService.getCombatMapState();
+    const opponentDistance = this.combatService.getOpponentDistance(participant, this.combatParticipants, mapState);
+    return this.combatService.calculateSurpriseDistancePenalty(participant.isSurprised, opponentDistance);
+  }
+
+  getOpponentDistanceDisplay(participant: CombatParticipant): number {
+    if (!participant.isSurprised) return 0;
+    const mapState = this.combatService.getCombatMapState();
+    const opponentDistance = this.combatService.getOpponentDistance(participant, this.combatParticipants, mapState);
+    return opponentDistance;
   }
 
   getDisplaySR(participant: CombatParticipant): number {
@@ -634,6 +659,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const opponent = this.combatParticipants.find(p => p.id === participant.selectedOpponentId);
     if (!opponent || opponent.isDead) {
       alert('Selected opponent is not available!');
+      return;
+    }
+
+    // Check distance-based weapon restrictions
+    const distanceResult = this.checkDistanceWeaponRestriction(participant, opponent);
+    if (distanceResult.blocked) {
+      alert(distanceResult.message);
       return;
     }
 
@@ -717,6 +749,9 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       attacker.kills = (attacker.kills || 0) + 1;
       this.combatLogService.addEntry(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
     }
+
+    // Apply creature conditions (disease, poison, etc.) if attacker has them
+    this.applyCreatureConditions(defender, attacker);
 
     this.lastDamageRolls.set(attacker.id, {
       total: rawDamage, breakdown: damageBreakdown,
@@ -847,6 +882,9 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       });
     }
 
+    // Apply creature conditions (disease, poison, etc.) if attacker has them
+    this.applyCreatureConditions(defender, attacker);
+
     this.pendingAttack = null;
     this.saveCombat();
     this.focusNextRollButton();
@@ -869,13 +907,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       intBonus > 0 ? `+${intBonus} INT` : '',
       encPenalty > 0 ? `-${encPenalty} ENC` : ''
     ].filter(Boolean).join(' ');
-    const bonusPart = bonusParts
-      ? ` + ${bonusParts} = ${effectiveSkill}%`
+    const skillLabel = bonusParts
+      ? `${dodgeSkill} ${bonusParts} = ${effectiveSkill}%`
       : `${effectiveSkill}%`;
 
     if (success) {
       this.combatLogService.addEntry(
-        `[DODGE] ${defender.name} dodges! (rolled ${roll} vs ${dodgeSkill}${bonusPart}) — evades ${hitLocation} (d20:${locationRoll}) hit!`
+        `[DODGE] ${defender.name} dodges! (rolled ${roll} vs ${skillLabel}) — evades ${hitLocation} (d20:${locationRoll}) hit!`
       );
       this.lastDamageRolls.set(attacker.id, {
         total: rawDamage, breakdown: damageBreakdown,
@@ -885,7 +923,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const armor = this.getArmorValue(defender, hitLocation);
       const finalDamage = Math.max(0, rawDamage - armor);
       this.combatLogService.addEntry(
-        `[DODGE FAILED] ${defender.name} fails dodge (rolled ${roll} vs ${dodgeSkill}${bonusPart}) → ${hitLocation} (d20:${locationRoll}): ${finalDamage} damage`
+        `[DODGE FAILED] ${defender.name} fails dodge (rolled ${roll} vs ${skillLabel}) → ${hitLocation} (d20:${locationRoll}): ${finalDamage} damage`
       );
 
       const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
@@ -900,6 +938,9 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         finalDamage, armorAbsorbed: armor, targetName: defender.name
       });
     }
+
+    // Apply creature conditions (disease, poison, etc.) if attacker has them
+    this.applyCreatureConditions(defender, attacker);
 
     this.pendingAttack = null;
     this.saveCombat();
@@ -1190,6 +1231,67 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.characterUpdateService.notifyCharacterUpdated();
   }
 
+  private applyCreatureConditions(defender: CombatParticipant, attacker: CombatParticipant): void {
+    // Apply conditions from creature special abilities to character defenders
+    if (defender.type !== 'character' || !defender.characterId) return;
+
+    const character = this.characterService.getCharacter(defender.characterId);
+    if (!character) return;
+
+    // Check if attacker is a creature with special abilities
+    let specialAbilities: string[] = [];
+    if (attacker.type === 'monster' && attacker.monsterId) {
+      // Check bestiary monsters for special abilities
+      const bestiaryMonster = BESTIARY_MONSTERS.find(m => m.id === attacker.monsterId);
+      if (bestiaryMonster?.specialAbilities) {
+        specialAbilities = bestiaryMonster.specialAbilities;
+      }
+    }
+
+    // Extract condition keywords from special abilities
+    const creatureConditions = specialAbilities
+      .filter(ability => {
+        const lowerAbility = ability.toLowerCase();
+        return lowerAbility.includes('disease') ||
+               lowerAbility.includes('poison') ||
+               lowerAbility.includes('curse') ||
+               lowerAbility.includes('plague') ||
+               lowerAbility.includes('venom');
+      })
+      .map(ability => {
+        // Extract condition from ability (e.g., "Disease carrier" → "disease")
+        const lower = ability.toLowerCase();
+        if (lower.includes('disease')) return 'diseased';
+        if (lower.includes('poison')) return 'poisoned';
+        if (lower.includes('curse')) return 'cursed';
+        if (lower.includes('plague')) return 'plagued';
+        if (lower.includes('venom')) return 'venomous';
+        return lower;
+      });
+
+    if (creatureConditions.length === 0) return;
+
+    // Initialize conditions array if needed
+    if (!character.conditions) {
+      character.conditions = [];
+    }
+
+    // Apply conditions that aren't already present
+    let conditionsApplied = false;
+    for (const condition of creatureConditions) {
+      if (!character.conditions.includes(condition)) {
+        character.conditions.push(condition);
+        conditionsApplied = true;
+      }
+    }
+
+    if (conditionsApplied) {
+      this.characterService.updateCharacter(character);
+      this.characters = this.characterService.getCharacters();
+      this.characterUpdateService.notifyCharacterUpdated();
+    }
+  }
+
   getLastDamageRoll(participantId: string) {
     return this.lastDamageRolls.get(participantId);
   }
@@ -1282,6 +1384,44 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   onOpponentChange(_participant: CombatParticipant): void { this.debouncedSaveCombat(); }
+
+  private checkDistanceWeaponRestriction(attacker: CombatParticipant, defender: CombatParticipant): { blocked: boolean; message: string } {
+    const weaponName = attacker.selectedWeapon;
+    if (!weaponName) return { blocked: false, message: '' };
+
+    const weapon = WEAPON_LIST.find(w => w.name === weaponName);
+    if (!weapon) return { blocked: false, message: '' };
+
+    // Missile weapons can attack from any distance
+    if (weapon.isMissile) return { blocked: false, message: '' };
+
+    // Non-missile weapons require melee range (distance <= 1)
+    const distance = this.getDistanceToOpponent(attacker, defender);
+    if (distance > 1) {
+      return {
+        blocked: true,
+        message: `${weaponName} requires melee range! Your opponent is ${distance} squares away. Switch to a missile weapon or move closer.`
+      };
+    }
+
+    return { blocked: false, message: '' };
+  }
+
+  private getDistanceToOpponent(attacker: CombatParticipant, defender: CombatParticipant): number {
+    // Get positions from combat map state
+    const mapState = this.combatService.getCombatMapState();
+    const attackerPos = mapState.positions[attacker.id];
+    const defenderPos = mapState.positions[defender.id];
+
+    if (!attackerPos || !defenderPos) {
+      // If positions not found in map, assume they're in melee range
+      // (this allows combat to proceed if map isn't being used)
+      return 0;
+    }
+
+    // Use Chebyshev distance (king's move): max of absolute differences
+    return Math.max(Math.abs(attackerPos.x - defenderPos.x), Math.abs(attackerPos.y - defenderPos.y));
+  }
 
   clearCombatLog(): void {
     if (this.combatLog.length > 0 && confirm('Save this combat log to history and clear?')) {

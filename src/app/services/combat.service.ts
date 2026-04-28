@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CombatParticipant, Monster, CombatLogEntry } from '../models/combat.model';
+import { CombatParticipant, Monster, CombatLogEntry, CombatMapState } from '../models/combat.model';
 import { WEAPON_LIST } from '../models/character.model';
 
 @Injectable({
@@ -9,6 +9,7 @@ export class CombatService {
   private readonly STORAGE_KEY = 'runequest-combat';
   private readonly MONSTERS_KEY = 'runequest-monsters';
   private readonly LOG_HISTORY_KEY = 'runequest-combat-log-history';
+  private readonly MAP_KEY = 'runequest-combat-map';
   readonly SURPRISE_SR_PENALTY = 12;
 
   getCombatParticipants(): CombatParticipant[] {
@@ -22,6 +23,13 @@ export class CombatService {
 
   clearCombat(): void {
     localStorage.removeItem(this.STORAGE_KEY);
+  }
+
+  clearAllCombatState(): void {
+    localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(this.MAP_KEY);
+    localStorage.removeItem(this.ROUND_KEY);
+    localStorage.removeItem(this.ACTIVE_PARTICIPANT_KEY);
   }
 
   getMonsters(): Monster[] {
@@ -58,17 +66,36 @@ export class CombatService {
     return Math.ceil(meters / 3);
   }
 
-  calculateSurpriseDistancePenalty(distance: number | undefined, isSurprised: boolean | undefined): number {
+  calculateSurpriseDistancePenalty(isSurprised: boolean | undefined, opponentDistance: number): number {
     if (!isSurprised) return 0;
-    if (distance === undefined || distance <= 0) return 0;
-    if (distance <= 3) return 3;
-    if (distance <= 9) return 1;
+    if (opponentDistance <= 3) return 3;
+    if (opponentDistance > 3) return 1;
     return 0;
   }
 
-  calculateEffectiveSR(participant: CombatParticipant): number {
+  getOpponentDistance(participant: CombatParticipant, allParticipants: CombatParticipant[], mapState: CombatMapState): number {
+    if (!participant.selectedOpponentId) return 0;
+
+    const opponent = allParticipants.find(p => p.id === participant.selectedOpponentId);
+    if (!opponent) return 0;
+
+    const participantPos = mapState.positions[participant.id];
+    const opponentPos = mapState.positions[opponent.id];
+
+    if (!participantPos || !opponentPos) return 0;
+
+    return Math.max(Math.abs(participantPos.x - opponentPos.x), Math.abs(participantPos.y - opponentPos.y));
+  }
+
+  calculateEffectiveSR(participant: CombatParticipant, allParticipants?: CombatParticipant[], mapState?: CombatMapState): number {
     const moveCost = this.calculateMovementSRCost(participant.movementThisRound ?? 0);
-    const distancePenalty = this.calculateSurpriseDistancePenalty(participant.distanceToOpponent, participant.isSurprised);
+    let distancePenalty = 0;
+
+    if (participant.isSurprised && allParticipants && mapState) {
+      const opponentDistance = this.getOpponentDistance(participant, allParticipants, mapState);
+      distancePenalty = this.calculateSurpriseDistancePenalty(participant.isSurprised, opponentDistance);
+    }
+
     return participant.finalStrikeRank + moveCost + distancePenalty;
   }
 
@@ -116,5 +143,57 @@ export class CombatService {
 
   clearCombatLogHistory(): void {
     localStorage.removeItem(this.LOG_HISTORY_KEY);
+  }
+
+  // Combat Map State
+  getCombatMapState(): CombatMapState {
+    const data = localStorage.getItem(this.MAP_KEY);
+    return data ? JSON.parse(data) : { positions: {}, movedThisRound: [] };
+  }
+
+  saveCombatMapState(state: CombatMapState): void {
+    localStorage.setItem(this.MAP_KEY, JSON.stringify(state));
+  }
+
+  clearCombatMapState(): void {
+    localStorage.removeItem(this.MAP_KEY);
+  }
+
+  // Combat Round Management
+  private readonly ROUND_KEY = 'runequest-combat-round';
+
+  getCurrentRound(): number {
+    const round = localStorage.getItem(this.ROUND_KEY);
+    return round ? parseInt(round, 10) : 0;
+  }
+
+  setCurrentRound(round: number): void {
+    localStorage.setItem(this.ROUND_KEY, round.toString());
+  }
+
+  incrementRound(): number {
+    const newRound = this.getCurrentRound() + 1;
+    this.setCurrentRound(newRound);
+    return newRound;
+  }
+
+  resetRound(): void {
+    this.setCurrentRound(0);
+  }
+
+  // Active Participant Management
+  private readonly ACTIVE_PARTICIPANT_KEY = 'runequest-active-participant';
+
+  getActiveParticipantId(): string | null {
+    const id = localStorage.getItem(this.ACTIVE_PARTICIPANT_KEY);
+    return id || null;
+  }
+
+  setActiveParticipantId(participantId: string | null): void {
+    if (participantId) {
+      localStorage.setItem(this.ACTIVE_PARTICIPANT_KEY, participantId);
+    } else {
+      localStorage.removeItem(this.ACTIVE_PARTICIPANT_KEY);
+    }
   }
 }

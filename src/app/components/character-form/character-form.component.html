@@ -391,6 +391,21 @@
       }
     </div>
 
+    <div class="form-section" [class.collapsed]="isSectionCollapsed('conditions')">
+      <div class="section-header" (click)="toggleSection('conditions')">
+        <h4>Conditions</h4>
+        <span class="collapse-toggle">{{ isSectionCollapsed('conditions') ? '▶' : '▼' }}</span>
+      </div>
+      @if (!isSectionCollapsed('conditions')) {
+      <div class="section-content">
+        <app-character-conditions
+          [conditions]="character.conditions || []"
+          (conditionsChange)="character.conditions = $event"
+        ></app-character-conditions>
+      </div>
+      }
+    </div>
+
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">
         {{ editMode ? translationService.get('button.save', 'Save Character') : translationService.get('button.save', 'Save Character') }}

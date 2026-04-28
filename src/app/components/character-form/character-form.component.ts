@@ -33,6 +33,7 @@ import { CharacterMagic } from '../character-magic/character-magic';
 import { CharacterResources } from '../character-resources/character-resources';
 import { CharacterEquipment } from '../character-equipment/character-equipment';
 import { CharacterNotes } from '../character-notes/character-notes';
+import { CharacterConditions } from '../character-conditions/character-conditions';
 
 @Component({
   selector: 'app-character-form',
@@ -55,7 +56,8 @@ import { CharacterNotes } from '../character-notes/character-notes';
     CharacterMagic,
     CharacterResources,
     CharacterEquipment,
-    CharacterNotes
+    CharacterNotes,
+    CharacterConditions
   ],
   templateUrl: './character-form.component.html',
   styleUrl: './character-form.component.css'
@@ -82,6 +84,7 @@ export class CharacterFormComponent implements OnInit {
     resources: { ...DEFAULT_RESOURCES },
     equipment: [],
     notes: '',
+    conditions: [],
     familyHistory: { ...DEFAULT_FAMILY_HISTORY },
     cultStatus: { ...DEFAULT_CULT_STATUS }
   };
