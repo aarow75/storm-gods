@@ -1,0 +1,379 @@
+<div class="wilderness-map-page">
+  <header class="page-header">
+    <h1>Wilderness Map</h1>
+    <a routerLink="/" class="back-link">← Back to Characters</a>
+  </header>
+
+  <div class="toolbar">
+    <div class="toolbar-section">
+      <div class="mode-toggle">
+        <button
+          [class.active]="mapMode === 'terrain'"
+          (click)="setMapMode('terrain')"
+          class="mode-button">
+          Paint Terrain
+        </button>
+        <button
+          [class.active]="mapMode === 'image'"
+          (click)="setMapMode('image')"
+          class="mode-button">
+          Background Image
+        </button>
+      </div>
+
+      <div class="image-selector">
+        <label for="bg-select">Map:</label>
+        <select
+          id="bg-select"
+          class="bg-dropdown"
+          (change)="onBackgroundImageChange($event)">
+          <option value="" [selected]="!state.currentMapId">None</option>
+          @for (bg of mapBackgrounds; track bg.id) {
+            <option [value]="bg.id" [selected]="state.currentMapId === bg.id">{{ bg.label }}</option>
+          }
+          @if (state.customMaps.length > 0) {
+            <option disabled>──────────</option>
+          }
+          @for (m of state.customMaps; track m.id) {
+            <option [value]="m.id" [selected]="state.currentMapId === m.id">{{ m.label }}</option>
+          }
+        </select>
+        <button class="btn-add-token" (click)="showAddMapModal = true">+ New Map</button>
+        @if (state.customMaps.some(m => m.id === state.currentMapId)) {
+          <button class="btn-danger" (click)="deleteCustomMap(state.currentMapId!)">Delete Map</button>
+        }
+      </div>
+
+      @if (mapMode === 'image') {
+        <div class="grid-dimensions">
+          <label for="grid-width">Width:</label>
+          <input
+            id="grid-width"
+            type="number"
+            min="5"
+            max="100"
+            [value]="gridWidth"
+            (change)="setGridDimensions($event, gridHeight)"
+            class="dimension-input" />
+          <label for="grid-height">Height:</label>
+          <input
+            id="grid-height"
+            type="number"
+            min="5"
+            max="100"
+            [value]="gridHeight"
+            (change)="setGridDimensions(gridWidth, $event)"
+            class="dimension-input" />
+          <span class="dimension-display">{{ gridWidth }}×{{ gridHeight }}</span>
+        </div>
+
+        <div class="scale-settings">
+          <label for="scale-value">Scale:</label>
+          <input
+            id="scale-value"
+            type="number"
+            min="0.1"
+            max="100"
+            step="0.1"
+            [value]="scale"
+            (change)="onScaleChange($event)"
+            class="scale-input" />
+          <select
+            id="scale-unit"
+            class="scale-unit-select"
+            [value]="scaleUnit"
+            (change)="onScaleUnitChange($event)">
+            <option value="miles">miles per hex</option>
+            <option value="kilometers">km per hex</option>
+          </select>
+        </div>
+
+        <button
+          class="mode-button"
+          [class.active]="showTerrainOverlay"
+          (click)="toggleTerrainOverlay()"
+          title="Toggle semi-transparent terrain color overlay">
+          Terrain Overlay
+        </button>
+      }
+
+      <div class="hex-border-control">
+        <label for="hex-border-slider">Hex Borders:</label>
+        <input
+          id="hex-border-slider"
+          type="range"
+          min="0"
+          max="1"
+          step="0.1"
+          [value]="hexBorderOpacity"
+          (change)="onHexBorderOpacityChange($event)"
+          class="border-slider" />
+        <span class="opacity-value">{{ (hexBorderOpacity * 100).toFixed(0) }}%</span>
+      </div>
+    </div>
+
+      @if (interactionMode === 'paint') {
+        <div class="terrain-brush-picker">
+          @for (t of terrainDefs; track t.id) {
+            <button
+              class="terrain-swatch"
+              [class.selected]="selectedTerrain === t.id"
+              [style.background-color]="t.fillColor"
+              [title]="t.label + ' (cost: ' + t.moveCost + ')'"
+              (click)="selectedTerrain = t.id"
+              [attr.aria-label]="t.label">
+            </button>
+          }
+          <span class="selected-terrain-label">
+            {{ (terrainDefs.find(t => t.id === selectedTerrain) || terrainDefs[0])?.label }}
+            <span class="cost-badge">({{ (terrainDefs.find(t => t.id === selectedTerrain) || terrainDefs[0])?.moveCost }})</span>
+          </span>
+        </div>
+      }
+
+    <div class="interaction-toggle">
+      <button
+        [class.active]="interactionMode === 'paint'"
+        (click)="interactionMode = 'paint'"
+        class="mode-button">
+        Paint
+      </button>
+      <button
+        [class.active]="interactionMode === 'move'"
+        (click)="interactionMode = 'move'"
+        class="mode-button">
+        Move
+      </button>
+    </div>
+  </div>
+
+  <div class="map-container">
+    <div class="map-scroll-container" [class.paint-cursor]="interactionMode === 'paint'">
+      <svg
+        #hexSvg
+        [attr.width]="svgWidth"
+        [attr.height]="svgHeight"
+        class="hex-grid"
+        (pointermove)="onSvgPointerMove($event)">
+        @if (mapMode === 'image' && state.backgroundImage) {
+          <image
+            [attr.href]="getBackgroundImagePath()"
+            [attr.width]="svgWidth"
+            [attr.height]="svgHeight"
+            [attr.x]="0"
+            [attr.y]="0"
+            preserveAspectRatio="xMidYMid slice"
+            class="map-background" />
+        }
+        <g [attr.transform]="'translate(' + svgOffsetX + ',' + svgOffsetY + ')'">
+          @for (hex of hexes; track hex.q + ',' + hex.r) {
+            <polygon
+              [attr.points]="hex.points"
+              [attr.fill]="getHexFill(hex.q, hex.r)"
+              [attr.stroke]="getHexStroke(hex.q, hex.r)"
+              [attr.stroke-width]="isPathPreview(hex.q, hex.r) ? 2 : 1"
+              [attr.stroke-opacity]="hexBorderOpacity"
+              [class.hex-tile]="true"
+              [class.path-preview]="isPathPreview(hex.q, hex.r)"
+              (pointerdown)="onHexPointerDown(hex.q, hex.r, $event)"
+              (pointerenter)="onHexPointerEnter(hex.q, hex.r)"
+              (click)="onHexClick(hex.q, hex.r)" />
+          }
+
+          @for (token of placedTokens; track token.id) {
+            <circle
+              [attr.cx]="getTokenCx(token)"
+              [attr.cy]="getTokenCy(token)"
+              [attr.r]="HEX_SIZE * 0.55"
+              [attr.fill]="token.color"
+              [attr.stroke]="selectedTokenId === token.id ? 'white' : 'rgba(0,0,0,0.4)'"
+              [attr.stroke-width]="selectedTokenId === token.id ? 2.5 : 1"
+              class="token-circle"
+              style="cursor: pointer;" />
+            <text
+              [attr.x]="getTokenCx(token)"
+              [attr.y]="getTokenCy(token)"
+              dominant-baseline="central"
+              text-anchor="middle"
+              [attr.font-size]="HEX_SIZE * 0.7"
+              fill="white"
+              style="pointer-events: none; font-weight: bold; text-shadow: 0 0 2px #000;">
+              {{ token.name[0] }}
+            </text>
+          }
+        </g>
+      </svg>
+    </div>
+
+    <aside class="side-panel">
+      <div class="panel-section">
+        <h3>Tokens</h3>
+        <div class="token-list">
+          @if (characters.length === 0) {
+            <p class="empty-state">No characters created yet</p>
+          } @else {
+            <div class="tokens-group">
+              <h4>Characters</h4>
+              @for (char of characters; track char.id) {
+                @let charToken = state.tokens.find(t => t.characterId === char.id);
+                <div class="token-row">
+                  <button
+                    class="token-button"
+                    [class.selected]="selectedTokenId === charToken?.id"
+                    (click)="selectOrAddCharacterToken(char)">
+                    <span
+                      class="token-color"
+                      [style.background-color]="char.color ?? '#888888'"></span>
+                    <span class="token-name">{{ char.name }}</span>
+                  </button>
+                  @if (charToken) {
+                    <button
+                      class="btn-delete-token"
+                      (click)="deleteToken(charToken.id)"
+                      title="Delete this token">
+                      ×
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (customTokens.length > 0) {
+            <div class="tokens-group">
+              <h4>Custom Tokens</h4>
+              @for (token of customTokens; track token.id) {
+                <div class="token-row">
+                  <button
+                    class="token-button"
+                    [class.selected]="selectedTokenId === token.id"
+                    (click)="selectedTokenId = selectedTokenId === token.id ? null : token.id">
+                    <span
+                      class="token-color"
+                      [style.background-color]="token.color"></span>
+                    <span class="token-name">{{ token.name }}</span>
+                    @if (token.position) {
+                      <span class="token-location">(q: {{ token.position.q }}, r: {{ token.position.r }})</span>
+                    }
+                  </button>
+                  <button
+                    class="btn-delete-token"
+                    (click)="deleteToken(token.id)"
+                    title="Delete this token">
+                    ×
+                  </button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <button class="btn-add-token" (click)="addCustomToken()">+ Custom Token</button>
+      </div>
+
+      @if (previewPath.length > 0) {
+        <div class="panel-section path-info">
+          <h3>Path</h3>
+          <div class="path-stats">
+            <div class="stat">
+              <span class="stat-label">Distance:</span>
+              <span class="stat-value">
+                {{ previewPath.length }} hex{{ previewPath.length !== 1 ? 'es' : '' }}
+                @if (scale) {
+                  <span class="distance-unit">({{ Math.floor(previewPath.length * scale) }} {{ scaleUnit }})</span>
+                }
+              </span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Cost:</span>
+              <span class="stat-value">{{ previewCost | number: '1.1-1' }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <div class="panel-section">
+        <h3>Map Controls</h3>
+        <button class="btn-control" (click)="clearTerrain()">Clear Terrain</button>
+        <button class="btn-control" (click)="clearTokens()">Clear Tokens</button>
+      </div>
+    </aside>
+  </div>
+
+  @if (showAddMapModal) {
+    <div class="modal" (click)="showAddMapModal = false">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>New Map</h3>
+          <button class="btn-close" (click)="showAddMapModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div style="margin-bottom: var(--spacing-lg);">
+            <label for="map-name">Name:</label>
+            <input
+              id="map-name"
+              type="text"
+              [(ngModel)]="newMapForm.label"
+              placeholder="Enter map name"
+              style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-md);" />
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+            <div>
+              <label for="map-width">Width (hexes):</label>
+              <input
+                id="map-width"
+                type="number"
+                min="5"
+                max="100"
+                [(ngModel)]="newMapForm.width"
+                style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-md);" />
+            </div>
+            <div>
+              <label for="map-height">Height (hexes):</label>
+              <input
+                id="map-height"
+                type="number"
+                min="5"
+                max="100"
+                [(ngModel)]="newMapForm.height"
+                style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-md);" />
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md);">
+            <div>
+              <label for="map-scale">Scale:</label>
+              <input
+                id="map-scale"
+                type="number"
+                min="0.1"
+                max="100"
+                step="0.1"
+                [(ngModel)]="newMapForm.scale"
+                style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-md);" />
+            </div>
+            <div>
+              <label for="map-unit">Unit:</label>
+              <select
+                id="map-unit"
+                [(ngModel)]="newMapForm.scaleUnit"
+                style="width: 100%; padding: var(--spacing-sm); border: 1px solid var(--color-border); border-radius: var(--border-radius-md);">
+                <option value="miles">miles per hex</option>
+                <option value="kilometers">km per hex</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button (click)="showAddMapModal = false" style="padding: var(--spacing-sm) var(--spacing-md); border: 1px solid var(--color-border); background: var(--color-bg-white); border-radius: var(--border-radius-md); cursor: pointer;">Cancel</button>
+          <button
+            class="btn-primary"
+            (click)="addMap()"
+            [disabled]="!newMapForm.label.trim()"
+            style="padding: var(--spacing-sm) var(--spacing-md); border: none; background: var(--color-primary-blue); color: white; border-radius: var(--border-radius-md); cursor: pointer; margin-left: var(--spacing-md);">
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

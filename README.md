@@ -40,7 +40,8 @@ A comprehensive Angular application for creating and managing Runequest and Drag
 - **NPC/Monster Support**: Add custom monsters to combat encounters
 
 ### Reference & Database
-- **Rules Reference**: Complete rules database with game system-specific content
+- **Rules Reference**: Complete rules database with game system-specific content (includes melee round phases)
+- **Publications**: Browse all RuneQuest 2 (1978-1983) and modern RuneQuest: Roleplaying in Glorantha (2014-Present) publications with Chaosium catalog numbers and publication years
 - **Bestiary**: Pre-populated monster database with creature stats and abilities (searchable and filterable by game system)
 - **Monster Creator**: Create and save custom monsters with full stat blocks
 - **Game System Filtering**: Filter creatures and rules by RuneQuest or Dragonbane system
@@ -93,9 +94,12 @@ runequest-characters/
 │   │   │   ├── character-list/        # Character cards display with create button
 │   │   │   ├── dice-roller/           # Standalone dice roller with boons/banes
 │   │   │   ├── combat-tracker/        # Full combat encounter management
+│   │   │   ├── combat-map/            # Tactical combat map with hex grid
+│   │   │   ├── wilderness-map/        # Wilderness map with terrain and token placement
 │   │   │   ├── rules-reference/       # Game rules database
 │   │   │   ├── bestiary/              # Monster database with filtering
 │   │   │   ├── monster-creator/       # Custom monster creation tool
+│   │   │   ├── publications/          # RuneQuest publications browser
 │   │   │   └── settings/              # Settings page (language, text size, game system)
 │   │   ├── models/
 │   │   │   ├── character.model.ts     # Character data models & calculations
@@ -113,6 +117,7 @@ runequest-characters/
 │   │   ├── constants/
 │   │   │   ├── skill-categories.constants.ts
 │   │   │   ├── monsters.constants.ts
+│   │   │   ├── runequest-publications.constants.ts  # 47 RuneQuest publications (RQ2 & modern)
 │   │   │   └── [other game data constants]
 │   │   ├── styles.css                 # Global styles
 │   │   └── index.html
@@ -126,12 +131,14 @@ runequest-characters/
 The main navigation provides quick access to core features:
 
 - **Characters** — View all characters, create new characters (button in header)
-- **Combat Tracker** — Manage active combat encounters and initiative
 - **Bestiary** — Browse creatures, create custom monsters (button in header)
-- **Rules Reference** — Look up game rules and mechanics
+- **Combat Tracker** — Manage active combat encounters and initiative
+- **Wilderness Map** — Tactical hex-grid map for combat and exploration with token placement and pathfinding
+- **Rules Reference** — Look up game rules and mechanics including melee round phases
+- **Publications** — Browse RuneQuest publications by Chaosium catalog number across RQ2 and modern eras
 - **⚙️ Settings** — Configure game system, text size, and language
 
-The Dice Roller is available on character management and combat pages for quick dice rolls.
+The Dice Roller is available on character management and combat pages for quick dice rolls. It's hidden on reference pages (Bestiary, Rules Reference, Publications, Settings, Wilderness Map) to reduce visual clutter.
 
 ## Usage
 
@@ -168,10 +175,31 @@ The Dice Roller is available on character management and combat pages for quick 
 5. Track unconsciousness and death states
 6. Use dice roller for attack and damage rolls
 
+### Using the Wilderness Map
+1. Go to Wilderness Map page
+2. **Paint Mode**: Paint terrain on the hex grid (plains, forest, hills, mountains, etc.)
+3. **Move Mode**: Add and position tokens representing characters or custom markers
+   - **Character Tokens**: Click character names to add them to the map
+   - **Custom Tokens**: Create custom tokens with names and colors
+   - **Delete Tokens**: Click the × button next to any token to remove it individually
+   - **Pathfinding**: Hover over hexes while a token is selected to see movement cost and path
+4. Switch between Terrain and Background Image modes for different map views
+5. Manage multiple maps: Create, load, and delete custom maps
+6. Scale maps with miles or kilometer units per hex
+
 ### Using the Bestiary & Monster Creator
 - **Bestiary**: Search and filter monsters by game system (RuneQuest/Dragonbane)
 - **Monster Creator**: Create custom creatures with full stat blocks and save them
 - Filter by system to see only relevant creatures
+
+### Browsing Publications
+- Go to Publications page
+- View all RuneQuest publications organized by era:
+  - **RuneQuest 2 (1978-1983)**: Classic editions and supplements
+  - **Modern RuneQuest: Roleplaying in Glorantha (2014-Present)**: Current edition releases
+- Sort by Chaosium catalog number (CHA####)
+- See publication year and descriptions for each title
+- View summary statistics at the bottom
 
 ### Customizing Settings
 - Click ⚙️ gear icon in the top-right header
@@ -294,6 +322,32 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+## Recent Updates (Session 2026-04-28)
+
+### New Features
+- **Wilderness Map Enhancements**: Added individual token deletion functionality. Each token now displays a delete button (×) that removes only that token, rather than requiring deletion of all tokens at once.
+- **Publications Browser**: New Publications page displaying all 47 RuneQuest publications:
+  - 22 RuneQuest 2 publications (CHA4001-CHA4023, 1978-1983)
+  - 25 Modern RuneQuest: Roleplaying in Glorantha publications (CHA4025-CHA4060, 2014-Present)
+  - Sortable by Chaosium catalog number with publication years and descriptions
+  - Statistics showing publication counts by era
+  - Added navigation link with 📚 library icon
+
+### Rules Reference Updates
+- **Melee Round Phases**: New comprehensive section detailing all 6 phases of combat:
+  1. Declare Actions & Modifiers
+  2. Calculate Strike Ranks
+  3. Act by Strike Rank
+  4. Resolve Attacks & Defenses
+  5. Apply Conditions
+  6. Round End & Reset
+  - Includes key points about simultaneous action at same Strike Rank
+
+### UI/UX Improvements
+- Dice roller now hidden on Publications page (consistent with other reference pages)
+- Updated navigation guide to reflect new Publications feature
+- Improved component organization with modular token management
 
 ## Future Features
 

@@ -1,0 +1,65 @@
+<div class="publications-page">
+  <header class="page-header">
+    <h1>RuneQuest Publications</h1>
+    <a routerLink="/" class="back-link">← Back to Characters</a>
+  </header>
+
+  <div class="publications-container">
+    <div class="section">
+      <h2>RuneQuest 2 (1978-1983)</h2>
+      <p class="section-description">Classic editions from the original RuneQuest 2nd Edition era</p>
+      <div class="publications-table">
+        <div class="table-header">
+          <div class="col-number">Catalog #</div>
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of rq2Publications; track pub.chaosiumNumber) {
+          <div class="table-row">
+            <div class="col-number">{{ pub.chaosiumNumber }}</div>
+            <div class="col-title">{{ pub.title }}</div>
+            <div class="col-year">{{ pub.publishedYear }}</div>
+            <div class="col-description">{{ pub.description || '—' }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>RuneQuest: Roleplaying in Glorantha (2014-Present)</h2>
+      <p class="section-description">Modern editions and supplements for the current RuneQuest era</p>
+      <div class="publications-table">
+        <div class="table-header">
+          <div class="col-number">Catalog #</div>
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of modernPublications; track pub.chaosiumNumber) {
+          <div class="table-row">
+            <div class="col-number">{{ pub.chaosiumNumber }}</div>
+            <div class="col-title">{{ pub.title }}</div>
+            <div class="col-year">{{ pub.publishedYear }}</div>
+            <div class="col-description">{{ pub.description || '—' }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ rq2Publications.length }}</div>
+        <div class="stat-label">RQ2 Publications</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ modernPublications.length }}</div>
+        <div class="stat-label">Modern Publications</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ publications.length }}</div>
+        <div class="stat-label">Total Publications</div>
+      </div>
+    </div>
+  </div>
+</div>
