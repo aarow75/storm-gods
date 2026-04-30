@@ -1,65 +1,240 @@
-<div class="publications-page">
-  <header class="page-header">
-    <h1>RuneQuest Publications</h1>
-    <a routerLink="/" class="back-link">← Back to Characters</a>
-  </header>
+@if (isRunequest) {
+  <div class="publications-page">
+    <header class="page-header">
+      <h2>RuneQuest Publications</h2>
+      <a routerLink="/" class="back-link">← Back to Characters</a>
+    </header>
 
-  <div class="publications-container">
-    <div class="section">
-      <h2>RuneQuest 2 (1978-1983)</h2>
-      <p class="section-description">Classic editions from the original RuneQuest 2nd Edition era</p>
-      <div class="publications-table">
-        <div class="table-header">
-          <div class="col-number">Catalog #</div>
-          <div class="col-title">Title</div>
-          <div class="col-year">Year</div>
-          <div class="col-description">Description</div>
-        </div>
-        @for (pub of rq2Publications; track pub.chaosiumNumber) {
-          <div class="table-row">
-            <div class="col-number">{{ pub.chaosiumNumber }}</div>
-            <div class="col-title">{{ pub.title }}</div>
-            <div class="col-year">{{ pub.publishedYear }}</div>
-            <div class="col-description">{{ pub.description || '—' }}</div>
+    <div class="publications-container">
+      @if (rq2Publications.length > 0) {
+        <div class="section">
+          <h3>RuneQuest 2 (1978-1983)</h3>
+          <p class="section-description">Classic editions from the original RuneQuest 2nd Edition era</p>
+          <div class="publications-table">
+            <div class="table-header">
+              <div class="col-number">Catalog #</div>
+              <div class="col-title">Title</div>
+              <div class="col-year">Year</div>
+              <div class="col-description">Description</div>
+            </div>
+            @for (pub of rq2Publications; track pub.chaosiumNumber) {
+              <div class="table-row">
+                <div class="col-number">{{ pub.chaosiumNumber }}</div>
+                <div class="col-title">{{ pub.title }}</div>
+                <div class="col-year">{{ pub.publishedYear }}</div>
+                <div class="col-description">{{ pub.description || '—' }}</div>
+              </div>
+            }
           </div>
-        }
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>RuneQuest: Roleplaying in Glorantha (2014-Present)</h2>
-      <p class="section-description">Modern editions and supplements for the current RuneQuest era</p>
-      <div class="publications-table">
-        <div class="table-header">
-          <div class="col-number">Catalog #</div>
-          <div class="col-title">Title</div>
-          <div class="col-year">Year</div>
-          <div class="col-description">Description</div>
         </div>
-        @for (pub of modernPublications; track pub.chaosiumNumber) {
-          <div class="table-row">
-            <div class="col-number">{{ pub.chaosiumNumber }}</div>
-            <div class="col-title">{{ pub.title }}</div>
-            <div class="col-year">{{ pub.publishedYear }}</div>
-            <div class="col-description">{{ pub.description || '—' }}</div>
-          </div>
-        }
-      </div>
-    </div>
+      }
 
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-number">{{ rq2Publications.length }}</div>
-        <div class="stat-label">RQ2 Publications</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">{{ modernPublications.length }}</div>
-        <div class="stat-label">Modern Publications</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number">{{ publications.length }}</div>
-        <div class="stat-label">Total Publications</div>
+      @if (modernPublications.length > 0) {
+        <div class="section">
+          <h3>RuneQuest: Roleplaying in Glorantha (2014-Present)</h3>
+          <p class="section-description">Modern editions and supplements for the current RuneQuest era</p>
+          <div class="publications-table">
+            <div class="table-header">
+              <div class="col-number">Catalog #</div>
+              <div class="col-title">Title</div>
+              <div class="col-year">Year</div>
+              <div class="col-description">Description</div>
+            </div>
+            @for (pub of modernPublications; track pub.chaosiumNumber) {
+              <div class="table-row">
+                <div class="col-number">{{ pub.chaosiumNumber }}</div>
+                <div class="col-title">{{ pub.title }}</div>
+                <div class="col-year">{{ pub.publishedYear }}</div>
+                <div class="col-description">{{ pub.description || '—' }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number">{{ rq2Publications.length }}</div>
+          <div class="stat-label">RQ2 Publications</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ modernPublications.length }}</div>
+          <div class="stat-label">Modern Publications</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ publications.length }}</div>
+          <div class="stat-label">Total Publications</div>
+        </div>
       </div>
     </div>
   </div>
-</div>
+} @else {
+  <div class="publications-page">
+    <header class="page-header">
+      <h2>Dragonbane Publications</h2>
+      <a routerLink="/" class="back-link">← Back to Characters</a>
+    </header>
+
+    <div class="publications-container">
+      @if (coreBooks.length > 0) {
+        <div class="section">
+          <h3>Core Books</h3>
+          <p class="section-description">Essential rulebooks and foundational supplements</p>
+          <div class="publications-table dragonbane-table">
+            <div class="table-header">
+              <div class="col-title">Title</div>
+              <div class="col-year">Year</div>
+              @if (coreBooks.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
+                <div class="col-publisher">Publisher</div>
+              }
+              <div class="col-description">Description</div>
+            </div>
+            @for (pub of coreBooks; track pub.title) {
+              <div class="table-row">
+                <div class="col-title">{{ pub.title }}</div>
+                <div class="col-year">{{ pub.publishedYear }}</div>
+                @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
+                  <div class="col-publisher">{{ pub.publisher }}</div>
+                }
+                <div class="col-description">{{ pub.description || '—' }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (bestiaries.length > 0) {
+        <div class="section">
+          <h3>Bestiaries & Creatures</h3>
+          <p class="section-description">Monster and creature references</p>
+          <div class="publications-table dragonbane-table">
+            <div class="table-header">
+              <div class="col-title">Title</div>
+              <div class="col-year">Year</div>
+              @if (bestiaries.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
+                <div class="col-publisher">Publisher</div>
+              }
+              <div class="col-description">Description</div>
+            </div>
+            @for (pub of bestiaries; track pub.title) {
+              <div class="table-row">
+                <div class="col-title">{{ pub.title }}</div>
+                <div class="col-year">{{ pub.publishedYear }}</div>
+                @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
+                  <div class="col-publisher">{{ pub.publisher }}</div>
+                }
+                <div class="col-description">{{ pub.description || '—' }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (settings.length > 0) {
+        <div class="section">
+          <h3>Settings & Worldbooks</h3>
+          <p class="section-description">Campaign settings and world guides</p>
+          <div class="publications-table dragonbane-table">
+            <div class="table-header">
+              <div class="col-title">Title</div>
+              <div class="col-year">Year</div>
+              @if (settings.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
+                <div class="col-publisher">Publisher</div>
+              }
+              <div class="col-description">Description</div>
+            </div>
+            @for (pub of settings; track pub.title) {
+              <div class="table-row">
+                <div class="col-title">{{ pub.title }}</div>
+                <div class="col-year">{{ pub.publishedYear }}</div>
+                @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
+                  <div class="col-publisher">{{ pub.publisher }}</div>
+                }
+                <div class="col-description">{{ pub.description || '—' }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (adventures.length > 0) {
+        <div class="section">
+          <h3>Adventures & Scenarios</h3>
+          <p class="section-description">Adventure modules and campaign adventures</p>
+          <div class="publications-table dragonbane-table">
+            <div class="table-header">
+              <div class="col-title">Title</div>
+              <div class="col-year">Year</div>
+              @if (adventures.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
+                <div class="col-publisher">Publisher</div>
+              }
+              <div class="col-description">Description</div>
+            </div>
+            @for (pub of adventures; track pub.title) {
+              <div class="table-row">
+                <div class="col-title">{{ pub.title }}</div>
+                <div class="col-year">{{ pub.publishedYear }}</div>
+                @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
+                  <div class="col-publisher">{{ pub.publisher }}</div>
+                }
+                <div class="col-description">{{ pub.description || '—' }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (trudvangBooks.length > 0) {
+        <div class="section">
+          <h3>Dragonbane: Trudvang (Upcoming - Kickstarter 2026)</h3>
+          <p class="section-description">Four books bringing the legendary Trudvang setting to Dragonbane</p>
+          <div class="publications-table dragonbane-table">
+            <div class="table-header">
+              <div class="col-title">Title</div>
+              <div class="col-year">Year</div>
+              @if (trudvangBooks.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
+                <div class="col-publisher">Publisher</div>
+              }
+              <div class="col-description">Description</div>
+            </div>
+            @for (pub of trudvangBooks; track pub.title) {
+              <div class="table-row">
+                <div class="col-title">{{ pub.title }}</div>
+                <div class="col-year">{{ pub.publishedYear }}</div>
+                @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
+                  <div class="col-publisher">{{ pub.publisher }}</div>
+                }
+                <div class="col-description">{{ pub.description || '—' }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number">{{ coreBooks.length }}</div>
+          <div class="stat-label">Core Books</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ bestiaries.length }}</div>
+          <div class="stat-label">Bestiaries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ adventures.length }}</div>
+          <div class="stat-label">Adventures</div>
+        </div>
+        @if (trudvangBooks.length > 0) {
+          <div class="stat-card">
+            <div class="stat-number">{{ trudvangBooks.length }}</div>
+            <div class="stat-label">Trudvang Books</div>
+          </div>
+        }
+        <div class="stat-card">
+          <div class="stat-number">{{ publications.length }}</div>
+          <div class="stat-label">Total Publications</div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,239 @@
+<div class="gm-screen">
+  <h2>{{ gameSystemService.getSystemName() }} Game Master's Screen</h2>
+
+  <!-- Conditions Table -->
+  <section class="gm-section">
+    <h3>Conditions & Effects</h3>
+    <table class="gm-table">
+      <thead>
+        <tr>
+          <th>Condition</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (condition of conditions; track condition.name) {
+          <tr>
+            <td>{{ condition.name }}</td>
+            <td>{{ condition.effect }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Difficulty Levels -->
+  <section class="gm-section">
+    <h3>Difficulty Levels</h3>
+    <table class="gm-table">
+      <thead>
+        <tr>
+          <th>Level</th>
+          <th>Typical Chance</th>
+          <th>Modifier</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (level of difficultyLevels; track level.level) {
+          <tr>
+            <td>{{ level.level }}</td>
+            <td>{{ level.chance }}</td>
+            <td>{{ level.modifier }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Runequest Specific Content -->
+  @if (gameSystemService.gameSystem() === 'runequest') {
+    <!-- Hit Locations -->
+    <section class="gm-section">
+      <h3>Hit Location (d20)</h3>
+      <table class="gm-table">
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>d20 Roll</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (loc of runesquestHitLocations; track loc.location) {
+            <tr>
+              <td>{{ loc.location }}</td>
+              <td>{{ loc.range }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Strike Rank Reference -->
+    <section class="gm-section">
+      <h3>Strike Rank Modifiers</h3>
+      <div class="strike-rank-grid">
+        <div class="strike-rank-column">
+          <h3>Size Modifier</h3>
+          <table class="gm-table-small">
+            <thead>
+              <tr>
+                <th>Size</th>
+                <th>Mod</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (mod of strikeRankModifiers; track $index) {
+                @if (mod.siz) {
+                  <tr>
+                    <td>{{ mod.siz }}</td>
+                    <td>+{{ mod.sizMod }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="strike-rank-column">
+          <h3>DEX Modifier</h3>
+          <table class="gm-table-small">
+            <thead>
+              <tr>
+                <th>DEX</th>
+                <th>Mod</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (mod of strikeRankModifiers; track $index) {
+                @if (mod.dex) {
+                  <tr>
+                    <td>{{ mod.dex }}</td>
+                    <td>+{{ mod.dexMod }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="note"><strong>Strike Rank = Base 0 + SIZ modifier + DEX modifier</strong></p>
+      <p class="note"><strong>Additional Modifiers:</strong></p>
+      <ul class="note-list">
+        <li><strong>Weapon Length:</strong> Longer weapons may modify strike rank (varies by weapon)</li>
+        <li><strong>POW:</strong> Used in spirit combat instead of physical damage (directly affects damage dealt)</li>
+      </ul>
+    </section>
+
+    <!-- Magic Modifiers -->
+    <section class="gm-section">
+      <h3>Magic Modifiers</h3>
+      <table class="gm-table">
+        <thead>
+          <tr>
+            <th>Situation</th>
+            <th>Modifier</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (mod of magicModifiers; track mod.situation) {
+            <tr>
+              <td>{{ mod.situation }}</td>
+              <td>{{ mod.modifier }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Armor Locations Reference -->
+    <section class="gm-section">
+      <h3>Armor Coverage</h3>
+      <div class="armor-ref">
+        <div class="armor-column">
+          <strong>Light Armor</strong>
+          <p>Covers most of body</p>
+          <p>No location penalties</p>
+        </div>
+        <div class="armor-column">
+          <strong>Medium Armor</strong>
+          <p>Heavy leather or chain</p>
+          <p>-5% DEX-based skills</p>
+        </div>
+        <div class="armor-column">
+          <strong>Heavy Armor</strong>
+          <p>Full plate or heavy chain</p>
+          <p>-10% DEX-based skills</p>
+        </div>
+      </div>
+    </section>
+  }
+
+  <!-- Dragonbane Specific Content -->
+  @if (gameSystemService.gameSystem() === 'dragonbane') {
+    <section class="gm-section">
+      <h3>Dragonbane Quick Reference</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Difficulty Modifiers</h3>
+          <ul>
+            <li><strong>Simple:</strong> 6 (easy for trained characters)</li>
+            <li><strong>Standard:</strong> 9 (normal task)</li>
+            <li><strong>Hard:</strong> 12 (challenging)</li>
+            <li><strong>Very Hard:</strong> 15 (very difficult)</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Roll Results</h3>
+          <ul>
+            <li><strong>Critical Failure:</strong> 1-3 (worse failure)</li>
+            <li><strong>Failure:</strong> 4-difficulty (no success)</li>
+            <li><strong>Success:</strong> difficulty+ (goal achieved)</li>
+            <li><strong>Critical Success:</strong> difficulty + 10+ (exceptional)</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Combat Speed</h3>
+          <ul>
+            <li><strong>Initiative:</strong> d6 + modifiers, rolled each round</li>
+            <li><strong>Quick Action:</strong> Move or attack, not both</li>
+            <li><strong>Full Round:</strong> Movement + Attack</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="gm-section">
+      <h3>Dragonbane Armor</h3>
+      <table class="gm-table">
+        <thead>
+          <tr>
+            <th>Armor Type</th>
+            <th>Protection</th>
+            <th>Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Padded</td>
+            <td>1d4</td>
+            <td>Light, agile</td>
+          </tr>
+          <tr>
+            <td>Leather</td>
+            <td>1d6</td>
+            <td>Standard</td>
+          </tr>
+          <tr>
+            <td>Chain</td>
+            <td>1d8</td>
+            <td>Heavy, slow</td>
+          </tr>
+          <tr>
+            <td>Plate</td>
+            <td>1d10</td>
+            <td>Very heavy</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  }
+</div>

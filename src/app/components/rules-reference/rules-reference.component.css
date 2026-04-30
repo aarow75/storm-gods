@@ -1,17 +1,23 @@
 @import '../../shared/styles/variables.css';
+@import '../../shared/styles/docs-common.css';
 
 .rules-reference {
   padding: var(--spacing-5xl);
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  min-height: 100vh;
 }
 
 .rules-reference h2 {
-  text-align: center;
-  color: var(--color-text-primary);
+  text-align: left;
+  color: #3b82f6;
   margin-bottom: var(--spacing-6xl);
-  border-bottom: 3px solid var(--color-info);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.08);
   padding-bottom: var(--spacing-3xl);
+  font-weight: 700;
+  font-size: var(--font-size-2xl);
+  letter-spacing: 0.5px;
 }
 
 .reference-container {
@@ -21,27 +27,34 @@
 }
 
 .reference-section {
-  background: var(--color-bg-white);
-  border: 1px solid var(--color-gray-200);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 245, 0.95) 100%);
+  border-left: 6px solid #3b82f6;
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-4xl);
-  box-shadow: 0 1px 3px var(--shadow-black-10);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.reference-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .reference-section h3 {
-  color: var(--color-text-primary);
+  color: #3b82f6;
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 700;
   margin-top: 0;
   margin-bottom: var(--spacing-2xl);
-  padding-bottom: var(--spacing-lg);
-  border-bottom: 2px solid var(--color-gray-300);
+  padding-bottom: var(--spacing-2xl);
+  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
 }
 
 .reference-section h4 {
   color: var(--color-text-primary);
   font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
 }
 
@@ -56,32 +69,38 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--font-size-base);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
 }
 
 .reference-table thead {
-  background: var(--color-bg-blue-lighter);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 .reference-table th {
   padding: var(--spacing-xl) var(--spacing-lg);
   text-align: left;
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-primary);
-  border-bottom: 2px solid var(--color-gray-300);
+  font-weight: 700;
+  color: white;
+  border-bottom: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: var(--font-size-xs);
 }
 
 .reference-table td {
   padding: var(--spacing-lg);
-  border-bottom: 1px solid var(--color-gray-200);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   color: var(--color-text-secondary);
+  background-color: rgba(255, 255, 255, 0.7);
 }
 
-.reference-table tbody tr:nth-child(odd) {
-  background: var(--color-bg-lighter);
+.reference-table tbody tr:nth-child(even) td {
+  background-color: rgba(245, 245, 250, 0.8);
 }
 
 .reference-table tbody tr:hover {
-  background: var(--color-bg-blue-lighter);
+  background-color: rgba(59, 130, 246, 0.08);
 }
 
 .mechanics-summary {
@@ -92,14 +111,16 @@
 
 .mechanic-item {
   padding: var(--spacing-2xl);
-  background: var(--color-bg-lighter);
-  border-left: 3px solid var(--color-info);
-  border-radius: var(--border-radius-sm);
+  background: linear-gradient(135deg, rgba(219, 234, 254, 0.4) 0%, rgba(240, 253, 250, 0.4) 100%);
+  border-left: 4px solid #3b82f6;
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(59, 130, 246, 0.1);
 }
 
 .mechanic-item h4 {
-  color: var(--color-info-dark);
+  color: #3b82f6;
   margin-top: 0;
+  font-weight: 700;
 }
 
 .mechanic-item p {

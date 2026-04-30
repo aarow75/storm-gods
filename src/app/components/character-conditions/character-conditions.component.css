@@ -1,0 +1,84 @@
+.conditions-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.conditions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-2xl);
+}
+
+.condition-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--input-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.condition-card:hover {
+  border-color: var(--accent-color);
+  background-color: var(--accent-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.condition-card.active {
+  border-color: var(--accent-color);
+  background: linear-gradient(135deg, var(--accent-bg) 0%, rgba(59, 130, 246, 0.05) 100%);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.condition-checkbox {
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--accent-color);
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.condition-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.condition-name {
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  color: var(--text-color);
+}
+
+.condition-effect {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.condition-card.active .condition-name {
+  color: var(--accent-color);
+}
+
+.condition-card.active .condition-effect {
+  color: var(--text-color);
+}
+
+@media (max-width: 768px) {
+  .conditions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .condition-card {
+    padding: var(--spacing-lg);
+  }
+}

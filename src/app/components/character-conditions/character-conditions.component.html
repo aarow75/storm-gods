@@ -1,0 +1,21 @@
+<div class="conditions-section">
+  <div class="conditions-grid">
+    @for (condition of availableConditions; track condition.name) {
+      <div
+        class="condition-card"
+        [class.active]="isActive(condition.name)"
+        (click)="toggleCondition(condition.name)">
+        <input
+          type="checkbox"
+          [id]="'condition-' + condition.name"
+          [checked]="isActive(condition.name)"
+          (change)="toggleCondition(condition.name)"
+          class="condition-checkbox">
+        <label [for]="'condition-' + condition.name" class="condition-label">
+          <span class="condition-name">{{ condition.name }}</span>
+          <span class="condition-effect">{{ condition.effect }}</span>
+        </label>
+      </div>
+    }
+  </div>
+</div>
