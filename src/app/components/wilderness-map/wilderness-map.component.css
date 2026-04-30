@@ -288,11 +288,12 @@
   display: flex;
   overflow: hidden;
   gap: var(--spacing-md);
+  position: relative;
 }
 
 .map-scroll-container {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   background-color: var(--color-bg-lighter);
 }
 
@@ -303,6 +304,8 @@
 .hex-grid {
   display: block;
   touch-action: none;
+  width: 100%;
+  height: 100%;
 }
 
 .map-background {
@@ -691,4 +694,196 @@
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   margin-left: var(--spacing-sm);
+}
+
+.encounter-result {
+  background-color: #fee;
+  border-left: 3px solid #d9534f;
+}
+
+.encounter-result h3 {
+  margin-top: 0;
+  color: #d9534f;
+}
+
+.encounter-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-base);
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.info-value {
+  color: var(--color-text-secondary);
+}
+
+.difficulty {
+  font-weight: 600;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  text-transform: capitalize;
+}
+
+.difficulty-trivial {
+  background-color: #f0f0f0;
+  color: #555;
+}
+
+.difficulty-easy {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.difficulty-moderate {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.difficulty-challenging {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.difficulty-deadly {
+  background-color: #b71c1c;
+  color: #fff;
+}
+
+.encounter-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.btn-start-combat {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid #d9534f;
+  background-color: #d9534f;
+  color: white;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.btn-start-combat:hover {
+  background-color: #c9302c;
+  border-color: #ac2925;
+}
+
+.btn-start-combat:active {
+  transform: scale(0.98);
+}
+
+.btn-dismiss {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid #d9534f;
+  background-color: var(--color-bg-white);
+  color: #d9534f;
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.btn-dismiss:hover {
+  background-color: #fee;
+  border-color: #c9302c;
+}
+
+/* Fullscreen mode */
+.wilderness-map-page.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
+.wilderness-map-page.fullscreen .toolbar {
+  display: none;
+}
+
+/* Sidebar as drawer in fullscreen */
+.wilderness-map-page.fullscreen .side-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 280px;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 10;
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.25);
+}
+
+.wilderness-map-page.fullscreen .side-panel.sidebar-open {
+  transform: translateX(0);
+}
+
+/* Floating overlay controls */
+.map-overlay-controls {
+  position: absolute;
+  bottom: var(--spacing-4xl);
+  right: var(--spacing-4xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.overlay-btn {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-white);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.overlay-btn:hover {
+  background-color: var(--color-bg-lighter);
+}
+
+/* Fullscreen toggle button in header */
+.btn-fullscreen {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg-white);
+  color: var(--color-text-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-fullscreen:hover {
+  background-color: var(--color-bg-lighter);
+  border-color: var(--color-text-primary);
 }

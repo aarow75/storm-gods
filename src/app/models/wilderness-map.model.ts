@@ -48,6 +48,9 @@ export interface WildernessMapState {
   scaleUnit?: 'miles' | 'kilometers';
   showTerrainOverlay?: boolean;
   hexBorderOpacity?: number;
+  viewZoom?: number;
+  viewPanX?: number;
+  viewPanY?: number;
 }
 
 export const GRID_COLS = 40;
@@ -64,6 +67,9 @@ export const DEFAULT_WILDERNESS_STATE: WildernessMapState = {
   gridWidth: GRID_COLS,
   gridHeight: GRID_ROWS,
   hexBorderOpacity: 1,
+  viewZoom: 1,
+  viewPanX: 0,
+  viewPanY: 0,
 };
 
 export function tileKey(q: number, r: number): string {

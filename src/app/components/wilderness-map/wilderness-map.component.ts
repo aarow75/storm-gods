@@ -1,6 +1,6 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   DEFAULT_WILDERNESS_STATE,
@@ -15,9 +15,16 @@ import {
 } from '../../models/wilderness-map.model';
 import { TERRAIN_DEFINITIONS } from '../../constants/terrain.constants';
 import { MAP_BACKGROUNDS } from '../../constants/map-backgrounds.constants';
+import { ENCOUNTER_TABLES } from '../../constants/encounters.constants';
+import { MONSTERS as BESTIARY_MONSTERS } from '../../constants/monsters.constants';
 import { WildernessMapService } from '../../services/wilderness-map.service';
 import { CharacterService } from '../../services/character.service';
+import { CombatService } from '../../services/combat.service';
+import { DiceService } from '../../services/dice.service';
 import { Character } from '../../models/character.model';
+import { CombatParticipant, Monster as CombatMonster } from '../../models/combat.model';
+import { Monster as BestiaryMonster } from '../../models/monster.model';
+import { getSizeModifier, getDexterityModifier } from '../../models/character.model';
 import { dijkstra } from '../../utils/hex-pathfinding';
 
 @Component({
@@ -27,7 +34,7 @@ import { dijkstra } from '../../utils/hex-pathfinding';
   templateUrl: './wilderness-map.component.html',
   styleUrl: './wilderness-map.component.css',
 })
-export class WildernessMapComponent implements OnInit, OnDestroy {
+export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('hexSvg', { read: ElementRef }) hexSvg!: ElementRef<SVGSVGElement>;
 
   state: WildernessMapState = { ...DEFAULT_WILDERNESS_STATE };
@@ -48,10 +55,43 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
   selectedTokenId: string | null = null;
   isPainting = false;
 
+  // Viewport state (persisted)
+  viewZoom = 1;
+  viewPanX = 0;
+  viewPanY = 0;
+
+  // Pan gesture transient state (not persisted)
+  isPanning = false;
+  panHasMoved = false;
+  panStartX = 0;
+  panStartY = 0;
+  panStartViewX = 0;
+  panStartViewY = 0;
+
+  // Pinch gesture transient state (not persisted)
+  lastTouchDist = 0;
+
+  // Fullscreen and drawer UI state
+  isFullscreen = false;
+  isSidebarOpen = false;
+
+  get viewTransform(): string {
+    return `translate(${this.viewPanX}, ${this.viewPanY}) scale(${this.viewZoom})`;
+  }
+
   hoveredHex: HexCoord | null = null;
   previewPath: HexCoord[] = [];
   previewPathSet = new Set<string>();
   previewCost = 0;
+
+  encounterResult: {
+    roll: number;
+    creature: string;
+    count: string;
+    difficulty: 'trivial' | 'easy' | 'moderate' | 'challenging' | 'deadly';
+    terrain: string;
+    stoppedAt: HexCoord;
+  } | null = null;
 
   mapMode: 'terrain' | 'image' = 'terrain';
   showTerrainOverlay = false;
@@ -67,9 +107,16 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
   svgWidth = 0;
   svgHeight = 0;
 
+  private readonly onWheelBound = (e: WheelEvent) => this.onSvgWheel(e);
+  private readonly onTouchStartBound = (e: TouchEvent) => this.onSvgTouchStart(e);
+  private readonly onTouchMoveBound = (e: TouchEvent) => this.onSvgTouchMove(e);
+
   constructor(
     private wildernessService: WildernessMapService,
-    private characterService: CharacterService
+    private characterService: CharacterService,
+    private combatService: CombatService,
+    private diceService: DiceService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -82,6 +129,9 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
     this.scaleUnit = this.state.scaleUnit ?? 'miles';
     this.showTerrainOverlay = this.state.showTerrainOverlay ?? false;
     this.hexBorderOpacity = this.state.hexBorderOpacity ?? 1;
+    this.viewZoom = this.state.viewZoom ?? 1;
+    this.viewPanX = this.state.viewPanX ?? 0;
+    this.viewPanY = this.state.viewPanY ?? 0;
     console.log('Loaded state from localStorage:', this.state);
     this.buildHexGrid();
     if (this.state.currentMapId) {
@@ -90,7 +140,20 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
     this.ensureMapDataSynced();
   }
 
+  ngAfterViewInit(): void {
+    const el = this.hexSvg.nativeElement;
+    el.addEventListener('wheel', this.onWheelBound, { passive: false });
+    el.addEventListener('touchstart', this.onTouchStartBound, { passive: false });
+    el.addEventListener('touchmove', this.onTouchMoveBound, { passive: false });
+  }
+
   ngOnDestroy(): void {
+    const el = this.hexSvg?.nativeElement;
+    if (el) {
+      el.removeEventListener('wheel', this.onWheelBound);
+      el.removeEventListener('touchstart', this.onTouchStartBound);
+      el.removeEventListener('touchmove', this.onTouchMoveBound);
+    }
     this.wildernessService.saveState(this.state);
   }
 
@@ -165,6 +228,17 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
     this.paintHex(q, r);
   }
 
+  onSvgPointerDown(event: PointerEvent): void {
+    if (this.interactionMode !== 'move') return;
+    this.isPanning = true;
+    this.panHasMoved = false;
+    this.panStartX = event.clientX;
+    this.panStartY = event.clientY;
+    this.panStartViewX = this.viewPanX;
+    this.panStartViewY = this.viewPanY;
+    (event.currentTarget as SVGElement).setPointerCapture(event.pointerId);
+  }
+
   onHexPointerEnter(q: number, r: number): void {
     if (this.interactionMode === 'paint' && this.isPainting) {
       this.paintHex(q, r);
@@ -175,13 +249,24 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
   }
 
   onSvgPointerMove(event: PointerEvent): void {
+    if (this.isPanning) {
+      const dx = event.clientX - this.panStartX;
+      const dy = event.clientY - this.panStartY;
+      this.viewPanX = this.panStartViewX + dx;
+      this.viewPanY = this.panStartViewY + dy;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+        this.panHasMoved = true;
+      }
+      return;
+    }
+
     if (!this.isPainting && this.interactionMode !== 'move') return;
     if (!this.hexSvg) return;
 
     const svg = this.hexSvg.nativeElement;
     const rect = svg.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const x = (event.clientX - rect.left - this.viewPanX) / this.viewZoom;
+    const y = (event.clientY - rect.top - this.viewPanY) / this.viewZoom;
 
     for (const hex of this.hexes) {
       const dx = x - (hex.cx + this.svgOffsetX);
@@ -206,6 +291,12 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
       this.isPainting = false;
       this.saveState();
     }
+    if (this.isPanning) {
+      this.isPanning = false;
+      if (this.panHasMoved) {
+        this.saveViewState();
+      }
+    }
   }
 
   private paintHex(q: number, r: number): void {
@@ -222,12 +313,165 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
     this.wildernessService.saveState(this.state);
   }
 
+  private isEncounterToken(token: WildernessToken): boolean {
+    return token.name.toLowerCase().includes('encounter');
+  }
+
+  private terrainToEncounterTableName(terrain: TerrainType): string {
+    const map: Partial<Record<TerrainType, string>> = {
+      plains: 'plains',
+      forest: 'forest',
+      'dense-forest': 'forest',
+      hills: 'mountains',
+      mountains: 'mountains',
+      desert: 'desert',
+      road: 'roads',
+      swamp: 'forest',
+      river: 'forest',
+      none: 'plains',
+    };
+    return map[terrain] ?? 'plains';
+  }
+
+  private rollEncounterForTerrain(
+    terrain: TerrainType
+  ): {
+    roll: number;
+    creature: string;
+    count: string;
+    difficulty: 'trivial' | 'easy' | 'moderate' | 'challenging' | 'deadly';
+    terrain: string;
+    stoppedAt: HexCoord;
+  } | null {
+    const tableName = this.terrainToEncounterTableName(terrain);
+    const table = ENCOUNTER_TABLES.find((t) => t.terrain === tableName);
+    if (!table) return null;
+
+    const roll = Math.ceil(Math.random() * 20);
+
+    const entry = table.entries.find((e) => {
+      const [low, high] = e.roll.includes('-') ? e.roll.split('-').map(Number) : [Number(e.roll), Number(e.roll)];
+      return roll >= low && roll <= high;
+    });
+
+    if (!entry) return null;
+    return {
+      roll,
+      creature: entry.creature,
+      count: entry.count,
+      difficulty: entry.difficulty,
+      terrain: tableName,
+      stoppedAt: { q: 0, r: 0 },
+    };
+  }
+
+  private convertBestiaryMonster(bm: BestiaryMonster): CombatMonster {
+    return {
+      id: `bestiary-${bm.id}`,
+      name: bm.name,
+      hitPoints: bm.hitPoints,
+      strikeRank: getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX),
+      armor: bm.armor,
+      weapons: bm.attacks.map((a) => ({
+        name: a.name,
+        damage: a.damage,
+        strikeRankModifier: 0,
+      })),
+    };
+  }
+
+  private parseCountString(countStr: string): number {
+    if (countStr === '-') return 0;
+    const diceMatch = countStr.match(/(\d+)d(\d+)/);
+    if (diceMatch) {
+      const count = parseInt(diceMatch[1], 10);
+      const sides = parseInt(diceMatch[2], 10);
+      let total = 0;
+      for (let i = 0; i < count; i++) {
+        total += Math.floor(Math.random() * sides) + 1;
+      }
+      return total;
+    }
+    const numMatch = countStr.match(/\d+/);
+    return numMatch ? parseInt(numMatch[0], 10) : 1;
+  }
+
+  startCombatWithEncounter(): void {
+    if (!this.encounterResult) return;
+
+    const creatureName = this.encounterResult.creature;
+    const countStr = this.encounterResult.count;
+    const count = this.parseCountString(countStr);
+
+    if (count === 0) {
+      alert('No creatures to encounter!');
+      this.encounterResult = null;
+      return;
+    }
+
+    const bestiaryMonster = BESTIARY_MONSTERS.find(
+      (m) => m.name.toLowerCase() === creatureName.toLowerCase()
+    );
+
+    if (!bestiaryMonster) {
+      alert(`Creature "${creatureName}" not found in bestiary`);
+      return;
+    }
+
+    const combatMonster = this.convertBestiaryMonster(bestiaryMonster);
+    const existingParticipants = this.combatService.getCombatParticipants();
+    const participants: CombatParticipant[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const id = this.combatService.generateId();
+      const baseStrikeRank = combatMonster.strikeRank;
+      const firstWeapon = combatMonster.weapons[0]?.name || 'Bite';
+      const weapon = combatMonster.weapons.find((w) => w.name === firstWeapon);
+      const finalStrikeRank = baseStrikeRank + (weapon?.strikeRankModifier || 0);
+
+      const participant: CombatParticipant = {
+        id,
+        name: count > 1 ? `${combatMonster.name} ${i + 1}` : combatMonster.name,
+        type: 'monster',
+        monsterId: combatMonster.id,
+        maxHitPoints: combatMonster.hitPoints,
+        currentHitPoints: new Array(combatMonster.hitPoints).fill(false),
+        baseStrikeRank,
+        selectedWeapon: firstWeapon,
+        selectedParryItem: firstWeapon,
+        finalStrikeRank,
+        isDead: false,
+        kills: 0,
+        color: '#666666',
+        locationDamage: {},
+        distanceToOpponent: 0,
+        movementThisRound: 0,
+        isSurprised: false,
+        movementRate: 8,
+      };
+      participants.push(participant);
+    }
+
+    const allParticipants = [...existingParticipants, ...participants];
+    this.combatService.saveCombatParticipants(
+      this.combatService.sortParticipantsByStrikeRank(allParticipants)
+    );
+
+    this.encounterResult = null;
+    this.router.navigate(['/combat']);
+  }
+
   onHexClick(q: number, r: number): void {
+    if (this.panHasMoved) {
+      this.panHasMoved = false;
+      return;
+    }
     if (this.interactionMode !== 'move') return;
 
     const clickedToken = this.getTokenAt(q, r);
     if (clickedToken) {
       this.selectedTokenId = clickedToken.id === this.selectedTokenId ? null : clickedToken.id;
+      this.encounterResult = null;
       return;
     }
 
@@ -235,9 +479,53 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
 
     const token = this.state.tokens.find((t) => t.id === this.selectedTokenId);
     if (token) {
-      token.position = { q, r };
+      if (!token.position) {
+        token.position = { q, r };
+        this.encounterResult = null;
+      } else {
+        const result = dijkstra(
+          token.position,
+          { q, r },
+          (tq, tr) => (this.state.tiles[tileKey(tq, tr)] ?? 'none') as TerrainType,
+          this.gridWidth,
+          this.gridHeight
+        );
+        const path = result?.path ?? [{ q, r }];
+
+        // Find first encounter token on the path
+        const encounterHexIdx = path.findIndex((h) =>
+          this.state.tokens.some(
+            (t) =>
+              t.id !== token.id &&
+              this.isEncounterToken(t) &&
+              t.position?.q === h.q &&
+              t.position?.r === h.r
+          )
+        );
+
+        if (encounterHexIdx !== -1) {
+          // Stop in the hex just before the encounter token (or at start if encounter is first hex)
+          const stopHex = encounterHexIdx > 0 ? path[encounterHexIdx - 1] : token.position;
+          token.position = stopHex;
+
+          // Roll encounter based on terrain at the encounter hex
+          const encHex = path[encounterHexIdx];
+          const terrain = (this.state.tiles[tileKey(encHex.q, encHex.r)] ?? 'none') as TerrainType;
+          const rollResult = this.rollEncounterForTerrain(terrain);
+          if (rollResult) {
+            this.encounterResult = { ...rollResult, stoppedAt: stopHex };
+          } else {
+            this.encounterResult = null;
+          }
+        } else {
+          token.position = { q, r };
+          this.encounterResult = null;
+        }
+      }
       this.saveState();
       this.selectedTokenId = null;
+      this.previewPath = [];
+      this.previewPathSet.clear();
     }
   }
 
@@ -579,5 +867,87 @@ export class WildernessMapComponent implements OnInit, OnDestroy {
   onScaleUnitChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.setScale(this.scale, target.value as 'miles' | 'kilometers');
+  }
+
+  private onSvgWheel(event: WheelEvent): void {
+    event.preventDefault();
+
+    const svg = this.hexSvg.nativeElement;
+    const rect = svg.getBoundingClientRect();
+    const mx = event.clientX - rect.left;
+    const my = event.clientY - rect.top;
+
+    const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
+    const newZoom = Math.max(0.2, Math.min(8, this.viewZoom * factor));
+    const scale = newZoom / this.viewZoom;
+
+    this.viewPanX = mx + scale * (this.viewPanX - mx);
+    this.viewPanY = my + scale * (this.viewPanY - my);
+    this.viewZoom = newZoom;
+
+    this.saveViewState();
+  }
+
+  private onSvgTouchStart(event: TouchEvent): void {
+    if (event.touches.length !== 2) return;
+    event.preventDefault();
+    const t0 = event.touches[0];
+    const t1 = event.touches[1];
+    this.lastTouchDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+  }
+
+  private onSvgTouchMove(event: TouchEvent): void {
+    if (event.touches.length !== 2) return;
+    event.preventDefault();
+
+    const t0 = event.touches[0];
+    const t1 = event.touches[1];
+    const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY);
+    if (this.lastTouchDist === 0) {
+      this.lastTouchDist = dist;
+      return;
+    }
+
+    const svg = this.hexSvg.nativeElement;
+    const rect = svg.getBoundingClientRect();
+    const mx = ((t0.clientX + t1.clientX) / 2) - rect.left;
+    const my = ((t0.clientY + t1.clientY) / 2) - rect.top;
+
+    const factor = dist / this.lastTouchDist;
+    const newZoom = Math.max(0.2, Math.min(8, this.viewZoom * factor));
+    const scale = newZoom / this.viewZoom;
+
+    this.viewPanX = mx + scale * (this.viewPanX - mx);
+    this.viewPanY = my + scale * (this.viewPanY - my);
+    this.viewZoom = newZoom;
+
+    this.lastTouchDist = dist;
+
+    this.saveViewState();
+  }
+
+  toggleFullscreen(): void {
+    this.isFullscreen = !this.isFullscreen;
+    if (!this.isFullscreen) {
+      this.isSidebarOpen = false;
+    }
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  resetView(): void {
+    this.viewZoom = 1;
+    this.viewPanX = 0;
+    this.viewPanY = 0;
+    this.saveViewState();
+  }
+
+  private saveViewState(): void {
+    this.state.viewZoom = this.viewZoom;
+    this.state.viewPanX = this.viewPanX;
+    this.state.viewPanY = this.viewPanY;
+    this.wildernessService.saveState(this.state);
   }
 }

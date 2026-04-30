@@ -1,7 +1,12 @@
-<div class="wilderness-map-page">
+<div class="wilderness-map-page" [class.fullscreen]="isFullscreen">
   <header class="page-header">
     <h1>Wilderness Map</h1>
-    <a routerLink="/" class="back-link">← Back to Characters</a>
+    <div style="display: flex; gap: var(--spacing-lg); align-items: center;">
+      <a routerLink="/" class="back-link">← Back to Characters</a>
+      <button class="btn-fullscreen" (click)="toggleFullscreen()" [title]="isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'">
+        {{ isFullscreen ? '✕' : '⛶' }}
+      </button>
+    </div>
   </header>
 
   <div class="toolbar">
@@ -151,61 +156,64 @@
     <div class="map-scroll-container" [class.paint-cursor]="interactionMode === 'paint'">
       <svg
         #hexSvg
-        [attr.width]="svgWidth"
-        [attr.height]="svgHeight"
+        width="100%"
+        height="100%"
         class="hex-grid"
+        (pointerdown)="onSvgPointerDown($event)"
         (pointermove)="onSvgPointerMove($event)">
-        @if (mapMode === 'image' && state.backgroundImage) {
-          <image
-            [attr.href]="getBackgroundImagePath()"
-            [attr.width]="svgWidth"
-            [attr.height]="svgHeight"
-            [attr.x]="0"
-            [attr.y]="0"
-            preserveAspectRatio="xMidYMid slice"
-            class="map-background" />
-        }
-        <g [attr.transform]="'translate(' + svgOffsetX + ',' + svgOffsetY + ')'">
-          @for (hex of hexes; track hex.q + ',' + hex.r) {
-            <polygon
-              [attr.points]="hex.points"
-              [attr.fill]="getHexFill(hex.q, hex.r)"
-              [attr.stroke]="getHexStroke(hex.q, hex.r)"
-              [attr.stroke-width]="isPathPreview(hex.q, hex.r) ? 2 : 1"
-              [attr.stroke-opacity]="hexBorderOpacity"
-              [class.hex-tile]="true"
-              [class.path-preview]="isPathPreview(hex.q, hex.r)"
-              (pointerdown)="onHexPointerDown(hex.q, hex.r, $event)"
-              (pointerenter)="onHexPointerEnter(hex.q, hex.r)"
-              (click)="onHexClick(hex.q, hex.r)" />
+        <g [attr.transform]="viewTransform">
+          @if (mapMode === 'image' && state.backgroundImage) {
+            <image
+              [attr.href]="getBackgroundImagePath()"
+              [attr.width]="svgWidth"
+              [attr.height]="svgHeight"
+              [attr.x]="0"
+              [attr.y]="0"
+              preserveAspectRatio="xMidYMid slice"
+              class="map-background" />
           }
+          <g [attr.transform]="'translate(' + svgOffsetX + ',' + svgOffsetY + ')'">
+            @for (hex of hexes; track hex.q + ',' + hex.r) {
+              <polygon
+                [attr.points]="hex.points"
+                [attr.fill]="getHexFill(hex.q, hex.r)"
+                [attr.stroke]="getHexStroke(hex.q, hex.r)"
+                [attr.stroke-width]="isPathPreview(hex.q, hex.r) ? 2 : 1"
+                [attr.stroke-opacity]="hexBorderOpacity"
+                [class.hex-tile]="true"
+                [class.path-preview]="isPathPreview(hex.q, hex.r)"
+                (pointerdown)="onHexPointerDown(hex.q, hex.r, $event)"
+                (pointerenter)="onHexPointerEnter(hex.q, hex.r)"
+                (click)="onHexClick(hex.q, hex.r)" />
+            }
 
-          @for (token of placedTokens; track token.id) {
-            <circle
-              [attr.cx]="getTokenCx(token)"
-              [attr.cy]="getTokenCy(token)"
-              [attr.r]="HEX_SIZE * 0.55"
-              [attr.fill]="token.color"
-              [attr.stroke]="selectedTokenId === token.id ? 'white' : 'rgba(0,0,0,0.4)'"
-              [attr.stroke-width]="selectedTokenId === token.id ? 2.5 : 1"
-              class="token-circle"
-              style="cursor: pointer;" />
-            <text
-              [attr.x]="getTokenCx(token)"
-              [attr.y]="getTokenCy(token)"
-              dominant-baseline="central"
-              text-anchor="middle"
-              [attr.font-size]="HEX_SIZE * 0.7"
-              fill="white"
-              style="pointer-events: none; font-weight: bold; text-shadow: 0 0 2px #000;">
-              {{ token.name[0] }}
-            </text>
-          }
+            @for (token of placedTokens; track token.id) {
+              <circle
+                [attr.cx]="getTokenCx(token)"
+                [attr.cy]="getTokenCy(token)"
+                [attr.r]="HEX_SIZE * 0.55"
+                [attr.fill]="token.color"
+                [attr.stroke]="selectedTokenId === token.id ? 'white' : 'rgba(0,0,0,0.4)'"
+                [attr.stroke-width]="selectedTokenId === token.id ? 2.5 : 1"
+                class="token-circle"
+                style="cursor: pointer;" />
+              <text
+                [attr.x]="getTokenCx(token)"
+                [attr.y]="getTokenCy(token)"
+                dominant-baseline="central"
+                text-anchor="middle"
+                [attr.font-size]="HEX_SIZE * 0.7"
+                fill="white"
+                style="pointer-events: none; font-weight: bold; text-shadow: 0 0 2px #000;">
+                {{ token.name.toLowerCase().includes('encounter') ? '⚠' : token.name[0] }}
+              </text>
+            }
+          </g>
         </g>
       </svg>
     </div>
 
-    <aside class="side-panel">
+    <aside class="side-panel" [class.sidebar-open]="isSidebarOpen">
       <div class="panel-section">
         <h3>Tokens</h3>
         <div class="token-list">
@@ -271,6 +279,38 @@
         <button class="btn-add-token" (click)="addCustomToken()">+ Custom Token</button>
       </div>
 
+      @if (encounterResult) {
+        <div class="panel-section encounter-result">
+          <h3>⚔ Encounter Triggered!</h3>
+          <div class="encounter-info">
+            <div class="info-row">
+              <span class="info-label">Roll:</span>
+              <span class="info-value">{{ encounterResult.roll }}/20</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Terrain:</span>
+              <span class="info-value">{{ encounterResult.terrain }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Creature:</span>
+              <span class="info-value">{{ encounterResult.creature }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Count:</span>
+              <span class="info-value">{{ encounterResult.count }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Difficulty:</span>
+              <span class="info-value difficulty" [class]="'difficulty-' + encounterResult.difficulty">{{ encounterResult.difficulty }}</span>
+            </div>
+          </div>
+          <div class="encounter-actions">
+            <button class="btn-start-combat" (click)="startCombatWithEncounter()">⚔ Start Combat</button>
+            <button class="btn-dismiss" (click)="encounterResult = null">Dismiss</button>
+          </div>
+        </div>
+      }
+
       @if (previewPath.length > 0) {
         <div class="panel-section path-info">
           <h3>Path</h3>
@@ -298,6 +338,13 @@
         <button class="btn-control" (click)="clearTokens()">Clear Tokens</button>
       </div>
     </aside>
+
+    <div class="map-overlay-controls">
+      <button class="overlay-btn" (click)="resetView()" title="Reset zoom and pan">⊙</button>
+      @if (isFullscreen) {
+        <button class="overlay-btn" (click)="toggleSidebar()" title="Toggle sidebar">☰</button>
+      }
+    </div>
   </div>
 
   @if (showAddMapModal) {
