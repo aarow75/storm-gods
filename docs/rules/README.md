@@ -26,7 +26,8 @@ This documentation is organized according to the RQ2 #4001 Rulebook (1978-79) Ta
 - [x] Section VI: Other Skills (completed — 900+ lines)
 - [x] Section VII: Rune Magic (completed — 1,000+ lines)
 - [x] Section VIII: Monsters (completed — 900+ lines)
-- [ ] Section IX: Treasure (placeholder)
+- [x] Section IX: Treasure (completed — 700+ lines)
+- [x] Section X: Appendices (completed — 800+ lines)
 
 ## Notes
 
