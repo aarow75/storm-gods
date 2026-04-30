@@ -158,10 +158,12 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.defaultMonsters = structuredClone(DEFAULT_MONSTERS);
     this.bestiaryMonsters = BESTIARY_MONSTERS.map(m => this.convertBestiaryMonster(m));
     this.customMonsters = this.customMonsterService.getMonsters().map(m => this.convertBestiaryMonster(m));
+    const savedCombatMonsters = this.combatService.getMonsters();
     this.monsters = [
       ...this.defaultMonsters,
       ...this.bestiaryMonsters,
-      ...this.customMonsters
+      ...this.customMonsters,
+      ...savedCombatMonsters
     ];
     this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(
       this.combatService.getCombatParticipants()

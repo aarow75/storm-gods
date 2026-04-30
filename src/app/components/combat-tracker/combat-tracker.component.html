@@ -253,7 +253,10 @@
                   <input type="checkbox" [checked]="participant.isSurprised"
                          (change)="toggleSurprise(participant)">
                   Surprised
-                  @if (participant.isSurprised) { <span class="surprise-badge">+12 SR</span> }
+                  @if (participant.isSurprised) {
+                    <span class="surprise-badge">+{{ getSurpriseDistancePenalty(participant) }} SR</span>
+                    <span class="distance-info">({{ getOpponentDistanceDisplay(participant) }}m)</span>
+                  }
                 </label>
               </div>
 
@@ -588,7 +591,7 @@
         <div class="form-group surprise-form-group">
           <label>
             <input type="checkbox" [(ngModel)]="addParticipantSurprised">
-            Surprised (acts last, +12 SR)
+            Surprised (distance-based SR penalty)
           </label>
         </div>
       </div>

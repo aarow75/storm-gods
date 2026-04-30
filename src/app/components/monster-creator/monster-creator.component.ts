@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Monster } from '../../models/monster.model';
+import { HIT_LOCATION_TEMPLATES } from '../../constants/hit-location-templates.constants';
 import { CustomMonsterService } from '../../services/custom-monster.service';
 import { TranslationService } from '../../services/translation.service';
 
@@ -21,13 +22,14 @@ export class MonsterCreatorComponent implements OnInit {
   form: {
     name: string;
     description: string;
-    category: 'humanoid' | 'beast' | 'undead' | 'chaos' | 'dragon' | 'spirit';
+    category: 'humanoid' | 'beast' | 'undead' | 'chaos' | 'dragon' | 'spirit' | 'npc' | 'mount';
     gameSystem: 'runequest' | 'dragonbane' | 'both';
     hitPoints: number;
     armor: number;
     armorDescription: string;
     movement: number;
     strikeRank: number;
+    hitLocationTemplateId: string;
     stats: { STR: number; CON: number; SIZ: number; DEX: number; INT: number; POW: number; CHA: number };
     attacks: { name: string; damage: string; skill: number }[];
     specialAbilities: string[];
@@ -41,6 +43,7 @@ export class MonsterCreatorComponent implements OnInit {
     armorDescription: '',
     movement: 10,
     strikeRank: 10,
+    hitLocationTemplateId: '',
     stats: {
       STR: 10,
       CON: 10,
@@ -54,11 +57,15 @@ export class MonsterCreatorComponent implements OnInit {
     specialAbilities: ['']
   };
 
-  categories = ['humanoid', 'beast', 'undead', 'chaos', 'dragon', 'spirit'];
+  categories = ['humanoid', 'beast', 'undead', 'chaos', 'dragon', 'spirit', 'npc', 'mount'];
   gameSystems = [
     { value: 'runequest', label: 'RuneQuest' },
     { value: 'dragonbane', label: 'DragonBane' },
     { value: 'both', label: 'Both Systems' }
+  ];
+  hitLocationTemplateOptions = [
+    { value: '', label: 'None (flat HP)' },
+    ...HIT_LOCATION_TEMPLATES.map(t => ({ value: t.id, label: t.label }))
   ];
 
   constructor(
@@ -109,6 +116,7 @@ export class MonsterCreatorComponent implements OnInit {
       armorDescription: monster.armorDescription,
       movement: monster.movement,
       strikeRank: monster.strikeRank || 10,
+      hitLocationTemplateId: monster.hitLocationTemplateId ?? '',
       stats: { ...monster.stats },
       attacks: monster.attacks.length > 0 ? [...monster.attacks] : [{ name: '', damage: '', skill: 50 }],
       specialAbilities: monster.specialAbilities && monster.specialAbilities.length > 0
@@ -128,6 +136,7 @@ export class MonsterCreatorComponent implements OnInit {
       armorDescription: '',
       movement: 10,
       strikeRank: 10,
+      hitLocationTemplateId: '',
       stats: {
         STR: 10,
         CON: 10,
@@ -162,7 +171,8 @@ export class MonsterCreatorComponent implements OnInit {
       stats: this.form.stats,
       attacks: this.form.attacks.filter(a => a.name.trim()),
       specialAbilities: this.form.specialAbilities.filter(a => a.trim()),
-      isCustom: true
+      isCustom: true,
+      hitLocationTemplateId: this.form.hitLocationTemplateId || undefined
     };
 
     this.monsterService.saveMonster(monsterToSave);
@@ -211,7 +221,9 @@ export class MonsterCreatorComponent implements OnInit {
       'undead': 'Undead',
       'chaos': 'Chaos',
       'dragon': 'Dragon',
-      'spirit': 'Spirit'
+      'spirit': 'Spirit',
+      'npc': 'NPC',
+      'mount': 'Mount'
     };
     return labels[category] || category;
   }

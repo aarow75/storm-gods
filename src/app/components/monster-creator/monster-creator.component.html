@@ -78,6 +78,18 @@
             <input id="strikeRank" type="number" [(ngModel)]="form.strikeRank" min="0" />
           </div>
         </div>
+
+        <div class="form-group">
+          <label for="hitLocationTemplate">Hit Location Template</label>
+          <select id="hitLocationTemplate" [(ngModel)]="form.hitLocationTemplateId">
+            @for (tmpl of hitLocationTemplateOptions; track tmpl.value) {
+              <option [value]="tmpl.value">{{ tmpl.label }}</option>
+            }
+          </select>
+          @if (form.hitLocationTemplateId) {
+            <p class="form-hint">HP per location will be auto-calculated from CON + SIZ when displayed.</p>
+          }
+        </div>
       </div>
 
       <!-- Stats Section -->

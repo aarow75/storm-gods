@@ -36,8 +36,8 @@ export interface CombatParticipant {
   parriesAgainst?: { [attackerId: string]: number }; // parry attempts vs each attacker this round
   distanceToOpponent?: number;  // meters to opponent at start of combat
   movementThisRound?: number;   // meters moving this round (costs ceil(m/3) SR)
-  isSurprised?: boolean;        // +12 SR penalty; cleared on New Round
-  effectiveSR?: number;         // finalStrikeRank + movement cost + surprise penalty
+  isSurprised?: boolean;        // distance-based SR penalty: +3 if within 3m, +1 if beyond; cleared on New Round
+  effectiveSR?: number;         // finalStrikeRank + movement cost + distance-based surprise penalty
   movementRate?: number;        // squares/round; from character.derivedStats.movementRate; default 8
 }
 

@@ -54,7 +54,8 @@ export const MONSTERS: Monster[] = [
       { name: 'Bite', damage: '2d6+5', skill: 45 },
       { name: 'Talons (rear)', damage: '1d6+5', skill: 55 }
     ],
-    specialAbilities: ['Flight (18m)', 'Keen vision', 'Deadly dive attack']
+    specialAbilities: ['Flight (18m)', 'Keen vision', 'Deadly dive attack'],
+    hitLocationTemplateId: 'quadruped'
   },
   {
     id: 'scorpion_man',
@@ -72,7 +73,8 @@ export const MONSTERS: Monster[] = [
       { name: 'Claws (x2)', damage: '1d4+2', skill: 60 },
       { name: 'Bite', damage: '1d3+2', skill: 40 }
     ],
-    specialAbilities: ['Venomous sting (1d3 poison damage)', 'Multi-limb attacks', 'Armored body']
+    specialAbilities: ['Venomous sting (1d3 poison damage)', 'Multi-limb attacks', 'Armored body'],
+    hitLocationTemplateId: 'scorpion_man'
   },
   {
     id: 'centaur',
@@ -90,7 +92,8 @@ export const MONSTERS: Monster[] = [
       { name: 'Spear', damage: '1d8+3', skill: 60 },
       { name: 'Kick (rear legs)', damage: '1d6+3', skill: 45 }
     ],
-    specialAbilities: ['Mounted combat superiority', 'Exceptional movement', 'Multi-attack capability']
+    specialAbilities: ['Mounted combat superiority', 'Exceptional movement', 'Multi-attack capability'],
+    hitLocationTemplateId: 'centaur'
   },
   {
     id: 'baboon',
@@ -108,7 +111,8 @@ export const MONSTERS: Monster[] = [
       { name: 'Fist', damage: '1d4', skill: 40 },
       { name: 'Claw', damage: '1d3', skill: 35 }
     ],
-    specialAbilities: ['Pack tactics', 'Climbing', 'Tribal intelligence']
+    specialAbilities: ['Pack tactics', 'Climbing', 'Tribal intelligence'],
+    hitLocationTemplateId: 'quadruped'
   },
   {
     id: 'giant_spider',
@@ -125,7 +129,8 @@ export const MONSTERS: Monster[] = [
       { name: 'Bite', damage: '1d6 + venom', skill: 55 },
       { name: 'Web entangle', damage: 'Special', skill: 45 }
     ],
-    specialAbilities: ['Venomous bite (1d3 poison)', 'Web creation', 'Climbing', 'Darkvision']
+    specialAbilities: ['Venomous bite (1d3 poison)', 'Web creation', 'Climbing', 'Darkvision'],
+    hitLocationTemplateId: 'giant_spider'
   },
   {
     id: 'mostali_dwarf',
@@ -414,5 +419,432 @@ export const MONSTERS: Monster[] = [
       { name: 'Magic missile', damage: '1d6+2', skill: 70 }
     ],
     specialAbilities: ['Life drain', 'Undead', 'Shapeshifting', 'Charm ability', 'Regeneration', 'Sunlight vulnerability']
+  },
+
+  // WILDERNESS CREATURES - BEASTS
+  {
+    id: 'bear',
+    name: 'Bear',
+    gameSystem: 'both',
+    category: 'beast',
+    rarity: 'common',
+    terrain: ['forest', 'mountains', 'hills'],
+    description: 'A large carnivorous mammal found in forests and mountains. Bears are powerful predators with exceptional strength, sharp claws, and keen senses.',
+    stats: { STR: 20, CON: 18, SIZ: 20, DEX: 10, INT: 4, POW: 10, CHA: 5 },
+    hitPoints: 19,
+    armor: 2,
+    armorDescription: 'thick fur and hide',
+    movement: 10,
+    attacks: [
+      { name: 'Bite', damage: '1d8+3', skill: 50 },
+      { name: 'Claw (left)', damage: '1d8+3', skill: 55 },
+      { name: 'Claw (right)', damage: '1d8+3', skill: 55 },
+      { name: 'Hug/Crush', damage: '2d6+2', skill: 40 }
+    ],
+    specialAbilities: ['Exceptional strength', 'Keen smell', 'Territorial', 'Hibernation']
+  },
+  {
+    id: 'dire_wolf',
+    name: 'Dire Wolf',
+    gameSystem: 'both',
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['forest', 'plains', 'tundra'],
+    description: 'An enormous predatory wolf, twice the size of a normal wolf with enhanced strength and ferocity. Dire wolves often hunt in packs and are a serious threat to travelers.',
+    stats: { STR: 18, CON: 16, SIZ: 20, DEX: 14, INT: 5, POW: 9, CHA: 6 },
+    hitPoints: 18,
+    armor: 1,
+    armorDescription: 'thick fur',
+    movement: 14,
+    attacks: [
+      { name: 'Bite', damage: '1d10+2', skill: 60 },
+      { name: 'Claw', damage: '1d6+2', skill: 50 },
+      { name: 'Tackle', damage: '1d6+1', skill: 45 }
+    ],
+    specialAbilities: ['Pack hunting', 'Exceptional speed', 'Keen smell', 'Darkvision', 'Howl (intimidation)']
+  },
+  {
+    id: 'lion',
+    name: 'Lion',
+    gameSystem: 'both',
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['plains', 'savanna', 'desert'],
+    description: 'A massive feline predator with tawny fur and, for males, an impressive mane. Lions are apex predators of open grasslands, hunting with cunning and group tactics.',
+    stats: { STR: 22, CON: 18, SIZ: 22, DEX: 14, INT: 5, POW: 10, CHA: 8 },
+    hitPoints: 20,
+    armor: 1,
+    armorDescription: 'thick fur',
+    movement: 12,
+    attacks: [
+      { name: 'Bite', damage: '1d10+3', skill: 60 },
+      { name: 'Claw (left)', damage: '1d8+3', skill: 55 },
+      { name: 'Claw (right)', damage: '1d8+3', skill: 55 },
+      { name: 'Tackle', damage: '1d8+2', skill: 50 }
+    ],
+    specialAbilities: ['Pride hunting', 'Exceptional strength', 'Keen senses', 'Territorial roar']
+  },
+  {
+    id: 'rock_lizard',
+    name: 'Rock Lizard',
+    gameSystem: 'runequest',
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['mountains', 'hills', 'desert'],
+    description: 'A large lizard with stone-like hide that camouflages it perfectly against rocky terrain. Rock lizards are carnivorous ambush predators with powerful jaws.',
+    stats: { STR: 16, CON: 16, SIZ: 14, DEX: 10, INT: 2, POW: 8, CHA: 3 },
+    hitPoints: 15,
+    armor: 4,
+    armorDescription: 'rocky hide',
+    movement: 8,
+    attacks: [
+      { name: 'Bite', damage: '1d8+2', skill: 55 },
+      { name: 'Claw', damage: '1d6+2', skill: 45 },
+      { name: 'Tail whip', damage: '1d6+1', skill: 40 }
+    ],
+    specialAbilities: ['Camouflage (rocky terrain)', 'Ambush predator', 'Stone affinity']
+  },
+  {
+    id: 'rubble_runner',
+    name: 'Rubble Runner',
+    gameSystem: 'runequest',
+    category: 'beast',
+    rarity: 'common',
+    terrain: ['mountains', 'ruins', 'hills'],
+    description: 'A fast, lizard-like creature that scurries across rubble and broken terrain. Rubble runners are omnivorous scavengers that occasionally hunt in packs.',
+    stats: { STR: 8, CON: 10, SIZ: 6, DEX: 16, INT: 3, POW: 7, CHA: 4 },
+    hitPoints: 8,
+    armor: 1,
+    armorDescription: 'tough hide',
+    movement: 12,
+    attacks: [
+      { name: 'Bite', damage: '1d4+1', skill: 40 },
+      { name: 'Claw', damage: '1d3+1', skill: 35 }
+    ],
+    specialAbilities: ['Fast movement', 'Climbing', 'Scavenging instinct', 'Pack coordination']
+  },
+  {
+    id: 'dragonewt',
+    name: 'Dragonewt',
+    gameSystem: 'runequest',
+    category: 'humanoid',
+    rarity: 'uncommon',
+    terrain: ['mountains', 'caves', 'desert'],
+    description: 'A draconic humanoid standing upright, covered in scales and possessing a reptilian tail. Dragonewts are organized in castes and possess inherent magical abilities tied to draconic power.',
+    stats: { STR: 15, CON: 14, SIZ: 14, DEX: 13, INT: 12, POW: 14, CHA: 11 },
+    hitPoints: 14,
+    armor: 3,
+    armorDescription: 'draconic scales',
+    movement: 10,
+    attacks: [
+      { name: 'Claw', damage: '1d6+2', skill: 50 },
+      { name: 'Bite', damage: '1d4+2', skill: 45 },
+      { name: 'Tail strike', damage: '1d6+1', skill: 40 },
+      { name: 'Breath weapon', damage: '1d6', skill: 55 }
+    ],
+    specialAbilities: ['Draconic scales', 'Breath weapon (fire/cold)', 'Magical affinity', 'Tail combat']
+  },
+  {
+    id: 'horse',
+    name: 'Horse',
+    gameSystem: 'both',
+    category: 'mount',
+    rarity: 'common',
+    terrain: ['plains', 'grasslands', 'roads'],
+    description: 'A domesticated equine used for transportation, agriculture, and combat. Horses are strong, fast, and responsive to training, making them invaluable companions.',
+    stats: { STR: 18, CON: 16, SIZ: 18, DEX: 12, INT: 6, POW: 9, CHA: 7 },
+    hitPoints: 17,
+    armor: 0,
+    armorDescription: 'none (can wear barding)',
+    movement: 14,
+    attacks: [
+      { name: 'Bite', damage: '1d4', skill: 30 },
+      { name: 'Kick (rear)', damage: '1d6', skill: 45 },
+      { name: 'Trample', damage: '1d8', skill: 40 }
+    ],
+    specialAbilities: ['Fast movement', 'Keen senses', 'Bond with rider', 'Endurance']
+  },
+  {
+    id: 'war_horse',
+    name: 'War Horse',
+    gameSystem: 'both',
+    category: 'mount',
+    rarity: 'uncommon',
+    terrain: ['plains', 'grasslands', 'roads'],
+    description: 'A heavily trained and conditioned horse bred for battle. War horses are larger, more aggressive, and better armored than common horses.',
+    stats: { STR: 20, CON: 18, SIZ: 20, DEX: 12, INT: 6, POW: 10, CHA: 8 },
+    hitPoints: 19,
+    armor: 3,
+    armorDescription: 'heavy barding and leather',
+    movement: 12,
+    attacks: [
+      { name: 'Bite', damage: '1d6', skill: 35 },
+      { name: 'Kick (rear)', damage: '1d8', skill: 50 },
+      { name: 'Trample', damage: '1d10', skill: 45 }
+    ],
+    specialAbilities: ['Combat training', 'Armored', 'Exceptional strength', 'Brave in battle']
+  },
+  {
+    id: 'dinosaur_allosaurus',
+    name: 'Allosaurus',
+    gameSystem: 'runequest',
+    category: 'beast',
+    rarity: 'rare',
+    terrain: ['jungle', 'lost_valley', 'ancient_ruins'],
+    description: 'A massive carnivorous dinosaur with powerful hind legs, small arms with claws, and razor-sharp teeth. Allosaurs are apex predators that hunt large prey.',
+    stats: { STR: 24, CON: 18, SIZ: 26, DEX: 12, INT: 2, POW: 9, CHA: 4 },
+    hitPoints: 22,
+    armor: 2,
+    armorDescription: 'thick hide',
+    movement: 12,
+    attacks: [
+      { name: 'Bite', damage: '2d8+4', skill: 60 },
+      { name: 'Claw (left)', damage: '1d10+4', skill: 55 },
+      { name: 'Claw (right)', damage: '1d10+4', skill: 55 },
+      { name: 'Tail sweep', damage: '1d10+3', skill: 50 }
+    ],
+    specialAbilities: ['Exceptional strength', 'Pack hunting', 'Keen sight', 'Terrifying roar']
+  },
+  {
+    id: 'dinosaur_triceratops',
+    name: 'Triceratops',
+    gameSystem: 'runequest',
+    category: 'beast',
+    rarity: 'rare',
+    terrain: ['jungle', 'lost_valley', 'grasslands'],
+    description: 'A large herbivorous dinosaur with three massive horns and a bony frill protecting its neck. Despite being herbivorous, triceratops are territorial and extremely dangerous.',
+    stats: { STR: 26, CON: 20, SIZ: 28, DEX: 10, INT: 2, POW: 8, CHA: 5 },
+    hitPoints: 24,
+    armor: 3,
+    armorDescription: 'thick hide and bone frill',
+    movement: 10,
+    attacks: [
+      { name: 'Gore (horns)', damage: '2d8+4', skill: 55 },
+      { name: 'Trample', damage: '1d12+4', skill: 50 },
+      { name: 'Frill bash', damage: '1d10+4', skill: 45 }
+    ],
+    specialAbilities: ['Exceptional strength', 'Charge attack', 'Territorial defense', 'Armored body']
+  },
+  {
+    id: 'dinosaur_stegosaurus',
+    name: 'Stegosaurus',
+    gameSystem: 'runequest',
+    category: 'beast',
+    rarity: 'rare',
+    terrain: ['jungle', 'lost_valley', 'grasslands'],
+    description: 'A large herbivorous dinosaur with a row of large bony plates along its back and a spiked tail. Despite being herbivorous, stegosaurs are dangerous when threatened.',
+    stats: { STR: 24, CON: 18, SIZ: 24, DEX: 8, INT: 2, POW: 7, CHA: 4 },
+    hitPoints: 21,
+    armor: 4,
+    armorDescription: 'thick hide and bone plates',
+    movement: 8,
+    attacks: [
+      { name: 'Tail spike strike', damage: '2d6+4', skill: 50 },
+      { name: 'Trample', damage: '1d10+4', skill: 45 },
+      { name: 'Headbutt', damage: '1d8+4', skill: 40 }
+    ],
+    specialAbilities: ['Armored back', 'Dangerous tail', 'Slow but powerful', 'Herbivore instinct']
+  },
+  {
+    id: 'dinosaur_velociraptor',
+    name: 'Velociraptor',
+    gameSystem: 'runequest',
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['jungle', 'lost_valley', 'forest'],
+    description: 'A small but deadly predatory dinosaur with sharp teeth, powerful hind legs, and curved claws. Velociraptors hunt in coordinated packs with cunning tactics.',
+    stats: { STR: 12, CON: 12, SIZ: 10, DEX: 16, INT: 5, POW: 8, CHA: 5 },
+    hitPoints: 11,
+    armor: 1,
+    armorDescription: 'tough hide',
+    movement: 13,
+    attacks: [
+      { name: 'Bite', damage: '1d6+1', skill: 55 },
+      { name: 'Claw kick', damage: '1d8+1', skill: 60 },
+      { name: 'Claw (left)', damage: '1d6+1', skill: 50 }
+    ],
+    specialAbilities: ['Pack hunting', 'Fast movement', 'Keen intelligence', 'Coordinated tactics']
+  },
+  {
+    id: 'dinosaur_brachiosaurus',
+    name: 'Brachiosaurus',
+    gameSystem: 'runequest',
+    category: 'beast',
+    rarity: 'rare',
+    terrain: ['jungle', 'lost_valley'],
+    description: 'An enormous long-necked herbivorous dinosaur. Though peaceful, a brachiosaurus can cause tremendous damage through sheer size and mass if provoked.',
+    stats: { STR: 30, CON: 22, SIZ: 32, DEX: 6, INT: 2, POW: 7, CHA: 6 },
+    hitPoints: 27,
+    armor: 2,
+    armorDescription: 'thick hide',
+    movement: 8,
+    attacks: [
+      { name: 'Trample', damage: '2d10+5', skill: 45 },
+      { name: 'Tail whip', damage: '2d8+5', skill: 40 },
+      { name: 'Headbutt', damage: '1d10+5', skill: 35 }
+    ],
+    specialAbilities: ['Exceptional size', 'Crushing power', 'Long reach', 'Herbivore temperament']
+  },
+
+  // WILDERNESS NPCs
+  {
+    id: 'nomad_tribesman',
+    name: 'Nomadic Tribesman',
+    gameSystem: 'runequest',
+    category: 'npc',
+    rarity: 'common',
+    terrain: ['plains', 'grasslands', 'desert', 'mountains'],
+    description: 'A member of a nomadic tribe adapted to harsh wilderness living. Nomads are skilled hunters, horsemen, and warriors with deep knowledge of the lands they traverse.',
+    stats: { STR: 14, CON: 14, SIZ: 13, DEX: 13, INT: 10, POW: 11, CHA: 10 },
+    hitPoints: 13,
+    armor: 2,
+    armorDescription: 'leather armor',
+    movement: 10,
+    attacks: [
+      { name: 'Shortbow', damage: '1d6+1', skill: 60 },
+      { name: 'Spear or Javelin', damage: '1d6+1', skill: 55 },
+      { name: 'Club or Mace', damage: '1d6+1', skill: 50 }
+    ],
+    specialAbilities: ['Horsemanship', 'Tracking', 'Desert/plains navigation', 'Group tactics']
+  },
+  {
+    id: 'wandering_priest',
+    name: 'Wandering Priest',
+    gameSystem: 'runequest',
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['roads', 'settlements', 'temples', 'forests'],
+    description: 'A holy person devoted to a deity, traveling the roads to spread faith, perform ceremonies, and help the faithful. Wandering priests possess magical abilities and moral authority.',
+    stats: { STR: 12, CON: 13, SIZ: 12, DEX: 11, INT: 14, POW: 15, CHA: 13 },
+    hitPoints: 12,
+    armor: 1,
+    armorDescription: 'robes (minimal protection)',
+    movement: 10,
+    attacks: [
+      { name: 'Staff', damage: '1d6', skill: 40 },
+      { name: 'Holy smite (magic)', damage: '1d6+2', skill: 50 },
+      { name: 'Fists', damage: '1d3', skill: 25 }
+    ],
+    specialAbilities: ['Divine magic', 'Healing', 'Holy protection', 'Moral authority', 'Knowledge of theology']
+  },
+  {
+    id: 'merchant_caravan_leader',
+    name: 'Merchant (Caravan Leader)',
+    gameSystem: 'both',
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['roads', 'settlements', 'plains'],
+    description: 'A seasoned trader who leads merchant caravans across dangerous roads. Caravan leaders are shrewd negotiators, skilled in trade and combat to protect their goods.',
+    stats: { STR: 13, CON: 13, SIZ: 13, DEX: 12, INT: 14, POW: 11, CHA: 14 },
+    hitPoints: 13,
+    armor: 2,
+    armorDescription: 'leather armor',
+    movement: 10,
+    attacks: [
+      { name: 'Sword', damage: '1d8', skill: 50 },
+      { name: 'Dagger', damage: '1d4+1', skill: 45 },
+      { name: 'Whip', damage: '1d4', skill: 40 }
+    ],
+    specialAbilities: ['Negotiation', 'Trade expertise', 'Caravan command', 'Bodyguard experience', 'Merchant knowledge']
+  },
+  {
+    id: 'bandit_outlaw',
+    name: 'Bandit/Outlaw',
+    gameSystem: 'both',
+    category: 'npc',
+    rarity: 'common',
+    terrain: ['roads', 'forests', 'mountains', 'ruins'],
+    description: 'A desperate criminal making a living by preying on travelers and settlements. Bandits are cunning, quick to violence, and often organized in groups.',
+    stats: { STR: 14, CON: 12, SIZ: 12, DEX: 13, INT: 9, POW: 10, CHA: 9 },
+    hitPoints: 12,
+    armor: 2,
+    armorDescription: 'worn leather armor',
+    movement: 10,
+    attacks: [
+      { name: 'Sword', damage: '1d8', skill: 50 },
+      { name: 'Shortbow', damage: '1d6', skill: 45 },
+      { name: 'Dagger', damage: '1d4+1', skill: 40 }
+    ],
+    specialAbilities: ['Ambush tactics', 'Teamwork', 'Quick thinking', 'Survival skills']
+  },
+  {
+    id: 'hermit_scholar',
+    name: 'Hermit/Scholar',
+    gameSystem: 'both',
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['forests', 'mountains', 'caves', 'settlements'],
+    description: 'A solitary individual who has retreated from society to pursue knowledge, faith, or asceticism. Hermits are often sources of ancient wisdom but can be unpredictable.',
+    stats: { STR: 10, CON: 12, SIZ: 11, DEX: 10, INT: 16, POW: 14, CHA: 11 },
+    hitPoints: 11,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 9,
+    attacks: [
+      { name: 'Staff', damage: '1d6', skill: 35 },
+      { name: 'Magic missile', damage: '1d4+1', skill: 45 },
+      { name: 'Fists', damage: '1d3', skill: 20 }
+    ],
+    specialAbilities: ['Magic knowledge', 'Scholarly wisdom', 'Meditation', 'Ancient lore']
+  },
+  {
+    id: 'ranger_bounty_hunter',
+    name: 'Ranger/Bounty Hunter',
+    gameSystem: 'both',
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['forests', 'mountains', 'plains', 'wilderness'],
+    description: 'A skilled tracker and hunter who pursues prey through wilderness or settles disputes through combat. Rangers are excellent scouts with survival expertise.',
+    stats: { STR: 15, CON: 15, SIZ: 13, DEX: 15, INT: 12, POW: 12, CHA: 11 },
+    hitPoints: 14,
+    armor: 2,
+    armorDescription: 'leather armor',
+    movement: 11,
+    attacks: [
+      { name: 'Bow', damage: '1d8+1', skill: 65 },
+      { name: 'Sword', damage: '1d8', skill: 55 },
+      { name: 'Dagger', damage: '1d4+1', skill: 50 }
+    ],
+    specialAbilities: ['Tracking', 'Wilderness survival', 'Keen senses', 'Stealth', 'Animal handling']
+  },
+  {
+    id: 'noble_traveler',
+    name: 'Noble/Traveler',
+    gameSystem: 'both',
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['roads', 'settlements', 'estates'],
+    description: 'A person of noble birth traveling for adventure, politics, or exile. Nobles command respect through lineage and wealth, often employing bodyguards.',
+    stats: { STR: 13, CON: 13, SIZ: 13, DEX: 12, INT: 14, POW: 12, CHA: 15 },
+    hitPoints: 13,
+    armor: 3,
+    armorDescription: 'fine armor',
+    movement: 10,
+    attacks: [
+      { name: 'Sword', damage: '1d8+1', skill: 55 },
+      { name: 'Bow', damage: '1d6+1', skill: 45 },
+      { name: 'Dagger', damage: '1d4+1', skill: 40 }
+    ],
+    specialAbilities: ['Leadership', 'Etiquette', 'Influence', 'Political knowledge', 'Wealth']
+  },
+  {
+    id: 'militia_guard',
+    name: 'Militia/Town Guard',
+    gameSystem: 'both',
+    category: 'npc',
+    rarity: 'common',
+    terrain: ['settlements', 'roads', 'towns'],
+    description: 'A local militia member or town guard responsible for maintaining order and protecting citizens. Guards have basic training and often work in groups.',
+    stats: { STR: 14, CON: 13, SIZ: 13, DEX: 11, INT: 10, POW: 10, CHA: 10 },
+    hitPoints: 13,
+    armor: 3,
+    armorDescription: 'town guard armor',
+    movement: 10,
+    attacks: [
+      { name: 'Sword', damage: '1d8', skill: 50 },
+      { name: 'Shield bash', damage: '1d4', skill: 40 },
+      { name: 'Spear', damage: '1d6+1', skill: 45 }
+    ],
+    specialAbilities: ['Patrol knowledge', 'Law enforcement', 'Group coordination', 'Local connections']
   }
 ];

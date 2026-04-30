@@ -1,8 +1,8 @@
 <div class="bestiary-container">
   <div class="bestiary-header">
     <div>
-      <h1>Monster Bestiary</h1>
-      <p class="subtitle">Explore creatures from across RuneQuest and DragonBane</p>
+      <h1>Monster Bestiary & Encounters</h1>
+      <p class="subtitle">Explore creatures and encounters across RuneQuest and DragonBane</p>
     </div>
     <a routerLink="/monster-creator" class="btn-monster-creator">
       <span class="icon">🤖</span>
@@ -10,73 +10,91 @@
     </a>
   </div>
 
-  <div class="controls-section">
-    <!-- System Filter -->
-    <div class="filter-group">
-      <label class="filter-label">Game System:</label>
-      <div class="filter-bar">
-        <button
-          class="filter-btn"
-          [class.active]="systemFilter() === 'all'"
-          (click)="toggleSystemFilter('all')">
-          All
-        </button>
-        <button
-          class="filter-btn"
-          [class.active]="systemFilter() === 'runequest'"
-          (click)="toggleSystemFilter('runequest')">
-          RuneQuest
-        </button>
-        <button
-          class="filter-btn"
-          [class.active]="systemFilter() === 'dragonbane'"
-          (click)="toggleSystemFilter('dragonbane')">
-          DragonBane
-        </button>
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'bestiary'"
+      (click)="setActiveTab('bestiary')">
+      📚 Bestiary
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab() === 'encounters'"
+      (click)="setActiveTab('encounters')">
+      🎲 Encounter Tables
+    </button>
+  </div>
+
+  <!-- BESTIARY TAB -->
+  @if (activeTab() === 'bestiary') {
+    <div class="controls-section">
+      <!-- System Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Game System:</label>
+        <div class="filter-bar">
+          <button
+            class="filter-btn"
+            [class.active]="systemFilter() === 'all'"
+            (click)="toggleSystemFilter('all')">
+            All
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="systemFilter() === 'runequest'"
+            (click)="toggleSystemFilter('runequest')">
+            RuneQuest
+          </button>
+          <button
+            class="filter-btn"
+            [class.active]="systemFilter() === 'dragonbane'"
+            (click)="toggleSystemFilter('dragonbane')">
+            DragonBane
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- Search Input -->
-    <div class="search-group">
-      <label for="search-input" class="filter-label">Search:</label>
-      <input
-        id="search-input"
-        type="text"
-        class="search-input"
-        placeholder="Search monster name..."
-        [ngModel]="searchQuery()"
-        (ngModelChange)="searchQuery.set($event)">
-    </div>
+      <!-- Search Input -->
+      <div class="search-group">
+        <label for="search-input" class="filter-label">Search:</label>
+        <input
+          id="search-input"
+          type="text"
+          class="search-input"
+          placeholder="Search monster name..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)">
+      </div>
 
-    <!-- Category Filter -->
-    <div class="category-group">
-      <label class="filter-label">Category:</label>
-      <div class="category-pills">
-        <button
-          class="category-pill"
-          [class.active]="categoryFilter() === 'all'"
-          (click)="toggleCategoryFilter('all')">
-          All
-        </button>
-        @for (category of categories; track category) {
+      <!-- Category Filter -->
+      <div class="category-group">
+        <label class="filter-label">Category:</label>
+        <div class="category-pills">
           <button
             class="category-pill"
-            [class.active]="categoryFilter() === category"
-            (click)="toggleCategoryFilter(category)">
-            {{ getCategoryLabel(category) }}
+            [class.active]="categoryFilter() === 'all'"
+            (click)="toggleCategoryFilter('all')">
+            All
           </button>
-        }
+          @for (category of categories; track category) {
+            <button
+              class="category-pill"
+              [class.active]="categoryFilter() === category"
+              (click)="toggleCategoryFilter(category)">
+              {{ getCategoryLabel(category) }}
+            </button>
+          }
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Results Summary -->
-  <div class="results-summary">
-    <p>{{ filteredMonsters().length }} monster(s) found</p>
-  </div>
+    <!-- Results Summary -->
+    <div class="results-summary">
+      <p>{{ filteredMonsters().length }} creature(s) found</p>
+    </div>
 
-  <!-- Monsters Grid -->
-  @if (filteredMonsters().length > 0) {
+    <!-- Monsters Grid -->
+    @if (filteredMonsters().length > 0) {
     <div class="monsters-grid">
       @for (monster of filteredMonsters(); track monster.id) {
         <div class="monster-card">
@@ -136,10 +154,19 @@
 
           <!-- HP, Armor, Movement Row -->
           <div class="combat-stats-row">
-            <div class="combat-stat">
-              <span class="stat-label">HP:</span>
-              <span class="stat-value">{{ monster.hitPoints }}</span>
-            </div>
+            @if (getMonsterHitLocations(monster); as locations) {
+              <div class="combat-stat hit-locations-block">
+                <span class="stat-label">Hit Locations</span>
+                @for (loc of locations; track loc.name) {
+                  <span class="location-chip">{{ loc.name }}: {{ loc.hp }}</span>
+                }
+              </div>
+            } @else {
+              <div class="combat-stat">
+                <span class="stat-label">HP:</span>
+                <span class="stat-value">{{ monster.hitPoints }}</span>
+              </div>
+            }
             <div class="combat-stat">
               <span class="stat-label">Armor:</span>
               <span class="stat-value">{{ monster.armor }}</span>
@@ -197,9 +224,214 @@
         </div>
       }
     </div>
-  } @else {
-    <div class="empty-state">
-      <p>No monsters match your filters. Try adjusting your search or category selection.</p>
+    } @else {
+      <div class="empty-state">
+        <p>No creatures match your filters. Try adjusting your search or category selection.</p>
+      </div>
+    }
+  }
+
+  <!-- ENCOUNTERS TAB -->
+  @if (activeTab() === 'encounters') {
+    <div class="encounters-section">
+      <div class="encounters-intro">
+        <p>Use these encounter tables to generate random encounters for different terrains. Roll 1d20 and consult the appropriate table for the current location.</p>
+      </div>
+
+      <!-- D20 Roller -->
+      @if (!selectedTerrain()) {
+        <div class="terrain-selector">
+          <h3>Select a Terrain</h3>
+          <div class="terrain-buttons">
+            @for (table of encounterTables; track table.terrain) {
+              <button
+                class="terrain-btn"
+                (click)="selectTerrain(table.terrain)">
+                {{ table.terrain | titlecase }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (selectedTerrain()) {
+        <div class="roller-section">
+          <div class="roller-header">
+            <h3>{{ selectedTerrain() | titlecase }} Encounter</h3>
+            <button class="btn-back" (click)="selectedTerrain.set(null)">← Back to Terrain Selection</button>
+          </div>
+
+          <div class="d20-roller-container">
+            <div class="roller-display">
+              @if (lastRoll()) {
+                <div class="roll-result">
+                  <span class="roll-label">You rolled:</span>
+                  <span class="roll-number">{{ lastRoll() }}</span>
+                </div>
+              } @else {
+                <div class="roll-prompt">
+                  <span>Ready to roll?</span>
+                </div>
+              }
+            </div>
+
+            <button
+              class="btn-roll-d20"
+              (click)="rollD20()"
+              [disabled]="isRolling()">
+              @if (isRolling()) {
+                <span class="spinner"></span>
+                Rolling...
+              } @else {
+                🎲 Roll d20
+              }
+            </button>
+          </div>
+
+          <!-- Encounter Result -->
+          @if (lastRoll()) {
+            @let encounter = getEncounterForRoll(selectedTerrain(), lastRoll()!);
+            @if (encounter) {
+              <div class="encounter-result-card" [class.just-added]="addedToCombat()">
+                <div class="result-header">
+                  <h4>Encounter Result</h4>
+                  <span class="result-roll">Roll {{ lastRoll() }}</span>
+                </div>
+                <div class="result-content">
+                  <div class="result-row">
+                    <span class="result-label">Creature/NPC:</span>
+                    <span class="result-value">{{ encounter.creature }}</span>
+                  </div>
+                  <div class="result-row">
+                    <span class="result-label">Count:</span>
+                    @if (parseDiceExpression(encounter.count)) {
+                      <div class="count-roller">
+                        <button class="btn-roll-count" (click)="rollCount(encounter.count)" [disabled]="isCountRolling()">
+                          @if (isCountRolling()) {
+                            <span class="spinner-small"></span>
+                          } @else {
+                            🎲
+                          }
+                          Roll {{ encounter.count }}
+                        </button>
+                        @if (countRoll() !== null) {
+                          <span class="count-result">{{ countRoll() }}</span>
+                        }
+                      </div>
+                    } @else {
+                      <span class="result-value">{{ encounter.count }}</span>
+                    }
+                  </div>
+                  <div class="result-row">
+                    <span class="result-label">Difficulty:</span>
+                    <span [class]="'difficulty-badge difficulty-' + encounter.difficulty">
+                      {{ encounter.difficulty | titlecase }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="result-actions">
+                  @if (addedToCombat()) {
+                    <div class="success-message">
+                      ✓ {{ addedCreatureName() }} added to combat tracker!
+                    </div>
+                  } @else {
+                    <button
+                      class="btn-add-to-combat"
+                      (click)="addCreatureToCombat(encounter.creature)"
+                      title="Add this creature to the combat tracker">
+                      ⚔️ Add to Combat
+                    </button>
+                    <button
+                      class="btn-view-bestiary"
+                      (click)="searchQuery.set(encounter.creature); activeTab.set('bestiary')"
+                      title="View creature details in bestiary">
+                      📖 View in Bestiary
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <!-- Quick Reference Table -->
+          @let terrain = selectedTerrain();
+          @let table = terrain ? encounterTables.find(t => t.terrain === terrain) : null;
+          @if (table) {
+            <div class="quick-reference">
+              <h4>Quick Reference - {{ table.terrain | titlecase }}</h4>
+              <p class="table-description">{{ table.description }}</p>
+              <table class="encounter-table">
+                <thead>
+                  <tr>
+                    <th class="roll-col">Roll</th>
+                    <th class="creature-col">Creature/NPC</th>
+                    <th class="count-col">Count</th>
+                    <th class="difficulty-col">Difficulty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of table.entries; track entry.roll) {
+                    <tr
+                      [class]="'difficulty-' + entry.difficulty"
+                      [class.highlighted]="isRowHighlighted(entry.roll, lastRoll())">
+                      <td class="roll-cell">{{ entry.roll }}</td>
+                      <td class="creature-cell">{{ entry.creature }}</td>
+                      <td class="count-cell">{{ entry.count }}</td>
+                      <td class="difficulty-cell">
+                        <span class="difficulty-badge">{{ entry.difficulty | titlecase }}</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="encounter-tables-grid">
+        @for (table of encounterTables; track table.terrain) {
+          <div class="encounter-table-card">
+            <button
+              class="table-header"
+              (click)="toggleTerrainExpanded(table.terrain)"
+              [class.expanded]="expandedTerrainId() === table.terrain">
+              <span class="terrain-name">{{ table.terrain | titlecase }}</span>
+              <span class="expand-icon">{{ expandedTerrainId() === table.terrain ? '▼' : '▶' }}</span>
+            </button>
+
+            @if (expandedTerrainId() === table.terrain) {
+              <div class="table-content">
+                <p class="table-description">{{ table.description }}</p>
+                <table class="encounter-table">
+                  <thead>
+                    <tr>
+                      <th class="roll-col">Roll</th>
+                      <th class="creature-col">Creature/NPC</th>
+                      <th class="count-col">Count</th>
+                      <th class="difficulty-col">Difficulty</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (entry of table.entries; track entry.roll) {
+                      <tr [class]="'difficulty-' + entry.difficulty">
+                        <td class="roll-cell">{{ entry.roll }}</td>
+                        <td class="creature-cell">{{ entry.creature }}</td>
+                        <td class="count-cell">{{ entry.count }}</td>
+                        <td class="difficulty-cell">
+                          <span class="difficulty-badge">{{ entry.difficulty | titlecase }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+      </div>
     </div>
   }
 </div>

@@ -10,7 +10,6 @@ export class CombatService {
   private readonly MONSTERS_KEY = 'runequest-monsters';
   private readonly LOG_HISTORY_KEY = 'runequest-combat-log-history';
   private readonly MAP_KEY = 'runequest-combat-map';
-  readonly SURPRISE_SR_PENALTY = 12;
 
   getCombatParticipants(): CombatParticipant[] {
     const data = localStorage.getItem(this.STORAGE_KEY);
