@@ -203,7 +203,7 @@
                     <option [value]="weapon">{{ weapon }}</option>
                   }
                 </select>
-                @if (!participant.isDead && !participant.isSurprised) {
+                @if (!participant.isDead) {
                   <button class="btn btn-roll-damage"
                           #rollDamageBtn
                           [attr.data-participant-id]="participant.id"
@@ -287,11 +287,10 @@
                     <span class="damage-dice">{{ getWeaponDamage(participant) }}</span>
                     <button #rollDamageBtn
                             class="btn-roll-damage"
-                            [class.action-skipped]="participant.isSurprised"
                             [attr.data-participant-id]="participant.id"
                             (click)="rollWeaponDamage(participant)"
-                            [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant) || participant.isSurprised"
-                            [title]="participant.isSurprised ? 'Surprised — round is skipped' : !hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
+                            [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant)"
+                            [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
                       Roll
                     </button>
                   </div>

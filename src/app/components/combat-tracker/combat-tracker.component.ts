@@ -1307,7 +1307,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   canParticipantAct(participant: CombatParticipant): boolean {
-    return !participant.isDead && !participant.isSurprised;
+    return !participant.isDead;
   }
 
   private focusNextRollButton(): void {

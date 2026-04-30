@@ -125,25 +125,6 @@
       }
     </div>
 
-    <!-- Family History Component (RuneQuest only) -->
-    @if (gameSystemService.gameSystem() === 'runequest') {
-    <div class="form-section" [class.collapsed]="isSectionCollapsed('familyHistory')">
-      <div class="section-header" (click)="toggleSection('familyHistory')">
-        <h4>Family History</h4>
-        <span class="collapse-toggle">{{ isSectionCollapsed('familyHistory') ? '▶' : '▼' }}</span>
-      </div>
-      @if (!isSectionCollapsed('familyHistory')) {
-      <div class="section-content">
-        <app-character-family-history
-          [familyHistory]="character.familyHistory!"
-          (addEvent)="addFamilyEvent()"
-          (removeEvent)="removeFamilyEvent($event)"
-        ></app-character-family-history>
-      </div>
-      }
-    </div>
-    }
-
     <!-- Skills Component -->
     <div class="form-section" [class.collapsed]="isSectionCollapsed('skills')">
       <div class="section-header" (click)="toggleSection('skills')">

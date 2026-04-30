@@ -9,7 +9,6 @@ export const translations: { [locale: string]: TranslationDictionary } = {
 
     // Character Form sections
     'section.background': 'Background',
-    'section.familyHistory': 'Family History',
     'section.characteristics': 'Characteristics',
     'section.skills': 'Skills',
     'section.derivedStats': 'Derived Statistics',
@@ -83,16 +82,6 @@ export const translations: { [locale: string]: TranslationDictionary } = {
     'settings.language': 'Language',
     'language.english': 'English',
     'language.swedish': 'Swedish',
-
-    // Family History
-    'familyHistory.grandfather': 'Grandfather',
-    'familyHistory.grandmother': 'Grandmother',
-    'familyHistory.father': 'Father',
-    'familyHistory.mother': 'Mother',
-    'familyHistory.events': 'Family Events',
-    'familyHistory.eventPlaceholder': 'Family event description',
-    'familyHistory.namePlaceholder': 'Name',
-    'familyHistory.noEvents': 'No family events recorded.',
 
     // Characteristics
     'char.str': 'STR (Strength)',
@@ -212,7 +201,6 @@ export const translations: { [locale: string]: TranslationDictionary } = {
 
     // Character Form sections
     'section.background': 'Bakgrund',
-    'section.familyHistory': 'Familjehistoria',
     'section.characteristics': 'Egenskaper',
     'section.skills': 'Färdigheter',
     'section.derivedStats': 'Härledda Statistik',
@@ -286,16 +274,6 @@ export const translations: { [locale: string]: TranslationDictionary } = {
     'settings.language': 'Språk',
     'language.english': 'Engelska',
     'language.swedish': 'Svenska',
-
-    // Family History
-    'familyHistory.grandfather': 'Farfar',
-    'familyHistory.grandmother': 'Farmor',
-    'familyHistory.father': 'Far',
-    'familyHistory.mother': 'Mor',
-    'familyHistory.events': 'Familjehändelser',
-    'familyHistory.eventPlaceholder': 'Beskrivning av familjehändelse',
-    'familyHistory.namePlaceholder': 'Namn',
-    'familyHistory.noEvents': 'Inga familjehändelser registrerade.',
 
     // Characteristics
     'char.str': 'STY (Styrka)',

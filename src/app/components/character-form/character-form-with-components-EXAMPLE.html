@@ -72,13 +72,6 @@
       (cultChange)="onCultChange()"
     ></app-character-background>
 
-    <!-- Family History Component -->
-    <app-character-family-history
-      [familyHistory]="character.familyHistory!"
-      (addEvent)="addFamilyEvent()"
-      (removeEvent)="removeFamilyEvent($event)"
-    ></app-character-family-history>
-
     <!-- Characteristics Component -->
     <app-character-characteristics
       [stats]="character.stats!"

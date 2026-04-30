@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   Character, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES,
-  DEFAULT_FAMILY_HISTORY, DEFAULT_CULT_STATUS,
+  DEFAULT_CULT_STATUS,
   calculateHitLocations, calculateDerivedStats
 } from '../models/character.model';
 import { CHARACTER_COLORS } from '../constants/character-colors.constants';
@@ -121,11 +121,6 @@ export class CharacterService {
     // Ensure notes exist
     if (!char.notes) {
       char.notes = '';
-    }
-
-    // Ensure family history exists
-    if (!char.familyHistory) {
-      char.familyHistory = { ...DEFAULT_FAMILY_HISTORY };
     }
 
     // Ensure cult status exists

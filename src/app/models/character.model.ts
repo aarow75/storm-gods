@@ -19,7 +19,6 @@ export interface Character {
   equipment: EquipmentItem[];
   conditions?: string[]; // Active conditions like 'disease', 'poisoned', etc.
   notes: string;
-  familyHistory?: FamilyHistory;
   cultStatus?: CultStatus;
 }
 
@@ -164,14 +163,6 @@ export interface RuneSpell {
   runePointCost: number;
   associatedRune: string;
   reusable: boolean;
-}
-
-export interface FamilyHistory {
-  grandfather: string;
-  grandmother: string;
-  father: string;
-  mother: string;
-  events: string[];
 }
 
 export interface CultStatus {
@@ -918,14 +909,6 @@ export const RUNE_SPELL_LIBRARY: Record<string, RuneSpell[]> = {
     { name: 'Reflection', runePointCost: 2, associatedRune: 'Moon', reusable: true },
     { name: 'Axis Mundi', runePointCost: 3, associatedRune: 'Harmony', reusable: true }
   ]
-};
-
-export const DEFAULT_FAMILY_HISTORY: FamilyHistory = {
-  grandfather: '',
-  grandmother: '',
-  father: '',
-  mother: '',
-  events: []
 };
 
 export const DEFAULT_CULT_STATUS: CultStatus = {

@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import {
   Character, CharacterStats, CharacterSkills, ArmorLocations, Weapon, WeaponDefinition, Shield, ShieldDefinition, Passion, Spell, RuneSpell,
   DEFAULT_STATS, DEFAULT_SKILLS, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
-  DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES, DEFAULT_FAMILY_HISTORY, DEFAULT_CULT_STATUS,
+  DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES, DEFAULT_CULT_STATUS,
   calculateHitLocations, calculateDerivedStats, calculateTotalArmor, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
   CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS, ARMOR_TYPES,
   applySkillBonuses, enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES,
@@ -19,7 +19,6 @@ import { UIStateService } from '../../services/ui-state.service';
 import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
 import { CHARACTER_COLORS } from '../../constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
-import { CharacterFamilyHistory } from '../character-family-history/character-family-history';
 import { CharacterCharacteristics } from '../character-characteristics/character-characteristics';
 import { CharacterSkills as CharacterSkillsComponent } from '../character-skills/character-skills';
 import { CharacterDerivedStats } from '../character-derived-stats/character-derived-stats';
@@ -43,7 +42,6 @@ import { CharacterConditions } from '../character-conditions/character-condition
     CommonModule,
     FormsModule,
     CharacterBackground,
-    CharacterFamilyHistory,
     CharacterCharacteristics,
     CharacterSkillsComponent,
     CharacterDerivedStats,
@@ -86,7 +84,6 @@ export class CharacterFormComponent implements OnInit {
     equipment: [],
     notes: '',
     conditions: [],
-    familyHistory: { ...DEFAULT_FAMILY_HISTORY },
     cultStatus: { ...DEFAULT_CULT_STATUS }
   };
 
@@ -183,7 +180,6 @@ export class CharacterFormComponent implements OnInit {
       resources: this.character.resources!,
       equipment: this.character.equipment!,
       notes: this.character.notes!,
-      familyHistory: this.character.familyHistory,
       cultStatus: this.character.cultStatus
     };
 
@@ -222,10 +218,6 @@ export class CharacterFormComponent implements OnInit {
         resources: { ...character.resources },
         equipment: character.equipment ? [...character.equipment] : [],
         notes: character.notes || '',
-        familyHistory: character.familyHistory ? {
-          ...character.familyHistory,
-          events: [...(character.familyHistory.events || [])]
-        } : { ...DEFAULT_FAMILY_HISTORY },
         cultStatus: character.cultStatus ? {
           ...character.cultStatus,
           runeSpells: [...(character.cultStatus.runeSpells || [])]
@@ -536,16 +528,6 @@ export class CharacterFormComponent implements OnInit {
     this.character.cultStatus.cultName = this.character.background.cult;
   }
 
-  addFamilyEvent(): void {
-    if (!this.character.familyHistory) return;
-    this.character.familyHistory.events.push('');
-  }
-
-  removeFamilyEvent(index: number): void {
-    if (!this.character.familyHistory) return;
-    this.character.familyHistory.events.splice(index, 1);
-  }
-
   getOpposedRuneValue(rune: string, type: 'elemental' | 'power'): number {
     if (!this.character.runes) return 0;
 
@@ -741,7 +723,6 @@ export class CharacterFormComponent implements OnInit {
       resources: { ...DEFAULT_RESOURCES },
       equipment: [],
       notes: '',
-      familyHistory: { ...DEFAULT_FAMILY_HISTORY },
       cultStatus: { ...DEFAULT_CULT_STATUS }
     };
     this.editMode = false;
