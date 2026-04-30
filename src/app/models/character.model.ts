@@ -371,15 +371,15 @@ export const DEFAULT_RESOURCES: Resources = {
 };
 
 export function calculateHitLocations(con: number, siz: number): HitLocations {
-  const totalHP = Math.round((con + siz) / 2);
+  const totalHP = Math.ceil((con + siz) / 2);
   return {
-    'Right Leg': Math.max(1, Math.round(totalHP * 0.33)),
-    'Left Leg': Math.max(1, Math.round(totalHP * 0.33)),
-    'Abdomen': Math.max(1, Math.round(totalHP * 0.33)),
-    'Chest': Math.max(1, Math.round(totalHP * 0.40)),
-    'Right Arm': Math.max(1, Math.round(totalHP * 0.25)),
-    'Left Arm': Math.max(1, Math.round(totalHP * 0.25)),
-    'Head': Math.max(1, Math.round(totalHP * 0.33))
+    'Right Leg': Math.max(1, Math.round(totalHP / 4)),
+    'Left Leg': Math.max(1, Math.round(totalHP / 4)),
+    'Abdomen': Math.max(1, Math.round(totalHP / 6)),
+    'Chest': Math.max(1, Math.round(totalHP / 3)),
+    'Right Arm': Math.max(1, Math.round(totalHP / 6)),
+    'Left Arm': Math.max(1, Math.round(totalHP / 6)),
+    'Head': Math.max(1, Math.round(totalHP / 8))
   };
 }
 
@@ -426,22 +426,21 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
   const totalHP = Math.round((stats.CON + stats.SIZ) / 2);
   const strSiz = stats.STR + stats.SIZ;
 
-  // Damage Bonus calculation
+  // Damage Bonus calculation (RQ2 standard progression)
   let damageBonus = '0';
-  if (strSiz <= 12) damageBonus = '-1d4';
-  else if (strSiz <= 24) damageBonus = '0';
-  else if (strSiz <= 32) damageBonus = '+1d4';
-  else if (strSiz <= 40) damageBonus = '+1d6';
-  else if (strSiz <= 56) damageBonus = '+2d6';
-  else if (strSiz <= 72) damageBonus = '+3d6';
-  else damageBonus = '+4d6';
+  if (strSiz <= 6) damageBonus = '0';
+  else if (strSiz <= 12) damageBonus = '1d4';
+  else if (strSiz <= 18) damageBonus = '1d6';
+  else if (strSiz <= 24) damageBonus = '1d8';
+  else if (strSiz <= 30) damageBonus = '1d10';
+  else if (strSiz <= 36) damageBonus = '1d12';
+  else if (strSiz <= 42) damageBonus = '1d12+1d4';
+  else if (strSiz <= 48) damageBonus = '2d12';
+  else if (strSiz <= 54) damageBonus = '2d12+1d4';
+  else damageBonus = '3d12';
 
-  // Spirit Combat Damage
-  let spiritCombatDamage = '1d6';
-  if (stats.POW <= 6) spiritCombatDamage = '1d3';
-  else if (stats.POW <= 12) spiritCombatDamage = '1d6';
-  else if (stats.POW <= 18) spiritCombatDamage = '1d6+1';
-  else spiritCombatDamage = '1d6+2';
+  // Spirit Combat Damage (RQ2: POW value used directly, not rolled)
+  const spiritCombatDamage = stats.POW.toString();
 
   // Strike Rank: base 0 + SIZ modifier + DEX modifier
   let strikeRank = getSizeModifier(stats.SIZ) + getDexterityModifier(stats.DEX);
@@ -465,7 +464,7 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
     magicPoints: stats.POW,
     damageBonus: damageBonus,
     spiritCombatDamage: spiritCombatDamage,
-    healingRate: Math.max(1, Math.round(stats.CON / 6)),
+    healingRate: Math.ceil(stats.CON / 4),
     movementRate: movementRate,
     strikeRank: strikeRank,
     maxEncumbrance: maxEncumbrance,
@@ -922,6 +921,86 @@ export function applySkillBonuses(
   }
 
   return skills;
+}
+
+// Skill category mappings for applying characteristic modifiers (RQ2 rule)
+export const SKILL_CATEGORY_MAP: Record<string, string> = {
+  // Agility Skills (STR, SIZ, DEX, POW)
+  'Climb': 'Agility',
+  'Dodge': 'Agility',
+  'Ride': 'Agility',
+  'Swim': 'Agility',
+  // Communication Skills (INT, POW, CHA)
+  'Speak (Native)': 'Communication',
+  'Speak (Other)': 'Communication',
+  'Read/Write': 'Communication',
+  // Knowledge Skills (INT, POW)
+  'Lore (World)': 'Knowledge',
+  'Lore (Animal)': 'Knowledge',
+  'Lore (Plant)': 'Knowledge',
+  // Magic Skills (POW, CHA)
+  'Spirit Combat': 'Magic',
+  'Sorcery': 'Magic',
+  'Rune Magic': 'Magic',
+  // Manipulation Skills (STR, DEX, INT, POW) - includes all weapon skills
+  'Sword & Shield': 'Manipulation',
+  'Two-Handed Weapon': 'Manipulation',
+  'Spear': 'Manipulation',
+  'Bow': 'Manipulation',
+  'Sling': 'Manipulation',
+  'Unarmed': 'Manipulation',
+  'Shield': 'Manipulation',
+  'Craft': 'Manipulation',
+  'Farm': 'Manipulation',
+  'Heal': 'Manipulation',
+  // Perception Skills (INT, POW)
+  'Listen': 'Perception',
+  'Scan': 'Perception',
+  'Search': 'Perception',
+  'Track': 'Perception',
+  // Stealth Skills (SIZ, DEX, INT, POW)
+  'Hide': 'Stealth',
+  'Move Quietly': 'Stealth'
+};
+
+// Calculate skill category modifier from characteristics (RQ2: characteristic modifiers per category)
+// NOTE: In a full RQ2 implementation, these modifiers would come from the characteristic set
+// selected during character creation. For now, this function is a placeholder for future implementation.
+// The stats parameter will be used when characteristic sets with modifiers are fully integrated.
+export function calculateSkillCategoryModifiers(_stats: CharacterStats): Record<string, number> {
+  // TODO: Implement full RQ2 skill category modifier calculation based on characteristic set
+  // For now, returning zero modifiers to maintain current behavior
+  // Once characteristic sets are implemented with their associated modifiers,
+  // this function should apply them to each skill category
+  return {
+    'Agility': 0,
+    'Communication': 0,
+    'Knowledge': 0,
+    'Magic': 0,
+    'Manipulation': 0,
+    'Perception': 0,
+    'Stealth': 0
+  };
+}
+
+// Apply skill category modifiers to skills (RQ2: add modifier to base chance)
+export function applySkillCategoryModifiers(
+  skills: CharacterSkills,
+  categoryModifiers: Record<string, number>
+): CharacterSkills {
+  const modified = { ...skills };
+
+  Object.entries(SKILL_CATEGORY_MAP).forEach(([skill, category]) => {
+    if (modified[skill] !== undefined && categoryModifiers[category] !== undefined) {
+      modified[skill] += categoryModifiers[category];
+      // Ensure skill doesn't exceed 95% (RQ2 cap before magical enhancement)
+      modified[skill] = Math.min(modified[skill], 95);
+      // Ensure skill doesn't go below 0%
+      modified[skill] = Math.max(modified[skill], 0);
+    }
+  });
+
+  return modified;
 }
 
 // Function to enforce opposed rune constraints

@@ -19,14 +19,14 @@ This documentation is organized according to the RQ2 #4001 Rulebook (1978-79) Ta
 ## Status
 
 - [x] Folder structure created
-- [x] Section II: Character Creation (completed)
-- [x] Section III: Mechanics and Melee (completed)
-- [ ] Section IV: Combat Skills
-- [ ] Section V: Basic Magic
-- [ ] Section VI: Other Skills
-- [ ] Section VII: Rune Magic
-- [ ] Section VIII: Monsters
-- [ ] Section IX: Treasure
+- [x] Section II: Character Creation (completed — 1,300+ lines)
+- [x] Section III: Mechanics and Melee (completed — 700+ lines)
+- [x] Section IV: Combat Skills (completed — 800+ lines)
+- [x] Section V: Basic Magic (completed — 500+ lines)
+- [x] Section VI: Other Skills (completed — 900+ lines)
+- [x] Section VII: Rune Magic (completed — 1,000+ lines)
+- [ ] Section VIII: Monsters (placeholder)
+- [ ] Section IX: Treasure (placeholder)
 
 ## Notes
 
