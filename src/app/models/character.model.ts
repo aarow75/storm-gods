@@ -9,6 +9,7 @@ export interface Character {
   skills: CharacterSkills;
   hitLocations: HitLocations;
   armor: ArmorLocations;
+  armorType?: string; // Type of worn armor (e.g., 'Leather', 'Chain Mail')
   shields?: Shield[];
   weapons: Weapon[];
   runes: Runes;
@@ -383,6 +384,34 @@ export function calculateHitLocations(con: number, siz: number): HitLocations {
   };
 }
 
+export function calculateArmorFromWornArmor(armorType?: string): ArmorLocations {
+  const baseArmor: ArmorLocations = {
+    'Right Leg': 0,
+    'Left Leg': 0,
+    'Abdomen': 0,
+    'Chest': 0,
+    'Right Arm': 0,
+    'Left Arm': 0,
+    'Head': 0
+  };
+
+  if (!armorType) return baseArmor;
+
+  const armorDef = ARMOR_TYPES.find(a => a.name === armorType);
+  if (!armorDef) return baseArmor;
+
+  // Worn armor applies to all locations
+  return {
+    'Right Leg': armorDef.points,
+    'Left Leg': armorDef.points,
+    'Abdomen': armorDef.points,
+    'Chest': armorDef.points,
+    'Right Arm': armorDef.points,
+    'Left Arm': armorDef.points,
+    'Head': armorDef.points
+  };
+}
+
 export function calculateArmorFromShields(shields: Shield[]): ArmorLocations {
   const shieldArmor: ArmorLocations = {
     'Right Leg': 0,
@@ -404,6 +433,21 @@ export function calculateArmorFromShields(shields: Shield[]): ArmorLocations {
   });
 
   return shieldArmor;
+}
+
+export function calculateTotalArmor(armorType?: string, shields: Shield[] = []): ArmorLocations {
+  const wornArmor = calculateArmorFromWornArmor(armorType);
+  const shieldArmor = calculateArmorFromShields(shields);
+
+  return {
+    'Right Leg': wornArmor['Right Leg'] + shieldArmor['Right Leg'],
+    'Left Leg': wornArmor['Left Leg'] + shieldArmor['Left Leg'],
+    'Abdomen': wornArmor['Abdomen'] + shieldArmor['Abdomen'],
+    'Chest': wornArmor['Chest'] + shieldArmor['Chest'],
+    'Right Arm': wornArmor['Right Arm'] + shieldArmor['Right Arm'],
+    'Left Arm': wornArmor['Left Arm'] + shieldArmor['Left Arm'],
+    'Head': wornArmor['Head'] + shieldArmor['Head']
+  };
 }
 
 export function getSizeModifier(siz: number): number {
@@ -446,6 +490,9 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
   let strikeRank = getSizeModifier(stats.SIZ) + getDexterityModifier(stats.DEX);
 
   // Encumbrance calculations: equipment + weapons + shields
+  // NOTE: RQ2 standard defines carrying capacity as STR (in this simplified implementation)
+  // Full rules may specify STR × 3 kg. This should be verified against official RQ2 materials.
+  // Current implementation: carrying capacity = STR, penalties apply for each point over capacity
   const maxEncumbrance = stats.STR;
   const equipmentENC = equipment.reduce((sum, item) => sum + item.encumbrance * item.quantity, 0);
   const weaponsENC = weapons.reduce((sum, w) => sum + (WEAPON_LIST.find(wd => wd.name === w.name)?.encumbrance || 0), 0);
@@ -453,7 +500,10 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
   const totalENC = equipmentENC + weaponsENC + shieldsENC;
   const overENC = Math.max(0, totalENC - maxEncumbrance);
 
-  // Apply encumbrance penalties
+  // Apply encumbrance penalties (RQ2 standard):
+  // - Strike Rank: +1 per point over capacity
+  // - Movement: -1 MOV per point over capacity (minimum 0)
+  // - Defense: -5% dodge per point over capacity
   const movementRate = Math.max(0, 8 - overENC);
   strikeRank += overENC;
   const encumbranceDefensePenalty = overENC * 5;
@@ -964,22 +1014,26 @@ export const SKILL_CATEGORY_MAP: Record<string, string> = {
 };
 
 // Calculate skill category modifier from characteristics (RQ2: characteristic modifiers per category)
-// NOTE: In a full RQ2 implementation, these modifiers would come from the characteristic set
-// selected during character creation. For now, this function is a placeholder for future implementation.
-// The stats parameter will be used when characteristic sets with modifiers are fully integrated.
-export function calculateSkillCategoryModifiers(_stats: CharacterStats): Record<string, number> {
-  // TODO: Implement full RQ2 skill category modifier calculation based on characteristic set
-  // For now, returning zero modifiers to maintain current behavior
-  // Once characteristic sets are implemented with their associated modifiers,
-  // this function should apply them to each skill category
+// Each skill category gets a modifier based on the average of its tied characteristics
+// Formula: (average of tied characteristics - 10) * 5 / number of characteristics
+export function calculateSkillCategoryModifiers(stats: CharacterStats): Record<string, number> {
+  const calculateModifier = (characteristics: number[]): number => {
+    if (characteristics.length === 0) return 0;
+    const average = characteristics.reduce((a, b) => a + b, 0) / characteristics.length;
+    // Each characteristic point above/below 10 contributes to skill modifiers
+    // Standard range: 3-21, average is ~10-11
+    // Modifier = (average - 10) * 5
+    return Math.round((average - 10) * 5);
+  };
+
   return {
-    'Agility': 0,
-    'Communication': 0,
-    'Knowledge': 0,
-    'Magic': 0,
-    'Manipulation': 0,
-    'Perception': 0,
-    'Stealth': 0
+    'Agility': calculateModifier([stats.STR, stats.SIZ, stats.DEX, stats.POW]),
+    'Communication': calculateModifier([stats.INT, stats.POW, stats.CHA]),
+    'Knowledge': calculateModifier([stats.INT, stats.POW]),
+    'Magic': calculateModifier([stats.POW, stats.CHA]),
+    'Manipulation': calculateModifier([stats.STR, stats.DEX, stats.INT, stats.POW]),
+    'Perception': calculateModifier([stats.INT, stats.POW]),
+    'Stealth': calculateModifier([stats.SIZ, stats.DEX, stats.INT, stats.POW])
   };
 }
 
@@ -1001,6 +1055,12 @@ export function applySkillCategoryModifiers(
   });
 
   return modified;
+}
+
+// Initialize skills with category modifiers applied based on characteristics
+export function initializeSkillsWithModifiers(stats: CharacterStats, baseSkills: CharacterSkills = DEFAULT_SKILLS): CharacterSkills {
+  const modifiers = calculateSkillCategoryModifiers(stats);
+  return applySkillCategoryModifiers(baseSkills, modifiers);
 }
 
 // Function to enforce opposed rune constraints

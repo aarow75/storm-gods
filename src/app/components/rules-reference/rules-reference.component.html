@@ -1,272 +1,44 @@
 <div class="rules-reference">
-  <h2>RuneQuest Rules Reference</h2>
+  <div class="rules-layout">
+    <!-- TOC Sidebar -->
+    @if (!isLoading && toc.length > 0) {
+      <aside class="toc-sidebar">
+        <nav class="toc-nav">
+          <h3 class="toc-title">Table of Contents</h3>
+          <ul class="toc-list">
+            @for (item of toc; track item.anchor) {
+              <li [style.margin-left.rem]="(item.level - 2) * 0.75">
+                <a (click)="scrollToSection(item.anchor)" class="toc-link">
+                  {{ item.title }}
+                </a>
+              </li>
+            }
+          </ul>
+        </nav>
+      </aside>
+    }
 
-  <div class="reference-container">
-    <!-- Characteristics Table -->
-    <div class="reference-section">
-      <h3>Characteristics</h3>
-      <table class="reference-table">
-        <thead>
-          <tr>
-            <th>Stat</th>
-            <th>Abbreviation</th>
-            <th>Roll</th>
-            <th>Primary Uses</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Strength</td><td>STR</td><td>3D6</td><td>Damage bonus, melee power</td></tr>
-          <tr><td>Constitution</td><td>CON</td><td>3D6</td><td>Hit points, healing rate</td></tr>
-          <tr><td>Size</td><td>SIZ</td><td>3D6</td><td>Hit points, damage bonus</td></tr>
-          <tr><td>Dexterity</td><td>DEX</td><td>3D6</td><td>Strike rank, parry bonus</td></tr>
-          <tr><td>Intelligence</td><td>INT</td><td>3D6</td><td>Strike rank, skill bonus</td></tr>
-          <tr><td>Power</td><td>POW</td><td>3D6</td><td>Magic points, spirit combat</td></tr>
-          <tr><td>Charisma</td><td>CHA</td><td>3D6</td><td>Social interactions, loyalty</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Main Content -->
+    @if (!isLoading && !error) {
+      <main class="reference-container">
+        <div [innerHTML]="html" class="markdown-content"></div>
+      </main>
+    }
 
-    <!-- Damage Bonus Table -->
-    <div class="reference-section">
-      <h3>Damage Bonus (from STR+SIZ)</h3>
-      <table class="reference-table">
-        <thead>
-          <tr>
-            <th>STR+SIZ</th>
-            <th>Bonus</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>≤12</td><td>-1d4</td></tr>
-          <tr><td>13-24</td><td>0</td></tr>
-          <tr><td>25-32</td><td>+1d4</td></tr>
-          <tr><td>33-40</td><td>+1d6</td></tr>
-          <tr><td>41-56</td><td>+2d6</td></tr>
-          <tr><td>57-72</td><td>+3d6</td></tr>
-          <tr><td>73+</td><td>+4d6</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Hit Location Table -->
-    <div class="reference-section">
-      <h3>Hit Location (d20 Roll)</h3>
-      <table class="reference-table">
-        <thead>
-          <tr>
-            <th>Roll</th>
-            <th>Location</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>1-4</td><td>Right Leg</td></tr>
-          <tr><td>5-8</td><td>Left Leg</td></tr>
-          <tr><td>9-11</td><td>Abdomen</td></tr>
-          <tr><td>12</td><td>Chest</td></tr>
-          <tr><td>13-15</td><td>Right Arm</td></tr>
-          <tr><td>16-18</td><td>Left Arm</td></tr>
-          <tr><td>19-20</td><td>Head</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Hit Location Effects -->
-    <div class="reference-section">
-      <h3>Hit Location Effects (when max damage reached)</h3>
-      <table class="reference-table">
-        <thead>
-          <tr>
-            <th>Location</th>
-            <th>Effect</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Head</td><td>Instant Death (fatal)</td></tr>
-          <tr><td>Chest</td><td>Incapacitated</td></tr>
-          <tr><td>Abdomen</td><td>Incapacitated</td></tr>
-          <tr><td>Right Arm</td><td>Arm Useless</td></tr>
-          <tr><td>Left Arm</td><td>Arm Useless</td></tr>
-          <tr><td>Right Leg</td><td>Leg Useless</td></tr>
-          <tr><td>Left Leg</td><td>Leg Useless</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Shields Quick Reference -->
-    <div class="reference-section">
-      <h3>Shields</h3>
-      <table class="reference-table">
-        <thead>
-          <tr>
-            <th>Shield Type</th>
-            <th>AP</th>
-            <th>HP</th>
-            <th>ENC</th>
-            <th>Cost (L)</th>
-            <th>Covers</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Target Shield</td><td>6</td><td>9</td><td>1</td><td>30</td><td>L.Arm, Chest</td></tr>
-          <tr><td>Heater Shield</td><td>10</td><td>12</td><td>2</td><td>60</td><td>Both Arms, Chest</td></tr>
-          <tr><td>Kite Shield</td><td>12</td><td>14</td><td>3</td><td>100</td><td>Both Arms, Chest, Abdomen</td></tr>
-          <tr><td>Tower Shield</td><td>14</td><td>16</td><td>4</td><td>150</td><td>Both Arms, Chest, Abdomen, Head</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Defense Summary -->
-    <div class="reference-section">
-      <h3>Defense Mechanics</h3>
-      <div class="mechanics-summary">
-        <div class="mechanic-item">
-          <h4>Parry</h4>
-          <p><strong>Skill:</strong> Weapon or Shield skill</p>
-          <p><strong>Effect:</strong> Weapon/shield absorbs damage up to its AP. Excess hits character minus armor.</p>
-          <p><strong>Penalty:</strong> -20% per additional parry vs same attacker per round</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Dodge</h4>
-          <p><strong>Skill:</strong> Dodge + DEX bonus + INT bonus - ENC penalty</p>
-          <p><strong>Effect:</strong> Full evade on success. Full damage on failure, minus armor.</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Aimed Attack</h4>
-          <p><strong>Penalty:</strong> -20% to hit</p>
-          <p><strong>Effect:</strong> Choose specific hit location before rolling</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Disarm</h4>
-          <p><strong>Penalty:</strong> -20% to hit</p>
-          <p><strong>Effect:</strong> Damage targets opponent's weapon HP instead of body</p>
-        </div>
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-state">
+        <p>Loading rules...</p>
+        <p style="font-size: 0.85rem; color: #999;">Check browser console (F12) for details</p>
       </div>
-    </div>
+    }
 
-    <!-- Strike Rank -->
-    <div class="reference-section">
-      <h3>Strike Rank Calculation</h3>
-      <p><strong>Base Formula:</strong> SIZ Modifier + DEX Modifier (from Strike Rank Modifier Table)</p>
-      <p><strong>Modifiers:</strong> Weapon modifier, Movement cost, Surprise penalty, Encumbrance penalty</p>
-      <p><strong>Resolution:</strong> Lower SR acts first in combat. Cumulative modifiers add to strike rank.</p>
-      <table class="reference-table">
-        <thead>
-          <tr>
-            <th>SIZ</th>
-            <th>SR Modifier</th>
-            <th>DEX</th>
-            <th>SR Modifier</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>22+</td><td>0</td><td>19+</td><td>0</td></tr>
-          <tr><td>15-21</td><td>+1</td><td>16-18</td><td>+1</td></tr>
-          <tr><td>7-14</td><td>+2</td><td>13-15</td><td>+2</td></tr>
-          <tr><td>1-6</td><td>+3</td><td>9-12</td><td>+3</td></tr>
-          <tr><td></td><td></td><td>6-8</td><td>+4</td></tr>
-          <tr><td></td><td></td><td>1-5</td><td>+5</td></tr>
-        </tbody>
-      </table>
-      <p><strong>Example:</strong> SIZ 10 = +2, DEX 14 = +2, Broadsword +2, 6m movement +2 = Final SR of 8.</p>
-    </div>
-
-    <!-- Melee Round Phases -->
-    <div class="reference-section">
-      <h3>Phases of the Melee Round</h3>
-      <p><strong>A melee round consists of the following phases:</strong></p>
-      <div class="mechanics-summary">
-        <div class="mechanic-item">
-          <h4>Phase 1: Declare Actions & Modifiers</h4>
-          <p>All combatants declare what they intend to do: attack, defend, move, cast spell, etc. Declare any special actions (aimed attack, disarm, etc.) and modifiers.</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Phase 2: Calculate Strike Ranks</h4>
-          <p>Each combatant calculates their Strike Rank for this round based on their declared action. Consider: base SR, weapon modifier, movement cost, surprise penalties, encumbrance penalties, and any other situational modifiers.</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Phase 3: Act by Strike Rank</h4>
-          <p>Starting with the lowest Strike Rank number, combatants act in order. Each participant performs their declared action: attack, dodge, parry, cast spell, etc. Upon acting, recalculate remaining participants' Strike Ranks if needed.</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Phase 4: Resolve Attacks & Defenses</h4>
-          <p>For each attack, determine if it hits (roll vs. weapon skill), determine hit location, roll damage, and apply defenses (armor, parry, dodge). Record damage to the appropriate hit location.</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Phase 5: Apply Conditions</h4>
-          <p>Apply any status changes from the round: injuries, incapacitation, death, spell effects, etc. Check for unconsciousness, limb loss, or other consequences of damage.</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Phase 6: Round End & Reset</h4>
-          <p>Clear surprise status if this is round 1. Reset for next round. All combatants recover one action if they acted. Determine if anyone is still combat-capable; end combat if only one side remains.</p>
-        </div>
+    <!-- Error State -->
+    @if (error) {
+      <div class="error-state">
+        <p><strong>Error:</strong> {{ error }}</p>
+        <p style="font-size: 0.85rem; margin-top: 1rem;">Check the browser console (F12) for more details</p>
       </div>
-      <p><strong>Key Points:</strong> Combat is simultaneous at the same SR. Multiple actions at the same SR are resolved at the same time. After everyone has acted, a new round begins.</p>
-    </div>
-
-    <!-- Movement in Combat -->
-    <div class="reference-section">
-      <h3>Movement in Combat</h3>
-      <p><strong>Movement Allowance:</strong> Before attacking, a participant may move up to their movement rate in meters</p>
-      <p><strong>Cost:</strong> Every 3 meters of movement costs +1 Strike Rank</p>
-      <table class="reference-table">
-        <thead>
-          <tr>
-            <th>Distance Moved</th>
-            <th>SR Cost</th>
-            <th>Distance Moved</th>
-            <th>SR Cost</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>1-3m</td><td>+1 SR</td><td>7-9m</td><td>+3 SR</td></tr>
-          <tr><td>4-6m</td><td>+2 SR</td><td>10-12m</td><td>+4 SR</td></tr>
-        </tbody>
-      </table>
-      <p><strong>Effect:</strong> Movement delays a participant's action in the round, possibly preventing them from acting if their modified SR exceeds remaining combatants.</p>
-      <p><strong>Distance Tracking:</strong> Combat tracker tracks distance to opponent in meters for missile/ranged combat.</p>
-    </div>
-
-    <!-- Surprise Rules -->
-    <div class="reference-section">
-      <h3>Surprise Mechanics</h3>
-      <p><strong>When Surprised:</strong> A participant who is caught off-guard takes a distance-based Strike Rank penalty</p>
-      <p><strong>Penalty by Distance:</strong> +3 SR if opponent within 3m, +1 SR if opponent beyond 3m</p>
-      <p><strong>Duration:</strong> Surprise effect applies only to the first round of combat. When New Round is clicked, surprise clears.</p>
-      <div class="mechanics-summary">
-        <div class="mechanic-item">
-          <h4>Surprise at Close Range</h4>
-          <p><strong>Warrior A:</strong> Base SR 5, moves 3m (+1) = Final SR 6</p>
-          <p><strong>Warrior B:</strong> Base SR 4, surprised at 2m (+3) = Final SR 7</p>
-          <p><strong>Result:</strong> Warrior A acts first (SR 6 before 7)</p>
-        </div>
-        <div class="mechanic-item">
-          <h4>Surprise at Range</h4>
-          <p><strong>Warrior C:</strong> Base SR 5, surprised at 6m (+1), moves 3m (+1) = Final SR 7</p>
-          <p><strong>Warrior D:</strong> Base SR 4 = Final SR 4</p>
-          <p><strong>Result:</strong> Warrior D acts before C due to lower SR</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Encumbrance -->
-    <div class="reference-section">
-      <h3>Encumbrance Calculation</h3>
-      <p><strong>Total Weight:</strong> Sum of all equipment, weapons, and shields</p>
-      <p><strong>Max Capacity:</strong> STR stat</p>
-      <p><strong>Penalties:</strong> For each point over capacity:</p>
-      <ul>
-        <li>Strike Rank increases by +1</li>
-        <li>Movement Rate decreases by 1 (minimum 0)</li>
-        <li>Dodge skill penalty: -5% per point over capacity</li>
-      </ul>
-      <p><strong>Example:</strong> STR 10, Total ENC 12 = 2 over. SR +2, Movement -2, Dodge -10%.</p>
-    </div>
-
-    <!-- Healing -->
-    <div class="reference-section">
-      <h3>Healing Rate</h3>
-      <p><strong>Formula:</strong> CON / 6 (rounded up, minimum 1)</p>
-      <p><strong>Recovery:</strong> 1 hit point per week per healing rate</p>
-    </div>
+    }
   </div>
 </div>

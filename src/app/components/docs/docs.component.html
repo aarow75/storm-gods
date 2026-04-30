@@ -1,10 +1,26 @@
 <div class="docs-container">
   <aside class="docs-sidebar">
     <nav class="docs-nav">
-      <a routerLink="/docs/rules" routerLinkActive="active" class="docs-nav-link">
-        <span class="docs-nav-icon">&#x1F4D6;</span>
-        <span>Rules Reference</span>
-      </a>
+      <div class="docs-nav-group">
+        <button (click)="toggleRulesMenu()" class="docs-nav-link docs-nav-toggle">
+          <span class="docs-nav-icon">&#x1F4D6;</span>
+          <span>Rules Reference</span>
+          <span class="toggle-icon" [class.expanded]="isExpandedRules">▼</span>
+        </button>
+        @if (isExpandedRules && rulesDocuments.length > 0) {
+          <ul class="docs-nav-submenu">
+            @for (doc of rulesDocuments; track doc.filename) {
+              <li>
+                <a [routerLink]="['/docs/rules']" [queryParams]="{ file: doc.filename }"
+                   routerLinkActive="active" class="docs-nav-sublink">
+                  {{ doc.name }}
+                </a>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
       <a routerLink="/docs/publications" routerLinkActive="active" class="docs-nav-link">
         <span class="docs-nav-icon">&#x1F4DA;</span>
         <span>Publications</span>

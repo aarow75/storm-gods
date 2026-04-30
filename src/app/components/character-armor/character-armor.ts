@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ArmorLocations } from '../../models/character.model';
+import { ArmorLocations, ARMOR_TYPES } from '../../models/character.model';
 import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 
@@ -14,7 +14,11 @@ import { GameSystemService } from '../../services/game-system.service';
 })
 export class CharacterArmor {
   @Input() armor!: ArmorLocations;
+  @Input() armorType?: string;
   @Output() applyToAll = new EventEmitter<void>();
+  @Output() armorTypeChange = new EventEmitter<string>();
+
+  armorTypes = ARMOR_TYPES;
 
   constructor(
     public translationService: TranslationService,

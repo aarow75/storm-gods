@@ -6,9 +6,10 @@ import {
   Character, CharacterStats, CharacterSkills, ArmorLocations, Weapon, WeaponDefinition, Shield, ShieldDefinition, Passion, Spell, RuneSpell,
   DEFAULT_STATS, DEFAULT_SKILLS, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES, DEFAULT_FAMILY_HISTORY, DEFAULT_CULT_STATUS,
-  calculateHitLocations, calculateDerivedStats, calculateArmorFromShields, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
+  calculateHitLocations, calculateDerivedStats, calculateTotalArmor, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
   CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS, ARMOR_TYPES,
-  applySkillBonuses, enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES
+  applySkillBonuses, enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES,
+  initializeSkillsWithModifiers, calculateSkillCategoryModifiers
 } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
 import { DiceService } from '../../services/dice.service';
@@ -159,6 +160,11 @@ export class CharacterFormComponent implements OnInit {
     this.showValidationErrors = false;
     this.validationErrorList = [];
 
+    // Apply skill category modifiers based on final characteristic values
+    const skillsWithModifiers = this.character.stats
+      ? initializeSkillsWithModifiers(this.character.stats, this.character.skills!)
+      : this.character.skills!;
+
     const characterData: Character = {
       id: this.editMode && this.editingId ? this.editingId : '',
       name: this.character.name!,
@@ -166,7 +172,7 @@ export class CharacterFormComponent implements OnInit {
       background: this.character.background!,
       stats: this.character.stats!,
       derivedStats: this.character.derivedStats!,
-      skills: this.character.skills!,
+      skills: skillsWithModifiers,
       hitLocations: this.character.hitLocations!,
       armor: this.character.armor!,
       shields: this.character.shields,
@@ -401,20 +407,13 @@ export class CharacterFormComponent implements OnInit {
   }
 
   private updateArmorFromShields(): void {
-    if (!this.character.armor) {
-      this.character.armor = { ...DEFAULT_ARMOR };
-    }
-    const shieldArmor = calculateArmorFromShields(this.character.shields || []);
-    this.character.armor = {
-      'Right Leg': (this.character.armor['Right Leg'] || 0) - (this.lastShieldArmor?.['Right Leg'] || 0) + shieldArmor['Right Leg'],
-      'Left Leg': (this.character.armor['Left Leg'] || 0) - (this.lastShieldArmor?.['Left Leg'] || 0) + shieldArmor['Left Leg'],
-      'Abdomen': (this.character.armor['Abdomen'] || 0) - (this.lastShieldArmor?.['Abdomen'] || 0) + shieldArmor['Abdomen'],
-      'Chest': (this.character.armor['Chest'] || 0) - (this.lastShieldArmor?.['Chest'] || 0) + shieldArmor['Chest'],
-      'Right Arm': (this.character.armor['Right Arm'] || 0) - (this.lastShieldArmor?.['Right Arm'] || 0) + shieldArmor['Right Arm'],
-      'Left Arm': (this.character.armor['Left Arm'] || 0) - (this.lastShieldArmor?.['Left Arm'] || 0) + shieldArmor['Left Arm'],
-      'Head': (this.character.armor['Head'] || 0) - (this.lastShieldArmor?.['Head'] || 0) + shieldArmor['Head']
-    };
-    this.lastShieldArmor = shieldArmor;
+    // Calculate total armor from worn armor + shields
+    this.character.armor = calculateTotalArmor(this.character.armorType, this.character.shields || []);
+  }
+
+  onArmorTypeChange(armorType: string): void {
+    this.character.armorType = armorType;
+    this.updateArmorFromShields();
   }
 
   getSkillKeys(category: string): string[] {

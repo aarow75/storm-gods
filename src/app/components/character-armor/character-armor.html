@@ -3,6 +3,22 @@
 }
 
 @if (isRuneQuest) {
+  <!-- Armor type selector (worn armor) -->
+  <div class="form-group">
+    <label for="armor-type">Worn Armor Type:</label>
+    <select
+      id="armor-type"
+      [(ngModel)]="armorType"
+      (ngModelChange)="armorTypeChange.emit($event)"
+      name="armor-type"
+    >
+      @for (type of armorTypes; track type.name) {
+        <option [value]="type.name">{{ type.name }} ({{ type.points }} AP)</option>
+      }
+    </select>
+  </div>
+
+
   <!-- RuneQuest: Hit location-based armor -->
   <div class="armor-grid">
     @for (location of getArmorLocationKeys(); track location) {

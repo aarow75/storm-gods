@@ -208,7 +208,9 @@
       <div class="section-content">
         <app-character-armor
           [armor]="character.armor!"
+          [armorType]="character.armorType"
           (applyToAll)="applyArmorToAll()"
+          (armorTypeChange)="onArmorTypeChange($event)"
         ></app-character-armor>
       </div>
       }
