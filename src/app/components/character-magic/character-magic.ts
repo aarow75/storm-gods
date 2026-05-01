@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Magic, Spell, RuneSpell } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   standalone: true,
@@ -26,10 +25,8 @@ export class CharacterMagic {
   @Output() addRuneSpell = new EventEmitter<void>();
   @Output() removeRuneSpell = new EventEmitter<number>();
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.magic');
+  get heading(): string {
+    return 'Magic';
   }
 
   onAddSpell(type: 'spiritMagic' | 'sorcery'): void {

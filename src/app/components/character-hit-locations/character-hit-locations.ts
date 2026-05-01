@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HitLocations, ArmorLocations } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   standalone: true,
@@ -16,10 +15,8 @@ export class CharacterHitLocations {
   @Input() armor?: ArmorLocations;
   @Output() calculate = new EventEmitter<void>();
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.hitLocations');
+  get heading(): string {
+    return 'Hit Locations';
   }
 
   getHitLocationKeys(): string[] {

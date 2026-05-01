@@ -1,35 +1,35 @@
 @if (heading) {
-<h4>{{ heading }} <button type="button" class="btn-calculate" (click)="calculate.emit()">{{ translationService.get('button.calculate', 'Calculate') }}</button></h4>
+<h4>{{ heading }} <button type="button" class="btn-calculate" (click)="calculate.emit()">Calculate</button></h4>
 }
 <div class="derived-stats-grid">
   <div class="form-group">
-    <label>{{ translationService.get('derived.hitPoints', 'Hit Points') }}:</label>
+    <label>Hit Points:</label>
     <input type="number" [(ngModel)]="derivedStats.totalHitPoints" name="totalHP" readonly />
   </div>
   <div class="form-group">
-    <label>{{ translationService.get('derived.magicPoints', 'Magic Points') }}:</label>
+    <label>Magic Points:</label>
     <input type="number" [(ngModel)]="derivedStats.magicPoints" name="magicPoints" readonly />
   </div>
   <div class="form-group">
-    <label>{{ translationService.get('derived.damageBonus', 'Damage Bonus') }}:</label>
+    <label>Damage Bonus:</label>
     <input type="text" [(ngModel)]="derivedStats.damageBonus" name="damageBonus" readonly />
   </div>
   <div class="form-group">
-    <label>{{ translationService.get('derived.healingRate', 'Healing Rate') }}:</label>
+    <label>Healing Rate:</label>
     <input type="number" [(ngModel)]="derivedStats.healingRate" name="healingRate" readonly />
   </div>
   <div class="form-group">
-    <label>{{ translationService.get('derived.encumbrance', 'Encumbrance') }}:</label>
+    <label>Encumbrance:</label>
     <input type="text" [value]="derivedStats.totalEncumbrance + ' / ' + derivedStats.maxEncumbrance" readonly />
   </div>
   @if (isRuneQuest) {
   <div class="form-group">
-    <label>{{ translationService.get('derived.strikeRank', 'Strike Rank') }}:</label>
+    <label>Strike Rank:</label>
     <input type="number" [(ngModel)]="derivedStats.strikeRank" name="strikeRank" readonly />
     <span class="stat-breakdown">{{ strikeRankBreakdown }}</span>
   </div>
   <div class="form-group">
-    <label>{{ translationService.get('derived.movementRate', 'Movement Rate') }}:</label>
+    <label>Movement Rate:</label>
     <input type="number" [(ngModel)]="derivedStats.movementRate" name="movementRate" readonly />
   </div>
   }

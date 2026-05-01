@@ -93,8 +93,8 @@
   @if (rollHistory.length > 0) {
   <div class="roll-history">
     <div class="history-header">
-      <h3>{{ translationService.get('diceRoller.history', 'Roll History') }}</h3>
-      <button class="btn-clear" (click)="clearHistory()">{{ translationService.get('button.clear', 'Clear') }}</button>
+      <h3>Roll History</h3>
+      <button class="btn-clear" (click)="clearHistory()">Clear</button>
     </div>
     <div class="history-list">
       @for (roll of rollHistory; track roll) {

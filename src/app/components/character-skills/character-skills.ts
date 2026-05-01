@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CharacterSkills as CharacterSkillsModel } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-character-skills',
@@ -18,10 +17,8 @@ export class CharacterSkills {
 
   @Output() applyBonuses = new EventEmitter<void>();
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.skills');
+  get heading(): string {
+    return 'Skills';
   }
 
   /**

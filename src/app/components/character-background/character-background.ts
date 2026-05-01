@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CharacterBackground as CharacterBackgroundModel } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
@@ -30,39 +29,33 @@ export class CharacterBackground {
     'Other'
   ];
 
-  constructor(
-    public translationService: TranslationService,
-    public gameSystemService: GameSystemService
-  ) {}
+  constructor(public gameSystemService: GameSystemService) {}
 
-  get heading(): string | undefined {
-    return this.translationService.translate('section.background');
+  get heading(): string {
+    return 'Background';
   }
 
   get cultLabel(): string {
-    return this.translationService.get(this.gameSystemService.getCultLabel(), 'Cult/Religion');
+    return this.gameSystemService.getCultLabel();
   }
 
   get occupationLabel(): string {
-    return this.translationService.get(this.gameSystemService.getOccupationLabel(), 'Occupation');
+    return this.gameSystemService.getOccupationLabel();
   }
 
   get homelandLabel(): string {
-    return this.translationService.get(this.gameSystemService.getHomelandLabel(), 'Homeland');
+    return this.gameSystemService.getHomelandLabel();
   }
 
   get selectCultLabel(): string {
-    const key = this.gameSystemService.gameSystem() === 'runequest' ? 'background.selectCult' : 'background.selectBelief';
-    return this.translationService.get(key, 'Select Cult');
+    return this.gameSystemService.getSelectCultLabel();
   }
 
   get selectOccupationLabel(): string {
-    const key = this.gameSystemService.gameSystem() === 'runequest' ? 'background.selectOccupation' : 'background.selectProfession';
-    return this.translationService.get(key, 'Select Occupation');
+    return this.gameSystemService.getSelectOccupationLabel();
   }
 
   get selectHomelandLabel(): string {
-    const key = this.gameSystemService.gameSystem() === 'runequest' ? 'background.selectHomeland' : 'background.selectKin';
-    return this.translationService.get(key, 'Select Homeland');
+    return this.gameSystemService.getSelectHomelandLabel();
   }
 }

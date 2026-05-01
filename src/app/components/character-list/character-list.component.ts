@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 import { Character } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
 import { CharacterUpdateService } from '../../services/character-update.service';
-import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
@@ -23,12 +22,11 @@ export class CharacterListComponent implements OnInit, OnDestroy {
     private characterService: CharacterService,
     private characterUpdateService: CharacterUpdateService,
     private router: Router,
-    public translationService: TranslationService,
     public gameSystemService: GameSystemService
   ) {}
 
-  get heading(): string | undefined {
-    return this.translationService.translate('characterList.title');
+  get heading(): string {
+    return 'Characters';
   }
 
   ngOnInit(): void {
@@ -56,8 +54,7 @@ export class CharacterListComponent implements OnInit, OnDestroy {
   }
 
   deleteCharacter(id: string): void {
-    const confirmMessage = this.translationService.get('characterList.deleteConfirm', 'Are you sure you want to delete this character?');
-    if (confirm(confirmMessage)) {
+    if (confirm('Are you sure you want to delete this character?')) {
       this.characterService.deleteCharacter(id);
       this.loadCharacters();
     }

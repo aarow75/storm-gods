@@ -4,16 +4,16 @@
     <h2>{{ heading }}</h2>
     <a [routerLink]="gameSystemService.link('create')" class="btn-create-character">
       <span class="icon">➕</span>
-      {{ translationService.get('form.createNew', 'Create New Character') }}
+      Create New Character
     </a>
   </div>
   }
 
   @if (characters.length === 0) {
   <div class="no-characters">
-    <p>{{ translationService.get('characterList.noCharacters', 'No characters yet. Create your first character below!') }}</p>
+    <p>No characters yet. Create your first character below!</p>
     <a [routerLink]="gameSystemService.link('create')" class="btn-create-large">
-      {{ translationService.get('form.createNew', 'Create New Character') }}
+      Create New Character
     </a>
   </div>
   }
@@ -50,7 +50,7 @@
       </div>
       <div class="characteristics-and-hit-locations-container">
         <div class="characteristics-container">
-          <h4>{{ translationService.get('characterList.characteristics', 'Characteristics') }}</h4>
+          <h4>Characteristics</h4>
           <div class="stats">
             <div class="stat"><strong>STR:</strong> {{ character.stats.STR }}</div>
             <div class="stat"><strong>CON:</strong> {{ character.stats.CON }}</div>
@@ -60,12 +60,12 @@
             <div class="stat"><strong>POW:</strong> {{ character.stats.POW }}</div>
             <div class="stat"><strong>CHA:</strong> {{ character.stats.CHA }}</div>
           </div>
-          
-          <h4>{{ translationService.get('characterList.weapons', 'Weapons') }}</h4>
+
+          <h4>Weapons</h4>
           <div class="weapons-list">
             @if (!character.weapons || character.weapons.length === 0) {
             <div class="no-items">
-              {{ translationService.get('weapons.noWeapons', 'No weapons') }}
+              No weapons
             </div>
             }
             @for (weapon of character.weapons; track weapon) {
@@ -77,34 +77,34 @@
         </div>
 
         <div class="hit-location-container">
-          <h4>{{ translationService.get('characterList.hitLocations', 'Hit Locations') }}</h4>
+          <h4>Hit Locations</h4>
           <div class="hit-locations">
             <div class="hit-item">
-              <strong>{{ translationService.get('hitLoc.head', 'Head') }}:</strong>
+              <strong>Head:</strong>
               <span class="hit-values">HP {{ character.hitLocations['Head'] }} / AP {{ character.armor['Head'] }}</span>
             </div>
             <div class="hit-item">
-              <strong>{{ translationService.get('hitLoc.rightArm', 'Right Arm') }}:</strong>
+              <strong>Right Arm:</strong>
               <span class="hit-values">HP {{ character.hitLocations['Right Arm'] }} / AP {{ character.armor['Right Arm'] }}</span>
             </div>
             <div class="hit-item">
-              <strong>{{ translationService.get('hitLoc.chest', 'Chest') }}:</strong>
+              <strong>Chest:</strong>
               <span class="hit-values">HP {{ character.hitLocations['Chest'] }} / AP {{ character.armor['Chest'] }}</span>
             </div>
             <div class="hit-item">
-              <strong>{{ translationService.get('hitLoc.leftArm', 'Left Arm') }}:</strong>
+              <strong>Left Arm:</strong>
               <span class="hit-values">HP {{ character.hitLocations['Left Arm'] }} / AP {{ character.armor['Left Arm'] }}</span>
             </div>
             <div class="hit-item">
-              <strong>{{ translationService.get('hitLoc.abdomen', 'Abdomen') }}:</strong>
+              <strong>Abdomen:</strong>
               <span class="hit-values">HP {{ character.hitLocations['Abdomen'] }} / AP {{ character.armor['Abdomen'] }}</span>
             </div>
             <div class="hit-item">
-              <strong>{{ translationService.get('hitLoc.rightLeg', 'Right Leg') }}:</strong>
+              <strong>Right Leg:</strong>
               <span class="hit-values">HP {{ character.hitLocations['Right Leg'] }} / AP {{ character.armor['Right Leg'] }}</span>
             </div>
             <div class="hit-item">
-              <strong>{{ translationService.get('hitLoc.leftLeg', 'Left Leg') }}:</strong>
+              <strong>Left Leg:</strong>
               <span class="hit-values">HP {{ character.hitLocations['Left Leg'] }} / AP {{ character.armor['Left Leg'] }}</span>
             </div>
           </div>
@@ -112,8 +112,8 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn-edit" (click)="onEdit(character.id)">{{ translationService.get('button.edit', 'Edit') }}</button>
-        <button class="btn btn-delete" (click)="deleteCharacter(character.id)">{{ translationService.get('button.delete', 'Delete') }}</button>
+        <button class="btn btn-edit" (click)="onEdit(character.id)">Edit</button>
+        <button class="btn btn-delete" (click)="deleteCharacter(character.id)">Delete</button>
       </div>
     </div>
     }

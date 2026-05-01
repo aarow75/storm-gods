@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameSystemService } from '../../services/game-system.service';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   selector: 'app-game-masters-screen',
@@ -11,8 +10,7 @@ import { TranslationService } from '../../services/translation.service';
 })
 export class GameMastersScreenComponent {
   constructor(
-    public gameSystemService: GameSystemService,
-    public translationService: TranslationService
+    public gameSystemService: GameSystemService
   ) {}
 
   strikeRankModifiers = [

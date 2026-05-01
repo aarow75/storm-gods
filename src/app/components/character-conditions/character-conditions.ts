@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   standalone: true,
@@ -17,10 +16,8 @@ export class CharacterConditions {
   newCondition = '';
   commonConditions = ['diseased', 'poisoned', 'cursed', 'plagued', 'wounded'];
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.conditions');
+  get heading(): string {
+    return 'Conditions';
   }
 
   addCondition(): void {

@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CultStatus } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   standalone: true,
@@ -15,9 +14,7 @@ export class CharacterCultStatus {
   @Input() cultStatus!: CultStatus;
   @Input() cultRanks!: string[];
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.cultStatus');
+  get heading(): string {
+    return 'Cult Status';
   }
 }

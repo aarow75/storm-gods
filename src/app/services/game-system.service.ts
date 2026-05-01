@@ -162,16 +162,27 @@ export class GameSystemService {
     return this.gameSystem() === 'runequest' ? 'RuneQuest' : 'Dragonbane';
   }
 
-  // Helper to get appropriate label translations based on system
   getHomelandLabel(): string {
-    return this.gameSystem() === 'runequest' ? 'background.homeland' : 'background.kin';
+    return this.gameSystem() === 'runequest' ? 'Homeland' : 'Kin (Race)';
   }
 
   getOccupationLabel(): string {
-    return this.gameSystem() === 'runequest' ? 'background.occupation' : 'background.profession';
+    return this.gameSystem() === 'runequest' ? 'Occupation' : 'Profession';
   }
 
   getCultLabel(): string {
-    return this.gameSystem() === 'runequest' ? 'background.cult' : 'background.belief';
+    return this.gameSystem() === 'runequest' ? 'Cult/Religion' : 'Belief';
+  }
+
+  getSelectHomelandLabel(): string {
+    return this.gameSystem() === 'runequest' ? 'Select Homeland' : 'Select Kin';
+  }
+
+  getSelectOccupationLabel(): string {
+    return this.gameSystem() === 'runequest' ? 'Select Occupation' : 'Select Profession';
+  }
+
+  getSelectCultLabel(): string {
+    return this.gameSystem() === 'runequest' ? 'Select Cult' : 'Select Belief';
   }
 }

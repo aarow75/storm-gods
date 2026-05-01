@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DerivedStats, CharacterStats } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
@@ -17,20 +16,16 @@ export class CharacterDerivedStats {
   @Input() stats?: CharacterStats;
   @Output() calculate = new EventEmitter<void>();
 
-  constructor(
-    public translationService: TranslationService,
-    public gameSystemService: GameSystemService
-  ) {}
+  constructor(public gameSystemService: GameSystemService) {}
 
-  get heading(): string | undefined {
-    return this.translationService.translate('section.derivedStats');
+  get heading(): string {
+    return 'Derived Statistics';
   }
 
   get isRuneQuest(): boolean {
     return this.gameSystemService.gameSystem() === 'runequest';
   }
 
-  // Strike Rank breakdown for RuneQuest
   get strikeRankBreakdown(): string {
     if (!this.stats) return '';
     const siz = this.stats.SIZ;

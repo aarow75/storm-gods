@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Passion } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   standalone: true,
@@ -19,10 +18,8 @@ export class CharacterPassions {
   @Output() addPassion = new EventEmitter<void>();
   @Output() removePassion = new EventEmitter<number>();
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.passions');
+  get heading(): string {
+    return 'Passions';
   }
 
   onAddPassion(): void {

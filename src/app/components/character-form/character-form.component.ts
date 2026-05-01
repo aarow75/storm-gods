@@ -13,7 +13,6 @@ import {
 } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
 import { DiceService } from '../../services/dice.service';
-import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 import { UIStateService } from '../../services/ui-state.service';
 import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
@@ -122,7 +121,6 @@ export class CharacterFormComponent implements OnInit {
     private diceService: DiceService,
     private router: Router,
     private route: ActivatedRoute,
-    public translationService: TranslationService,
     public gameSystemService: GameSystemService,
     public uiStateService: UIStateService
   ) {}

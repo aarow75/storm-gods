@@ -12,7 +12,6 @@ import { CombatService } from '../../services/combat.service';
 import { CombatLogService } from '../../services/combat-log.service';
 import { DiceService } from '../../services/dice.service';
 import { CharacterUpdateService } from '../../services/character-update.service';
-import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 import { parseDamageWithConditions } from '../../utils/damage-parser';
 
@@ -105,7 +104,6 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     private combatLogService: CombatLogService,
     private diceService: DiceService,
     private characterUpdateService: CharacterUpdateService,
-    public translationService: TranslationService,
     public gameSystemService: GameSystemService
   ) {}
 

@@ -3,13 +3,13 @@
 }
 <div class="quick-roll">
   <button type="button" class="btn btn-roll-all" (click)="rollAll.emit()">
-    {{ translationService.get('button.rollAll', 'Roll All 3D6') }}
+    Roll All 3D6
   </button>
 </div>
 
 <div class="stats-grid">
   <div class="form-group">
-    <label for="str" [class.success-label]="isFieldRandomized('str')">{{ translationService.get('char.str', 'STR (Strength)') }}:</label>
+    <label for="str" [class.success-label]="isFieldRandomized('str')">STR (Strength):</label>
     <div class="input-with-dice">
       <input
         type="number"
@@ -26,7 +26,7 @@
   </div>
 
   <div class="form-group">
-    <label for="con" [class.success-label]="isFieldRandomized('con')">{{ translationService.get('char.con', 'CON (Constitution)') }}:</label>
+    <label for="con" [class.success-label]="isFieldRandomized('con')">CON (Constitution):</label>
     <div class="input-with-dice">
       <input
         type="number"
@@ -44,7 +44,7 @@
 
   @if (showSiz) {
   <div class="form-group">
-    <label for="siz" [class.success-label]="isFieldRandomized('siz')">{{ translationService.get('char.siz', 'SIZ (Size)') }}:</label>
+    <label for="siz" [class.success-label]="isFieldRandomized('siz')">SIZ (Size):</label>
     <div class="input-with-dice">
       <input
         type="number"
@@ -79,7 +79,7 @@
   </div>
 
   <div class="form-group">
-    <label for="int" [class.success-label]="isFieldRandomized('int')">{{ translationService.get('char.int', 'INT (Intelligence)') }}:</label>
+    <label for="int" [class.success-label]="isFieldRandomized('int')">INT (Intelligence):</label>
     <div class="input-with-dice">
       <input
         type="number"
@@ -113,7 +113,7 @@
   </div>
 
   <div class="form-group">
-    <label for="cha" [class.success-label]="isFieldRandomized('cha')">{{ translationService.get('char.cha', 'CHA (Charisma)') }}:</label>
+    <label for="cha" [class.success-label]="isFieldRandomized('cha')">CHA (Charisma):</label>
     <div class="input-with-dice">
       <input
         type="number"

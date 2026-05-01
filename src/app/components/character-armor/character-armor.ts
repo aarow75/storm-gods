@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ArmorLocations, ARMOR_TYPES } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
@@ -20,13 +19,10 @@ export class CharacterArmor {
 
   armorTypes = ARMOR_TYPES;
 
-  constructor(
-    public translationService: TranslationService,
-    public gameSystemService: GameSystemService
-  ) {}
+  constructor(public gameSystemService: GameSystemService) {}
 
-  get heading(): string | undefined {
-    return this.translationService.translate('section.armor');
+  get heading(): string {
+    return 'Armor';
   }
 
   get isRuneQuest(): boolean {
@@ -43,7 +39,6 @@ export class CharacterArmor {
   }
 
   set singleArmorRating(value: number) {
-    // Apply same armor rating to all locations for consistency
     this.armor['Chest'] = value;
     this.armor['Abdomen'] = value;
     this.armor['Right Arm'] = value;

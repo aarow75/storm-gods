@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TranslationService } from '../../services/translation.service';
 import { EquipmentItem, EquipmentDefinition, EQUIPMENT_LIST } from '../../models/character.model';
 
 @Component({
@@ -23,12 +22,12 @@ export class CharacterEquipment {
   readonly equipmentList = EQUIPMENT_LIST;
   readonly categories: string[];
 
-  constructor(public translationService: TranslationService) {
+  constructor() {
     this.categories = [...new Set(EQUIPMENT_LIST.map(item => item.category))];
   }
 
-  get heading(): string | undefined {
-    return this.translationService.translate('section.equipment');
+  get heading(): string {
+    return 'Equipment';
   }
 
   getItemsByCategory(category: string): EquipmentDefinition[] {

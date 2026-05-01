@@ -1,19 +1,19 @@
 <div class="character-form" [class.edit-mode]="editMode">
-  <h3>{{ editMode ? translationService.get('form.editCharacter', 'Edit Character') : translationService.get('form.createNew', 'Create New Character') }}</h3>
+  <h3>{{ editMode ? 'Edit Character' : 'Create New Character' }}</h3>
   @if (editMode) {
   <div class="edit-banner" [style.background]="character.color || '#f59e0b'">
-    {{ translationService.get('form.editing', 'Editing') }}: {{ character.name }}
+    Editing: {{ character.name }}
   </div>
   }
 
   @if (showValidationErrors) {
   <div class="validation-banner">
     <div class="validation-banner-header">
-      <span class="validation-banner-title">{{ translationService.get('validation.title', 'Required fields missing') }}</span>
+      <span class="validation-banner-title">Required fields missing</span>
       <button type="button" class="btn-dismiss" (click)="dismissValidationErrors()">×</button>
     </div>
     <div class="validation-banner-content">
-      <p>{{ translationService.get('validation.message', 'Please fill in the following required fields:') }}</p>
+      <p>Please fill in the following required fields:</p>
       <ul>
         @for (error of validationErrorList; track error) {
         <li>{{ error }}</li>
@@ -27,9 +27,9 @@
     @if (!editMode) {
     <div class="randomize-section">
       <button type="button" class="btn-randomize" (click)="randomizeCharacter()">
-        {{ translationService.get('button.randomize', 'Randomize Character') }}
+        Randomize Character
       </button>
-      <p class="randomize-hint">{{ translationService.get('form.randomizeHint', 'Generates random stats, cult, occupation, and homeland') }}</p>
+      <p class="randomize-hint">Generates random stats, cult, occupation, and homeland</p>
     </div>
     }
 
@@ -37,7 +37,7 @@
       <label for="name"
         [class.required-label]="isFieldInvalid('name')"
         [class.success-label]="isFieldRandomized('name') && !isFieldInvalid('name')">
-        {{ translationService.get('form.characterName', 'Character Name') }}: <span class="required-star">*</span>
+        Character Name: <span class="required-star">*</span>
       </label>
       <input
         type="text"
@@ -45,20 +45,20 @@
         [(ngModel)]="character.name"
         name="name"
         required
-        [placeholder]="translationService.get('form.characterNamePlaceholder', 'Enter character name')"
+        placeholder="Enter character name"
         [class.invalid-field]="isFieldInvalid('name')"
         [class.success-field]="isFieldRandomized('name') && !isFieldInvalid('name')"
       />
       @if (isFieldInvalid('name')) {
-      <span class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+      <span class="validation-error">Required field</span>
       }
       @if (isFieldRandomized('name') && !isFieldInvalid('name')) {
-      <span class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+      <span class="success-message">Randomized</span>
       }
     </div>
 
     <div class="form-group">
-      <label>{{ translationService.get('form.characterColor', 'Character Color') }}:</label>
+      <label>Character Color:</label>
       <div class="color-picker">
         @for (color of characterColors; track color) {
         <button
@@ -391,7 +391,7 @@
 
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">
-        {{ editMode ? translationService.get('button.save', 'Save Character') : translationService.get('button.save', 'Save Character') }}
+        Save Character
       </button>
       @if (editMode) {
       <button
@@ -399,7 +399,7 @@
         class="btn btn-secondary"
         (click)="cancelEdit()"
       >
-        {{ translationService.get('button.cancel', 'Cancel') }}
+        Cancel
       </button>
       }
     </div>

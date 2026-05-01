@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Resources } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   standalone: true,
@@ -14,10 +13,8 @@ import { TranslationService } from '../../services/translation.service';
 export class CharacterResources {
   @Input() resources!: Resources;
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.resources');
+  get heading(): string {
+    return 'Resources';
   }
 
   getResourceKeys(): { key: keyof Resources; label: string }[] {

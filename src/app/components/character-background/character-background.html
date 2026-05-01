@@ -21,10 +21,10 @@
       }
     </select>
     @if (isFieldInvalid('cult')) {
-    <span class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+    <span class="validation-error">Required field</span>
     }
     @if (isFieldRandomized('cult') && !isFieldInvalid('cult')) {
-    <span class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+    <span class="success-message">Randomized</span>
     }
   </div>
 
@@ -46,10 +46,10 @@
       }
     </select>
     @if (isFieldInvalid('occupation')) {
-    <span class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+    <span class="validation-error">Required field</span>
     }
     @if (isFieldRandomized('occupation') && !isFieldInvalid('occupation')) {
-    <span class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+    <span class="success-message">Randomized</span>
     }
   </div>
 
@@ -71,22 +71,22 @@
       }
     </select>
     @if (isFieldInvalid('homeland')) {
-    <span class="validation-error">{{ translationService.get('form.requiredField', 'Required field') }}</span>
+    <span class="validation-error">Required field</span>
     }
     @if (isFieldRandomized('homeland') && !isFieldInvalid('homeland')) {
-    <span class="success-message">{{ translationService.get('form.randomized', 'Randomized') }}</span>
+    <span class="success-message">Randomized</span>
     }
   </div>
 
   <div class="form-group">
-    <label for="age">{{ translationService.get('background.age', 'Age') }}:</label>
+    <label for="age">Age:</label>
     <input type="number" id="age" [(ngModel)]="background.age" name="age" min="14" max="100" />
   </div>
 
   <div class="form-group">
-    <label for="gender">{{ translationService.get('background.gender', 'Gender') }}:</label>
+    <label for="gender">Gender:</label>
     <select id="gender" [(ngModel)]="background.gender" name="gender">
-      <option value="">{{ translationService.get('background.selectGender', 'Select Gender') }}</option>
+      <option value="">Select Gender</option>
       @for (gender of genderOptions; track gender) {
       <option [value]="gender">{{ gender }}</option>
       }

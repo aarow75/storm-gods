@@ -3,7 +3,7 @@
 }
 <div class="magic-section">
   <div class="form-group">
-    <label for="rune-points">{{ translationService.get('cult.runePoints', 'Rune Points') }}:</label>
+    <label for="rune-points">Rune Points:</label>
     <input
       type="number"
       id="rune-points"
@@ -13,7 +13,7 @@
     />
   </div>
 
-  <h5>{{ translationService.get('magic.spiritMagic', 'Spirit Magic') }}</h5>
+  <h5>Spirit Magic</h5>
   <div class="spells-list">
     @for (spell of magic.spiritMagic; track spell) {
       <div class="spell-row">
@@ -24,7 +24,7 @@
             (change)="spell.name = $any($event.target).value"
             [name]="'spirit-spell-dropdown-' + $index"
           >
-            <option value="">{{ translationService.get('magic.custom', 'Custom') }}</option>
+            <option value="">Custom</option>
             @for (spellName of spiritMagicSpells; track spellName) {
               <option [value]="spellName">{{ spellName }}</option>
             }
@@ -35,7 +35,7 @@
               class="custom-spell-input"
               [(ngModel)]="spell.name"
               [name]="'spirit-spell-custom-' + $index"
-              [placeholder]="translationService.get('magic.selectSpell', 'Select Spell')"
+              placeholder="Select Spell"
             />
           }
         </div>
@@ -48,22 +48,22 @@
         <button type="button" class="btn-remove-small" (click)="onRemoveSpell('spiritMagic', $index)">×</button>
       </div>
     }
-    <button type="button" class="btn-add-small" (click)="onAddSpell('spiritMagic')">{{ translationService.get('button.add', 'Add') }}</button>
+    <button type="button" class="btn-add-small" (click)="onAddSpell('spiritMagic')">Add</button>
   </div>
 
-  <h5>{{ translationService.get('magic.runeMagic', 'Rune Magic') }}</h5>
+  <h5>Rune Magic</h5>
   <div class="spells-list">
     @for (spell of magic.runeMagic; track spell) {
       <div class="rune-spell-row">
         <div class="rune-spell-name-group">
-          <label [attr.for]="'rune-spell-' + $index">{{ translationService.get('cult.spellName', 'Spell Name') }}</label>
+          <label [attr.for]="'rune-spell-' + $index">Spell Name</label>
           <select
             [id]="'rune-spell-' + $index"
             [value]="getRuneSpellDropdownValue(spell)"
             (change)="onRuneSpellChange($index, $any($event.target).value)"
             [name]="'rune-spell-dropdown-' + $index"
           >
-            <option value="">{{ translationService.get('magic.custom', 'Custom') }}</option>
+            <option value="">Custom</option>
             @for (availSpell of getAvailableRuneSpells(); track availSpell.name) {
               <option [value]="availSpell.name">{{ availSpell.name }}</option>
             }
@@ -74,12 +74,12 @@
               class="custom-rune-spell-input"
               [(ngModel)]="spell.name"
               [name]="'rune-spell-custom-' + $index"
-              [placeholder]="translationService.get('magic.selectSpell', 'Select Spell')"
+              placeholder="Select Spell"
             />
           }
         </div>
         <div class="form-group">
-          <label [attr.for]="'rune-spell-cost-' + $index">{{ translationService.get('cult.cost', 'Cost') }}</label>
+          <label [attr.for]="'rune-spell-cost-' + $index">Cost</label>
           <input
             type="number"
             [id]="'rune-spell-cost-' + $index"
@@ -89,7 +89,7 @@
           />
         </div>
         <div class="form-group">
-          <label [attr.for]="'rune-spell-rune-' + $index">{{ translationService.get('cult.rune', 'Rune') }}</label>
+          <label [attr.for]="'rune-spell-rune-' + $index">Rune</label>
           <input
             type="text"
             [id]="'rune-spell-rune-' + $index"
@@ -98,7 +98,7 @@
           />
         </div>
         <div class="form-group">
-          <label [attr.for]="'rune-spell-reusable-' + $index">{{ translationService.get('cult.reusable', 'Reusable') }}</label>
+          <label [attr.for]="'rune-spell-reusable-' + $index">Reusable</label>
           <input
             type="checkbox"
             [id]="'rune-spell-reusable-' + $index"
@@ -109,10 +109,10 @@
         <button type="button" class="btn-remove-small" (click)="onRemoveRuneSpell($index)">×</button>
       </div>
     }
-    <button type="button" class="btn-add-small" (click)="onAddRuneSpell()">{{ translationService.get('button.add', 'Add') }}</button>
+    <button type="button" class="btn-add-small" (click)="onAddRuneSpell()">Add</button>
   </div>
 
-  <h5>{{ translationService.get('magic.sorcery', 'Sorcery') }}</h5>
+  <h5>Sorcery</h5>
   <div class="spells-list">
     @for (spell of magic.sorcery; track spell) {
       <div class="spell-row">
@@ -123,7 +123,7 @@
             (change)="spell.name = $any($event.target).value"
             [name]="'sorcery-spell-dropdown-' + $index"
           >
-            <option value="">{{ translationService.get('magic.custom', 'Custom') }}</option>
+            <option value="">Custom</option>
             @for (spellName of sorcerySpells; track spellName) {
               <option [value]="spellName">{{ spellName }}</option>
             }
@@ -134,7 +134,7 @@
               class="custom-spell-input"
               [(ngModel)]="spell.name"
               [name]="'sorcery-spell-custom-' + $index"
-              [placeholder]="translationService.get('magic.selectSpell', 'Select Spell')"
+              placeholder="Select Spell"
             />
           }
         </div>
@@ -147,6 +147,6 @@
         <button type="button" class="btn-remove-small" (click)="onRemoveSpell('sorcery', $index)">×</button>
       </div>
     }
-    <button type="button" class="btn-add-small" (click)="onAddSpell('sorcery')">{{ translationService.get('button.add', 'Add') }}</button>
+    <button type="button" class="btn-add-small" (click)="onAddSpell('sorcery')">Add</button>
   </div>
 </div>

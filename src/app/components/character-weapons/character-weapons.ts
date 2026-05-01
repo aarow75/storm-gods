@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Weapon, WeaponDefinition, CharacterStats, Resources } from '../../models/character.model';
-import { TranslationService } from '../../services/translation.service';
 
 @Component({
   standalone: true,
@@ -21,10 +20,8 @@ export class CharacterWeapons {
   @Output() removeWeapon = new EventEmitter<number>();
   @Output() weaponChange = new EventEmitter<number>();
 
-  constructor(public translationService: TranslationService) {}
-
-  get heading(): string | undefined {
-    return this.translationService.translate('section.weapons');
+  get heading(): string {
+    return 'Weapons';
   }
 
   onAddWeapon(): void { this.addWeapon.emit(); }

@@ -10,7 +10,6 @@ import { CombatParticipant, Monster as CombatMonster } from '../../models/combat
 import { getSizeModifier, getDexterityModifier } from '../../models/character.model';
 import { CustomMonsterService } from '../../services/custom-monster.service';
 import { GameSystemService } from '../../services/game-system.service';
-import { TranslationService } from '../../services/translation.service';
 import { CombatService } from '../../services/combat.service';
 
 @Component({
@@ -68,7 +67,6 @@ export class BestiaryComponent implements OnInit {
   constructor(
     private customMonsterService: CustomMonsterService,
     public gameSystemService: GameSystemService,
-    private translationService: TranslationService,
     private combatService: CombatService,
     private router: Router
   ) {}

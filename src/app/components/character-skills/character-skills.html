@@ -1,5 +1,5 @@
 @if (heading) {
-<h4>{{ heading }} <button type="button" class="btn-calculate" (click)="applyBonuses.emit()">{{ translationService.get('button.applyBonuses', 'Apply Skill Bonuses') }}</button></h4>
+<h4>{{ heading }} <button type="button" class="btn-calculate" (click)="applyBonuses.emit()">Apply Skill Bonuses</button></h4>
 }
 <div class="skills-section">
   @for (category of getCategoryKeys(); track category) {

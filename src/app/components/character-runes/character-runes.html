@@ -2,7 +2,7 @@
 <h4>{{ heading }}</h4>
 }
 <div class="runes-section">
-  <h5>{{ translationService.get('runes.elemental', 'Elemental Runes') }} <span class="rune-hint">({{ translationService.get('runes.opposed', 'Opposed') }})</span></h5>
+  <h5>Elemental Runes <span class="rune-hint">(Opposed)</span></h5>
   <div class="runes-grid">
     @for (rune of getRuneKeys('elemental'); track rune) {
       <div class="form-group">
@@ -23,7 +23,7 @@
     }
   </div>
 
-  <h5>{{ translationService.get('runes.power', 'Power/Form Runes') }} <span class="rune-hint">({{ translationService.get('runes.opposed', 'Opposed') }})</span></h5>
+  <h5>Power/Form Runes <span class="rune-hint">(Opposed)</span></h5>
   <div class="runes-grid">
     @for (rune of getRuneKeys('power'); track rune) {
       <div class="form-group">
@@ -44,7 +44,7 @@
     }
   </div>
 
-  <h5>{{ translationService.get('runes.form', 'Form Runes') }}</h5>
+  <h5>Form Runes</h5>
   <div class="runes-grid">
     @for (rune of getRuneKeys('form'); track rune) {
       <div class="form-group">
