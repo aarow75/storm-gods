@@ -8,13 +8,13 @@
     </p>
     <div class="button-group">
       <button
-        (click)="toggleGameSystem()"
+        (click)="switchSystem('runequest')"
         [class.active]="gameSystemService.gameSystem() === 'runequest'"
         class="system-toggle-btn system-toggle-rq">
         {{ translationService.get('system.runequest', 'RuneQuest') }}
       </button>
       <button
-        (click)="toggleGameSystem()"
+        (click)="switchSystem('dragonbane')"
         [class.active]="gameSystemService.gameSystem() === 'dragonbane'"
         class="system-toggle-btn system-toggle-db">
         {{ translationService.get('system.dragonbane', 'Dragonbane') }}

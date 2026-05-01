@@ -21,6 +21,7 @@ import { WildernessMapService } from '../../services/wilderness-map.service';
 import { CharacterService } from '../../services/character.service';
 import { CombatService } from '../../services/combat.service';
 import { DiceService } from '../../services/dice.service';
+import { GameSystemService } from '../../services/game-system.service';
 import { Character } from '../../models/character.model';
 import { CombatParticipant, Monster as CombatMonster } from '../../models/combat.model';
 import { Monster as BestiaryMonster } from '../../models/monster.model';
@@ -116,7 +117,8 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     private characterService: CharacterService,
     private combatService: CombatService,
     private diceService: DiceService,
-    private router: Router
+    private router: Router,
+    public gameSystemService: GameSystemService
   ) {}
 
   ngOnInit(): void {
@@ -458,7 +460,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     );
 
     this.encounterResult = null;
-    this.router.navigate(['/combat']);
+    this.router.navigate(this.gameSystemService.link('combat'));
   }
 
   onHexClick(q: number, r: number): void {

@@ -4,7 +4,7 @@
       <h2>Monster Creator</h2>
       <p style="margin: var(--spacing-sm) 0 0 0; color: var(--color-text-secondary); font-size: var(--font-size-lg);">Create and manage custom monsters for your adventures</p>
     </div>
-    <a routerLink="/bestiary" class="btn btn-secondary">Back to Bestiary</a>
+    <a [routerLink]="gameSystemService.link('bestiary')" class="btn btn-secondary">Back to Bestiary</a>
   </div>
 
   <!-- Monster Form -->

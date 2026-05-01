@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TranslationService } from '../../services/translation.service';
+import { GameSystemService } from '../../services/game-system.service';
 
 interface RulesDocument {
   filename: string;
@@ -18,7 +19,10 @@ export class DocsComponent implements OnInit {
   rulesDocuments: RulesDocument[] = [];
   isExpandedRules = true;
 
-  constructor(public translationService: TranslationService) {}
+  constructor(
+    public translationService: TranslationService,
+    public gameSystemService: GameSystemService
+  ) {}
 
   ngOnInit() {
     this.loadRulesDocuments();

@@ -5,7 +5,7 @@
       <span class="round-display">Round {{ currentRound > 0 ? currentRound : '—' }}</span>
     </div>
     <div class="header-actions">
-      <a routerLink="/combat" class="btn btn-secondary">← Combat Tracker</a>
+      <a [routerLink]="gameSystemService.link('combat')" class="btn btn-secondary">← Combat Tracker</a>
     </div>
   </div>
 

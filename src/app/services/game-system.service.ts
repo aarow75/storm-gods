@@ -1,4 +1,6 @@
 import { Injectable, signal } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 
 export type GameSystem = 'runequest' | 'dragonbane';
 
@@ -13,9 +15,9 @@ export interface GameSystemData {
 })
 export class GameSystemService {
   private readonly STORAGE_KEY = 'gameSystem';
+  private static readonly SYSTEM_PATTERN = /^\/(runequest|dragonbane)(?:\/|$)/;
 
-  // Signal for reactive game system
-  gameSystem = signal<GameSystem>(this.loadGameSystem());
+  gameSystem = signal<GameSystem>(this.loadLastUsed());
 
   private runequest: GameSystemData = {
     cults: [
@@ -106,25 +108,42 @@ export class GameSystemService {
     ]
   };
 
-  constructor() {
-    // Load from localStorage on init
-    this.gameSystem.set(this.loadGameSystem());
+  constructor(private router: Router) {
+    this.updateFromUrl(this.router.url);
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.updateFromUrl(event.urlAfterRedirects);
+      });
   }
 
-  private loadGameSystem(): GameSystem {
+  private loadLastUsed(): GameSystem {
     const stored = localStorage.getItem(this.STORAGE_KEY);
-    return (stored === 'dragonbane' ? 'dragonbane' : 'runequest') as GameSystem;
+    return stored === 'dragonbane' ? 'dragonbane' : 'runequest';
   }
 
-  setGameSystem(system: GameSystem): void {
-    this.gameSystem.set(system);
-    localStorage.setItem(this.STORAGE_KEY, system);
+  private updateFromUrl(url: string): void {
+    const match = url.match(GameSystemService.SYSTEM_PATTERN);
+    if (!match) return;
+    const sys = match[1] as GameSystem;
+    if (sys !== this.gameSystem()) {
+      this.gameSystem.set(sys);
+    }
+    localStorage.setItem(this.STORAGE_KEY, sys);
   }
 
-  toggleGameSystem(): void {
-    const current = this.gameSystem();
-    const newSystem = current === 'runequest' ? 'dragonbane' : 'runequest';
-    this.setGameSystem(newSystem);
+  /** Build a routerLink array prefixed with the current game system. */
+  link(...segments: (string | number)[]): (string | number)[] {
+    return ['/', this.gameSystem(), ...segments];
+  }
+
+  /** Navigate to the equivalent page under the other game system. */
+  switchSystem(system: GameSystem): void {
+    if (system === this.gameSystem()) return;
+    const match = this.router.url.match(/^\/(runequest|dragonbane)(.*)$/);
+    const tail = match?.[2];
+    const target = tail && tail !== '/' ? tail : '/characters';
+    this.router.navigateByUrl(`/${system}${target}`);
   }
 
   getCults(): string[] {

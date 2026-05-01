@@ -2,10 +2,10 @@
   <header>
     <div class="header-content">
       <div class="header-left">
-        <h1>{{ gameSystemService.getSystemName() }} {{ translationService.get('app.title', 'Character Manager') }}</h1>
+        <h1><img src="{{ gameSystemService.getSystemName() }}-logo.png"> {{ translationService.get('app.title', 'Character Manager') }}</h1>
       </div>
       <div class="header-right">
-        <a routerLink="/settings" class="settings-link" title="{{ translationService.get('settings.title', 'Settings') }}">
+        <a [routerLink]="gameSystemService.link('settings')" class="settings-link" title="{{ translationService.get('settings.title', 'Settings') }}">
           <span class="settings-icon">⚙️</span>
         </a>
       </div>
@@ -13,23 +13,23 @@
   </header>
 
   <nav class="main-nav">
-    <a routerLink="/characters" routerLinkActive="active" class="nav-link">
+    <a [routerLink]="gameSystemService.link('characters')" routerLinkActive="active" class="nav-link">
       <span class="nav-icon">&#x1F465;</span>
       <span>Characters</span>
     </a>
-    <a routerLink="/bestiary" routerLinkActive="active" class="nav-link">
+    <a [routerLink]="gameSystemService.link('bestiary')" routerLinkActive="active" class="nav-link">
       <span class="nav-icon">&#x1F409;</span>
       <span>Bestiary</span>
     </a>
-    <a routerLink="/combat" routerLinkActive="active" class="nav-link">
+    <a [routerLink]="gameSystemService.link('combat')" routerLinkActive="active" class="nav-link">
       <span class="nav-icon">&#x2694;&#xFE0F;</span>
       <span>Combat Tracker</span>
     </a>
-    <a routerLink="/wilderness-map" routerLinkActive="active" class="nav-link">
+    <a [routerLink]="gameSystemService.link('wilderness-map')" routerLinkActive="active" class="nav-link">
       <span class="nav-icon">&#x1F5FA;</span>
       <span>Wilderness Map</span>
     </a>
-    <a routerLink="/docs" routerLinkActive="active" class="nav-link">
+    <a [routerLink]="gameSystemService.link('docs')" routerLinkActive="active" class="nav-link">
       <span class="nav-icon">&#x1F4DA;</span>
       <span>Docs</span>
     </a>

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslationService } from '../../services/translation.service';
-import { GameSystemService } from '../../services/game-system.service';
+import { GameSystem, GameSystemService } from '../../services/game-system.service';
 import { UIStateService } from '../../services/ui-state.service';
 
 @Component({
@@ -22,8 +22,8 @@ export class SettingsComponent {
     this.translationService.setLocale(locale);
   }
 
-  toggleGameSystem(): void {
-    this.gameSystemService.toggleGameSystem();
+  switchSystem(system: GameSystem): void {
+    this.gameSystemService.switchSystem(system);
   }
 
   increaseFontSize(): void {

@@ -190,7 +190,7 @@ export class CharacterFormComponent implements OnInit {
     }
 
     this.resetForm();
-    this.router.navigate(['/characters']);
+    this.router.navigate(this.gameSystemService.link('characters'));
   }
 
   editCharacter(id: string): void {

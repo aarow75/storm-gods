@@ -24,7 +24,7 @@ export class CharacterListComponent implements OnInit, OnDestroy {
     private characterUpdateService: CharacterUpdateService,
     private router: Router,
     public translationService: TranslationService,
-    private gameSystemService: GameSystemService
+    public gameSystemService: GameSystemService
   ) {}
 
   get heading(): string | undefined {
@@ -52,7 +52,7 @@ export class CharacterListComponent implements OnInit, OnDestroy {
 
   onEdit(id: string): void {
     // Store the ID in the character form via a service or navigate with state
-    this.router.navigate(['/create'], { queryParams: { id: id } });
+    this.router.navigate(this.gameSystemService.link('create'), { queryParams: { id: id } });
   }
 
   deleteCharacter(id: string): void {

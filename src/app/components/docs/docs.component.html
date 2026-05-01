@@ -11,7 +11,7 @@
           <ul class="docs-nav-submenu">
             @for (doc of rulesDocuments; track doc.filename) {
               <li>
-                <a [routerLink]="['/docs/rules']" [queryParams]="{ file: doc.filename }"
+                <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename }"
                    routerLinkActive="active" class="docs-nav-sublink">
                   {{ doc.name }}
                 </a>
@@ -21,11 +21,11 @@
         }
       </div>
 
-      <a routerLink="/docs/publications" routerLinkActive="active" class="docs-nav-link">
+      <a [routerLink]="gameSystemService.link('docs', 'publications')" routerLinkActive="active" class="docs-nav-link">
         <span class="docs-nav-icon">&#x1F4DA;</span>
         <span>Publications</span>
       </a>
-      <a routerLink="/docs/gm-screen" routerLinkActive="active" class="docs-nav-link">
+      <a [routerLink]="gameSystemService.link('docs', 'gm-screen')" routerLinkActive="active" class="docs-nav-link">
         <span class="docs-nav-icon">&#x1F6A8;</span>
         <span>GM Screen</span>
       </a>

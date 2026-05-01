@@ -42,8 +42,9 @@ export class App implements OnInit {
   }
 
   private updateDiceRollerVisibility(url: string): void {
+    const path = url.replace(/^\/(runequest|dragonbane)/, '');
     const hideDiceRollerRoutes = ['/characters', '/settings', '/bestiary', '/docs', '/combat-map', '/wilderness-map'];
-    this.showDiceRoller.set(!hideDiceRollerRoutes.some(route => url.startsWith(route)));
+    this.showDiceRoller.set(!hideDiceRollerRoutes.some(route => path.startsWith(route)));
   }
 
   private updateTitle(): void {

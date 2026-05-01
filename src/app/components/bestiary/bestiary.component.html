@@ -4,7 +4,7 @@
       <h1>Monster Bestiary & Encounters</h1>
       <p class="subtitle">Explore creatures and encounters across RuneQuest and DragonBane</p>
     </div>
-    <a routerLink="/monster-creator" class="btn-monster-creator">
+    <a [routerLink]="gameSystemService.link('monster-creator')" class="btn-monster-creator">
       <span class="icon">🤖</span>
       Create Monster
     </a>
@@ -114,7 +114,7 @@
             </div>
             @if (isCustomMonster(monster)) {
               <div class="monster-actions">
-                <a [routerLink]="['/monster-creator']" [queryParams]="{ edit: monster.id }" class="action-btn edit-btn" title="Edit">✏️</a>
+                <a [routerLink]="gameSystemService.link('monster-creator')" [queryParams]="{ edit: monster.id }" class="action-btn edit-btn" title="Edit">✏️</a>
                 <button class="action-btn delete-btn" (click)="deleteCustomMonster(monster.id)" title="Delete">🗑️</button>
               </div>
             }

@@ -2,7 +2,7 @@
   <div class="publications-page">
     <header class="page-header">
       <h2>RuneQuest Publications</h2>
-      <a routerLink="/" class="back-link">← Back to Characters</a>
+      <a [routerLink]="gameSystemService.link('characters')" class="back-link">← Back to Characters</a>
     </header>
 
     <div class="publications-container">
@@ -72,7 +72,7 @@
   <div class="publications-page">
     <header class="page-header">
       <h2>Dragonbane Publications</h2>
-      <a routerLink="/" class="back-link">← Back to Characters</a>
+      <a [routerLink]="gameSystemService.link('characters')" class="back-link">← Back to Characters</a>
     </header>
 
     <div class="publications-container">

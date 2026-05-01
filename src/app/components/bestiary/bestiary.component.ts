@@ -67,7 +67,7 @@ export class BestiaryComponent implements OnInit {
 
   constructor(
     private customMonsterService: CustomMonsterService,
-    private gameSystemService: GameSystemService,
+    public gameSystemService: GameSystemService,
     private translationService: TranslationService,
     private combatService: CombatService,
     private router: Router
@@ -237,7 +237,7 @@ export class BestiaryComponent implements OnInit {
   }
 
   navigateToCombat(): void {
-    this.router.navigate(['/combat']);
+    this.router.navigate(this.gameSystemService.link('combat'));
   }
 
   getGameSystemName(system: string): string {

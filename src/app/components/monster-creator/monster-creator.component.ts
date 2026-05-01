@@ -6,6 +6,7 @@ import { Monster } from '../../models/monster.model';
 import { HIT_LOCATION_TEMPLATES } from '../../constants/hit-location-templates.constants';
 import { CustomMonsterService } from '../../services/custom-monster.service';
 import { TranslationService } from '../../services/translation.service';
+import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
   selector: 'app-monster-creator',
@@ -72,7 +73,8 @@ export class MonsterCreatorComponent implements OnInit {
     private monsterService: CustomMonsterService,
     private router: Router,
     private route: ActivatedRoute,
-    private translationService: TranslationService
+    private translationService: TranslationService,
+    public gameSystemService: GameSystemService
   ) {}
 
   ngOnInit(): void {

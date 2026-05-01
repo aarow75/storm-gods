@@ -7,6 +7,7 @@ import { CombatService } from '../../services/combat.service';
 import { CombatLogService } from '../../services/combat-log.service';
 import { DiceService } from '../../services/dice.service';
 import { CharacterService } from '../../services/character.service';
+import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
   standalone: true,
@@ -36,7 +37,8 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
     private combatService: CombatService,
     private combatLogService: CombatLogService,
     private diceService: DiceService,
-    private characterService: CharacterService
+    private characterService: CharacterService,
+    public gameSystemService: GameSystemService
   ) {}
 
   ngOnInit(): void {

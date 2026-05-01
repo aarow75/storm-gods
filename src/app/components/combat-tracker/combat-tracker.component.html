@@ -3,8 +3,8 @@
     <h2>Combat Tracker</h2>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="openAddParticipantModal()">Add Participant</button>
-      <a routerLink="/combat-map" class="btn btn-secondary">Combat Map</a>
-      <a routerLink="/monster-creator" class="btn btn-secondary">Monster Creator</a>
+      <a [routerLink]="gameSystemService.link('combat-map')" class="btn btn-secondary">Combat Map</a>
+      <a [routerLink]="gameSystemService.link('monster-creator')" class="btn btn-secondary">Monster Creator</a>
       <button class="btn btn-secondary" (click)="toggleLogHistory()">
         {{ showLogHistory ? 'Hide History' : 'Show History' }}
       </button>

@@ -40,6 +40,12 @@ header {
   line-height: 1.2;
 }
 
+.header-left img {
+  bottom: -4px;
+  height: 30px;
+  position: relative;
+}
+
 .header-right {
   display: flex;
   align-items: center;

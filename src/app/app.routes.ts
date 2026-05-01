@@ -1,4 +1,5 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Routes, Router, CanActivateFn } from '@angular/router';
 import { CharacterListComponent } from './components/character-list/character-list.component';
 import { CharacterFormComponent } from './components/character-form/character-form.component';
 import { CombatTrackerComponent } from './components/combat-tracker/combat-tracker.component';
@@ -12,8 +13,17 @@ import { PublicationsComponent } from './components/publications/publications.co
 import { DocsComponent } from './components/docs/docs.component';
 import { GameMastersScreenComponent } from './components/game-masters-screen/game-masters-screen.component';
 
-export const routes: Routes = [
-  { path: '', redirectTo: '/characters', pathMatch: 'full' },
+const LAST_USED_SYSTEM_KEY = 'gameSystem';
+
+const redirectToLastSystem: CanActivateFn = () => {
+  const router = inject(Router);
+  const stored = localStorage.getItem(LAST_USED_SYSTEM_KEY);
+  const system = stored === 'dragonbane' ? 'dragonbane' : 'runequest';
+  return router.parseUrl(`/${system}/characters`);
+};
+
+const gameSystemRoutes: Routes = [
+  { path: '', redirectTo: 'characters', pathMatch: 'full' },
   { path: 'characters', component: CharacterListComponent },
   { path: 'create', component: CharacterFormComponent },
   { path: 'combat', component: CombatTrackerComponent },
@@ -31,6 +41,12 @@ export const routes: Routes = [
   },
   { path: 'bestiary', component: BestiaryComponent },
   { path: 'monster-creator', component: MonsterCreatorComponent },
-  { path: 'settings', component: SettingsComponent },
-  { path: '**', redirectTo: '/characters' }
+  { path: 'settings', component: SettingsComponent }
+];
+
+export const routes: Routes = [
+  { path: 'runequest', children: gameSystemRoutes },
+  { path: 'dragonbane', children: gameSystemRoutes },
+  { path: '', pathMatch: 'full', canActivate: [redirectToLastSystem], children: [] },
+  { path: '**', canActivate: [redirectToLastSystem], children: [] }
 ];

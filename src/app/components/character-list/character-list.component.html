@@ -2,7 +2,7 @@
   @if (heading) {
   <div class="character-list-header">
     <h2>{{ heading }}</h2>
-    <a routerLink="/create" class="btn-create-character">
+    <a [routerLink]="gameSystemService.link('create')" class="btn-create-character">
       <span class="icon">➕</span>
       {{ translationService.get('form.createNew', 'Create New Character') }}
     </a>
@@ -12,7 +12,7 @@
   @if (characters.length === 0) {
   <div class="no-characters">
     <p>{{ translationService.get('characterList.noCharacters', 'No characters yet. Create your first character below!') }}</p>
-    <a routerLink="/create" class="btn-create-large">
+    <a [routerLink]="gameSystemService.link('create')" class="btn-create-large">
       {{ translationService.get('form.createNew', 'Create New Character') }}
     </a>
   </div>
