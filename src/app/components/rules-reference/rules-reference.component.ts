@@ -40,7 +40,7 @@ export class RulesReferenceComponent implements OnInit, OnDestroy {
         }),
         switchMap(params => {
           const filename = params['file'] || 'I-introduction';
-          return this.http.get(`/docs/rules/${filename}.md`, { responseType: 'text' })
+          return this.http.get(`/docs/runequest/rules/${filename}.md`, { responseType: 'text' })
             .pipe(timeout(5000));
         }),
         map(content => {

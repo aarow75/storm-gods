@@ -31,7 +31,13 @@ export class DocsComponent implements OnInit {
       { filename: 'I-introduction', name: 'I. Introduction' },
       { filename: 'II-character-creation', name: 'II. Character Creation' },
       { filename: 'III-mechanics-and-melee', name: 'III. Mechanics and Melee' },
-      { filename: 'IV-combat-skills', name: 'IV. Combat Skills' }
+      { filename: 'IV-combat-skills', name: 'IV. Combat Skills' },
+      { filename: 'V-basic-magic', name: 'V. Basic Magic' },
+      { filename: 'VI-other-skills', name: 'VI. Other Skills' },
+      { filename: 'VII-rune-magic', name: 'VII. Rune Magic' },
+      { filename: 'VIII-monsters', name: 'VIII. Monsters' },
+      { filename: 'IX-treasure', name: 'IX. Treasure Hoards' },
+      { filename: 'X-appendices', name: 'X. Appendices' }
     ];
   }
 
