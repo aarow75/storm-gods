@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { MarkdownService, type TocItem } from '../../services/markdown.service';
+import { GameSystemService } from '../../services/game-system.service';
 import { switchMap, timeout, map, catchError, tap } from 'rxjs/operators';
 import { Subject, of } from 'rxjs';
 import { takeUntil } from 'rxjs';
@@ -28,7 +29,8 @@ export class RulesReferenceComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private http: HttpClient,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private gameSystem: GameSystemService
   ) {}
 
   ngOnInit() {
@@ -40,7 +42,8 @@ export class RulesReferenceComponent implements OnInit, OnDestroy {
         }),
         switchMap(params => {
           const filename = params['file'] || 'I-introduction';
-          return this.http.get(`/docs/runequest/rules/${filename}.md`, { responseType: 'text' })
+          const system = this.gameSystem.gameSystem();
+          return this.http.get(`/docs/${system}/rules/${filename}.md`, { responseType: 'text' })
             .pipe(timeout(5000));
         }),
         map(content => {
