@@ -202,6 +202,12 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.selectedWeapon = '';
   }
 
+  setEntityType(type: 'character' | 'monster'): void {
+    if (this.selectedEntityType === type) return;
+    this.selectedEntityType = type;
+    this.onEntityTypeChange();
+  }
+
   onCharacterSelect(): void {
     const character = this.characters.find(c => c.id === this.selectedCharacterId);
     if (character?.weapons.length) this.selectedWeapon = character.weapons[0].name;

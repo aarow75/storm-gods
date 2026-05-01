@@ -536,10 +536,24 @@
       <div class="modal-body">
         <div class="form-group">
           <label>Type:</label>
-          <select [(ngModel)]="selectedEntityType" (change)="onEntityTypeChange()">
-            <option value="character">Character</option>
-            <option value="monster">Monster</option>
-          </select>
+          <div class="entity-type-toggle" role="tablist">
+            <button type="button"
+                    role="tab"
+                    class="entity-type-btn"
+                    [class.active]="selectedEntityType === 'character'"
+                    [attr.aria-selected]="selectedEntityType === 'character'"
+                    (click)="setEntityType('character')">
+              Character
+            </button>
+            <button type="button"
+                    role="tab"
+                    class="entity-type-btn"
+                    [class.active]="selectedEntityType === 'monster'"
+                    [attr.aria-selected]="selectedEntityType === 'monster'"
+                    (click)="setEntityType('monster')">
+              Monster
+            </button>
+          </div>
         </div>
         @if (selectedEntityType === 'character') {
           <div class="form-group">

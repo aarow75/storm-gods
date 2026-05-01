@@ -758,6 +758,41 @@
   font-size: var(--font-size-lg);
 }
 
+.entity-type-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+  width: 100%;
+}
+
+.entity-type-btn {
+  flex: 1;
+  padding: var(--spacing-2xl) var(--spacing-3xl);
+  background: var(--color-bg-light);
+  color: var(--color-gray-600);
+  border: none;
+  font-family: inherit;
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.entity-type-btn + .entity-type-btn {
+  border-left: 1px solid var(--color-border);
+}
+
+.entity-type-btn:hover:not(.active) {
+  background: var(--color-gray-200);
+}
+
+.entity-type-btn.active {
+  background: var(--color-primary-orange);
+  color: var(--color-bg-white);
+}
+
 .weapons-list {
   display: flex;
   flex-direction: column;
