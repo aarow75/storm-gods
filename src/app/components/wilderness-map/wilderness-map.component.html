@@ -93,13 +93,6 @@
           </select>
         </div>
 
-        <button
-          class="mode-button"
-          [class.active]="showTerrainOverlay"
-          (click)="toggleTerrainOverlay()"
-          title="Toggle semi-transparent terrain color overlay">
-          Terrain Overlay
-        </button>
       }
 
       <div class="hex-border-control">
@@ -183,8 +176,7 @@
                 [class.hex-tile]="true"
                 [class.path-preview]="isPathPreview(hex.q, hex.r)"
                 (pointerdown)="onHexPointerDown(hex.q, hex.r, $event)"
-                (pointerenter)="onHexPointerEnter(hex.q, hex.r)"
-                (click)="onHexClick(hex.q, hex.r)" />
+                (pointerenter)="onHexPointerEnter(hex.q, hex.r)" />
             }
 
             @for (token of placedTokens; track token.id) {

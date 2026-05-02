@@ -95,7 +95,6 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   } | null = null;
 
   mapMode: 'terrain' | 'image' = 'terrain';
-  showTerrainOverlay = false;
   hexBorderOpacity = 1;
 
   showAddMapModal = false;
@@ -129,7 +128,6 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     this.gridHeight = this.state.gridHeight ?? GRID_ROWS;
     this.scale = this.state.scale ?? 6;
     this.scaleUnit = this.state.scaleUnit ?? 'miles';
-    this.showTerrainOverlay = this.state.showTerrainOverlay ?? false;
     this.hexBorderOpacity = this.state.hexBorderOpacity ?? 1;
     this.viewZoom = this.state.viewZoom ?? 1;
     this.viewPanX = this.state.viewPanX ?? 0;
@@ -199,16 +197,15 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getHexFill(q: number, r: number): string {
+    const terrain = this.getTerrainAt(q, r);
     if (this.mapMode === 'image') {
-      if (this.showTerrainOverlay) {
-        const terrain = this.getTerrainAt(q, r);
+      if (terrain !== 'none') {
         const def = TERRAIN_DEFINITIONS.find((t) => t.id === terrain);
         const baseColor = def?.fillColor ?? '#f5f0e8';
         return this.hexToRgba(baseColor, 0.45);
       }
       return 'rgba(255, 255, 255, 0.05)';
     }
-    const terrain = this.getTerrainAt(q, r);
     const def = TERRAIN_DEFINITIONS.find((t) => t.id === terrain);
     return def?.fillColor ?? '#f5f0e8';
   }
@@ -287,8 +284,8 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
-  @HostListener('document:pointerup')
-  onPointerUp(): void {
+  @HostListener('document:pointerup', ['$event'])
+  onPointerUp(event: PointerEvent): void {
     if (this.isPainting) {
       this.isPainting = false;
       this.saveState();
@@ -297,6 +294,25 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
       this.isPanning = false;
       if (this.panHasMoved) {
         this.saveViewState();
+      } else if (this.interactionMode === 'move') {
+        this.handleMapClick(event.clientX, event.clientY);
+      }
+    }
+  }
+
+  private handleMapClick(clientX: number, clientY: number): void {
+    const svg = this.hexSvg?.nativeElement;
+    if (!svg) return;
+    const rect = svg.getBoundingClientRect();
+    const x = (clientX - rect.left - this.viewPanX) / this.viewZoom;
+    const y = (clientY - rect.top - this.viewPanY) / this.viewZoom;
+
+    for (const hex of this.hexes) {
+      const dx = x - (hex.cx + this.svgOffsetX);
+      const dy = y - (hex.cy + this.svgOffsetY);
+      if (Math.sqrt(dx * dx + dy * dy) < this.HEX_SIZE) {
+        this.onHexClick(hex.q, hex.r);
+        return;
       }
     }
   }
@@ -464,10 +480,6 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   onHexClick(q: number, r: number): void {
-    if (this.panHasMoved) {
-      this.panHasMoved = false;
-      return;
-    }
     if (this.interactionMode !== 'move') return;
 
     const clickedToken = this.getTokenAt(q, r);
@@ -704,12 +716,6 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   setMapMode(mode: 'terrain' | 'image'): void {
     this.mapMode = mode;
     this.state.mapMode = mode;
-    this.saveState();
-  }
-
-  toggleTerrainOverlay(): void {
-    this.showTerrainOverlay = !this.showTerrainOverlay;
-    this.state.showTerrainOverlay = this.showTerrainOverlay;
     this.saveState();
   }
 
