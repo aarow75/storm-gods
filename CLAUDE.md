@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Runequest Character Manager** — An Angular application for creating and managing Runequest/Dragonbane RPG characters with complete character sheet functionality, dice rolling, combat tracking, and localStorage persistence.
+**Runequest Character Manager** — An Angular application for creating and managing Runequest/Dragonbane RPG characters with complete character sheet functionality, dice rolling, combat tracking, bestiary, wilderness/combat maps, and localStorage persistence.
 
 - **Framework**: Angular 21.2.7 with standalone components
 - **Language**: TypeScript 5.9
 - **Testing**: Vitest
 - **Mobile**: Capacitor 8 for Android
-- **Supported Systems**: Runequest and Dragonbane (switchable via `GameSystemService`)
+- **Supported Systems**: Runequest and Dragonbane (URL-based via `GameSystemService`)
 
 ## Common Commands
 
@@ -37,12 +37,13 @@ ng generate component path/to/component-name  # Create new component
 
 ### High-Level Structure
 
-The app uses a **modular component architecture** where each major character sheet section is an independent, self-contained component:
+The app uses a **modular component architecture** organized around multiple pages and sub-components:
 
-- **Root Component** (`app.ts`): Manages navigation, language/game-system switching, and the dice roller overlay
+- **Root Component** (`app.ts`): Manages navigation, game-system switching, and the dice roller overlay
 - **Character List** (`character-list.component.ts`): Grid of character cards; entry point for CRUD operations
-- **Character Form** (`character-form.component.ts`): Main editor; imports 12+ sub-components for different sections
-- **Sub-components** (e.g., `character-characteristics`, `character-skills`, `character-armor`): Focused on a single data section each
+- **Character Form** (`character-form.component.ts`): Main editor; imports 16 sub-components for different character sheet sections
+- **Sub-components** (e.g., `character-characteristics`, `character-skills`, `character-armor`): Each focused on a single data section
+- **Page Components**: `combat-tracker`, `combat-map`, `wilderness-map`, `bestiary`, `monster-creator`, `rules-reference`, `publications`, `game-masters-screen`, `settings`
 
 ### Services Layer
 
@@ -52,12 +53,16 @@ The app uses a **modular component architecture** where each major character she
   - Runs `migrateCharacter()` on every load to handle schema changes (backward compatibility)
   - Applies schema defaults for missing fields
 - **`DiceService`** — Dice roll logic (XdY+modifier)
-- **`GameSystemService`** — Switches between Runequest and Dragonbane systems; affects UI labels, rules, and calculations
-- **`TranslationService`** — i18n with English (en) and Swedish (sv) locales
+- **`GameSystemService`** — URL-based game system (Runequest/Dragonbane); uses Angular signals; reads system from URL on navigation; provides `link()` helper and `switchSystem()` to navigate between systems; serves system-specific cults/occupations/homelands and localized labels
 
 **Supporting Services**:
 - **`CharacterUpdateService`** — Reactive updates to character data (used by form sub-components)
 - **`CombatService`** — Combat mechanics (hit locations, damage, parry/dodge, encumbrance)
+- **`CombatLogService`** — Event log for combat actions
+- **`CustomMonsterService`** — Persistence for user-created monsters
+- **`MarkdownService`** — Markdown rendering used by rules/docs components
+- **`UIStateService`** — Shared UI state across components
+- **`WildernessMapService`** — State management for wilderness hex map
 
 ### Models & Data Flow
 
@@ -71,29 +76,40 @@ Character {
   hitLocations { Right Leg, Left Leg, Abdomen, Chest, Right Arm, Left Arm, Head }
   armor { per location }
   weapons [ { name, damage, skill, currentHitPoints } ]
+  shields [ { name, ... } ]
   runes { elemental, power, form }
   passions [ { name, value } ]
   magic { spiritMagic[], runeMagic[], sorcery[] }
   resources { lunars, wheels, clacks, reputation, ransom }
   equipment [ { name, quantity, cost, hitPoints, encumbrance } ]
+  conditions [ string[] ]  // e.g. 'diseased', 'poisoned'
   familyHistory, cultStatus, notes
 }
 ```
 
 **Key Calculations**:
-- `calculateDerivedStats()` — Damage bonus, strike rank, healing rate, magic points, movement
+- `calculateDerivedStats()` — Damage bonus, strike rank, healing rate, magic points, movement; encumbrance includes shields
 - `calculateHitLocations()` — HP per location from CON + SIZ
-- `calculateEncumbrance()` — Total weight from equipment + weapons; applies defense penalty if over capacity
+- `calculateEncumbrance()` — Total weight from equipment + weapons + shields; applies defense penalty if over capacity
+- `calculateArmorFromShields()` — Adds shield AP to relevant hit locations
+- `calculateTotalArmor()` — Combines worn armor and shields per location
 
 All calculations are pure functions exported from `character.model.ts` and called by services.
 
 ### Constants & Game Data
 
-All game data (cults, skills, weapons, runes, passions, equipment definitions) are stored as TypeScript constants in `src/app/constants/`:
+All game data is stored as TypeScript constants in `src/app/constants/`:
 - `skill-categories.constants.ts` — 30 skills organized by 8 categories
 - `cult-ranks.constants.ts` — Cult status ranks
 - `fantasy-names.constants.ts` — Name generation
 - `character-colors.constants.ts` — Unique colors for character cards
+- `equipment.constants.ts` — Equipment and shield definitions
+- `monsters.constants.ts` — Monster stat blocks
+- `encounters.constants.ts` — Random encounter tables
+- `hit-location-templates.constants.ts` — Hit location templates per creature type
+- `terrain.constants.ts` — Wilderness map terrain types
+- `map-backgrounds.constants.ts` — Background images for maps
+- `runequest-publications.constants.ts` / `dragonbane-publications.constants.ts` — Publication reference lists
 
 ### Data Persistence & Migration
 
@@ -138,12 +154,22 @@ Color scheme is configurable per character (`character.color` property). Form ed
 
 ### Routing
 
-Standalone routes in `app.routes.ts`:
-- `/` — Character list
-- `/character/create` — Create new character
-- `/character/:id` — Edit character
+Game system is embedded in the URL prefix (`/runequest/...` or `/dragonbane/...`). Navigating to `/` redirects to the last used system (stored in `localStorage['gameSystem']`).
 
-Uses Angular Router's standalone APIs; no module-based routing.
+Key routes (repeated under both `runequest` and `dragonbane`):
+- `/:system/characters` — Character list
+- `/:system/create` — Create new character
+- `/:system/combat` — Combat tracker
+- `/:system/combat-map` — Hex tactical map
+- `/:system/wilderness-map` — Overworld hex map
+- `/:system/docs/rules` — Rules reference
+- `/:system/docs/publications` — Publications list
+- `/:system/docs/gm-screen` — GM screen
+- `/:system/bestiary` — Monster browser
+- `/:system/monster-creator` — Custom monster builder
+- `/:system/settings` — App settings
+
+Uses Angular Router's standalone APIs; no module-based routing. `GameSystemService.link()` builds route arrays prefixed with the current system.
 
 ## Key Implementation Details
 
@@ -166,19 +192,16 @@ Uses Angular Router's standalone APIs; no module-based routing.
 
 These formulas are game-system agnostic; `GameSystemService` allows Dragonbane variants to override labels/calculations if needed.
 
-### i18n & Multi-Language
-
-- `TranslationService` holds locale state (English/Swedish)
-- Components inject `TranslationService` and call `get(key, default)` for labels
-- Fall back to English if key not found in Swedish
-- Game system name (`getSystemName()`) also translatable
-
 ### Game System Switching
 
-`GameSystemService` provides:
-- `toggleGameSystem()` — Switch between "Runequest" and "Dragonbane"
-- `getSystemName()` — Returns localized system name
-- Used in app root for title and in form to show system-specific rules/fields
+`GameSystemService` (URL-based, Angular signals):
+- `gameSystem` — Signal containing `'runequest' | 'dragonbane'`; updated automatically on navigation
+- `switchSystem(system)` — Navigate to the equivalent page under the other system
+- `link(...segments)` — Build a `routerLink` array prefixed with the current system
+- `getSystemName()` — Returns `'RuneQuest'` or `'Dragonbane'`
+- `getCults()`, `getOccupations()`, `getHomelands()` — System-specific dropdown values
+- `getCultLabel()`, `getOccupationLabel()`, `getHomelandLabel()` — System-specific field labels
+- Used in app root, character form, and all navigation links
 
 ## Testing Notes
 
@@ -198,9 +221,9 @@ These formulas are game-system agnostic; `GameSystemService` allows Dragonbane v
 
 ### Adding a New Game System Variant
 
-1. Extend `GameSystemService` with game-system-specific logic
-2. Wrap calculations with `if (this.gameSystemService.isDragonbane())` where rules differ
-3. Update translation keys for system-specific labels
+1. Extend `GameSystemService` with system-specific data arrays and label getters
+2. Use `gameSystemService.gameSystem() === 'dragonbane'` where rules differ
+3. Add system-specific constants to the relevant constants file
 
 ### Component Communication
 
@@ -217,11 +240,8 @@ These formulas are game-system agnostic; `GameSystemService` allows Dragonbane v
 
 ## Notes for Future Work
 
-See README.md for the TODO section. Key upcoming features:
 - Movement in combat system
 - Improved UI theme, fonts, colors
-- Dragonbane-specific rules
-- Monster Builder page
+- Dragonbane-specific rules and stat differences
 - Advanced dice roller (modifiers, boon/bane with dual d20)
 - Editable character colors (no duplicates among first 5 characters)
-- Game system indicator per character (RQ vs DB)
