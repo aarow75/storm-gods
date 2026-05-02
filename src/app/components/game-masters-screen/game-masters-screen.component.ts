@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameSystemService } from '../../services/game-system.service';
 
@@ -9,9 +9,28 @@ import { GameSystemService } from '../../services/game-system.service';
   styleUrl: './game-masters-screen.component.css'
 })
 export class GameMastersScreenComponent {
+  isFullscreen = false;
+
   constructor(
-    public gameSystemService: GameSystemService
+    public gameSystemService: GameSystemService,
+    private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef
   ) {}
+
+  @HostListener('document:fullscreenchange')
+  onFullscreenChange() {
+    this.isFullscreen = !!document.fullscreenElement;
+    this.cdr.markForCheck();
+  }
+
+  toggleFullscreen() {
+    const el = this.elementRef.nativeElement.querySelector('.gm-screen');
+    if (!document.fullscreenElement) {
+      el.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
 
   strikeRankModifiers = [
     { siz: '22+', sizMod: 0, dex: '19+', dexMod: 0 },

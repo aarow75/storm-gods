@@ -22,7 +22,7 @@
 .page-header h2 {
   margin: 0;
   font-size: var(--font-size-2xl);
-  color: #3b82f6;
+  color: var(--docs-accent);
   font-weight: 700;
   letter-spacing: 0.5px;
   text-align: left;
@@ -30,7 +30,7 @@
 }
 
 .back-link {
-  color: #3b82f6;
+  color: var(--docs-accent);
   text-decoration: none;
   font-size: var(--font-size-base);
   transition: color 0.2s;
@@ -39,7 +39,7 @@
 }
 
 .back-link:hover {
-  color: #2563eb;
+  color: var(--docs-accent-dark);
   text-decoration: underline;
 }
 
@@ -55,7 +55,7 @@
   padding: var(--spacing-4xl);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 245, 0.95) 100%);
   border-radius: var(--border-radius-lg);
-  border-left: 6px solid #3b82f6;
+  border-left: 6px solid var(--docs-accent);
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
   transition: transform 0.2s, box-shadow 0.2s;
@@ -69,8 +69,8 @@
 .section h3 {
   margin: 0 0 var(--spacing-2xl) 0;
   font-size: var(--font-size-xl);
-  color: #3b82f6;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  color: var(--docs-accent);
+  border-bottom: 2px solid rgba(var(--docs-accent-rgb), 0.2);
   padding-bottom: var(--spacing-2xl);
   font-weight: 700;
 }
@@ -94,7 +94,7 @@
   grid-template-columns: 100px 2fr 45px 2fr;
   gap: var(--spacing-md);
   padding: var(--spacing-xl) var(--spacing-2xl);
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, var(--docs-accent-dark) 0%, var(--docs-accent-header) 100%);
   border-bottom: none;
   font-weight: 700;
   font-size: var(--font-size-xs);
@@ -124,7 +124,7 @@
 }
 
 .table-row:hover {
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: rgba(var(--docs-accent-rgb), 0.08);
 }
 
 .table-row:last-child {
@@ -181,8 +181,8 @@
 
 .stat-card {
   padding: var(--spacing-3xl);
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(219, 234, 254, 0.1) 100%);
-  border: 2px solid rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(var(--docs-accent-rgb), 0.1) 0%, rgba(var(--docs-accent-rgb), 0.05) 100%);
+  border: 2px solid rgba(var(--docs-accent-rgb), 0.3);
   border-radius: var(--border-radius-md);
   text-align: center;
   transition: all 0.2s ease;
@@ -190,14 +190,14 @@
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.7);
+  box-shadow: 0 8px 16px rgba(var(--docs-accent-rgb), 0.15);
+  border-color: rgba(var(--docs-accent-rgb), 0.7);
 }
 
 .stat-number {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--docs-accent);
   line-height: 1;
   margin-bottom: var(--spacing-md);
 }

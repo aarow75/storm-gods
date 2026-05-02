@@ -4,14 +4,28 @@
   flex-direction: column;
   background: var(--color-bg-light);
   transition: background-color 0.3s ease;
+
+  /* Docs page accent — defaults to blue, overridden per system */
+  --docs-accent: #3b82f6;
+  --docs-accent-rgb: 59, 130, 246;
+  --docs-accent-dark: #2563eb;
+  --docs-accent-header: #1d4ed8;
 }
 
 .app-container.runequest-theme {
   background: var(--color-bg-orange-light);
+  --docs-accent: #f59e0b;
+  --docs-accent-rgb: 245, 158, 11;
+  --docs-accent-dark: #d97706;
+  --docs-accent-header: #92400e;
 }
 
 .app-container.dragonbane-theme {
   background: var(--color-bg-green-light);
+  --docs-accent: #10b981;
+  --docs-accent-rgb: 16, 185, 129;
+  --docs-accent-dark: #059669;
+  --docs-accent-header: #047857;
 }
 
 header {

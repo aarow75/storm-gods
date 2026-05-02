@@ -32,10 +32,10 @@
 .toc-title {
   font-size: var(--font-size-lg);
   font-weight: 700;
-  color: #3b82f6;
+  color: var(--docs-accent);
   margin: 0 0 var(--spacing-2xl) 0;
   padding-bottom: var(--spacing-lg);
-  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 2px solid rgba(var(--docs-accent-rgb), 0.2);
 }
 
 .toc-list {
@@ -61,9 +61,9 @@
 }
 
 .toc-link:hover {
-  color: #3b82f6;
-  background-color: rgba(59, 130, 246, 0.05);
-  border-left-color: #3b82f6;
+  color: var(--docs-accent);
+  background-color: rgba(var(--docs-accent-rgb), 0.05);
+  border-left-color: var(--docs-accent);
 }
 
 .markdown-content {
@@ -76,12 +76,12 @@
 .markdown-content h4,
 .markdown-content h5,
 .markdown-content h6 {
-  color: #3b82f6;
+  color: var(--docs-accent);
   font-weight: 700;
   margin-top: var(--spacing-4xl);
   margin-bottom: var(--spacing-2xl);
   padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  border-bottom: 1px solid rgba(var(--docs-accent-rgb), 0.1);
 }
 
 .markdown-content h1 { font-size: var(--font-size-2xl); }
@@ -104,7 +104,7 @@
 }
 
 .markdown-content table thead {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--docs-accent) 0%, var(--docs-accent-dark) 100%);
 }
 
 .markdown-content table th {
@@ -129,7 +129,7 @@
 }
 
 .markdown-content table tbody tr:hover {
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: rgba(var(--docs-accent-rgb), 0.08);
 }
 
 .markdown-content ul,
@@ -146,16 +146,16 @@
 }
 
 .markdown-content code {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(var(--docs-accent-rgb), 0.1);
   padding: 2px 6px;
   border-radius: var(--border-radius-sm);
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: var(--font-size-md);
-  color: #3b82f6;
+  color: var(--docs-accent);
 }
 
 .markdown-content blockquote {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--docs-accent);
   padding-left: var(--spacing-2xl);
   margin: var(--spacing-2xl) 0;
   color: var(--color-text-secondary);
@@ -173,7 +173,7 @@
 }
 
 .markdown-content sup a {
-  color: #3b82f6;
+  color: var(--docs-accent);
   text-decoration: none;
 }
 
@@ -193,7 +193,7 @@
 
 .rules-reference h2 {
   text-align: left;
-  color: #3b82f6;
+  color: var(--docs-accent);
   margin-bottom: var(--spacing-6xl);
   border-bottom: 2px solid rgba(0, 0, 0, 0.08);
   padding-bottom: var(--spacing-3xl);
@@ -209,11 +209,53 @@
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-5xl);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.fullscreen-btn {
+  position: absolute;
+  top: var(--spacing-3xl);
+  right: var(--spacing-3xl);
+  background: var(--color-bg-light);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-md);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-600);
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+}
+
+.fullscreen-btn:hover {
+  background: var(--color-gray-200);
+  color: var(--color-text-primary);
+}
+
+/* Fullscreen layout: content fills the element, no max-width cap */
+.rules-reference:fullscreen {
+  padding: var(--spacing-5xl);
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  overflow-y: auto;
+  max-width: none;
+}
+
+.rules-reference:fullscreen .rules-layout {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.rules-reference:fullscreen .reference-container {
+  border-radius: var(--border-radius-lg);
 }
 
 .reference-section {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 245, 245, 0.95) 100%);
-  border-left: 6px solid #3b82f6;
+  border-left: 6px solid var(--docs-accent);
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-4xl);
@@ -227,13 +269,13 @@
 }
 
 .reference-section h3 {
-  color: #3b82f6;
+  color: var(--docs-accent);
   font-size: var(--font-size-xl);
   font-weight: 700;
   margin-top: 0;
   margin-bottom: var(--spacing-2xl);
   padding-bottom: var(--spacing-2xl);
-  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 2px solid rgba(var(--docs-accent-rgb), 0.2);
 }
 
 .reference-section h4 {
@@ -259,7 +301,7 @@
 }
 
 .reference-table thead {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--docs-accent) 0%, var(--docs-accent-dark) 100%);
 }
 
 .reference-table th {
@@ -285,7 +327,7 @@
 }
 
 .reference-table tbody tr:hover {
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: rgba(var(--docs-accent-rgb), 0.08);
 }
 
 .mechanics-summary {
@@ -297,13 +339,13 @@
 .mechanic-item {
   padding: var(--spacing-2xl);
   background: linear-gradient(135deg, rgba(219, 234, 254, 0.4) 0%, rgba(240, 253, 250, 0.4) 100%);
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--docs-accent);
   border-radius: var(--border-radius-md);
-  border: 1px solid rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(var(--docs-accent-rgb), 0.1);
 }
 
 .mechanic-item h4 {
-  color: #3b82f6;
+  color: var(--docs-accent);
   margin-top: 0;
   font-weight: 700;
 }
@@ -337,12 +379,12 @@
 ::ng-deep .reference-container h4,
 ::ng-deep .reference-container h5,
 ::ng-deep .reference-container h6 {
-  color: #3b82f6;
+  color: var(--docs-accent);
   font-weight: 700;
   margin-top: var(--spacing-4xl);
   margin-bottom: var(--spacing-2xl);
   padding-bottom: var(--spacing-lg);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  border-bottom: 1px solid rgba(var(--docs-accent-rgb), 0.1);
 }
 
 ::ng-deep .reference-container h1 { font-size: var(--font-size-2xl); }
@@ -365,7 +407,7 @@
 }
 
 ::ng-deep .reference-container table thead {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--docs-accent) 0%, var(--docs-accent-dark) 100%);
 }
 
 ::ng-deep .reference-container table th {
@@ -390,7 +432,7 @@
 }
 
 ::ng-deep .reference-container table tbody tr:hover {
-  background-color: rgba(59, 130, 246, 0.08);
+  background-color: rgba(var(--docs-accent-rgb), 0.08);
 }
 
 ::ng-deep .reference-container ul,
@@ -407,16 +449,16 @@
 }
 
 ::ng-deep .reference-container code {
-  background: rgba(59, 130, 246, 0.1);
+  background: rgba(var(--docs-accent-rgb), 0.1);
   padding: 2px 6px;
   border-radius: var(--border-radius-sm);
   font-family: 'Monaco', 'Menlo', monospace;
   font-size: var(--font-size-md);
-  color: #3b82f6;
+  color: var(--docs-accent);
 }
 
 ::ng-deep .reference-container blockquote {
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid var(--docs-accent);
   padding-left: var(--spacing-2xl);
   margin: var(--spacing-2xl) 0;
   color: var(--color-text-secondary);

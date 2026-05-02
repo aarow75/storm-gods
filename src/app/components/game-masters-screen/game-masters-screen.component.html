@@ -1,4 +1,11 @@
 <div class="gm-screen">
+  <button
+    class="fullscreen-btn"
+    (click)="toggleFullscreen()"
+    [title]="isFullscreen ? 'Exit full screen' : 'Full screen'"
+    [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'">
+    {{ isFullscreen ? '✕' : '⛶' }}
+  </button>
   <h2>{{ gameSystemService.getSystemName() }} Game Master's Screen</h2>
 
   <!-- Conditions Table -->

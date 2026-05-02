@@ -23,6 +23,19 @@
   </div>
 
   <div class="settings-section">
+    <h2>Data</h2>
+    <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
+      Export your wilderness map terrain data as a JSON file
+    </p>
+    <div class="button-group">
+      <button (click)="exportCharacters()" class="export-btn">Export Characters</button>
+      <button (click)="exportCombatLog()" class="export-btn">Export Combat Log</button>
+      <button (click)="exportCustomMonsters()" class="export-btn">Export Custom Monsters</button>
+      <button (click)="exportTerrainData()" class="export-btn">Export Terrain Data</button>
+    </div>
+  </div>
+
+  <div class="settings-section">
     <h2>Text Size</h2>
     <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
       Adjust the text size for better readability

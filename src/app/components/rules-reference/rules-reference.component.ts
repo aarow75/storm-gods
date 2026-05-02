@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -21,6 +21,7 @@ export class RulesReferenceComponent implements OnInit, OnDestroy {
   toc: TocItem[] = [];
   isLoading = true;
   error: string | null = null;
+  isFullscreen = false;
 
   private destroy$ = new Subject<void>();
 
@@ -30,8 +31,24 @@ export class RulesReferenceComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private gameSystem: GameSystemService
+    private gameSystem: GameSystemService,
+    private elementRef: ElementRef
   ) {}
+
+  @HostListener('document:fullscreenchange')
+  onFullscreenChange() {
+    this.isFullscreen = !!document.fullscreenElement;
+    this.cdr.markForCheck();
+  }
+
+  toggleFullscreen() {
+    const el = this.elementRef.nativeElement.querySelector('.rules-reference');
+    if (!document.fullscreenElement) {
+      el.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
 
   ngOnInit() {
     this.route.queryParams

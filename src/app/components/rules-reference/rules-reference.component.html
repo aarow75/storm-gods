@@ -1,7 +1,7 @@
 <div class="rules-reference">
   <div class="rules-layout">
     <!-- TOC Sidebar -->
-    @if (!isLoading && toc.length > 0) {
+    @if (!isFullscreen && !isLoading && toc.length > 0) {
       <aside class="toc-sidebar">
         <nav class="toc-nav">
           <h3 class="toc-title">Table of Contents</h3>
@@ -21,6 +21,13 @@
     <!-- Main Content -->
     @if (!isLoading && !error) {
       <main class="reference-container">
+        <button
+          class="fullscreen-btn"
+          (click)="toggleFullscreen()"
+          [title]="isFullscreen ? 'Exit full screen' : 'Full screen'"
+          [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'">
+          {{ isFullscreen ? '✕' : '⛶' }}
+        </button>
         <div [innerHTML]="html" class="markdown-content"></div>
       </main>
     }

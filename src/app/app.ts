@@ -46,6 +46,6 @@ export class App implements OnInit {
 
   private updateTitle(): void {
     const systemName = this.gameSystemService.getSystemName();
-    this.titleService.setTitle(`${systemName} Character Generator`);
+    this.titleService.setTitle(`${systemName}`);
   }
 }

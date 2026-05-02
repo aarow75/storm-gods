@@ -89,6 +89,24 @@ h1 {
   max-width: 120px;
 }
 
+.export-btn {
+  font-family: inherit;
+  padding: var(--spacing-2xl) var(--spacing-4xl);
+  background-color: var(--color-bg-light);
+  color: var(--color-gray-600);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+}
+
+.export-btn:hover {
+  background-color: var(--color-gray-200);
+  transform: translateY(-2px);
+}
+
 .button-group button:active {
   transform: translateY(0);
 }
