@@ -24,6 +24,8 @@
     "@capacitor/angular": "^2.0.3",
     "@capacitor/cli": "^7.6.2",
     "@capacitor/core": "^8.3.1",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
     "markdown-it": "^14.1.1",
     "markdown-it-anchor": "^9.2.0",
     "markdown-it-footnote": "^4.0.0",
