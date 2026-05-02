@@ -7,9 +7,9 @@
           <span>Rules Reference</span>
           <span class="toggle-icon" [class.expanded]="isExpandedRules">▼</span>
         </button>
-        @if (isExpandedRules && rulesDocuments.length > 0) {
+        @if (isExpandedRules && rulesDocuments().length > 0) {
           <ul class="docs-nav-submenu">
-            @for (doc of rulesDocuments; track doc.filename) {
+            @for (doc of rulesDocuments(); track doc.filename) {
               <li>
                 <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename }"
                    routerLinkActive="active" class="docs-nav-sublink">
