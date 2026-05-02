@@ -1,11 +1,33 @@
-# RuneQuest Character Form - Component Structure
+# RuneQuest Character Manager - Component Structure
 
-## Component Hierarchy
+## Application Routes
+
+Game system (`runequest` or `dragonbane`) is part of the URL. Navigating to `/` redirects to the last used system.
+
+| Path | Component |
+|------|-----------|
+| `/:system/characters` | CharacterListComponent |
+| `/:system/create` | CharacterFormComponent |
+| `/:system/combat` | CombatTrackerComponent |
+| `/:system/combat-map` | CombatMapComponent |
+| `/:system/wilderness-map` | WildernessMapComponent |
+| `/:system/docs/rules` | RulesReferenceComponent (inside DocsComponent) |
+| `/:system/docs/publications` | PublicationsComponent (inside DocsComponent) |
+| `/:system/docs/gm-screen` | GameMastersScreenComponent (inside DocsComponent) |
+| `/:system/bestiary` | BestiaryComponent |
+| `/:system/monster-creator` | MonsterCreatorComponent |
+| `/:system/settings` | SettingsComponent |
+
+## Character Form Component Hierarchy
 
 ```
-character-form (Main Container)
+character-form (Main Container — 407 HTML / 732 TS lines)
 │
 ├── Character Name (inline in main form)
+│
+├── character-characteristics
+│   ├── STR, CON, SIZ, DEX, INT, POW, CHA (each with dice roller)
+│   └── Roll All Stats button
 │
 ├── character-background
 │   ├── Cult/Religion (dropdown with validation)
@@ -14,85 +36,80 @@ character-form (Main Container)
 │   ├── Age (number input)
 │   └── Gender (text input)
 │
-├── character-family-history
-│   ├── Grandfather (text input)
-│   ├── Grandmother (text input)
-│   ├── Father (text input)
-│   ├── Mother (text input)
-│   └── Family Events (dynamic list)
-│
-├── character-characteristics
-│   ├── STR (with dice roller)
-│   ├── CON (with dice roller)
-│   ├── SIZ (with dice roller)
-│   ├── DEX (with dice roller)
-│   ├── INT (with dice roller)
-│   ├── POW (with dice roller)
-│   ├── CHA (with dice roller)
-│   └── Roll All Stats button
-│
 ├── character-skills
-│   ├── Combat Skills category
-│   ├── Magic Skills category
-│   ├── Knowledge Skills category
-│   ├── Communication Skills category
-│   ├── Manipulation Skills category
-│   ├── Perception Skills category
-│   ├── Stealth Skills category
-│   ├── Agility Skills category
+│   ├── Combat, Magic, Knowledge, Communication, Manipulation,
+│   │   Perception, Stealth, Agility categories
 │   └── Apply Bonuses button
 │
 ├── character-derived-stats
-│   ├── Total Hit Points (readonly)
-│   ├── Magic Points (readonly)
-│   ├── Damage Bonus (readonly)
-│   ├── Healing Rate (readonly)
-│   └── Calculate button
+│   ├── Total Hit Points, Magic Points, Damage Bonus,
+│   │   Healing Rate, Strike Rank, Encumbrance (all readonly)
+│   └── Calculate from Stats button
 │
-├── character-hit-locations (placeholder)
-│   └── Hit location HP by body part
+├── character-hit-locations
+│   └── HP per body location
 │
-├── character-armor (placeholder)
-│   └── Armor points by location
+├── character-armor
+│   └── Armor points per location
 │
-├── character-weapons (placeholder)
+├── character-shields
+│   └── Shield list with add/remove
+│
+├── character-weapons
 │   └── Weapons list with add/remove
 │
-├── character-runes (placeholder)
+├── character-runes
 │   ├── Elemental Runes
 │   ├── Power Runes
 │   └── Form Runes
 │
-├── character-cult-status (placeholder)
-│   ├── Cult Name
-│   ├── Rank
+├── character-cult-status
+│   ├── Cult Name, Rank
 │   └── Rune Spells
 │
-├── character-passions (placeholder)
+├── character-passions
 │   └── Passions list with add/remove
 │
-├── character-magic (placeholder)
+├── character-magic
 │   ├── Spirit Magic
 │   ├── Rune Magic
 │   └── Sorcery
 │
-├── character-resources (placeholder)
-│   ├── Lunars
-│   ├── Wheels
-│   ├── Clacks
-│   ├── Reputation
-│   └── Ransom
+├── character-resources
+│   └── Lunars, Wheels, Clacks, Reputation, Ransom
 │
-├── character-equipment (placeholder)
+├── character-equipment
 │   └── Equipment list with add/remove
 │
-├── character-notes (placeholder)
+├── character-notes
 │   └── Notes textarea
+│
+├── character-conditions
+│   └── Active conditions/status effects
 │
 └── Form Actions (inline in main form)
     ├── Save/Update button
     └── Cancel button (edit mode only)
 ```
+
+**Note**: `character-family-history` exists as a component but is not currently used in the character form.
+
+## Other Page Components
+
+| Component | Purpose |
+|-----------|---------|
+| `character-list` | Grid of character cards; CRUD entry point |
+| `combat-tracker` | Initiative tracking, participants, combat rounds |
+| `combat-map` | Hex-grid tactical combat map |
+| `wilderness-map` | Overworld hex map with terrain and encounters |
+| `bestiary` | Monster reference browser |
+| `monster-creator` | Custom monster builder |
+| `docs` | Shell component with sub-route navigation |
+| `rules-reference` | In-app game rules viewer |
+| `publications` | Game publication reference lists |
+| `game-masters-screen` | GM quick-reference screen |
+| `settings` | App settings (game system, preferences) |
+| `dice-roller` | Global overlay component (managed by app root) |
 
 ## Data Flow
 
@@ -114,142 +131,90 @@ child-component.html
     character-form.component.ts
 ```
 
-## Component Status Legend
+## Component Communication Examples
 
-### ✅ Fully Implemented
-- **character-background**: Complete with validation and success styling
-- **character-family-history**: Complete with add/remove events
-- **character-characteristics**: Complete with dice rolling integration
-- **character-skills**: Complete with category organization
-- **character-derived-stats**: Complete with basic UI
-
-### 🔨 Placeholder Components
-- character-hit-locations
-- character-armor
-- character-weapons
-- character-runes
-- character-cult-status
-- character-passions
-- character-magic
-- character-resources
-- character-equipment
-- character-notes
-
-*Placeholder components have structure and typing but need full HTML/logic implementation*
-
-## Component Communication
-
-### Example 1: Background Component
-**Parent → Child (Input)**
+### Background Component
+**Input**
 ```typescript
 [background]="character.background!"
 [cults]="cults"
 [isFieldInvalid]="isFieldInvalid.bind(this)"
 ```
-
-**Child → Parent (Output)**
+**Output**
 ```typescript
 (cultChange)="onCultChange()"
 ```
 
-### Example 2: Characteristics Component
-**Parent → Child (Input)**
+### Characteristics Component
+**Input**
 ```typescript
 [stats]="character.stats!"
 [isFieldRandomized]="isFieldRandomized.bind(this)"
 ```
-
-**Child → Parent (Output)**
+**Output**
 ```typescript
 (rollAll)="rollAll3D6()"
 (rollStat)="roll3D6($event)"
 ```
 
-### Example 3: Family History Component
-**Parent → Child (Input)**
-```typescript
-[familyHistory]="character.familyHistory!"
-```
-
-**Child → Parent (Output)**
-```typescript
-(addEvent)="addFamilyEvent()"
-(removeEvent)="removeFamilyEvent($event)"
-```
-
 ## File Organization
 
 ```
-src/app/components/
-├── character-form/
-│   ├── character-form.component.ts (main controller)
-│   ├── character-form.component.html (template - to be updated)
-│   ├── character-form.component.css (shared styles)
-│   └── character-form-with-components-EXAMPLE.html (reference)
+src/app/
+├── app.ts                          — Root; nav, dice roller overlay, game-system switching
+├── app.routes.ts                   — Route definitions
+├── app.config.ts                   — Angular providers
 │
-├── character-background/
-│   ├── character-background.ts
-│   ├── character-background.html
-│   └── character-background.css
+├── components/
+│   ├── character-form/             — Main character editor (732 TS / 407 HTML lines)
+│   ├── character-list/             — Character card grid
+│   ├── character-background/       — Background fields sub-component
+│   ├── character-characteristics/  — Stats with dice rolling
+│   ├── character-skills/           — Skills by category
+│   ├── character-derived-stats/    — Calculated stats display
+│   ├── character-hit-locations/    — HP per body location
+│   ├── character-armor/            — Armor by location
+│   ├── character-shields/          — Shield list
+│   ├── character-weapons/          — Weapon list
+│   ├── character-runes/            — Elemental/Power/Form runes
+│   ├── character-cult-status/      — Cult rank and rune spells
+│   ├── character-passions/         — Passions list
+│   ├── character-magic/            — Spirit/Rune/Sorcery magic
+│   ├── character-resources/        — Currency and reputation
+│   ├── character-equipment/        — Equipment list
+│   ├── character-notes/            — Notes textarea
+│   ├── character-conditions/       — Active conditions
+│   ├── character-family-history/   — Family tree (unused in form)
+│   ├── combat-tracker/             — Combat initiative/round tracker
+│   ├── combat-map/                 — Hex tactical map
+│   ├── wilderness-map/             — Overworld hex map
+│   ├── bestiary/                   — Monster browser
+│   ├── monster-creator/            — Custom monster builder
+│   ├── docs/                       — Docs shell (sub-routes)
+│   ├── rules-reference/            — Rules viewer
+│   ├── publications/               — Publications list
+│   ├── game-masters-screen/        — GM reference screen
+│   ├── settings/                   — App settings
+│   └── dice-roller/                — Global dice overlay
 │
-├── character-family-history/
-│   ├── character-family-history.ts
-│   ├── character-family-history.html
-│   └── character-family-history.css
+├── services/
+│   ├── character.service.ts        — CRUD + localStorage persistence
+│   ├── character-update.service.ts — Reactive character updates
+│   ├── combat.service.ts           — Combat mechanics
+│   ├── combat-log.service.ts       — Combat event log
+│   ├── custom-monster.service.ts   — Custom monster persistence
+│   ├── dice.service.ts             — Dice roll logic
+│   ├── game-system.service.ts      — Runequest/Dragonbane switching
+│   ├── markdown.service.ts         — Markdown rendering for docs
+│   ├── ui-state.service.ts         — Shared UI state
+│   └── wilderness-map.service.ts   — Wilderness map state
 │
-├── character-characteristics/
-│   ├── character-characteristics.ts
-│   ├── character-characteristics.html
-│   └── character-characteristics.css
+├── models/
+│   ├── character.model.ts          — Character interface + defaults + calculations
+│   ├── combat.model.ts             — Combat types
+│   ├── monster.model.ts            — Monster types
+│   └── wilderness-map.model.ts     — Map types
 │
-├── character-skills/
-│   ├── character-skills.ts
-│   ├── character-skills.html
-│   └── character-skills.css
-│
-└── [10 more component folders...]
+├── constants/                      — Game data (skills, cults, equipment, monsters, etc.)
+└── utils/                          — Pure utilities (damage-parser, hex-pathfinding)
 ```
-
-## Integration Checklist
-
-To fully integrate these components into the main form:
-
-- [ ] Update `character-form.component.html` to use component tags
-- [ ] Remove old inline HTML sections
-- [ ] Test all @Input bindings work correctly
-- [ ] Test all @Output events fire properly
-- [ ] Verify two-way data binding with [(ngModel)]
-- [ ] Test validation styling flows to child components
-- [ ] Test success styling flows to child components
-- [ ] Verify dice rolling functionality
-- [ ] Test form save/update with new structure
-- [ ] Test edit mode with components
-- [ ] Complete placeholder component implementations
-- [ ] Add component-specific CSS as needed
-- [ ] Write unit tests for each component
-
-## Advantages of This Structure
-
-1. **Modularity**: Each component is self-contained
-2. **Reusability**: Components can be used in other forms
-3. **Maintainability**: Smaller files are easier to work with
-4. **Testability**: Components can be tested in isolation
-5. **Performance**: Can add OnPush change detection per component
-6. **Clarity**: Clear separation of concerns
-7. **Scalability**: Easy to add new sections as components
-8. **Team Development**: Multiple developers can work on different components
-
-## Original vs Refactored Size
-
-### Before:
-- **character-form.component.html**: ~800 lines
-- **character-form.component.ts**: ~610 lines
-- **Total**: ~1,410 lines in 2 files
-
-### After (when fully implemented):
-- **character-form.component.html**: ~200 lines (projected)
-- **character-form.component.ts**: ~610 lines (unchanged)
-- **15 child components**: ~150 lines each × 15 = ~2,250 lines
-- **Total**: ~3,060 lines in 47 files
-
-**Note**: While total lines increase, code is now properly organized and maintainable!
