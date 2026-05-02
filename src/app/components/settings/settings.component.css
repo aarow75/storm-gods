@@ -89,6 +89,31 @@ h1 {
   max-width: 120px;
 }
 
+.toggle-btn {
+  font-family: inherit;
+  padding: var(--spacing-2xl) var(--spacing-4xl);
+  background-color: var(--color-bg-light);
+  color: var(--color-gray-600);
+  border: 2px solid transparent;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: var(--font-size-lg);
+  font-weight: 500;
+  min-width: 160px;
+}
+
+.toggle-btn:hover:not(.active) {
+  background-color: var(--color-gray-200);
+  transform: translateY(-2px);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, var(--color-primary-blue) 0%, var(--color-primary-blue-dark, #1d4ed8) 100%);
+  color: var(--color-bg-white);
+  box-shadow: 0 4px 12px var(--color-primary-blue-40);
+}
+
 .export-btn {
   font-family: inherit;
   padding: var(--spacing-2xl) var(--spacing-4xl);

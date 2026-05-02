@@ -3,6 +3,7 @@ import { Injectable, signal } from '@angular/core';
 interface UIState {
   fontSize: number; // 12-18, relative to base 14px
   collapsedSections: Record<string, boolean>; // sectionId -> isCollapsed
+  use2d6Plus6: boolean;
 }
 
 @Injectable({
@@ -16,6 +17,7 @@ export class UIStateService {
 
   fontSize = signal(this.DEFAULT_FONT_SIZE);
   collapsedSections = signal<Record<string, boolean>>({});
+  use2d6Plus6 = signal(false);
 
   constructor() {
     this.loadState();
@@ -28,6 +30,7 @@ export class UIStateService {
         const state: UIState = JSON.parse(stored);
         this.fontSize.set(Math.max(this.MIN_FONT_SIZE, Math.min(this.MAX_FONT_SIZE, state.fontSize)));
         this.collapsedSections.set(state.collapsedSections || {});
+        this.use2d6Plus6.set(state.use2d6Plus6 ?? false);
       }
       this.applyFontSize();
     } catch (e) {
@@ -39,7 +42,8 @@ export class UIStateService {
     try {
       const state: UIState = {
         fontSize: this.fontSize(),
-        collapsedSections: this.collapsedSections()
+        collapsedSections: this.collapsedSections(),
+        use2d6Plus6: this.use2d6Plus6()
       };
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
@@ -80,5 +84,10 @@ export class UIStateService {
 
   isSectionCollapsed(sectionId: string): boolean {
     return this.collapsedSections()[sectionId] ?? false;
+  }
+
+  toggle2d6Plus6(): void {
+    this.use2d6Plus6.update(v => !v);
+    this.saveState();
   }
 }

@@ -242,7 +242,7 @@ export class CharacterFormComponent implements OnInit {
 
   roll3D6(stat: keyof CharacterStats): void {
     if (this.character.stats) {
-      this.character.stats[stat] = this.diceService.roll3D6();
+      this.character.stats[stat] = this.diceService.roll3D6Configured();
       this.randomizedFields.add(stat.toLowerCase());
     }
   }
@@ -255,13 +255,13 @@ export class CharacterFormComponent implements OnInit {
 
   rollAll3D6(): void {
     if (this.character.stats) {
-      this.character.stats.STR = this.diceService.roll3D6();
-      this.character.stats.CON = this.diceService.roll3D6();
-      this.character.stats.SIZ = this.diceService.roll3D6();
-      this.character.stats.DEX = this.diceService.roll3D6();
-      this.character.stats.INT = this.diceService.roll3D6();
-      this.character.stats.POW = this.diceService.roll3D6();
-      this.character.stats.CHA = this.diceService.roll3D6();
+      this.character.stats.STR = this.diceService.roll3D6Configured();
+      this.character.stats.CON = this.diceService.roll3D6Configured();
+      this.character.stats.SIZ = this.diceService.roll3D6Configured();
+      this.character.stats.DEX = this.diceService.roll3D6Configured();
+      this.character.stats.INT = this.diceService.roll3D6Configured();
+      this.character.stats.POW = this.diceService.roll3D6Configured();
+      this.character.stats.CHA = this.diceService.roll3D6Configured();
       this.calculateDerivedValues();
 
       // Mark all stats as randomized

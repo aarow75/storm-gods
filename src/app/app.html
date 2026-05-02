@@ -5,6 +5,9 @@
         <h1><img src="{{ gameSystemService.getSystemName() }}-logo.png"></h1>
       </div>
       <div class="header-right">
+        <button class="btn-dice-roller" (click)="toggleDiceModal()" [class.active]="diceModalOpen()" title="Dice Roller">
+          <span class="dice-icon">🎲</span>
+        </button>
         <a [routerLink]="gameSystemService.link('settings')" class="settings-link" title="Settings">
           <span class="settings-icon">⚙️</span>
         </a>
@@ -36,9 +39,17 @@
   </nav>
 
   <main>
-    @if (showDiceRoller()) {
-      <app-dice-roller></app-dice-roller>
-    }
     <router-outlet></router-outlet>
   </main>
+
+  @if (diceModalOpen()) {
+  <div class="dice-modal-backdrop" (click)="closeDiceModal()"></div>
+  <div class="dice-modal" role="dialog" aria-label="Dice Roller">
+    <div class="dice-modal-header">
+      <span class="dice-modal-title">Dice Roller</span>
+      <button class="dice-modal-close" (click)="closeDiceModal()" aria-label="Close">×</button>
+    </div>
+    <app-dice-roller [modal]="true"></app-dice-roller>
+  </div>
+  }
 </div>

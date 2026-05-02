@@ -1,11 +1,10 @@
 import { Component, OnInit, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { DiceRollerComponent } from './components/dice-roller/dice-roller.component';
 import { GameSystemService } from './services/game-system.service';
 import { UIStateService } from './services/ui-state.service';
-import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
@@ -14,13 +13,12 @@ import { filter } from 'rxjs/operators';
   styleUrl: './app.css'
 })
 export class App implements OnInit {
-  showDiceRoller = signal(true);
+  diceModalOpen = signal(false);
 
   constructor(
     public gameSystemService: GameSystemService,
     public uiStateService: UIStateService,
-    private titleService: Title,
-    private router: Router
+    private titleService: Title
   ) {
     effect(() => {
       this.updateTitle();
@@ -29,19 +27,14 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.updateTitle();
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.updateDiceRollerVisibility(event.urlAfterRedirects);
-      });
-    // Check initial route
-    this.updateDiceRollerVisibility(this.router.url);
   }
 
-  private updateDiceRollerVisibility(url: string): void {
-    const path = url.replace(/^\/(runequest|dragonbane)/, '');
-    const hideDiceRollerRoutes = ['/characters', '/settings', '/bestiary', '/docs', '/combat-map', '/wilderness-map'];
-    this.showDiceRoller.set(!hideDiceRollerRoutes.some(route => path.startsWith(route)));
+  toggleDiceModal(): void {
+    this.diceModalOpen.update(open => !open);
+  }
+
+  closeDiceModal(): void {
+    this.diceModalOpen.set(false);
   }
 
   private updateTitle(): void {

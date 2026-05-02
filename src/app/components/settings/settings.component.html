@@ -36,6 +36,21 @@
   </div>
 
   <div class="settings-section">
+    <h2>Dice Rolling</h2>
+    <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
+      Roll 2d6+6 instead of 3d6 for stat generation (range 8–18 instead of 3–18)
+    </p>
+    <div class="button-group">
+      <button
+        (click)="toggle2d6Plus6()"
+        [class.active]="uiStateService.use2d6Plus6()"
+        class="toggle-btn">
+        {{ uiStateService.use2d6Plus6() ? '2d6+6 (on)' : '3d6 (default)' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="settings-section">
     <h2>Text Size</h2>
     <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
       Adjust the text size for better readability

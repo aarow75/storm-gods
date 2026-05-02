@@ -67,6 +67,90 @@ header {
   flex-wrap: wrap;
 }
 
+.btn-dice-roller {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--border-radius-md);
+  color: var(--color-text-primary);
+  background: var(--color-bg-light);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-dice-roller:hover {
+  background: var(--color-gray-200);
+  transform: scale(1.1);
+}
+
+.btn-dice-roller.active {
+  background: var(--color-gray-200);
+}
+
+.dice-icon {
+  font-size: var(--font-size-2xl);
+}
+
+/* Dice Roller Modal */
+.dice-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--shadow-black-50);
+  z-index: 1000;
+}
+
+.dice-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  width: min(90vw, 680px);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px var(--shadow-black-50);
+}
+
+.dice-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-4xl) var(--spacing-5xl);
+  background: var(--color-bg-white);
+  border-radius: 12px 12px 0 0;
+  border-bottom: 2px solid var(--color-red-burnt);
+}
+
+.dice-modal-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.dice-modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-light);
+  border: none;
+  border-radius: 50%;
+  font-size: var(--font-size-2xl);
+  cursor: pointer;
+  color: var(--color-text-primary);
+  line-height: 1;
+  transition: background 0.2s ease;
+}
+
+.dice-modal-close:hover {
+  background: var(--color-gray-200);
+}
+
 .settings-link {
   display: flex;
   align-items: center;

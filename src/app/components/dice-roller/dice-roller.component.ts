@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DiceService } from '../../services/dice.service';
@@ -19,6 +19,8 @@ interface RollResult {
   styleUrl: './dice-roller.component.css'
 })
 export class DiceRollerComponent {
+  @Input() modal = false;
+
   rollHistory: RollResult[] = [];
   currentResult: number | null = null;
   currentType: string = '';
@@ -78,8 +80,8 @@ export class DiceRollerComponent {
   }
 
   roll3D6(): void {
-    const result = this.diceService.roll3D6();
-    this.addRoll('3d6', result);
+    const result = this.diceService.roll3D6Configured();
+    this.addRoll(this.uiStateService.use2d6Plus6() ? '2d6+6' : '3d6', result);
   }
 
   rollPercentile(): void {

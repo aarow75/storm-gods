@@ -48,6 +48,33 @@
         <span class="dead-badge">DEAD</span>
         }
       </div>
+      <div class="derived-stats">
+        <div class="derived-stat">
+          <span class="derived-label">Dmg Bonus</span>
+          <span class="derived-value">{{ character.derivedStats.damageBonus || '0' }}</span>
+        </div>
+        <div class="derived-stat">
+          <span class="derived-label">Strike Rank</span>
+          <span class="derived-value">{{ character.derivedStats.strikeRank }}</span>
+        </div>
+        <div class="derived-stat">
+          <span class="derived-label">Magic Points</span>
+          <span class="derived-value">{{ character.derivedStats.magicPoints }}</span>
+        </div>
+        <div class="derived-stat">
+          <span class="derived-label">Healing Rate</span>
+          <span class="derived-value">{{ character.derivedStats.healingRate }}</span>
+        </div>
+        <div class="derived-stat">
+          <span class="derived-label">Movement</span>
+          <span class="derived-value">{{ character.derivedStats.movementRate }}</span>
+        </div>
+        <div class="derived-stat">
+          <span class="derived-label">ENC</span>
+          <span class="derived-value">{{ character.derivedStats.maxEncumbrance }}</span>
+        </div>
+      </div>
+
       <div class="characteristics-and-hit-locations-container">
         <div class="characteristics-container">
           <h4>Characteristics</h4>

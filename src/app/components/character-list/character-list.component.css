@@ -313,6 +313,38 @@ h2 {
   font-size: var(--font-size-base);
 }
 
+.derived-stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-4xl);
+}
+
+.derived-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-lg) var(--spacing-sm);
+  background: var(--color-bg-lighter);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+}
+
+.derived-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.derived-value {
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+  color: var(--color-text-primary);
+}
+
 .characteristics-and-hit-locations-container {
   display: grid;
   grid-template-areas: 'characteristics hitLocations';

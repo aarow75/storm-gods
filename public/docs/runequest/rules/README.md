@@ -1,6 +1,6 @@
 # RuneQuest Rules Documentation
 
-This documentation is organized according to the RQ2 #4001 Rulebook (1978-79) Table of Contents. It serves as the authoritative reference for rules implementation in the character-creator app.
+This documentation is organized according to the RQ2 #4001 Rulebook (1978-79) Table of Contents. It serves as the authoritative reference for rules implementation in the storm-gods app.
 
 **Source**: Rules extracted from [RuneQuest Wiki (rqwiki.chaosium.com)](https://rqwiki.chaosium.com/) - the official RuneQuest rules reference.
 
@@ -15,19 +15,6 @@ This documentation is organized according to the RQ2 #4001 Rulebook (1978-79) Ta
 - **VII-rune-magic.md** — Rune magic and cults
 - **VIII-monsters.md** — Creature statistics and hit locations
 - **IX-treasure.md** — Equipment, treasure, and special items
-
-## Status
-
-- [x] Folder structure created
-- [x] Section II: Character Creation (completed — 1,300+ lines)
-- [x] Section III: Mechanics and Melee (completed — 700+ lines)
-- [x] Section IV: Combat Skills (completed — 800+ lines)
-- [x] Section V: Basic Magic (completed — 500+ lines)
-- [x] Section VI: Other Skills (completed — 900+ lines)
-- [x] Section VII: Rune Magic (completed — 1,000+ lines)
-- [x] Section VIII: Monsters (completed — 900+ lines)
-- [x] Section IX: Treasure (completed — 700+ lines)
-- [x] Section X: Appendices (completed — 800+ lines)
 
 ## Notes
 

@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
+import { UIStateService } from './ui-state.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DiceService {
+  constructor(private uiStateService: UIStateService) {}
+
   rollD4(): number {
     return this.rollDice(1, 4);
   }
@@ -29,6 +32,13 @@ export class DiceService {
   }
 
   roll3D6(): number {
+    return this.rollDice(3, 6);
+  }
+
+  roll3D6Configured(): number {
+    if (this.uiStateService.use2d6Plus6()) {
+      return this.rollDice(2, 6) + 6;
+    }
     return this.rollDice(3, 6);
   }
 

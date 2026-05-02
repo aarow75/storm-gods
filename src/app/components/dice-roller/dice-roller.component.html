@@ -1,4 +1,5 @@
-<div class="dice-roller">
+<div class="dice-roller" [class.modal-mode]="modal">
+  @if (!modal) {
   <div class="dice-roller-header">
     @if (heading) {
     <h2>{{ heading }}</h2>
@@ -7,8 +8,9 @@
       <span class="collapse-icon">{{ isCollapsed ? '▶' : '▼' }}</span>
     </button>
   </div>
+  }
 
-  @if (!isCollapsed) {
+  @if (modal || !isCollapsed) {
   <div class="roller-container">
     <div class="dice-controls">
       <button class="btn-roll dice-d4" (click)="rollD4()">d4</button>
@@ -17,7 +19,7 @@
       <button class="btn-roll dice-d10" (click)="rollD10()">d10</button>
       <button class="btn-roll dice-d12" (click)="rollD12()">d12</button>
       <button class="btn-roll dice-d20" (click)="rollD20()">d20</button>
-      <button class="btn-roll dice-3d6" (click)="roll3D6()">3d6</button>
+      <button class="btn-roll dice-3d6" (click)="roll3D6()">{{ uiStateService.use2d6Plus6() ? '2d6+6' : '3d6' }}</button>
       <button class="btn-roll dice-d100" (click)="rollPercentile()">d%</button>
     </div>
 

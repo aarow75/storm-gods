@@ -28,6 +28,10 @@ export class SettingsComponent {
     this.gameSystemService.switchSystem(system);
   }
 
+  toggle2d6Plus6(): void {
+    this.uiStateService.toggle2d6Plus6();
+  }
+
   increaseFontSize(): void {
     this.uiStateService.increaseFontSize();
   }
