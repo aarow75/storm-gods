@@ -1,10 +1,5 @@
 <div class="character-form" [class.edit-mode]="editMode">
   <h3>{{ editMode ? 'Edit Character' : 'Create New Character' }}</h3>
-  @if (editMode) {
-  <div class="edit-banner" [style.background]="character.color || '#f59e0b'">
-    Editing: {{ character.name }}
-  </div>
-  }
 
   @if (showValidationErrors) {
   <div class="validation-banner">
@@ -24,7 +19,11 @@
   }
 
   <form (ngSubmit)="saveCharacter()">
-    @if (!editMode) {
+    @if (editMode) {
+    <div class="edit-banner" [style.background]="character.color || '#f59e0b'">
+      Editing: {{ character.name }}
+    </div>
+    } @else {
     <div class="randomize-section">
       <button type="button" class="btn-randomize" (click)="randomizeCharacter()">
         Randomize Character
@@ -32,57 +31,55 @@
       <p class="randomize-hint">Generates random stats, cult, occupation, and homeland</p>
     </div>
     }
-
-    <div class="form-group">
-      <label for="name"
-        [class.required-label]="isFieldInvalid('name')"
-        [class.success-label]="isFieldRandomized('name') && !isFieldInvalid('name')">
-        Character Name: <span class="required-star">*</span>
-      </label>
-      <input
-        type="text"
-        id="name"
-        [(ngModel)]="character.name"
-        name="name"
-        required
-        placeholder="Enter character name"
-        [class.invalid-field]="isFieldInvalid('name')"
-        [class.success-field]="isFieldRandomized('name') && !isFieldInvalid('name')"
-      />
-      @if (isFieldInvalid('name')) {
-      <span class="validation-error">Required field</span>
-      }
-      @if (isFieldRandomized('name') && !isFieldInvalid('name')) {
-      <span class="success-message">Randomized</span>
-      }
-    </div>
-
-    <div class="form-group">
-      <label>Character Color:</label>
-      <div class="color-picker">
-        @for (color of characterColors; track color) {
-        <button
-          type="button"
-          class="color-swatch"
-          [style.background]="color.value"
-          [class.selected]="character.color === color.value"
-          (click)="character.color = color.value"
-          [title]="color.name"
-          aria-label="Select {{ color.name }} color"
-        >
-          <span class="color-name">{{ color.name }}</span>
-          @if (character.color === color.value) {
-          <span class="checkmark">✓</span>
+    <div class="form-sections-grid">
+      <div class="form-col">
+        <div class="form-group">
+          <label for="name"
+            [class.required-label]="isFieldInvalid('name')"
+            [class.success-label]="isFieldRandomized('name') && !isFieldInvalid('name')">
+            Character Name: <span class="required-star">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            [(ngModel)]="character.name"
+            name="name"
+            required
+            placeholder="Enter character name"
+            [class.invalid-field]="isFieldInvalid('name')"
+            [class.success-field]="isFieldRandomized('name') && !isFieldInvalid('name')"
+          />
+          @if (isFieldInvalid('name')) {
+          <span class="validation-error">Required field</span>
           }
-        </button>
-        }
+          @if (isFieldRandomized('name') && !isFieldInvalid('name')) {
+          <span class="success-message">Randomized</span>
+          }
+        </div>
       </div>
-      @if (character.color) {
-      <div class="selected-color">
-        <span class="color-label">Selected: </span>
-        <span class="color-value" [style.background]="character.color"></span>
+      <div class="form-col">
+        <div class="form-group">
+          <label>Character Color:</label>
+          <div class="color-picker">
+            @for (color of characterColors; track color) {
+            <button
+              type="button"
+              class="color-swatch"
+              [style.background]="color.value"
+              [class.selected]="character.color === color.value"
+              (click)="character.color = color.value"
+              [title]="color.name"
+              aria-label="Select {{ color.name }} color"
+            >
+              <span class="color-name">{{ color.name }}</span>
+              @if (character.color === color.value) {
+              <span class="checkmark">✓</span>
+              }
+            </button>
+            }
+          </div>
+        </div>
       </div>
-      }
     </div>
 
     <div class="form-sections-grid">
@@ -204,10 +201,47 @@
           }
         </div>
 
+        <!-- Equipment Component -->
+        <div class="form-section" [class.collapsed]="isSectionCollapsed('equipment')">
+          <div class="section-header" (click)="toggleSection('equipment')">
+            <h4>Equipment</h4>
+            <span class="collapse-toggle">{{ isSectionCollapsed('equipment') ? '▶' : '▼' }}</span>
+          </div>
+          @if (!isSectionCollapsed('equipment')) {
+          <div class="section-content">
+            <app-character-equipment
+              [equipment]="character.equipment!"
+              [maxEncumbrance]="character.derivedStats?.maxEncumbrance || 0"
+              (addEquipment)="addEquipment($event)"
+              (removeEquipment)="removeEquipment($event)"
+            ></app-character-equipment>
+          </div>
+          }
+        </div>
+
       </div>
 
       <!-- Right column: background & abilities -->
       <div class="form-col">
+
+        <!-- Skills Component -->
+        <div class="form-section" [class.collapsed]="isSectionCollapsed('skills')">
+          <div class="section-header" (click)="toggleSection('skills')">
+            <h4>Skills</h4>
+            <span class="collapse-toggle">{{ isSectionCollapsed('skills') ? '▶' : '▼' }}</span>
+          </div>
+          @if (!isSectionCollapsed('skills')) {
+          <div class="section-content">
+            <app-character-skills
+              [skills]="character.skills!"
+              [skillCategories]="skillCategories"
+              [getCategoryKeys]="getCategoryKeys.bind(this)"
+              [getSkillKeys]="getSkillKeys.bind(this)"
+              (applyBonuses)="applyAllSkillBonuses()"
+            ></app-character-skills>
+          </div>
+          }
+        </div>
 
         <!-- Background Component -->
         <div class="form-section" [class.collapsed]="isSectionCollapsed('background')">
@@ -226,25 +260,6 @@
               [isFieldRandomized]="isFieldRandomized.bind(this)"
               (cultChange)="onCultChange()"
             ></app-character-background>
-          </div>
-          }
-        </div>
-
-        <!-- Skills Component -->
-        <div class="form-section" [class.collapsed]="isSectionCollapsed('skills')">
-          <div class="section-header" (click)="toggleSection('skills')">
-            <h4>Skills</h4>
-            <span class="collapse-toggle">{{ isSectionCollapsed('skills') ? '▶' : '▼' }}</span>
-          </div>
-          @if (!isSectionCollapsed('skills')) {
-          <div class="section-content">
-            <app-character-skills
-              [skills]="character.skills!"
-              [skillCategories]="skillCategories"
-              [getCategoryKeys]="getCategoryKeys.bind(this)"
-              [getSkillKeys]="getSkillKeys.bind(this)"
-              (applyBonuses)="applyAllSkillBonuses()"
-            ></app-character-skills>
           </div>
           }
         </div>
@@ -350,39 +365,6 @@
           }
         </div>
 
-        <!-- Equipment Component -->
-        <div class="form-section" [class.collapsed]="isSectionCollapsed('equipment')">
-          <div class="section-header" (click)="toggleSection('equipment')">
-            <h4>Equipment</h4>
-            <span class="collapse-toggle">{{ isSectionCollapsed('equipment') ? '▶' : '▼' }}</span>
-          </div>
-          @if (!isSectionCollapsed('equipment')) {
-          <div class="section-content">
-            <app-character-equipment
-              [equipment]="character.equipment!"
-              [maxEncumbrance]="character.derivedStats?.maxEncumbrance || 0"
-              (addEquipment)="addEquipment($event)"
-              (removeEquipment)="removeEquipment($event)"
-            ></app-character-equipment>
-          </div>
-          }
-        </div>
-
-        <!-- Notes Component -->
-        <div class="form-section" [class.collapsed]="isSectionCollapsed('notes')">
-          <div class="section-header" (click)="toggleSection('notes')">
-            <h4>Notes</h4>
-            <span class="collapse-toggle">{{ isSectionCollapsed('notes') ? '▶' : '▼' }}</span>
-          </div>
-          @if (!isSectionCollapsed('notes')) {
-          <div class="section-content">
-            <app-character-notes
-              [notes]="character.notes!"
-            ></app-character-notes>
-          </div>
-          }
-        </div>
-
         <!-- Conditions Component -->
         <div class="form-section" [class.collapsed]="isSectionCollapsed('conditions')">
           <div class="section-header" (click)="toggleSection('conditions')">
@@ -395,6 +377,21 @@
               [conditions]="character.conditions || []"
               (conditionsChange)="character.conditions = $event"
             ></app-character-conditions>
+          </div>
+          }
+        </div>
+        
+        <!-- Notes Component -->
+        <div class="form-section" [class.collapsed]="isSectionCollapsed('notes')">
+          <div class="section-header" (click)="toggleSection('notes')">
+            <h4>Notes</h4>
+            <span class="collapse-toggle">{{ isSectionCollapsed('notes') ? '▶' : '▼' }}</span>
+          </div>
+          @if (!isSectionCollapsed('notes')) {
+          <div class="section-content">
+            <app-character-notes
+              [notes]="character.notes!"
+            ></app-character-notes>
           </div>
           }
         </div>

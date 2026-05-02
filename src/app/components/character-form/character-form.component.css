@@ -179,35 +179,12 @@ h3 {
 
 .color-swatch .checkmark {
   position: absolute;
+  top: 2px;
   font-size: var(--font-size-2xl);
   font-weight: bold;
   color: var(--color-bg-white);
   text-shadow: 0 2px 4px var(--shadow-black-50);
   pointer-events: none;
-}
-
-.selected-color {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-  padding: var(--spacing-xl);
-  background: var(--color-bg-lighter);
-  border-radius: 4px;
-}
-
-.color-label {
-  font-size: var(--font-size-base);
-  font-weight: 500;
-  color: var(--color-gray-600-alt);
-}
-
-.color-value {
-  width: 30px;
-  height: 30px;
-  border-radius: 4px;
-  border: 1px solid var(--color-border);
-  box-shadow: 0 2px 4px var(--shadow-black-10);
 }
 
 @media (max-width: 768px) {
