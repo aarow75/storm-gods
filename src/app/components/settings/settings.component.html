@@ -24,13 +24,34 @@
 
   <div class="settings-section">
     <h2>Data</h2>
-    <p style="margin: 0 0 var(--spacing-3xl) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
-      Export your wilderness map terrain data as a JSON file
+    <p style="margin: 0 0 var(--spacing-md) 0; color: var(--color-gray-600); font-size: var(--font-size-base);">
+      Export or import your data as JSON files. Importing merges with existing data — duplicate IDs are skipped.
     </p>
-    <div class="button-group">
+    <details class="import-help">
+      <summary>View import format</summary>
+      <div class="import-help-body">
+        <p>Import files must be JSON with one of these top-level shapes. The <code>exportedAt</code> field is optional.</p>
+        <p><strong>Characters</strong></p>
+        <pre>&#123;
+  "exportedAt": "2025-05-02T12:00:00Z",  // optional
+  "characters": [ &#123; ...character&#125;, ... ]
+&#125;</pre>
+        <p><strong>Custom Monsters</strong></p>
+        <pre>&#123;
+  "exportedAt": "2025-05-02T12:00:00Z",  // optional
+  "monsters": [ &#123; ...monster &#125;, ... ]
+&#125;</pre>
+        <p>The easiest way to get a valid file is to use the Export buttons above or the Export button on an individual character/monster form.</p>
+      </div>
+    </details>
+    <div class="button-group" style="margin-top: var(--spacing-3xl);">
       <button (click)="exportCharacters()" class="export-btn">Export Characters</button>
-      <button (click)="exportCombatLog()" class="export-btn">Export Combat Log</button>
+      <button (click)="importCharactersInput.click()" class="export-btn">Import Characters</button>
+      <input #importCharactersInput type="file" accept=".json" hidden (change)="importCharacters($event)">
       <button (click)="exportCustomMonsters()" class="export-btn">Export Custom Monsters</button>
+      <button (click)="importMonstersInput.click()" class="export-btn">Import Custom Monsters</button>
+      <input #importMonstersInput type="file" accept=".json" hidden (change)="importMonsters($event)">
+      <button (click)="exportCombatLog()" class="export-btn">Export Combat Log</button>
       <button (click)="exportTerrainData()" class="export-btn">Export Terrain Data</button>
     </div>
   </div>

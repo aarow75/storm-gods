@@ -199,6 +199,16 @@ export class CharacterService {
     this.saveCharacters(filtered);
   }
 
+  importCharacters(incoming: any[]): { imported: number; skipped: number } {
+    const existing = this.getCharacters();
+    const existingIds = new Set(existing.map(c => c.id));
+    const toAdd = incoming
+      .filter(c => !existingIds.has(c.id))
+      .map(c => this.migrateCharacter(c));
+    this.saveCharacters([...existing, ...toAdd]);
+    return { imported: toAdd.length, skipped: incoming.length - toAdd.length };
+  }
+
   private saveCharacters(characters: Character[]): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(characters));
   }

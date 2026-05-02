@@ -155,6 +155,9 @@
         <button class="btn btn-primary" (click)="saveMonster()">
           {{ editingMonster ? '✓ Update Monster' : '+ Create Monster' }}
         </button>
+        @if (editingMonster) {
+          <button class="btn btn-secondary" (click)="exportMonster(editingMonster)">Export</button>
+        }
         <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
       </div>
     </div>
@@ -186,6 +189,7 @@
             </div>
             <div class="card-actions">
               <button class="btn btn-primary btn-small" (click)="editMonster(monster)">Edit</button>
+              <button class="btn btn-secondary btn-small" (click)="exportMonster(monster)">Export</button>
               <button class="btn btn-danger btn-small" (click)="deleteMonster(monster.id)">Delete</button>
             </div>
           </div>

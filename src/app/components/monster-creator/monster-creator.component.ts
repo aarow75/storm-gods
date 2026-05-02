@@ -6,6 +6,7 @@ import { Monster } from '../../models/monster.model';
 import { HIT_LOCATION_TEMPLATES } from '../../constants/hit-location-templates.constants';
 import { CustomMonsterService } from '../../services/custom-monster.service';
 import { GameSystemService } from '../../services/game-system.service';
+import { ExportService } from '../../services/export.service';
 
 @Component({
   selector: 'app-monster-creator',
@@ -72,7 +73,8 @@ export class MonsterCreatorComponent implements OnInit {
     private monsterService: CustomMonsterService,
     private router: Router,
     private route: ActivatedRoute,
-    public gameSystemService: GameSystemService
+    public gameSystemService: GameSystemService,
+    private exportService: ExportService
   ) {}
 
   ngOnInit(): void {
@@ -186,6 +188,14 @@ export class MonsterCreatorComponent implements OnInit {
     this.showForm = false;
     this.editingMonster = null;
     this.resetForm();
+  }
+
+  exportMonster(monster: Monster): void {
+    const slug = monster.name.toLowerCase().replace(/\s+/g, '-');
+    this.exportService.download(`monster-${slug}`, {
+      exportedAt: new Date().toISOString(),
+      monsters: [monster],
+    });
   }
 
   deleteMonster(id: string): void {

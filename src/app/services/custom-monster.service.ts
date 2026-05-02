@@ -30,6 +30,14 @@ export class CustomMonsterService {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(monsters));
   }
 
+  importMonsters(incoming: Monster[]): { imported: number; skipped: number } {
+    const existing = this.getMonsters();
+    const existingIds = new Set(existing.map(m => m.id));
+    const toAdd = incoming.filter(m => !existingIds.has(m.id));
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify([...existing, ...toAdd]));
+    return { imported: toAdd.length, skipped: incoming.length - toAdd.length };
+  }
+
   deleteMonster(id: string): void {
     const monsters = this.getMonsters().filter(m => m.id !== id);
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(monsters));

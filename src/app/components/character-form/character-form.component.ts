@@ -15,6 +15,7 @@ import { CharacterService } from '../../services/character.service';
 import { DiceService } from '../../services/dice.service';
 import { GameSystemService } from '../../services/game-system.service';
 import { UIStateService } from '../../services/ui-state.service';
+import { ExportService } from '../../services/export.service';
 import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
 import { CHARACTER_COLORS } from '../../constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
@@ -122,7 +123,8 @@ export class CharacterFormComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     public gameSystemService: GameSystemService,
-    public uiStateService: UIStateService
+    public uiStateService: UIStateService,
+    private exportService: ExportService
   ) {}
 
   toggleSection(sectionId: string): void {
@@ -189,6 +191,14 @@ export class CharacterFormComponent implements OnInit {
 
     this.resetForm();
     this.router.navigate(this.gameSystemService.link('characters'));
+  }
+
+  exportCharacter(): void {
+    const slug = (this.character.name || 'character').toLowerCase().replace(/\s+/g, '-');
+    this.exportService.download(`character-${slug}`, {
+      exportedAt: new Date().toISOString(),
+      characters: [this.character],
+    });
   }
 
   editCharacter(id: string): void {
