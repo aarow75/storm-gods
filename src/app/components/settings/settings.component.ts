@@ -7,6 +7,7 @@ import { CharacterService } from '../../services/character.service';
 import { CombatLogService } from '../../services/combat-log.service';
 import { CustomMonsterService } from '../../services/custom-monster.service';
 import { ExportService } from '../../services/export.service';
+import { TerrainMapExport } from '../../models/wilderness-map.model';
 
 @Component({
   selector: 'app-settings',
@@ -48,12 +49,31 @@ export class SettingsComponent {
 
   exportTerrainData(): void {
     const state = this.wildernessMapService.getState();
+    const maps: TerrainMapExport[] = state.customMaps.map((cm) => ({
+      id: cm.id,
+      label: cm.label,
+      width: cm.width,
+      height: cm.height,
+      scale: cm.scale,
+      scaleUnit: cm.scaleUnit,
+      terrain: state.terrainMaps[cm.id] ?? {},
+      tokens: state.tokenMaps[cm.id] ?? [],
+    }));
     this.exportService.download('terrain-data', {
+      exportType: 'terrain-maps',
+      version: 1,
       exportedAt: new Date().toISOString(),
-      customMaps: state.customMaps,
-      terrainMaps: state.terrainMaps,
-      tiles: state.tiles,
+      maps,
     });
+  }
+
+  async importTerrainData(event: Event): Promise<void> {
+    const data = await this.readJsonFile(event);
+    if (data?.exportType !== 'terrain-maps' || !Array.isArray(data?.maps)) {
+      alert('Invalid terrain data file.'); return;
+    }
+    const result = this.wildernessMapService.importMaps(data.maps);
+    alert(`Imported ${result.imported} map(s). ${result.skipped} skipped (already exist).`);
   }
 
   exportCharacters(): void {

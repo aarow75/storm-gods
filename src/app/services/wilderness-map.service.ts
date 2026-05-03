@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { DEFAULT_WILDERNESS_STATE, WildernessMapState } from '../models/wilderness-map.model';
+import { DEFAULT_WILDERNESS_STATE, TerrainMapExport, WildernessMapState } from '../models/wilderness-map.model';
 
 @Injectable({ providedIn: 'root' })
 export class WildernessMapService {
@@ -22,5 +22,30 @@ export class WildernessMapService {
 
   clearState(): void {
     localStorage.removeItem(this.STORAGE_KEY);
+  }
+
+  importMaps(maps: TerrainMapExport[]): { imported: number; skipped: number } {
+    const state = this.getState();
+    let imported = 0;
+    let skipped = 0;
+    for (const map of maps) {
+      if (state.customMaps.some((m) => m.id === map.id)) {
+        skipped++;
+        continue;
+      }
+      state.customMaps.push({
+        id: map.id,
+        label: map.label,
+        width: map.width,
+        height: map.height,
+        scale: map.scale,
+        scaleUnit: map.scaleUnit,
+      });
+      state.terrainMaps[map.id] = map.terrain ?? {};
+      state.tokenMaps[map.id] = map.tokens ?? [];
+      imported++;
+    }
+    this.saveState(state);
+    return { imported, skipped };
   }
 }

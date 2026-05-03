@@ -104,3 +104,21 @@ export function parseTileKey(key: string): HexCoord {
   const [q, r] = key.split(',').map(Number);
   return { q, r };
 }
+
+export interface TerrainMapExport {
+  id: string;
+  label: string;
+  width: number;
+  height: number;
+  scale: number;
+  scaleUnit: 'miles' | 'kilometers';
+  terrain: Record<string, TerrainType>;
+  tokens?: WildernessToken[];
+}
+
+export interface TerrainExportFile {
+  exportType: 'terrain-maps';
+  version: 1;
+  exportedAt: string;
+  maps: TerrainMapExport[];
+}
