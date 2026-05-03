@@ -108,6 +108,22 @@
           class="border-slider" />
         <span class="opacity-value">{{ (hexBorderOpacity * 100).toFixed(0) }}%</span>
       </div>
+
+      @if (mapMode === 'image') {
+        <div class="hex-border-control">
+          <label for="terrain-opacity-slider">Terrain:</label>
+          <input
+            id="terrain-opacity-slider"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            [value]="terrainOpacity"
+            (change)="onTerrainOpacityChange($event)"
+            class="border-slider" />
+          <span class="opacity-value">{{ (terrainOpacity * 100).toFixed(0) }}%</span>
+        </div>
+      }
     </div>
 
       @if (interactionMode === 'paint') {
@@ -194,10 +210,10 @@
                 [attr.y]="getTokenCy(token)"
                 dominant-baseline="central"
                 text-anchor="middle"
-                [attr.font-size]="HEX_SIZE * 0.7"
+                [attr.font-size]="token.iconType ? HEX_SIZE * 0.6 : HEX_SIZE * 0.7"
                 fill="white"
                 style="pointer-events: none; font-weight: bold; text-shadow: 0 0 2px #000;">
-                {{ token.name.toLowerCase().includes('encounter') ? '⚠' : token.name[0] }}
+                {{ getTokenSymbol(token) }}
               </text>
             }
           </g>
@@ -248,9 +264,11 @@
                     class="token-button"
                     [class.selected]="selectedTokenId === token.id"
                     (click)="selectedTokenId = selectedTokenId === token.id ? null : token.id">
-                    <span
-                      class="token-color"
-                      [style.background-color]="token.color"></span>
+                    @if (token.iconType) {
+                      <span class="token-icon-badge" [style.background-color]="token.color">{{ getTokenSymbol(token) }}</span>
+                    } @else {
+                      <span class="token-color" [style.background-color]="token.color"></span>
+                    }
                     <span class="token-name">{{ token.name }}</span>
                     @if (token.position) {
                       <span class="token-location">(q: {{ token.position.q }}, r: {{ token.position.r }})</span>
@@ -268,7 +286,53 @@
           }
         </div>
 
-        <button class="btn-add-token" (click)="addCustomToken()">+ Custom Token</button>
+        <div class="token-actions">
+          <button class="btn-add-token" (click)="toggleCustomTokenForm()">
+            {{ showCustomTokenForm ? '✕ Cancel' : '+ Custom Token' }}
+          </button>
+          @if (customTokens.length > 0) {
+            <button class="btn-control" (click)="exportCustomTokens()" title="Export custom tokens as JSON">Export</button>
+          }
+          <label class="btn-control btn-import" title="Import custom tokens from JSON">
+            Import
+            <input type="file" accept=".json" (change)="importCustomTokens($event)" style="display:none;" />
+          </label>
+        </div>
+
+        @if (showCustomTokenForm) {
+          <div class="custom-token-form">
+            <input
+              type="text"
+              class="token-form-input"
+              [(ngModel)]="newTokenForm.name"
+              placeholder="Token name"
+              (keydown.enter)="submitCustomToken()"
+              maxlength="40" />
+            <div class="icon-picker-grid">
+              <button
+                class="icon-picker-btn"
+                [class.selected]="newTokenForm.iconType === null"
+                (click)="onNewTokenIconSelect(null)"
+                title="No icon (first letter)">A</button>
+              @for (icon of landmarkIcons; track icon.id) {
+                <button
+                  class="icon-picker-btn"
+                  [class.selected]="newTokenForm.iconType === icon.id"
+                  (click)="onNewTokenIconSelect(icon.id)"
+                  [title]="icon.label">{{ icon.symbol }}</button>
+              }
+            </div>
+            <div class="token-form-color-row">
+              <label>Color:</label>
+              <input type="color" [(ngModel)]="newTokenForm.color" class="token-color-input" />
+              <span class="token-form-color-preview" [style.background-color]="newTokenForm.color"></span>
+            </div>
+            <button
+              class="btn-primary token-form-submit"
+              (click)="submitCustomToken()"
+              [disabled]="!newTokenForm.name.trim()">Add Token</button>
+          </div>
+        }
       </div>
 
       @if (encounterResult) {
@@ -320,6 +384,31 @@
               <span class="stat-label">Cost:</span>
               <span class="stat-value">{{ previewCost | number: '1.1-1' }}</span>
             </div>
+          </div>
+        </div>
+      }
+
+      @if (totalPaintedHexes > 0) {
+        <div class="panel-section terrain-coverage">
+          <h3>Terrain Coverage</h3>
+          <div class="coverage-total">
+            <span class="coverage-painted">{{ totalPaintedHexes }} painted</span>
+            <span class="coverage-sep">/</span>
+            <span class="coverage-unpainted">{{ gridWidth * gridHeight - totalPaintedHexes }} unpainted</span>
+            <span class="coverage-sep">·</span>
+            <span>{{ gridWidth * gridHeight }} total</span>
+          </div>
+          <div class="coverage-list">
+            @for (entry of terrainCoverage; track entry.def.id) {
+              <div class="coverage-row">
+                <span class="coverage-swatch" [style.background-color]="entry.def.fillColor" [style.border-color]="entry.def.strokeColor"></span>
+                <span class="coverage-label">{{ entry.def.label }}</span>
+                <span class="coverage-bar-wrap">
+                  <span class="coverage-bar" [style.width.%]="entry.pct"></span>
+                </span>
+                <span class="coverage-pct">{{ entry.pct }}%</span>
+              </div>
+            }
           </div>
         </div>
       }

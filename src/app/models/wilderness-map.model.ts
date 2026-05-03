@@ -1,3 +1,25 @@
+export type LandmarkIconType =
+  | 'city' | 'town' | 'village' | 'temple'
+  | 'ruins' | 'keep' | 'dungeon' | 'poi';
+
+export interface LandmarkIconDefinition {
+  id: LandmarkIconType;
+  label: string;
+  symbol: string;
+  defaultColor: string;
+}
+
+export const LANDMARK_ICONS: LandmarkIconDefinition[] = [
+  { id: 'city',    label: 'City',    symbol: '⌂', defaultColor: '#8B4513' },
+  { id: 'town',    label: 'Town',    symbol: '▣', defaultColor: '#CD853F' },
+  { id: 'village', label: 'Village', symbol: '△', defaultColor: '#DAA520' },
+  { id: 'temple',  label: 'Temple',  symbol: '✙', defaultColor: '#9932CC' },
+  { id: 'ruins',   label: 'Ruins',   symbol: '◈', defaultColor: '#808080' },
+  { id: 'keep',    label: 'Keep',    symbol: '◆', defaultColor: '#4682B4' },
+  { id: 'dungeon', label: 'Dungeon', symbol: '⬡', defaultColor: '#2F4F4F' },
+  { id: 'poi',     label: 'Point',   symbol: '●', defaultColor: '#20B2AA' },
+];
+
 export type TerrainType =
   | 'plains'
   | 'forest'
@@ -31,6 +53,7 @@ export interface WildernessToken {
   sourceType: 'character' | 'custom';
   characterId?: string;
   position?: HexCoord;
+  iconType?: LandmarkIconType;
 }
 
 export interface WildernessMapState {
@@ -48,6 +71,7 @@ export interface WildernessMapState {
   scaleUnit?: 'miles' | 'kilometers';
   showTerrainOverlay?: boolean;
   hexBorderOpacity?: number;
+  terrainOpacity?: number;
   viewZoom?: number;
   viewPanX?: number;
   viewPanY?: number;

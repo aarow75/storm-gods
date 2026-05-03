@@ -8,6 +8,8 @@ import {
   GRID_ROWS,
   HEX_SIZE,
   HexCoord,
+  LANDMARK_ICONS,
+  LandmarkIconType,
   TerrainType,
   WildernessMapState,
   WildernessToken,
@@ -22,6 +24,7 @@ import { CharacterService } from '../../services/character.service';
 import { CombatService } from '../../services/combat.service';
 import { DiceService } from '../../services/dice.service';
 import { GameSystemService } from '../../services/game-system.service';
+import { ExportService } from '../../services/export.service';
 import { Character } from '../../models/character.model';
 import { CombatParticipant, Monster as CombatMonster } from '../../models/combat.model';
 import { Monster as BestiaryMonster } from '../../models/monster.model';
@@ -45,6 +48,11 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   readonly HEX_SIZE = HEX_SIZE;
   readonly terrainDefs = TERRAIN_DEFINITIONS;
   readonly mapBackgrounds = MAP_BACKGROUNDS;
+  readonly landmarkIcons = LANDMARK_ICONS;
+
+  showCustomTokenForm = false;
+  newTokenForm: { name: string; iconType: LandmarkIconType | null; color: string } =
+    { name: '', iconType: null, color: '#FF6B6B' };
 
   gridWidth = GRID_COLS;
   gridHeight = GRID_ROWS;
@@ -96,6 +104,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
 
   mapMode: 'terrain' | 'image' = 'terrain';
   hexBorderOpacity = 1;
+  terrainOpacity = 0.45;
 
   showAddMapModal = false;
   newMapForm = { label: '', width: 20, height: 20, scale: 6, scaleUnit: 'miles' as 'miles' | 'kilometers' };
@@ -117,7 +126,8 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     private combatService: CombatService,
     private diceService: DiceService,
     private router: Router,
-    public gameSystemService: GameSystemService
+    public gameSystemService: GameSystemService,
+    private exportService: ExportService
   ) {}
 
   ngOnInit(): void {
@@ -129,6 +139,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     this.scale = this.state.scale ?? 6;
     this.scaleUnit = this.state.scaleUnit ?? 'miles';
     this.hexBorderOpacity = this.state.hexBorderOpacity ?? 1;
+    this.terrainOpacity = this.state.terrainOpacity ?? 0.45;
     this.viewZoom = this.state.viewZoom ?? 1;
     this.viewPanX = this.state.viewPanX ?? 0;
     this.viewPanY = this.state.viewPanY ?? 0;
@@ -202,7 +213,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
       if (terrain !== 'none') {
         const def = TERRAIN_DEFINITIONS.find((t) => t.id === terrain);
         const baseColor = def?.fillColor ?? '#f5f0e8';
-        return this.hexToRgba(baseColor, 0.45);
+        return this.hexToRgba(baseColor, this.terrainOpacity);
       }
       return 'rgba(255, 255, 255, 0.05)';
     }
@@ -557,6 +568,23 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     return this.state.tokens.filter((t) => t.sourceType === 'custom');
   }
 
+  get totalPaintedHexes(): number {
+    return Object.keys(this.state.tiles).length;
+  }
+
+  get terrainCoverage(): Array<{ def: (typeof TERRAIN_DEFINITIONS)[0]; count: number; pct: number }> {
+    const tiles = this.state.tiles;
+    const total = Object.keys(tiles).length;
+    if (total === 0) return [];
+    const counts: Record<string, number> = {};
+    for (const terrain of Object.values(tiles)) {
+      counts[terrain] = (counts[terrain] ?? 0) + 1;
+    }
+    return TERRAIN_DEFINITIONS.filter((def) => def.id !== 'none' && counts[def.id])
+      .map((def) => ({ def, count: counts[def.id] ?? 0, pct: Math.round(((counts[def.id] ?? 0) / total) * 100) }))
+      .sort((a, b) => b.count - a.count);
+  }
+
   getTokenCx(token: WildernessToken): number {
     if (!token.position) return 0;
     const S = HEX_SIZE;
@@ -601,11 +629,33 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     this.interactionMode = 'move';
   }
 
-  addCustomToken(): void {
-    const name = prompt('Enter token name:', 'Marker');
+  toggleCustomTokenForm(): void {
+    this.showCustomTokenForm = !this.showCustomTokenForm;
+    if (this.showCustomTokenForm) {
+      this.newTokenForm = { name: '', iconType: null, color: '#FF6B6B' };
+    }
+  }
+
+  onNewTokenIconSelect(iconType: LandmarkIconType | null): void {
+    this.newTokenForm.iconType = iconType;
+    if (iconType) {
+      const def = LANDMARK_ICONS.find(i => i.id === iconType);
+      if (def) this.newTokenForm.color = def.defaultColor;
+    }
+  }
+
+  getTokenSymbol(token: WildernessToken): string {
+    if (token.name.toLowerCase().includes('encounter')) return '⚠';
+    if (token.iconType) {
+      return LANDMARK_ICONS.find(i => i.id === token.iconType)?.symbol ?? token.name[0];
+    }
+    return token.name[0] ?? '?';
+  }
+
+  submitCustomToken(): void {
+    const name = this.newTokenForm.name.trim();
     if (!name) return;
 
-    // Ensure state.tokens is synced to current map
     if (this.state.currentMapId && this.state.tokens !== this.state.tokenMaps[this.state.currentMapId]) {
       if (!this.state.tokenMaps[this.state.currentMapId]) {
         this.state.tokenMaps[this.state.currentMapId] = [];
@@ -613,28 +663,18 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
       this.state.tokens = this.state.tokenMaps[this.state.currentMapId];
     }
 
-    const colors = [
-      '#FF6B6B',
-      '#4ECDC4',
-      '#45B7D1',
-      '#FFA07A',
-      '#98D8C8',
-      '#F7DC6F',
-      '#BB8FCE',
-      '#85C1E2',
-    ];
-    const color = colors[this.state.tokens.length % colors.length];
-
     const token: WildernessToken = {
       id: this.generateId(),
       name,
-      color,
+      color: this.newTokenForm.color,
       sourceType: 'custom',
+      ...(this.newTokenForm.iconType ? { iconType: this.newTokenForm.iconType } : {}),
     };
     this.state.tokens.push(token);
     this.saveState();
     this.selectedTokenId = token.id;
     this.interactionMode = 'move';
+    this.showCustomTokenForm = false;
   }
 
   private generateId(): string {
@@ -680,6 +720,41 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
 
   isPathPreview(q: number, r: number): boolean {
     return this.previewPathSet.has(tileKey(q, r));
+  }
+
+  exportCustomTokens(): void {
+    const tokens = this.state.tokens.filter((t) => t.sourceType === 'custom');
+    const mapLabel = this.state.currentMapId
+      ? (this.state.customMaps.find((m) => m.id === this.state.currentMapId)?.label ??
+        MAP_BACKGROUNDS.find((b) => b.id === this.state.currentMapId)?.label ??
+        'map')
+      : 'map';
+    const filename = `tokens-${mapLabel.toLowerCase().replace(/\s+/g, '-')}`;
+    this.exportService.download(filename, tokens);
+  }
+
+  importCustomTokens(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported: WildernessToken[] = JSON.parse(e.target?.result as string);
+        const valid = imported.filter(
+          (t) => t.id && t.name && t.color && t.sourceType === 'custom'
+        );
+        this.state.tokens = [...this.state.tokens.filter((t) => t.sourceType !== 'custom'), ...valid];
+        if (this.state.currentMapId) {
+          this.state.tokenMaps[this.state.currentMapId] = this.state.tokens;
+        }
+        this.saveState();
+      } catch {
+        alert('Invalid token file — could not parse JSON.');
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
   }
 
   clearTerrain(): void {
@@ -752,6 +827,13 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     this.saveState();
   }
 
+  onTerrainOpacityChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.terrainOpacity = parseFloat(target.value);
+    this.state.terrainOpacity = this.terrainOpacity;
+    this.saveState();
+  }
+
   private loadMapData(mapId: string, terrainOverlay?: Record<string, TerrainType>): void {
     if (!this.state.terrainMaps[mapId]) {
       this.state.terrainMaps[mapId] = terrainOverlay ? { ...terrainOverlay } : {};
@@ -762,6 +844,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     this.state.tiles = this.state.terrainMaps[mapId];
     this.state.tokens = this.state.tokenMaps[mapId];
     this.selectedTokenId = null;
+    this.showCustomTokenForm = false;
     this.previewPath = [];
     this.previewPathSet.clear();
   }
