@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CombatParticipant, Monster, CombatLogEntry, CombatMapState } from '../models/combat.model';
+import { CombatParticipant, Monster, CombatLogEntry, CombatMapState, CombatMapTemplate } from '../models/combat.model';
 import { WEAPON_LIST } from '../models/character.model';
 
 @Injectable({
@@ -10,6 +10,7 @@ export class CombatService {
   private readonly MONSTERS_KEY = 'runequest-monsters';
   private readonly LOG_HISTORY_KEY = 'runequest-combat-log-history';
   private readonly MAP_KEY = 'runequest-combat-map';
+  private readonly MAP_TEMPLATES_KEY = 'runequest-combat-map-templates';
 
   getCombatParticipants(): CombatParticipant[] {
     const data = localStorage.getItem(this.STORAGE_KEY);
@@ -156,6 +157,24 @@ export class CombatService {
 
   clearCombatMapState(): void {
     localStorage.removeItem(this.MAP_KEY);
+  }
+
+  getMapTemplates(): CombatMapTemplate[] {
+    const data = localStorage.getItem(this.MAP_TEMPLATES_KEY);
+    return data ? JSON.parse(data) : [];
+  }
+
+  saveMapTemplate(template: CombatMapTemplate): void {
+    const templates = this.getMapTemplates();
+    const idx = templates.findIndex(t => t.id === template.id);
+    if (idx !== -1) templates[idx] = template;
+    else templates.push(template);
+    localStorage.setItem(this.MAP_TEMPLATES_KEY, JSON.stringify(templates));
+  }
+
+  deleteMapTemplate(id: string): void {
+    const templates = this.getMapTemplates().filter(t => t.id !== id);
+    localStorage.setItem(this.MAP_TEMPLATES_KEY, JSON.stringify(templates));
   }
 
   // Combat Round Management

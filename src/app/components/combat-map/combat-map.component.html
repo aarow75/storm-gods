@@ -19,6 +19,40 @@
       <button [class.selected-wall]="selectedWallColor === 'brown'" (click)="selectedWallColor = 'brown'" class="btn btn-small">Brown</button>
       <button (click)="clearAllWalls()" class="btn btn-danger btn-small">Clear Walls</button>
     }
+
+    <span class="toolbar-sep">|</span>
+
+    <button [class.active]="drawDungeonTokenMode" (click)="toggleDungeonTokenMode()" class="btn btn-secondary">
+      {{ drawDungeonTokenMode ? 'Stop Placing' : 'Place Tokens' }}
+    </button>
+    @if (drawDungeonTokenMode) {
+      <div class="dungeon-token-picker">
+        @for (def of dungeonTokenDefs; track def.id) {
+          <button
+            class="dungeon-token-pick-btn"
+            [class.selected-token]="selectedDungeonTokenType === def.id"
+            (click)="onSelectDungeonTokenType(def.id)"
+            [title]="def.label">{{ def.symbol }}</button>
+        }
+      </div>
+      <input type="color" [(ngModel)]="selectedDungeonTokenColor" class="dungeon-color-input" title="Token color" />
+      <button (click)="clearAllDungeonTokens()" class="btn btn-danger btn-small">Clear Tokens</button>
+    }
+
+    <span class="toolbar-sep">|</span>
+
+    <button (click)="toggleSaveTemplateForm()" class="btn btn-secondary btn-small">
+      {{ showSaveTemplateForm ? 'Cancel' : 'Save Map' }}
+    </button>
+    @if (showSaveTemplateForm) {
+      <input type="text" [(ngModel)]="newTemplateName"
+             placeholder="Template name" class="template-name-input"
+             (keydown.enter)="saveAsTemplate()" maxlength="60" />
+      <button (click)="saveAsTemplate()" [disabled]="!newTemplateName.trim()" class="btn btn-primary btn-small">Save</button>
+    }
+
+    <span class="toolbar-sep">|</span>
+    <button (click)="newMap()" class="btn btn-danger btn-small">New Map</button>
   </div>
 
   @if (participants.length === 0) {
@@ -61,6 +95,15 @@
                          [title]="p.name">
                       {{ p.name[0] }}
                     </div>
+                    @if (getDungeonTokenAt(col, row); as dt) {
+                      <div class="dungeon-token-dot"
+                           [style.background-color]="dt.color"
+                           [title]="dt.type">{{ getDungeonTokenSymbol(dt) }}</div>
+                    }
+                  } @else if (getDungeonTokenAt(col, row); as dt) {
+                    <div class="dungeon-token-full"
+                         [style.color]="dt.color"
+                         [title]="dt.type">{{ getDungeonTokenSymbol(dt) }}</div>
                   }
                 }
               </div>
@@ -117,6 +160,19 @@
             </div>
           }
         </div>
+
+        @if (savedTemplates.length > 0) {
+          <div class="template-list-section">
+            <div class="list-heading">Map Templates</div>
+            @for (tmpl of savedTemplates; track tmpl.id) {
+              <div class="template-item">
+                <span class="template-name" [title]="tmpl.name">{{ tmpl.name }}</span>
+                <button (click)="loadTemplate(tmpl)" class="btn btn-small">Load</button>
+                <button (click)="deleteTemplate(tmpl.id)" class="btn btn-danger btn-small">✕</button>
+              </div>
+            }
+          </div>
+        }
 
         <div class="combat-log-section">
           <div class="log-header">

@@ -52,10 +52,48 @@ export interface CombatPosition {
   y: number;
 }
 
+export type DungeonTokenType =
+  | 'door' | 'stairs-up' | 'stairs-down' | 'chest'
+  | 'trap' | 'fire' | 'altar' | 'pillar' | 'pit' | 'barrel';
+
+export interface DungeonTokenDefinition {
+  id: DungeonTokenType;
+  label: string;
+  symbol: string;
+  defaultColor: string;
+}
+
+export const DUNGEON_TOKEN_DEFS: DungeonTokenDefinition[] = [
+  { id: 'door',        label: 'Door',       symbol: '⛩', defaultColor: '#8B4513' },
+  { id: 'stairs-up',   label: 'Stairs Up',  symbol: '▲', defaultColor: '#4682B4' },
+  { id: 'stairs-down', label: 'Stairs Down', symbol: '▼', defaultColor: '#4682B4' },
+  { id: 'chest',       label: 'Chest',      symbol: '◈', defaultColor: '#DAA520' },
+  { id: 'trap',        label: 'Trap',       symbol: '⊗', defaultColor: '#DC2626' },
+  { id: 'fire',        label: 'Fire',       symbol: '✶', defaultColor: '#F97316' },
+  { id: 'altar',       label: 'Altar',      symbol: '✙', defaultColor: '#7C3AED' },
+  { id: 'pillar',      label: 'Pillar',     symbol: '◉', defaultColor: '#6B7280' },
+  { id: 'pit',         label: 'Pit',        symbol: '⊙', defaultColor: '#1F2937' },
+  { id: 'barrel',      label: 'Barrel',     symbol: '⊕', defaultColor: '#92400E' },
+];
+
+export interface DungeonToken {
+  type: DungeonTokenType;
+  color: string;
+}
+
 export interface CombatMapState {
   positions: Record<string, CombatPosition>;
   movedThisRound: string[];
   walls?: Record<string, 'black' | 'brown'>; // key: "x,y"
+  dungeonTokens?: Record<string, DungeonToken>; // key: "x,y"
+}
+
+export interface CombatMapTemplate {
+  id: string;
+  name: string;
+  createdAt: number;
+  walls: Record<string, 'black' | 'brown'>;
+  dungeonTokens: Record<string, DungeonToken>;
 }
 
 // Default monsters for RuneQuest

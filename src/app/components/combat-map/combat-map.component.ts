@@ -1,7 +1,11 @@
 import { Component, OnInit, OnDestroy, HostListener, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { CombatParticipant, CombatMapState, CombatPosition } from '../../models/combat.model';
+import { FormsModule } from '@angular/forms';
+import {
+  CombatParticipant, CombatMapState, CombatPosition,
+  DungeonToken, DungeonTokenType, DUNGEON_TOKEN_DEFS, CombatMapTemplate,
+} from '../../models/combat.model';
 import { WEAPON_LIST, Character, calculateHitLocations } from '../../models/character.model';
 import { CombatService } from '../../services/combat.service';
 import { CombatLogService } from '../../services/combat-log.service';
@@ -12,7 +16,7 @@ import { GameSystemService } from '../../services/game-system.service';
 @Component({
   standalone: true,
   selector: 'app-combat-map',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './combat-map.component.html',
   styleUrl: './combat-map.component.css'
 })
@@ -28,6 +32,15 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
   combatLogEntries = signal<string[]>([]);
   drawWallMode = false;
   selectedWallColor: 'black' | 'brown' = 'black';
+
+  readonly dungeonTokenDefs = DUNGEON_TOKEN_DEFS;
+  drawDungeonTokenMode = false;
+  selectedDungeonTokenType: DungeonTokenType = 'door';
+  selectedDungeonTokenColor = DUNGEON_TOKEN_DEFS[0].defaultColor;
+
+  showSaveTemplateForm = false;
+  newTemplateName = '';
+  savedTemplates: CombatMapTemplate[] = [];
 
   readonly GRID_SIZE = 20;
   readonly gridRows = Array.from({ length: 20 }, (_, i) => i);
@@ -53,6 +66,10 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.mapState.walls) {
       this.mapState.walls = {};
     }
+    if (!this.mapState.dungeonTokens) {
+      this.mapState.dungeonTokens = {};
+    }
+    this.savedTemplates = this.combatService.getMapTemplates();
 
     this.initializePositions();
     this.pruneStalePositions();
@@ -243,6 +260,12 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    // Dungeon token placement mode
+    if (this.drawDungeonTokenMode) {
+      this.toggleDungeonToken(x, y);
+      return;
+    }
+
     const occupant = this.getParticipantAt(x, y);
     if (occupant) {
       this.selectParticipant(occupant.id);
@@ -328,6 +351,7 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
     this.drawWallMode = !this.drawWallMode;
     if (this.drawWallMode) {
       this.selectedParticipantId = null;
+      this.drawDungeonTokenMode = false;
     }
   }
 
@@ -353,6 +377,91 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
   clearAllWalls(): void {
     this.mapState.walls = {};
     this.saveState();
+  }
+
+  toggleDungeonTokenMode(): void {
+    this.drawDungeonTokenMode = !this.drawDungeonTokenMode;
+    if (this.drawDungeonTokenMode) {
+      this.drawWallMode = false;
+      this.selectedParticipantId = null;
+    }
+  }
+
+  onSelectDungeonTokenType(type: DungeonTokenType): void {
+    this.selectedDungeonTokenType = type;
+    const def = DUNGEON_TOKEN_DEFS.find(d => d.id === type);
+    if (def) this.selectedDungeonTokenColor = def.defaultColor;
+  }
+
+  getDungeonTokenAt(x: number, y: number): DungeonToken | null {
+    return this.mapState.dungeonTokens?.[`${x},${y}`] ?? null;
+  }
+
+  toggleDungeonToken(x: number, y: number): void {
+    if (!this.mapState.dungeonTokens) this.mapState.dungeonTokens = {};
+    const key = `${x},${y}`;
+    const existing = this.mapState.dungeonTokens[key];
+    if (existing && existing.type === this.selectedDungeonTokenType) {
+      delete this.mapState.dungeonTokens[key];
+    } else {
+      this.mapState.dungeonTokens[key] = {
+        type: this.selectedDungeonTokenType,
+        color: this.selectedDungeonTokenColor,
+      };
+    }
+    this.saveState();
+  }
+
+  getDungeonTokenSymbol(token: DungeonToken): string {
+    return DUNGEON_TOKEN_DEFS.find(d => d.id === token.type)?.symbol ?? '?';
+  }
+
+  clearAllDungeonTokens(): void {
+    this.mapState.dungeonTokens = {};
+    this.saveState();
+  }
+
+  newMap(): void {
+    if (!confirm('Clear all walls and tokens? Participant positions will be kept.')) return;
+    this.mapState.walls = {};
+    this.mapState.dungeonTokens = {};
+    this.drawWallMode = false;
+    this.drawDungeonTokenMode = false;
+    this.saveState();
+  }
+
+  toggleSaveTemplateForm(): void {
+    this.showSaveTemplateForm = !this.showSaveTemplateForm;
+    if (this.showSaveTemplateForm) this.newTemplateName = '';
+  }
+
+  saveAsTemplate(): void {
+    const name = this.newTemplateName.trim();
+    if (!name) return;
+    const existing = this.savedTemplates.find(t => t.name === name);
+    if (existing && !confirm(`A template named "${name}" already exists. Overwrite it?`)) return;
+    const template: CombatMapTemplate = {
+      id: existing ? existing.id : this.combatService.generateId(),
+      name,
+      createdAt: Date.now(),
+      walls: { ...(this.mapState.walls ?? {}) },
+      dungeonTokens: { ...(this.mapState.dungeonTokens ?? {}) },
+    };
+    this.combatService.saveMapTemplate(template);
+    this.savedTemplates = this.combatService.getMapTemplates();
+    this.showSaveTemplateForm = false;
+  }
+
+  loadTemplate(template: CombatMapTemplate): void {
+    this.mapState.walls = { ...template.walls };
+    this.mapState.dungeonTokens = { ...template.dungeonTokens };
+    this.saveState();
+    setTimeout(() => this.drawOpponentLines(), 0);
+  }
+
+  deleteTemplate(id: string): void {
+    this.combatService.deleteMapTemplate(id);
+    this.savedTemplates = this.combatService.getMapTemplates();
   }
 
   private saveState(): void {

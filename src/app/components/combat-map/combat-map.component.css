@@ -600,3 +600,130 @@
     padding: var(--spacing-lg);
   }
 }
+
+/* Toolbar separator */
+.toolbar-sep {
+  color: var(--color-border-light);
+  user-select: none;
+  padding: 0 var(--spacing-xs);
+}
+
+/* Dungeon token type picker */
+.dungeon-token-picker {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.dungeon-token-pick-btn {
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-bg-lighter);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.15s, background-color 0.15s;
+  color: var(--color-text-primary);
+}
+
+.dungeon-token-pick-btn:hover {
+  background-color: var(--color-bg-light);
+  border-color: var(--color-border);
+}
+
+.dungeon-token-pick-btn.selected-token {
+  border-color: var(--color-primary-blue);
+  background-color: var(--color-bg-blue-light);
+}
+
+.dungeon-color-input {
+  width: 32px;
+  height: 26px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--border-radius-sm);
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Full-size dungeon token in empty cell */
+.dungeon-token-full {
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* Corner dot when participant also occupies the cell (grid-cell is position:relative) */
+.dungeon-token-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  font-size: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.9;
+  color: var(--color-bg-white);
+}
+
+/* Map template save input */
+.template-name-input {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-white);
+  width: 160px;
+}
+
+.template-name-input:focus {
+  outline: none;
+  border-color: var(--color-primary-blue);
+}
+
+/* Map templates section in sidebar */
+.template-list-section {
+  margin-top: var(--spacing-3xl);
+  padding-top: var(--spacing-3xl);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.template-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+}
+
+.template-item:hover {
+  background-color: var(--color-bg-lighter);
+}
+
+.template-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
