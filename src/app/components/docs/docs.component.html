@@ -2,24 +2,51 @@
   <aside class="docs-sidebar">
     <nav class="docs-nav">
       <div class="docs-nav-group">
-        <button (click)="toggleRulesMenu()" class="docs-nav-link docs-nav-toggle">
-          <span class="docs-nav-icon">&#x1F4D6;</span>
-          <span>Rules Reference</span>
-          <span class="toggle-icon" [class.expanded]="isExpandedRules">▼</span>
-        </button>
-        @if (isExpandedRules && rulesDocuments().length > 0) {
-          <ul class="docs-nav-submenu">
-            @for (doc of rulesDocuments(); track doc.filename) {
-              <li>
-                <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename }"
-                   routerLinkActive="active" class="docs-nav-sublink">
-                  {{ doc.name }}
-                </a>
-              </li>
-            }
-          </ul>
-        }
+        <div>
+          <button (click)="toggleRulesMenu()" class="docs-nav-link docs-nav-toggle">
+            <span class="docs-nav-icon">&#x1F4D6;</span>
+            <span>Rules Reference</span>
+            <span class="toggle-icon" [class.expanded]="isExpandedRules">▼</span>
+          </button>
+          @if (isExpandedRules && rulesDocuments().length > 0) {
+            <ul class="docs-nav-submenu">
+              @for (doc of rulesDocuments(); track doc.filename) {
+                <li>
+                  <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename }"
+                     routerLinkActive="active" class="docs-nav-sublink">
+                    {{ doc.name }}
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </div>
       </div>
+
+      @if (customDocuments.length > 0) {
+        <div class="docs-nav-group">
+          <div>
+            <button (click)="toggleCustomMenu()" class="docs-nav-link docs-nav-toggle">
+              <span class="docs-nav-icon">&#x1F4C4;</span>
+              <span>Documents</span>
+              <span class="toggle-icon" [class.expanded]="isExpandedCustom">▼</span>
+            </button>
+            @if (isExpandedCustom) {
+              <ul class="docs-nav-submenu">
+                @for (doc of customDocuments; track doc.filename) {
+                  <li>
+                    <a [routerLink]="gameSystemService.link('docs', 'page')" [queryParams]="{ file: doc.filename }"
+                       routerLinkActive="active" class="docs-nav-sublink">
+                      @if (doc.icon) { {{ doc.icon }} }
+                      {{ doc.name }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      }
 
       <a [routerLink]="gameSystemService.link('docs', 'publications')" routerLinkActive="active" class="docs-nav-link">
         <span class="docs-nav-icon">&#x1F4DA;</span>

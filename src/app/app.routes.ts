@@ -5,6 +5,7 @@ import { CharacterFormComponent } from './components/character-form/character-fo
 import { CombatTrackerComponent } from './components/combat-tracker/combat-tracker.component';
 import { CombatMapComponent } from './components/combat-map/combat-map.component';
 import { RulesReferenceComponent } from './components/rules-reference/rules-reference.component';
+import { MarkdownPageComponent } from './components/markdown-page/markdown-page.component';
 import { BestiaryComponent } from './components/bestiary/bestiary.component';
 import { MonsterCreatorComponent } from './components/monster-creator/monster-creator.component';
 import { SettingsComponent } from './components/settings/settings.component';
@@ -36,6 +37,7 @@ const gameSystemRoutes: Routes = [
       { path: 'rules', component: RulesReferenceComponent },
       { path: 'publications', component: PublicationsComponent },
       { path: 'gm-screen', component: GameMastersScreenComponent },
+      { path: 'page', component: MarkdownPageComponent },
       { path: '', redirectTo: 'rules', pathMatch: 'full' }
     ]
   },

@@ -8,6 +8,26 @@ interface RulesDocument {
   name: string;
 }
 
+interface CustomDocument {
+  filename: string;
+  name: string;
+  icon?: string;
+}
+
+// Add entries here to show additional markdown docs in the sidebar.
+// Place the .md files in public/docs/ and use their path as `filename`.
+// Example: { filename: 'house-rules.md', name: 'House Rules', icon: '🏠' }
+const CUSTOM_DOCUMENTS: CustomDocument[] = [
+  {
+    filename: 'BASIC ROLE-PLAYING.md',
+    name: 'Basic Roleplaying'
+  },
+  {
+    filename: 'CHA4028-Adventures.md',
+    name: 'Game Master\'s Screen Adventure Book'
+  }
+];
+
 const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
   runequest: [
     { filename: 'I-introduction', name: 'I. Introduction' },
@@ -41,7 +61,9 @@ const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
 })
 export class DocsComponent {
   rulesDocuments = computed(() => RULES_DOCUMENTS[this.gameSystemService.gameSystem()]);
+  customDocuments = CUSTOM_DOCUMENTS;
   isExpandedRules = true;
+  isExpandedCustom = true;
 
   constructor(
     public gameSystemService: GameSystemService
@@ -49,5 +71,9 @@ export class DocsComponent {
 
   toggleRulesMenu() {
     this.isExpandedRules = !this.isExpandedRules;
+  }
+
+  toggleCustomMenu() {
+    this.isExpandedCustom = !this.isExpandedCustom;
   }
 }

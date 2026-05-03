@@ -1,0 +1,45 @@
+<div class="markdown-page">
+  <div class="markdown-layout">
+    @if (!isFullscreen && !isLoading && toc.length > 0) {
+      <aside class="toc-sidebar">
+        <nav class="toc-nav">
+          <h3 class="toc-title">Table of Contents</h3>
+          <ul class="toc-list">
+            @for (item of toc; track item.anchor) {
+              <li [style.margin-left.rem]="(item.level - 2) * 0.75">
+                <a (click)="scrollToSection(item.anchor)" class="toc-link">
+                  {{ item.title }}
+                </a>
+              </li>
+            }
+          </ul>
+        </nav>
+      </aside>
+    }
+
+    @if (!isLoading && !error) {
+      <main class="page-container">
+        <button
+          class="fullscreen-btn"
+          (click)="toggleFullscreen()"
+          [title]="isFullscreen ? 'Exit full screen' : 'Full screen'"
+          [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'">
+          {{ isFullscreen ? '✕' : '⛶' }}
+        </button>
+        <div [innerHTML]="html" class="markdown-content"></div>
+      </main>
+    }
+
+    @if (isLoading) {
+      <div class="loading-state">
+        <p>Loading document...</p>
+      </div>
+    }
+
+    @if (error) {
+      <div class="error-state">
+        <p><strong>Error:</strong> {{ error }}</p>
+      </div>
+    }
+  </div>
+</div>
