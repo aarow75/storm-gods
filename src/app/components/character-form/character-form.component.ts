@@ -70,6 +70,7 @@ export class CharacterFormComponent implements OnInit {
     skills: { ...DEFAULT_SKILLS },
     hitLocations: { ...DEFAULT_HIT_LOCATIONS },
     armor: { ...DEFAULT_ARMOR },
+    armorType: undefined,
     shields: [],
     weapons: [],
     runes: JSON.parse(JSON.stringify(DEFAULT_RUNES)),
@@ -157,10 +158,14 @@ export class CharacterFormComponent implements OnInit {
     this.showValidationErrors = false;
     this.validationErrorList = [];
 
-    // Apply skill category modifiers based on final characteristic values
-    const skillsWithModifiers = this.character.stats
-      ? initializeSkillsWithModifiers(this.character.stats, this.character.skills!)
-      : this.character.skills!;
+    // Only apply skill category modifiers on initial character creation, not when editing
+    // (Editing characters already have modifiers applied from previous saves)
+    let skillsToSave = this.character.skills!;
+    if (!this.editMode) {
+      skillsToSave = this.character.stats
+        ? initializeSkillsWithModifiers(this.character.stats, this.character.skills!)
+        : this.character.skills!;
+    }
 
     const characterData: Character = {
       id: this.editMode && this.editingId ? this.editingId : '',
@@ -169,9 +174,10 @@ export class CharacterFormComponent implements OnInit {
       background: this.character.background!,
       stats: this.character.stats!,
       derivedStats: this.character.derivedStats!,
-      skills: skillsWithModifiers,
+      skills: skillsToSave,
       hitLocations: this.character.hitLocations!,
       armor: this.character.armor!,
+      armorType: this.character.armorType,
       shields: this.character.shields,
       weapons: this.character.weapons!,
       runes: this.character.runes!,
@@ -213,6 +219,7 @@ export class CharacterFormComponent implements OnInit {
         skills: { ...character.skills },
         hitLocations: { ...character.hitLocations },
         armor: { ...character.armor },
+        armorType: character.armorType,
         shields: character.shields ? [...character.shields.map(s => ({ ...s }))] : [],
         weapons: character.weapons ? [...character.weapons.map(w => ({ ...w }))] : [],
         runes: JSON.parse(JSON.stringify(character.runes)),
@@ -718,6 +725,7 @@ export class CharacterFormComponent implements OnInit {
       skills: { ...DEFAULT_SKILLS },
       hitLocations: { ...DEFAULT_HIT_LOCATIONS },
       armor: { ...DEFAULT_ARMOR },
+      armorType: undefined,
       shields: [],
       weapons: [],
       runes: JSON.parse(JSON.stringify(DEFAULT_RUNES)),

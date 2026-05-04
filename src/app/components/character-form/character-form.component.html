@@ -391,6 +391,7 @@
           <div class="section-content">
             <app-character-notes
               [notes]="character.notes!"
+              (notesChange)="character.notes = $event"
             ></app-character-notes>
           </div>
           }

@@ -4,7 +4,8 @@
 <div class="form-group">
   <textarea
     id="notes"
-    [(ngModel)]="notes"
+    [ngModel]="notes"
+    (ngModelChange)="onNotesChange($event)"
     name="notes"
     rows="6"
     placeholder="Additional notes about the character..."
