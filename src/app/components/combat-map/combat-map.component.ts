@@ -30,6 +30,7 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
   private lastSyncedRound = 0;
   private updateInterval: any;
   combatLogEntries = signal<string[]>([]);
+  showLegend = signal(false);
   drawWallMode = false;
   selectedWallColor: 'black' | 'brown' = 'black';
 
@@ -345,6 +346,10 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
     return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  toggleLegend(): void {
+    this.showLegend.update(v => !v);
   }
 
   toggleWallMode(): void {

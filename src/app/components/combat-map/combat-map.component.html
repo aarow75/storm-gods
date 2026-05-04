@@ -10,6 +10,12 @@
   </div>
 
   <div class="wall-toolbar">
+    <button [class.active]="showLegend()" (click)="toggleLegend()" class="btn btn-secondary">
+      {{ showLegend() ? 'Hide Legend' : 'Show Legend' }}
+    </button>
+
+    <span class="toolbar-sep">|</span>
+
     <button [class.active]="drawWallMode" (click)="toggleWallMode()" class="btn btn-secondary">
       {{ drawWallMode ? 'Stop Drawing Walls' : 'Draw Walls' }}
     </button>
@@ -54,6 +60,46 @@
     <span class="toolbar-sep">|</span>
     <button (click)="newMap()" class="btn btn-danger btn-small">New Map</button>
   </div>
+
+  @if (showLegend()) {
+    <div class="legend-section">
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-label">Participant Token</div>
+          <div class="legend-sample">
+            <div class="participant-token" style="background-color: #3b82f6">A</div>
+            <span class="legend-desc">Character or monster (colored by character, first letter of name)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-item">
+          <div class="legend-label">Walls</div>
+          <div class="legend-sample">
+            <div class="wall-sample black-wall"></div>
+            <span class="legend-desc">Black wall</span>
+          </div>
+        </div>
+        <div class="legend-item">
+          <div class="wall-sample brown-wall"></div>
+          <span class="legend-desc">Brown wall</span>
+        </div>
+      </div>
+
+      <div class="legend-row">
+        <div class="legend-label">Dungeon Elements</div>
+        <div class="legend-tokens">
+          @for (def of dungeonTokenDefs; track def.id) {
+            <div class="legend-token-item">
+              <div class="dungeon-token-legend" [style.color]="def.defaultColor">{{ def.symbol }}</div>
+              <span class="legend-token-name">{{ def.label }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 
   @if (participants.length === 0) {
     <p class="empty-state">No participants in combat. Add participants in the Combat Tracker first.</p>

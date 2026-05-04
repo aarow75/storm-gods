@@ -727,3 +727,93 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
 }
+
+/* Legend Section */
+.legend-section {
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-3xl);
+  margin-bottom: var(--spacing-3xl);
+  box-shadow: 0 2px 4px var(--shadow-black-10);
+}
+
+.legend-row {
+  display: flex;
+  gap: var(--spacing-4xl);
+  margin-bottom: var(--spacing-3xl);
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.legend-row:last-child {
+  margin-bottom: 0;
+}
+
+.legend-label {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-dark);
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.legend-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  min-width: 200px;
+}
+
+.legend-sample {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xl);
+}
+
+.legend-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+
+.wall-sample {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-border-light);
+}
+
+.black-wall {
+  background-color: #1a1a1a;
+}
+
+.brown-wall {
+  background-color: #6B3A2A;
+}
+
+.legend-tokens {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--spacing-2xl);
+  margin-top: var(--spacing-2xl);
+}
+
+.legend-token-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+}
+
+.dungeon-token-legend {
+  font-size: var(--font-size-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+}
+
+.legend-token-name {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-medium);
+}
