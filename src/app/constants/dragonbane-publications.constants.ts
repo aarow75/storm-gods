@@ -3,6 +3,7 @@ export interface DragonbanePublication {
   publishedYear: number;
   description?: string;
   publisher?: string;
+  purchased?: boolean;
 }
 
 export const DRAGONBANE_PUBLICATIONS: DragonbanePublication[] = [
@@ -12,12 +13,14 @@ export const DRAGONBANE_PUBLICATIONS: DragonbanePublication[] = [
     publishedYear: 2023,
     description: 'Core rulebook with D20-based rules, character creation, skills, combat, and magic. Includes the introductory adventure "The Castle of the Robber Knight"',
     publisher: 'Free League Publishing',
+    purchased: true,
   },
   {
     title: 'Dragonbane Core Set',
     publishedYear: 2023,
     description: 'Complete boxed set including rulebook, 11 adventures book (Secret of the Dragon Emperor campaign), solo play booklet, full-color map, dice, standees, character sheets, and cards',
     publisher: 'Free League Publishing',
+    purchased: true,
   },
 
   // Bestiary & Creatures
@@ -26,6 +29,7 @@ export const DRAGONBANE_PUBLICATIONS: DragonbanePublication[] = [
     publishedYear: 2024,
     description: '63 creatures with text and illustration, plus 9 new playable kin. Available in standard and premium Collector\'s Edition',
     publisher: 'Free League Publishing',
+    purchased: true,
   },
 
   // Adventures & Campaigns

@@ -91,7 +91,7 @@
 
 .table-header {
   display: grid;
-  grid-template-columns: 100px 2fr 45px 2fr;
+  grid-template-columns: 100px 2fr 45px 40px 2fr;
   gap: var(--spacing-md);
   padding: var(--spacing-xl) var(--spacing-2xl);
   background: linear-gradient(135deg, var(--docs-accent-dark) 0%, var(--docs-accent-header) 100%);
@@ -108,11 +108,11 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 100px 2fr 45px 2fr;
+  grid-template-columns: 100px 2fr 45px 40px 2fr;
   gap: var(--spacing-md);
   padding: var(--spacing-lg) var(--spacing-2xl);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  align-items: start;
+  align-items: center;
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   transition: background-color 0.15s ease;
@@ -164,12 +164,25 @@
 
 .dragonbane-table .table-header,
 .dragonbane-table .table-row {
-  grid-template-columns: 2fr 45px 1fr;
+  grid-template-columns: 2fr 45px 40px 1fr;
 }
 
 .dragonbane-table .table-header:has(.col-publisher),
 .dragonbane-table .table-row:has(.col-publisher) {
-  grid-template-columns: 2fr 45px 120px 1.5fr;
+  grid-template-columns: 2fr 45px 120px 40px 1.5fr;
+}
+
+.col-owned {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.purchase-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: default;
+  accent-color: var(--docs-accent);
 }
 
 .stats {
@@ -215,7 +228,7 @@
 
   .table-header,
   .table-row {
-    grid-template-columns: 80px 1fr 40px;
+    grid-template-columns: 1fr 40px 40px;
   }
 
   .col-number {
@@ -223,6 +236,20 @@
   }
 
   .col-description {
+    display: none;
+  }
+
+  .dragonbane-table .table-header,
+  .dragonbane-table .table-row {
+    grid-template-columns: 1fr 40px 40px;
+  }
+
+  .dragonbane-table .table-header:has(.col-publisher),
+  .dragonbane-table .table-row:has(.col-publisher) {
+    grid-template-columns: 1fr 40px 40px;
+  }
+
+  .col-publisher {
     display: none;
   }
 

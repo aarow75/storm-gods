@@ -15,6 +15,7 @@
               <div class="col-number">Catalog #</div>
               <div class="col-title">Title</div>
               <div class="col-year">Year</div>
+              <div class="col-owned">Owned</div>
               <div class="col-description">Description</div>
             </div>
             @for (pub of rq2Publications; track pub.chaosiumNumber) {
@@ -22,6 +23,9 @@
                 <div class="col-number">{{ pub.chaosiumNumber }}</div>
                 <div class="col-title">{{ pub.title }}</div>
                 <div class="col-year">{{ pub.publishedYear }}</div>
+                <div class="col-owned">
+                  <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+                </div>
                 <div class="col-description">{{ pub.description || '—' }}</div>
               </div>
             }
@@ -38,6 +42,7 @@
               <div class="col-number">Catalog #</div>
               <div class="col-title">Title</div>
               <div class="col-year">Year</div>
+              <div class="col-owned">Owned</div>
               <div class="col-description">Description</div>
             </div>
             @for (pub of modernPublications; track pub.chaosiumNumber) {
@@ -45,6 +50,9 @@
                 <div class="col-number">{{ pub.chaosiumNumber }}</div>
                 <div class="col-title">{{ pub.title }}</div>
                 <div class="col-year">{{ pub.publishedYear }}</div>
+                <div class="col-owned">
+                  <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+                </div>
                 <div class="col-description">{{ pub.description || '—' }}</div>
               </div>
             }
@@ -87,6 +95,7 @@
               @if (coreBooks.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
                 <div class="col-publisher">Publisher</div>
               }
+              <div class="col-owned">Owned</div>
               <div class="col-description">Description</div>
             </div>
             @for (pub of coreBooks; track pub.title) {
@@ -96,6 +105,9 @@
                 @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
                   <div class="col-publisher">{{ pub.publisher }}</div>
                 }
+                <div class="col-owned">
+                  <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+                </div>
                 <div class="col-description">{{ pub.description || '—' }}</div>
               </div>
             }
@@ -114,6 +126,7 @@
               @if (bestiaries.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
                 <div class="col-publisher">Publisher</div>
               }
+              <div class="col-owned">Owned</div>
               <div class="col-description">Description</div>
             </div>
             @for (pub of bestiaries; track pub.title) {
@@ -123,6 +136,9 @@
                 @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
                   <div class="col-publisher">{{ pub.publisher }}</div>
                 }
+                <div class="col-owned">
+                  <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+                </div>
                 <div class="col-description">{{ pub.description || '—' }}</div>
               </div>
             }
@@ -141,6 +157,7 @@
               @if (settings.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
                 <div class="col-publisher">Publisher</div>
               }
+              <div class="col-owned">Owned</div>
               <div class="col-description">Description</div>
             </div>
             @for (pub of settings; track pub.title) {
@@ -150,6 +167,9 @@
                 @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
                   <div class="col-publisher">{{ pub.publisher }}</div>
                 }
+                <div class="col-owned">
+                  <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+                </div>
                 <div class="col-description">{{ pub.description || '—' }}</div>
               </div>
             }
@@ -168,6 +188,7 @@
               @if (adventures.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
                 <div class="col-publisher">Publisher</div>
               }
+              <div class="col-owned">Owned</div>
               <div class="col-description">Description</div>
             </div>
             @for (pub of adventures; track pub.title) {
@@ -177,6 +198,9 @@
                 @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
                   <div class="col-publisher">{{ pub.publisher }}</div>
                 }
+                <div class="col-owned">
+                  <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+                </div>
                 <div class="col-description">{{ pub.description || '—' }}</div>
               </div>
             }
@@ -195,6 +219,7 @@
               @if (trudvangBooks.some(p => p.publisher && p.publisher !== 'Free League Publishing')) {
                 <div class="col-publisher">Publisher</div>
               }
+              <div class="col-owned">Owned</div>
               <div class="col-description">Description</div>
             </div>
             @for (pub of trudvangBooks; track pub.title) {
@@ -204,6 +229,9 @@
                 @if (pub.publisher && pub.publisher !== 'Free League Publishing') {
                   <div class="col-publisher">{{ pub.publisher }}</div>
                 }
+                <div class="col-owned">
+                  <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+                </div>
                 <div class="col-description">{{ pub.description || '—' }}</div>
               </div>
             }

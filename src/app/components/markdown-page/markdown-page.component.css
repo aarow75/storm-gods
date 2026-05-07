@@ -77,9 +77,9 @@
 }
 
 .fullscreen-btn {
-  position: absolute;
-  top: var(--spacing-3xl);
-  right: var(--spacing-3xl);
+  position: sticky; /* TODO: make this better */
+  top: 14rem;
+  right: 4rem;
   background: var(--color-bg-light);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--border-radius-md);
@@ -143,6 +143,10 @@
 ::ng-deep .page-container h1 { font-size: var(--font-size-2xl); }
 ::ng-deep .page-container h2 { font-size: var(--font-size-xl); }
 ::ng-deep .page-container h3 { font-size: var(--font-size-lg); }
+
+::ng-deep .page-container img {
+  width: -webkit-fill-available;
+}
 
 ::ng-deep .page-container p {
   margin: var(--spacing-lg) 0;

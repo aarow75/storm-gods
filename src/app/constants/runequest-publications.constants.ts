@@ -3,6 +3,7 @@ export interface RuneQuestPublication {
   title: string;
   publishedYear: number;
   description?: string;
+  purchased?: boolean;
 }
 
 export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
@@ -12,6 +13,7 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'RuneQuest 2 Rulebook',
     publishedYear: 1979,
     description: 'Core rulebook for RuneQuest 2nd Edition',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4001-X',
@@ -84,12 +86,14 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'Plunder',
     publishedYear: 1980,
     description: 'Treasure and equipment supplement',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4012',
     title: 'Runemasters',
     publishedYear: 1980,
     description: 'Magic system supplement',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4013',
@@ -108,12 +112,14 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'Borderlands',
     publishedYear: 1982,
     description: 'Boxed campaign setting',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4016-X',
     title: 'Troll Pak',
     publishedYear: 1982,
     description: 'Boxed troll supplement',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4017',
@@ -170,17 +176,20 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'RuneQuest: Roleplaying in Glorantha Quickstart',
     publishedYear: 2017,
     description: 'Quick-start rules for new players',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4028',
     title: 'RuneQuest – Roleplaying in Glorantha',
     publishedYear: 2018,
     description: 'Core rulebook',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4029',
     title: 'Gamemaster Screen Pack',
     publishedYear: 2019,
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4030',
@@ -197,12 +206,14 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'RuneQuest Glorantha Bestiary',
     publishedYear: 2019,
     description: 'Creatures and monsters of Glorantha',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4033',
     title: 'The Glorantha Sourcebook',
     publishedYear: 2018,
     description: 'Lore and background of Glorantha',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4034',
@@ -215,6 +226,7 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'RuneQuest Starter Set',
     publishedYear: 2021,
     description: 'Beginner-friendly starter set',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4036',
@@ -227,12 +239,14 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'Lands of RuneQuest: Dragon Pass',
     publishedYear: 2024,
     description: 'Regional guide to Dragon Pass',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4038',
     title: 'The Pegasus Plateau & Other Stories',
     publishedYear: 2020,
     description: 'Adventure scenarios',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4039',
@@ -257,12 +271,14 @@ export const RUNEQUEST_PUBLICATIONS: RuneQuestPublication[] = [
     title: 'Cults of RuneQuest: The Lightbringers',
     publishedYear: 2023,
     description: 'Light-aligned cults and deities',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4044',
     title: 'Cults of RuneQuest: The Earth Goddesses',
     publishedYear: 2023,
     description: 'Earth-aligned and fertility cults',
+    purchased: true,
   },
   {
     chaosiumNumber: 'CHA4045',
