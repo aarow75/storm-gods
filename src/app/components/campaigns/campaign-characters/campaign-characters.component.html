@@ -1,0 +1,92 @@
+<div class="campaign-characters">
+  <div class="header">
+    <h3>Campaign Roster</h3>
+    <button class="btn btn-primary" (click)="openAddModal()">+ Add Character</button>
+  </div>
+
+  @if (campaignCharacters.length === 0) {
+    <div class="no-characters">
+      <p>No characters in this campaign yet. Add your first character to begin!</p>
+      <button class="btn btn-primary" (click)="openAddModal()">Add Character</button>
+    </div>
+  } @else {
+    <div class="character-roster">
+      @for (character of campaignCharacters; track character.id) {
+        <div class="character-item">
+          <div class="character-info">
+            <div class="character-name-area">
+              <h4>{{ character.name }}</h4>
+              <span class="character-color" [style.background]="character.color"></span>
+            </div>
+
+            <div class="character-details">
+              <div class="detail">
+                <span class="label">Occupation:</span>
+                <span class="value">{{ getCharacterOccupation(character) }}</span>
+              </div>
+              <div class="detail">
+                <span class="label">Cult:</span>
+                <span class="value">{{ getCharacterCult(character) }}</span>
+              </div>
+              <div class="detail">
+                <span class="label">HP:</span>
+                <span class="value">{{ getCharacterHP(character) }}</span>
+              </div>
+            </div>
+
+            <div class="character-actions">
+              <a [routerLink]="gameSystemService.link('characters', character.id)" class="btn btn-secondary btn-small">
+                View Details
+              </a>
+              <button class="btn btn-remove btn-small" (click)="removeCharacter(character.id, $event)">
+                Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showAddModal) {
+  <div class="modal" (click)="closeAddModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Character to Campaign</h3>
+        <button class="btn-close" (click)="closeAddModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        @if (availableCharacters.length === 0) {
+          <p class="no-available">No available characters. Create a new character first.</p>
+        } @else {
+          <div class="character-selection">
+            @for (character of availableCharacters; track character.id) {
+              <label class="character-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="selectedCharacterIds.has(character.id)"
+                  (change)="toggleCharacterSelection(character.id)" />
+                <div class="checkbox-label">
+                  <span class="name">{{ character.name }}</span>
+                  <span class="occupation">{{ getCharacterOccupation(character) }}</span>
+                </div>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeAddModal()">Cancel</button>
+        <button
+          class="btn btn-primary"
+          (click)="addSelectedCharacters()"
+          [disabled]="selectedCharacterIds.size === 0">
+          Add Selected ({{ selectedCharacterIds.size }})
+        </button>
+      </div>
+    </div>
+  </div>
+}

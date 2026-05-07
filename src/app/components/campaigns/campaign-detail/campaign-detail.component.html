@@ -1,0 +1,101 @@
+<div class="campaign-detail-container">
+  @if (!campaignData) {
+    <div class="loading">Loading campaign...</div>
+  } @else {
+    <div class="detail-header">
+      <div class="breadcrumb">
+        <button class="btn-back" (click)="goBack()">← Campaigns</button>
+        <span class="breadcrumb-sep">›</span>
+        <span class="campaign-name">{{ campaignData.campaign.name }}</span>
+        @if (activeTab !== 'overview') {
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-tab">{{ activeTab | titlecase }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="tab-navigation">
+      <div class="tab-group">
+        <button
+          type="button"
+          role="tab"
+          class="tab-button"
+          [class.active]="activeTab === 'overview'"
+          [attr.aria-selected]="activeTab === 'overview'"
+          (click)="selectTab('overview')">
+          Overview
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-button"
+          [class.active]="activeTab === 'characters'"
+          [attr.aria-selected]="activeTab === 'characters'"
+          (click)="selectTab('characters')">
+          Characters
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-button"
+          [class.active]="activeTab === 'sessions'"
+          [attr.aria-selected]="activeTab === 'sessions'"
+          (click)="selectTab('sessions')">
+          Sessions
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-button"
+          [class.active]="activeTab === 'objectives'"
+          [attr.aria-selected]="activeTab === 'objectives'"
+          (click)="selectTab('objectives')">
+          Objectives
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-button"
+          [class.active]="activeTab === 'analytics'"
+          [attr.aria-selected]="activeTab === 'analytics'"
+          (click)="selectTab('analytics')">
+          Analytics
+        </button>
+      </div>
+    </div>
+
+    <div class="tab-content">
+      @if (activeTab === 'overview') {
+        <app-campaign-overview
+          [campaignData]="campaignData"
+          (dataChanged)="onDataChanged()">
+        </app-campaign-overview>
+      }
+
+      @if (activeTab === 'characters') {
+        <app-campaign-characters
+          [campaignData]="campaignData"
+          (dataChanged)="onDataChanged()">
+        </app-campaign-characters>
+      }
+
+      @if (activeTab === 'sessions') {
+        <app-campaign-sessions
+          [campaignData]="campaignData"
+          (dataChanged)="onDataChanged()">
+        </app-campaign-sessions>
+      }
+
+      @if (activeTab === 'objectives') {
+        <app-campaign-objectives
+          [campaignData]="campaignData"
+          (dataChanged)="onDataChanged()">
+        </app-campaign-objectives>
+      }
+
+      @if (activeTab === 'analytics') {
+        <app-campaign-analytics [campaignData]="campaignData"></app-campaign-analytics>
+      }
+    </div>
+  }
+</div>

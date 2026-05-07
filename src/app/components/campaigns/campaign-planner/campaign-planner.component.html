@@ -1,0 +1,94 @@
+<div class="campaigns-container">
+  <div class="campaigns-header">
+    <h2>Campaigns</h2>
+    <button class="btn btn-primary btn-create-campaign" (click)="openCreateModal()">
+      + New Campaign
+    </button>
+  </div>
+
+  @if (campaigns.length === 0) {
+    <div class="no-campaigns">
+      <p>No campaigns yet. Create your first campaign below!</p>
+      <button class="btn btn-primary btn-create-large" (click)="openCreateModal()">Create New Campaign</button>
+    </div>
+  } @else {
+    <div class="campaigns-grid">
+      @for (campaign of campaigns; track campaign.id) {
+        <div class="campaign-card" (click)="$event.preventDefault()">
+          <div class="card-header">
+            <h3>{{ campaign.name }}</h3>
+            <span [class]="'status-badge ' + getStatusColor(campaign.status)">
+              {{ campaign.status | uppercase }}
+            </span>
+          </div>
+
+          @if (campaign.primarySetting) {
+            <p class="campaign-setting">{{ campaign.primarySetting }}</p>
+          }
+
+          @if (campaign.description) {
+            <p class="campaign-description">{{ campaign.description }}</p>
+          }
+
+          <div class="campaign-stats">
+            <div class="stat">
+              <span class="stat-label">Started:</span>
+              <span class="stat-value">{{ formatDate(campaign.startDate) }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Characters:</span>
+              <span class="stat-value">{{ getCharacterCount(campaign) }}</span>
+            </div>
+          </div>
+
+          <div class="campaign-actions">
+            <a [routerLink]="gameSystemService.link('campaigns', campaign.id)" class="btn btn-secondary">
+              View Details
+            </a>
+            <button class="btn btn-remove" (click)="deleteCampaign(campaign.id, $event)">
+              Delete
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showCreateModal) {
+  <div class="modal" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create New Campaign</h3>
+        <button class="btn-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Campaign Name <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="newCampaignForm.name" placeholder="Enter campaign name" />
+        </div>
+
+        <div class="form-group">
+          <label>Primary Setting</label>
+          <input type="text" [(ngModel)]="newCampaignForm.primarySetting" placeholder="e.g., Glorantha - Sartar Province" />
+        </div>
+
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" [(ngModel)]="newCampaignForm.startDate" />
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="newCampaignForm.description" placeholder="Campaign description" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="createCampaign()">Create Campaign</button>
+      </div>
+    </div>
+  </div>
+}

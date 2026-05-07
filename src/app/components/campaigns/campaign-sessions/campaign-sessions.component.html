@@ -1,0 +1,165 @@
+<div class="campaign-sessions">
+  <div class="header">
+    <h3>Session Log</h3>
+    <button class="btn btn-primary" (click)="openCreateModal()">+ Log Session</button>
+  </div>
+
+  @if (sessions.length === 0) {
+    <div class="no-sessions">
+      <p>No sessions logged yet. Start your campaign by logging the first session!</p>
+      <button class="btn btn-primary" (click)="openCreateModal()">Log Session</button>
+    </div>
+  } @else {
+    <div class="sessions-list">
+      @for (session of sessions; track session.id) {
+        <div class="session-card">
+          <div class="session-header">
+            <div class="session-number">Session {{ session.sessionNumber }}</div>
+            <div class="session-date">{{ formatDate(session.date) }}</div>
+            <button class="btn btn-remove btn-small" (click)="deleteSession(session.id, $event)">Delete</button>
+          </div>
+
+          <div class="session-content">
+            <div class="session-details">
+              @if (session.location) {
+                <div class="detail">
+                  <span class="label">Location:</span>
+                  <span class="value">{{ session.location }}</span>
+                </div>
+              }
+
+              @if (session.duration) {
+                <div class="detail">
+                  <span class="label">Duration:</span>
+                  <span class="value">{{ session.duration }} minutes</span>
+                </div>
+              }
+
+              <div class="detail">
+                <span class="label">Attendees:</span>
+                <span class="value">{{ getAttendeeNames(session.attendeeIds) }}</span>
+              </div>
+            </div>
+
+            <div class="session-summary">
+              <p>{{ session.summary }}</p>
+            </div>
+
+            @if (session.objectivesProgressed && session.objectivesProgressed.length > 0) {
+              <div class="session-objectives">
+                <strong>Objectives:</strong>
+                <span>{{ getProgressedObjectiveTitles(session.objectivesProgressed) }}</span>
+              </div>
+            }
+
+            @if (session.notes) {
+              <div class="session-notes">
+                <strong>Notes:</strong>
+                <p>{{ session.notes }}</p>
+              </div>
+            }
+
+            @if (session.combatNotes) {
+              <div class="session-combat-notes">
+                <strong>Combat Notes:</strong>
+                <p>{{ session.combatNotes }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showCreateModal) {
+  <div class="modal" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Log New Session</h3>
+        <button class="btn-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Session Date <span class="required-star">*</span></label>
+          <input type="date" [(ngModel)]="newSessionForm.date" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Duration (minutes)</label>
+            <input type="number" [(ngModel)]="newSessionForm.duration" placeholder="e.g., 180" />
+          </div>
+          <div class="form-group">
+            <label>Location</label>
+            <input type="text" [(ngModel)]="newSessionForm.location" placeholder="e.g., Tavern, Ruins" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Session Summary <span class="required-star">*</span></label>
+          <textarea
+            [(ngModel)]="newSessionForm.summary"
+            placeholder="What happened in this session?"
+            rows="5"></textarea>
+        </div>
+
+        @if (campaignData.campaign.characterIds.length > 0) {
+          <div class="form-group">
+            <label>Attendees</label>
+            <div class="checkbox-group">
+              @for (characterId of campaignData.campaign.characterIds; track characterId) {
+                <label class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    [checked]="newSessionForm.attendees.has(characterId)"
+                    (change)="toggleAttendee(characterId)" />
+                  <span>{{ characterService.getCharacter(characterId)?.name }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        }
+
+        @if (campaignData.objectives.length > 0) {
+          <div class="form-group">
+            <label>Objectives Progressed</label>
+            <div class="checkbox-group">
+              @for (objective of campaignData.objectives; track objective.id) {
+                <label class="checkbox-item">
+                  <input
+                    type="checkbox"
+                    [checked]="newSessionForm.objectivesProgressed.has(objective.id)"
+                    (change)="toggleObjective(objective.id)" />
+                  <span>{{ objective.title }}</span>
+                </label>
+              }
+            </div>
+          </div>
+        }
+
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea
+            [(ngModel)]="newSessionForm.notes"
+            placeholder="Any additional notes"
+            rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Combat Notes</label>
+          <textarea
+            [(ngModel)]="newSessionForm.combatNotes"
+            placeholder="Paste or summarize relevant combat log entries"
+            rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="createSession()">Log Session</button>
+      </div>
+    </div>
+  </div>
+}

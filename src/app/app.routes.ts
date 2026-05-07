@@ -13,6 +13,8 @@ import { WildernessMapComponent } from './components/wilderness-map/wilderness-m
 import { PublicationsComponent } from './components/publications/publications.component';
 import { DocsComponent } from './components/docs/docs.component';
 import { GameMastersScreenComponent } from './components/game-masters-screen/game-masters-screen.component';
+import { CampaignPlannerComponent } from './components/campaigns/campaign-planner/campaign-planner.component';
+import { CampaignDetailComponent } from './components/campaigns/campaign-detail/campaign-detail.component';
 
 const LAST_USED_SYSTEM_KEY = 'gameSystem';
 
@@ -43,7 +45,9 @@ const gameSystemRoutes: Routes = [
   },
   { path: 'bestiary', component: BestiaryComponent },
   { path: 'monster-creator', component: MonsterCreatorComponent },
-  { path: 'settings', component: SettingsComponent }
+  { path: 'settings', component: SettingsComponent },
+  { path: 'campaigns', component: CampaignPlannerComponent },
+  { path: 'campaigns/:campaignId', component: CampaignDetailComponent }
 ];
 
 export const routes: Routes = [

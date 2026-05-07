@@ -1,0 +1,184 @@
+<div class="campaign-objectives">
+  <div class="header">
+    <h3>Campaign Objectives</h3>
+    <button class="btn btn-primary" (click)="openCreateModal()">+ New Objective</button>
+  </div>
+
+  @if (
+    objectivesByStatus.active.length === 0 &&
+    objectivesByStatus.paused.length === 0 &&
+    objectivesByStatus.completed.length === 0 &&
+    objectivesByStatus.failed.length === 0
+  ) {
+    <div class="no-objectives">
+      <p>No objectives yet. Create your first objective to begin tracking campaign goals!</p>
+      <button class="btn btn-primary" (click)="openCreateModal()">Create Objective</button>
+    </div>
+  } @else {
+    <div class="objectives-container">
+      @if (objectivesByStatus.active.length > 0) {
+        <div class="objectives-section">
+          <h4>Active Objectives</h4>
+          <div class="objectives-list">
+            @for (objective of objectivesByStatus.active; track objective.id) {
+              <div class="objective-card">
+                <div class="objective-header">
+                  <div class="header-left">
+                    <span [class]="'priority-badge ' + getPriorityColor(objective.priority)">
+                      {{ objective.priority | uppercase }}
+                    </span>
+                    <h5>{{ objective.title }}</h5>
+                  </div>
+                  <div class="header-right">
+                    <span [class]="'status-badge ' + getStatusColor(objective.status)">
+                      {{ getStatusLabel(objective.status) }}
+                    </span>
+                  </div>
+                </div>
+
+                @if (objective.description) {
+                  <p class="objective-description">{{ objective.description }}</p>
+                }
+
+                <div class="progress-section">
+                  <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="objective.progress"></div>
+                  </div>
+                  <div class="progress-controls">
+                    <button class="btn-progress" (click)="decrementProgress(objective, $event)">−</button>
+                    <span class="progress-text">{{ objective.progress }}%</span>
+                    <button class="btn-progress" (click)="incrementProgress(objective, $event)">+</button>
+                  </div>
+                </div>
+
+                @if (objective.notes) {
+                  <p class="objective-notes">{{ objective.notes }}</p>
+                }
+
+                <div class="objective-actions">
+                  <button class="btn btn-secondary btn-small" (click)="editObjective(objective)">Edit</button>
+                  <button class="btn btn-success btn-small" (click)="completeObjective(objective, $event)">Complete</button>
+                  <button class="btn btn-remove btn-small" (click)="deleteObjective(objective.id, $event)">Delete</button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (objectivesByStatus.paused.length > 0) {
+        <div class="objectives-section">
+          <h4>Paused Objectives</h4>
+          <div class="objectives-list">
+            @for (objective of objectivesByStatus.paused; track objective.id) {
+              <div class="objective-card paused">
+                <div class="objective-header">
+                  <div class="header-left">
+                    <span [class]="'priority-badge ' + getPriorityColor(objective.priority)">
+                      {{ objective.priority | uppercase }}
+                    </span>
+                    <h5>{{ objective.title }}</h5>
+                  </div>
+                  <span [class]="'status-badge ' + getStatusColor(objective.status)">
+                    Paused
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (objectivesByStatus.completed.length > 0 || objectivesByStatus.failed.length > 0) {
+        <div class="objectives-section">
+          <h4>Closed Objectives</h4>
+          <div class="objectives-list">
+            @for (objective of objectivesByStatus.completed; track objective.id) {
+              <div class="objective-card completed">
+                <div class="objective-header">
+                  <div class="header-left">
+                    <span [class]="'priority-badge ' + getPriorityColor(objective.priority)">
+                      {{ objective.priority | uppercase }}
+                    </span>
+                    <h5>{{ objective.title }}</h5>
+                  </div>
+                  <span [class]="'status-badge ' + getStatusColor(objective.status)">
+                    ✓ Completed
+                  </span>
+                </div>
+              </div>
+            }
+
+            @for (objective of objectivesByStatus.failed; track objective.id) {
+              <div class="objective-card failed">
+                <div class="objective-header">
+                  <div class="header-left">
+                    <span [class]="'priority-badge ' + getPriorityColor(objective.priority)">
+                      {{ objective.priority | uppercase }}
+                    </span>
+                    <h5>{{ objective.title }}</h5>
+                  </div>
+                  <span [class]="'status-badge ' + getStatusColor(objective.status)">
+                    ✗ Failed
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showCreateModal) {
+  <div class="modal" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ editingObjectiveId ? 'Edit Objective' : 'New Objective' }}</h3>
+        <button class="btn-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Title <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="newObjectiveForm.title" placeholder="Objective title" />
+        </div>
+
+        <div class="form-group">
+          <label>Priority</label>
+          <select [(ngModel)]="newObjectiveForm.priority">
+            <option value="critical">Critical</option>
+            <option value="major">Major</option>
+            <option value="minor">Minor</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea
+            [(ngModel)]="newObjectiveForm.description"
+            placeholder="What is the objective?"
+            rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea
+            [(ngModel)]="newObjectiveForm.notes"
+            placeholder="Any additional notes"
+            rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button
+          class="btn btn-primary"
+          (click)="editingObjectiveId ? updateObjective(editingObjectiveId) : createObjective()">
+          {{ editingObjectiveId ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

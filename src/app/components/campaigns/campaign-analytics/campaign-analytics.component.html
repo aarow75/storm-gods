@@ -1,0 +1,162 @@
+<div class="campaign-analytics">
+  <!-- Party Overview -->
+  <div class="analytics-section">
+    <h3>Party Overview</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ totalSessions }}</div>
+        <div class="stat-label">Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ totalCharacters }}</div>
+        <div class="stat-label">Characters</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ completedObjectives }}/{{ completedObjectives + activeObjectives }}</div>
+        <div class="stat-label">Objectives</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ formatPlayTime(totalPlayTime) }}</div>
+        <div class="stat-label">Play Time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Character Participation -->
+  @if (totalSessions > 0) {
+    <div class="analytics-section">
+      <h3>Character Participation</h3>
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Character</th>
+            <th>Sessions Attended</th>
+            <th>Attendance %</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (attendance of attendanceData; track attendance.character.id; let even = $even) {
+            <tr [class.even-row]="even">
+              <td>
+                <div class="character-name-cell">
+                  <span class="character-color" [style.background]="attendance.character.color"></span>
+                  <span>{{ attendance.character.name }}</span>
+                </div>
+              </td>
+              <td class="center">{{ attendance.sessionsAttended }}</td>
+              <td class="center">
+                <div class="attendance-bar">
+                  <div class="attendance-fill" [style.width.%]="attendance.attendancePercent"></div>
+                  <span class="attendance-text">{{ attendance.attendancePercent }}%</span>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Top Skills -->
+  @if (campaignCharacters.length > 0) {
+    <div class="analytics-section">
+      <h3>Character Skills</h3>
+      <div class="skills-grid">
+        @for (character of campaignCharacters; track character.id) {
+          <div class="character-skills-card">
+            <div class="card-header">
+              <span class="character-color" [style.background]="character.color"></span>
+              <h4>{{ character.name }}</h4>
+            </div>
+            @if (topSkillsMap.get(character.id) && topSkillsMap.get(character.id)!.length > 0) {
+              <div class="skills-list">
+                @for (skill of topSkillsMap.get(character.id); track skill.name) {
+                  <div class="skill-row">
+                    <span class="skill-name">{{ skill.name }}</span>
+                    <span class="skill-value">{{ skill.value }}%</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="no-skills">No skills recorded</p>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Objective Timeline -->
+  @if (objectives.length > 0) {
+    <div class="analytics-section">
+      <h3>Objective Timeline</h3>
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Progress</th>
+            <th>Created</th>
+            <th>Completed</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (objective of objectives; track objective.id; let even = $even) {
+            <tr [class.even-row]="even">
+              <td class="title-cell">{{ objective.title }}</td>
+              <td>
+                <span [class]="'priority-badge ' + getPriorityColor(objective.priority)">
+                  {{ objective.priority | uppercase }}
+                </span>
+              </td>
+              <td>
+                <span [class]="'status-badge ' + getObjectiveStatusColor(objective.status)">
+                  {{ objective.status | uppercase }}
+                </span>
+              </td>
+              <td class="center">{{ objective.progress }}%</td>
+              <td>{{ formatDate(objective.createdAt) }}</td>
+              <td>{{ objective.completedAt ? formatDate(objective.completedAt) : '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Session Log Summary -->
+  @if (sessions.length > 0) {
+    <div class="analytics-section">
+      <h3>Session Log</h3>
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Session</th>
+            <th>Date</th>
+            <th>Location</th>
+            <th>Attendees</th>
+            <th>Duration</th>
+            <th>Combat Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (session of sessions; track session.id; let even = $even) {
+            <tr [class.even-row]="even">
+              <td class="session-num">Session {{ session.sessionNumber }}</td>
+              <td>{{ formatDate(session.date) }}</td>
+              <td>{{ getSessionLocation(session) }}</td>
+              <td class="attendees-cell">
+                <div class="attendees-text">{{ getAttendeeNames(session.attendeeIds) }}</div>
+              </td>
+              <td class="center">{{ session.duration ? session.duration + 'm' : '—' }}</td>
+              <td class="notes-cell">
+                {{ session.combatNotes ? getTruncatedSummary(session.combatNotes, 40) : '—' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

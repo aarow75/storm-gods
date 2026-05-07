@@ -1,0 +1,101 @@
+<div class="campaign-overview">
+  @if (!isEditMode) {
+    <div class="view-mode">
+      <div class="header-section">
+        <div class="header-top">
+          <div class="title-area">
+            <h2>{{ campaignData.campaign.name }}</h2>
+            <span [class]="'status-badge ' + getStatusColor(campaignData.campaign.status)">
+              {{ campaignData.campaign.status | uppercase }}
+            </span>
+          </div>
+          <button class="btn btn-secondary" (click)="toggleEditMode()">Edit Campaign</button>
+        </div>
+
+        @if (campaignData.campaign.primarySetting) {
+          <p class="setting">📍 {{ campaignData.campaign.primarySetting }}</p>
+        }
+
+        @if (campaignData.campaign.description) {
+          <p class="description">{{ campaignData.campaign.description }}</p>
+        }
+      </div>
+
+      <div class="dates-section">
+        <div class="date-item">
+          <span class="label">Started:</span>
+          <span class="value">{{ formatDate(campaignData.campaign.startDate) }}</span>
+        </div>
+        @if (campaignData.campaign.endDate) {
+          <div class="date-item">
+            <span class="label">Completed:</span>
+            <span class="value">{{ formatDate(campaignData.campaign.endDate) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">{{ campaignData.campaign.characterIds.length }}</div>
+          <div class="stat-label">Characters</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getActiveSessions() }}</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getActiveObjectives() }}</div>
+          <div class="stat-label">Active Objectives</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">{{ getTotalObjectives() }}</div>
+          <div class="stat-label">Total Objectives</div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="edit-mode">
+      <h3>Edit Campaign</h3>
+
+      <div class="form-group">
+        <label>Campaign Name <span class="required-star">*</span></label>
+        <input type="text" [(ngModel)]="editForm.name" />
+      </div>
+
+      <div class="form-group">
+        <label>Primary Setting</label>
+        <input type="text" [(ngModel)]="editForm.primarySetting" placeholder="e.g., Glorantha - Sartar Province" />
+      </div>
+
+      <div class="form-group">
+        <label>Status</label>
+        <select [(ngModel)]="editForm.status">
+          <option value="active">Active</option>
+          <option value="paused">Paused</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" [(ngModel)]="editForm.startDate" />
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" [(ngModel)]="editForm.endDate" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="editForm.description" rows="5"></textarea>
+      </div>
+
+      <div class="edit-actions">
+        <button class="btn btn-secondary" (click)="toggleEditMode()">Cancel</button>
+        <button class="btn btn-primary" (click)="saveCampaign()">Save Changes</button>
+      </div>
+    </div>
+  }
+</div>
