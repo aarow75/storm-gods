@@ -80,6 +80,10 @@ export class MarkdownPageComponent implements OnInit, OnDestroy {
         }
         this.isLoading = false;
         this.cdr.markForCheck();
+        const fragment = this.route.snapshot.fragment;
+        if (fragment) {
+          this.scrollToSection(fragment);
+        }
       });
   }
 

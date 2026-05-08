@@ -23,8 +23,15 @@ const CUSTOM_DOCUMENTS: CustomDocument[] = [
     name: 'Basic Roleplaying'
   },
   {
-    filename: 'CHA4029-Adventures.md',
-    name: 'Game Master\'s Screen Adventure Book'
+    filename: 'dragonbane-srd.md',
+    name: 'Dragonbane Quickstart Rules'
+  }
+];
+
+const ADVENTURE_DOCUMENTS: CustomDocument[] = [
+  {
+    filename: 'runequest/adventures/00-Gamemasters-Screen-Pack-Adventures.md',
+    name: 'CHA4029 Gamemaster\'s Screen Pack: Adventures'
   }
 ];
 
@@ -62,8 +69,10 @@ const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
 export class DocsComponent {
   rulesDocuments = computed(() => RULES_DOCUMENTS[this.gameSystemService.gameSystem()]);
   customDocuments = CUSTOM_DOCUMENTS;
+  adventureDocuments = ADVENTURE_DOCUMENTS;
   isExpandedRules = true;
   isExpandedCustom = true;
+  isExpandedAdventures = true;
 
   constructor(
     public gameSystemService: GameSystemService
@@ -75,5 +84,9 @@ export class DocsComponent {
 
   toggleCustomMenu() {
     this.isExpandedCustom = !this.isExpandedCustom;
+  }
+
+  toggleAdventuresMenu() {
+    this.isExpandedAdventures = !this.isExpandedAdventures;
   }
 }

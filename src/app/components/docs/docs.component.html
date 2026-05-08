@@ -23,6 +23,30 @@
         </div>
       </div>
 
+      @if (adventureDocuments.length > 0) {
+        <div class="docs-nav-group">
+          <div>
+            <button (click)="toggleAdventuresMenu()" class="docs-nav-link docs-nav-toggle">
+              <span class="docs-nav-icon">&#x2694;&#xFE0F;</span>
+              <span>Adventures</span>
+              <span class="toggle-icon" [class.expanded]="isExpandedAdventures">▼</span>
+            </button>
+            @if (isExpandedAdventures) {
+              <ul class="docs-nav-submenu">
+                @for (doc of adventureDocuments; track doc.filename) {
+                  <li>
+                    <a [routerLink]="gameSystemService.link('docs', 'page')" [queryParams]="{ file: doc.filename }"
+                       routerLinkActive="active" class="docs-nav-sublink">
+                      {{ doc.name }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      }
+
       @if (customDocuments.length > 0) {
         <div class="docs-nav-group">
           <div>

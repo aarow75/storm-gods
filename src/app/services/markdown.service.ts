@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import MarkdownIt from 'markdown-it';
 import markdownItFootnote from 'markdown-it-footnote';
 import markdownItAnchor from 'markdown-it-anchor';
+import markdownItAttrs from 'markdown-it-attrs';
 
 export interface TocItem {
   level: number;
@@ -13,7 +14,8 @@ export interface TocItem {
 export class MarkdownService {
   private md = new MarkdownIt()
     .use(markdownItFootnote)
-    .use(markdownItAnchor);
+    .use(markdownItAnchor)
+    .use(markdownItAttrs);
 
   renderMarkdown(content: string): string {
     return this.md.render(content);
