@@ -23,7 +23,7 @@ const CUSTOM_DOCUMENTS: CustomDocument[] = [
     name: 'Basic Roleplaying'
   },
   {
-    filename: 'CHA4028-Adventures.md',
+    filename: 'CHA4029-Adventures.md',
     name: 'Game Master\'s Screen Adventure Book'
   }
 ];
