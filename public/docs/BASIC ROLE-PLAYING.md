@@ -1,7 +1,4 @@
-\pagestyle{empty}
 ![](docs/cover2.png)
-
-\newpage
 
 
 __BASIC ROLE-PLAYING__
@@ -11,11 +8,6 @@ __An Introductory Guide__
 _by GREG STAFFORD and LYNN WILLIS_
 
 Copyright&copy;1980 Chaosium Inc. All Rights Reserved. Published by Chaosium Inc., Box 6302, Albany CA 94706.
-
-
-\newpage
-\pagestyle{plain}
-\setcounter{page}{1}
 
 # I. Introduction
 

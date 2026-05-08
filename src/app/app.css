@@ -219,7 +219,7 @@ header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 1rem 1.5rem;
+  padding: 0.25rem 0.75rem;
   color: var(--color-gray-600);
   text-decoration: none;
   font-weight: 500;

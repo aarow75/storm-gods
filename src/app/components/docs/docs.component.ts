@@ -17,23 +17,36 @@ interface CustomDocument {
 // Add entries here to show additional markdown docs in the sidebar.
 // Place the .md files in public/docs/ and use their path as `filename`.
 // Example: { filename: 'house-rules.md', name: 'House Rules', icon: '🏠' }
-const CUSTOM_DOCUMENTS: CustomDocument[] = [
-  {
-    filename: 'BASIC ROLE-PLAYING.md',
-    name: 'Basic Roleplaying'
-  },
-  {
-    filename: 'dragonbane-srd.md',
-    name: 'Dragonbane Quickstart Rules'
-  }
-];
+const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
+  runequest: [
+    {
+      filename: 'BASIC ROLE-PLAYING.md',
+      name: 'Basic Roleplaying'
+    },
+  ],
+  dragonbane: [
+    {
+      filename: 'dragonbane/dragonbane-srd.md',
+      name: 'Dragonbane Quickstart Rules'
+    },
+    {
+      filename: 'dragonbane/dragonbane-faq.md',
+      name: 'Dragonbane FAQ'
+    }
 
-const ADVENTURE_DOCUMENTS: CustomDocument[] = [
-  {
-    filename: 'runequest/adventures/00-Gamemasters-Screen-Pack-Adventures.md',
-    name: 'CHA4029 Gamemaster\'s Screen Pack: Adventures'
-  }
-];
+  ]
+};
+
+const ADVENTURE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
+  runequest: [
+    {
+      filename: 'runequest/adventures/00-Gamemasters-Screen-Pack-Adventures.md',
+      name: 'CHA4029 Gamemaster\'s Screen Pack: Adventures'
+    }
+  ],
+  dragonbane: []
+}
+
 
 const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
   runequest: [
@@ -68,8 +81,8 @@ const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
 })
 export class DocsComponent {
   rulesDocuments = computed(() => RULES_DOCUMENTS[this.gameSystemService.gameSystem()]);
-  customDocuments = CUSTOM_DOCUMENTS;
-  adventureDocuments = ADVENTURE_DOCUMENTS;
+  customDocuments = computed(() => CUSTOM_DOCUMENTS[this.gameSystemService.gameSystem()]);
+  adventureDocuments = computed(() => ADVENTURE_DOCUMENTS[this.gameSystemService.gameSystem()]);
   isExpandedRules = true;
   isExpandedCustom = true;
   isExpandedAdventures = true;
