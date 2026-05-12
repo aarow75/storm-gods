@@ -6,12 +6,14 @@ import { GameSystemService, GameSystem } from '../../services/game-system.servic
 interface RulesDocument {
   filename: string;
   name: string;
+  tocMaxLevel?: number;
 }
 
 interface CustomDocument {
   filename: string;
   name: string;
   icon?: string;
+  tocMaxLevel?: number;
 }
 
 // Add entries here to show additional markdown docs in the sidebar.
@@ -26,12 +28,19 @@ const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   ],
   dragonbane: [
     {
+      filename: 'dragonbane/rules/Core-Rulebook.md',
+      name: 'Dragonbane Core Rulebook',
+      tocMaxLevel: 2
+    },
+    {
       filename: 'dragonbane/dragonbane-srd.md',
-      name: 'Dragonbane Quickstart Rules'
+      name: 'Dragonbane Quickstart Rules',
+      tocMaxLevel: 2
     },
     {
       filename: 'dragonbane/dragonbane-faq.md',
-      name: 'Dragonbane FAQ'
+      name: 'Dragonbane FAQ',
+      tocMaxLevel: 2
     }
 
   ]

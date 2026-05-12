@@ -12,7 +12,7 @@
             <ul class="docs-nav-submenu">
               @for (doc of rulesDocuments(); track doc.filename) {
                 <li>
-                  <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename }"
+                  <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename, tocMaxLevel: doc.tocMaxLevel }"
                      routerLinkActive="active" class="docs-nav-sublink">
                     {{ doc.name }}
                   </a>
@@ -35,7 +35,7 @@
               <ul class="docs-nav-submenu">
                 @for (doc of adventureDocuments(); track doc.filename) {
                   <li>
-                    <a [routerLink]="gameSystemService.link('docs', 'page')" [queryParams]="{ file: doc.filename }"
+                    <a [routerLink]="gameSystemService.link('docs', 'page')" [queryParams]="{ file: doc.filename, tocMaxLevel: doc.tocMaxLevel }"
                        routerLinkActive="active" class="docs-nav-sublink">
                       {{ doc.name }}
                     </a>
@@ -59,7 +59,7 @@
               <ul class="docs-nav-submenu">
                 @for (doc of customDocuments(); track doc.filename) {
                   <li>
-                    <a [routerLink]="gameSystemService.link('docs', 'page')" [queryParams]="{ file: doc.filename }"
+                    <a [routerLink]="gameSystemService.link('docs', 'page')" [queryParams]="{ file: doc.filename, tocMaxLevel: doc.tocMaxLevel }"
                        routerLinkActive="active" class="docs-nav-sublink">
                       @if (doc.icon) { {{ doc.icon }} }
                       {{ doc.name }}

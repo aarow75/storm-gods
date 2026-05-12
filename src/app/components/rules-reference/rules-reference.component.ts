@@ -59,13 +59,14 @@ export class RulesReferenceComponent implements OnInit, OnDestroy {
         }),
         switchMap(params => {
           const filename = params['file'] || 'I-introduction';
+          const tocMaxLevel = params['tocMaxLevel'] ? +params['tocMaxLevel'] : undefined;
           const system = this.gameSystem.gameSystem();
           return this.http.get(`/docs/${system}/rules/${filename}.md`, { responseType: 'text' })
-            .pipe(timeout(5000));
+            .pipe(timeout(5000), map(content => ({ content, tocMaxLevel })));
         }),
-        map(content => {
+        map(({ content, tocMaxLevel }) => {
           const html = this.markdown.renderMarkdown(content);
-          const toc = this.markdown.generateToc(content);
+          const toc = this.markdown.generateToc(content, tocMaxLevel);
           return { html, toc };
         }),
         catchError(err => {

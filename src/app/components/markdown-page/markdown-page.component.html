@@ -1,6 +1,6 @@
 <div class="markdown-page">
   <div class="markdown-layout">
-    @if (!isFullscreen && !isLoading && toc.length > 0) {
+    @if (!isFullscreen && !isLoading && toc.length > 0 && isTocVisible) {
       <aside class="toc-sidebar">
         <nav class="toc-nav">
           <h3 class="toc-title">Table of Contents</h3>
@@ -19,13 +19,24 @@
 
     @if (!isLoading && !error) {
       <main class="page-container">
-        <button
-          class="fullscreen-btn"
-          (click)="toggleFullscreen()"
-          [title]="isFullscreen ? 'Exit full screen' : 'Full screen'"
-          [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'">
-          {{ isFullscreen ? '✕' : '⛶' }}
-        </button>
+        <div class="page-toolbar">
+          @if (!isFullscreen && toc.length > 0) {
+            <button
+              class="toolbar-btn"
+              (click)="isTocVisible = !isTocVisible"
+              [title]="isTocVisible ? 'Hide table of contents' : 'Show table of contents'"
+              [attr.aria-label]="isTocVisible ? 'Hide table of contents' : 'Show table of contents'">
+              ☰
+            </button>
+          }
+          <button
+            class="toolbar-btn"
+            (click)="toggleFullscreen()"
+            [title]="isFullscreen ? 'Exit full screen' : 'Full screen'"
+            [attr.aria-label]="isFullscreen ? 'Exit full screen' : 'Enter full screen'">
+            {{ isFullscreen ? '✕' : '⛶' }}
+          </button>
+        </div>
         <div [innerHTML]="html" class="markdown-content"></div>
       </main>
     }
@@ -42,4 +53,8 @@
       </div>
     }
   </div>
+
+  @if (!isLoading && !error) {
+    <button class="scroll-top-btn" (click)="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">↑</button>
+  }
 </div>

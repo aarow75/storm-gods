@@ -14,14 +14,14 @@ export interface TocItem {
 export class MarkdownService {
   private md = new MarkdownIt()
     .use(markdownItFootnote)
-    .use(markdownItAnchor)
+    .use(markdownItAnchor, { slugify: (s: string) => this.slugify(s) })
     .use(markdownItAttrs);
 
   renderMarkdown(content: string): string {
     return this.md.render(content);
   }
 
-  generateToc(content: string): TocItem[] {
+  generateToc(content: string, maxLevel = 6): TocItem[] {
     const tokens = this.md.parse(content, {});
     const toc: TocItem[] = [];
 
@@ -30,6 +30,7 @@ export class MarkdownService {
 
       if (token.type === 'heading_open') {
         const level = parseInt(token.tag[1]);
+        if (level > maxLevel) continue;
         const nextToken = tokens[i + 1];
 
         if (nextToken?.type === 'inline' && nextToken.content) {

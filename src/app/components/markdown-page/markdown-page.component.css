@@ -76,10 +76,15 @@
   position: relative;
 }
 
-.fullscreen-btn {
-  position: sticky; /* TODO: make this better */
-  top: 14rem;
-  right: 4rem;
+.page-toolbar {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.toolbar-btn {
   background: var(--color-bg-light);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--border-radius-md);
@@ -95,7 +100,32 @@
   line-height: 1;
 }
 
-.fullscreen-btn:hover {
+.toolbar-btn:hover {
+  background: var(--color-gray-200);
+  color: var(--color-text-primary);
+}
+
+.scroll-top-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--color-bg-light);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-md);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: var(--font-size-xl);
+  color: var(--color-gray-600);
+  transition: background 0.15s, color 0.15s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+}
+
+.scroll-top-btn:hover {
   background: var(--color-gray-200);
   color: var(--color-text-primary);
 }
@@ -112,6 +142,11 @@
   color: #ef4444;
   background: rgba(239, 68, 68, 0.05);
   border-radius: var(--border-radius-lg);
+}
+
+.markdown-page:fullscreen .page-toolbar {
+  position: sticky;
+  top: 1rem;
 }
 
 .markdown-page:fullscreen {

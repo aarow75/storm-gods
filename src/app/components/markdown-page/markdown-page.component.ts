@@ -22,6 +22,7 @@ export class MarkdownPageComponent implements OnInit, OnDestroy {
   isLoading = true;
   error: string | null = null;
   isFullscreen = false;
+  isTocVisible = true;
 
   private destroy$ = new Subject<void>();
 
@@ -76,7 +77,8 @@ export class MarkdownPageComponent implements OnInit, OnDestroy {
           this.html = this.sanitizer.bypassSecurityTrustHtml(
             this.markdown.renderMarkdown(result.content)
           );
-          this.toc = this.markdown.generateToc(result.content);
+          const tocMaxLevel = this.route.snapshot.queryParams['tocMaxLevel'];
+          this.toc = this.markdown.generateToc(result.content, tocMaxLevel ? +tocMaxLevel : undefined);
         }
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -90,6 +92,14 @@ export class MarkdownPageComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  scrollToTop() {
+    if (this.isFullscreen) {
+      this.elementRef.nativeElement.querySelector('.markdown-page')?.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   scrollToSection(anchor: string) {
