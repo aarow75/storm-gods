@@ -122,3 +122,12 @@ export interface TerrainExportFile {
   exportedAt: string;
   maps: TerrainMapExport[];
 }
+
+export interface TerrainExportFileV2 {
+  exportType: 'terrain-maps';
+  version: 2;
+  exportedAt: string;
+  customMaps: CustomMap[];
+  terrainMaps: Record<string, Record<string, TerrainType>>;
+  tokenMaps: Record<string, WildernessToken[]>;
+}

@@ -133,14 +133,14 @@
               class="terrain-swatch"
               [class.selected]="selectedTerrain === t.id"
               [style.background-color]="t.fillColor"
-              [title]="t.label + ' (cost: ' + t.moveCost + ')'"
+              [title]="t.label + ' (cost: ' + (t.moveCost * scale / 6) + ')'"
               (click)="selectedTerrain = t.id"
               [attr.aria-label]="t.label">
             </button>
           }
           <span class="selected-terrain-label">
             {{ (terrainDefs.find(t => t.id === selectedTerrain) || terrainDefs[0])?.label }}
-            <span class="cost-badge">({{ (terrainDefs.find(t => t.id === selectedTerrain) || terrainDefs[0])?.moveCost }})</span>
+            <span class="cost-badge">({{ ((terrainDefs.find(t => t.id === selectedTerrain) || terrainDefs[0])?.moveCost ?? 1) * scale / 6 | number:'1.0-2' }})</span>
           </span>
         </div>
       }
@@ -382,7 +382,7 @@
             </div>
             <div class="stat">
               <span class="stat-label">Cost:</span>
-              <span class="stat-value">{{ previewCost | number: '1.1-1' }}</span>
+              <span class="stat-value">{{ previewCost * scale / 6 | number: '1.1-1' }}</span>
             </div>
           </div>
         </div>

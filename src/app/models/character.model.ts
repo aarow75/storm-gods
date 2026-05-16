@@ -1,3 +1,5 @@
+import { DB_SKILL_BY_ATTR } from "../constants";
+
 export interface Character {
   id: string;
   name: string;
@@ -248,6 +250,7 @@ export const DEFAULT_STATS: CharacterStats = {
   CHA: 10
 };
 
+// TODO: add attributes here for dragonbane
 export const DEFAULT_SKILLS: CharacterSkills = {
   'Sword & Shield': 15,
   'Two-Handed Weapon': 10,
@@ -647,6 +650,7 @@ export const EQUIPMENT_LIST: EquipmentDefinition[] = [
   { name: 'Small Boat', category: 'Transport & Storage', cost: 100, hitPoints: 30, encumbrance: 0 },
 ];
 
+// For Runequest
 export const COMBAT_SKILLS = [
   'Sword & Shield',
   'Two-Handed Weapon',
@@ -655,6 +659,18 @@ export const COMBAT_SKILLS = [
   'Sling',
   'Unarmed',
   'Shield'
+];
+// For Dragonbane
+export const WEAPON_SKILLS = [
+  'Axes (STR)',
+  'Bows (AGL)',
+  'Crossbows (AGL)',
+  'Hammers (STR)',
+  'Knives (AGL)',
+  'Slings (AGL)',
+  'Spears (STR)',
+  'Staves (AGL)',
+  'Swords (STR)',
 ];
 
 export const CULTS = [
@@ -784,6 +800,10 @@ export const ARMOR_TYPES = [
   { name: 'Chain Mail', points: 5 },
   { name: 'Plate Mail', points: 6 }
 ];
+
+export const DB_KIN_BASE_CHANCE: Record<string, Partial<CharacterStats>> = {
+
+}
 
 // Skill bonuses by occupation
 export const OCCUPATION_SKILL_BONUSES: Record<string, Partial<CharacterSkills>> = {

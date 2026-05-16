@@ -1,7 +1,8 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CharacterSkills as CharacterSkillsModel } from '../../models/character.model';
+import { GameSystemService } from '../../services/game-system.service';
 
 @Component({
   selector: 'app-character-skills',
@@ -12,10 +13,15 @@ import { CharacterSkills as CharacterSkillsModel } from '../../models/character.
 export class CharacterSkills {
   @Input() skills!: CharacterSkillsModel;
   @Input() skillCategories: any = {};
+  @Input() dbSkillCategories: any = {};
   @Input() getCategoryKeys!: () => string[];
   @Input() getSkillKeys!: (category: string) => string[];
+  @Input() getDbCategoryKeys!: () => string[];
+  @Input() getDbSkillKeys!: (category: string) => string[];
 
   @Output() applyBonuses = new EventEmitter<void>();
+
+  gameSystem = inject(GameSystemService).getSystemName();
 
   get heading(): string {
     return 'Skills';

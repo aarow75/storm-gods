@@ -14,6 +14,7 @@ export class CharacterWeapons {
   @Input() weapons!: Weapon[];
   @Input() weaponList!: WeaponDefinition[];
   @Input() combatSkills!: string[];
+  @Input() weaponSkills!: string[];
   @Input() stats?: CharacterStats;
   @Input() resources?: Resources;
   @Output() addWeapon = new EventEmitter<void>();

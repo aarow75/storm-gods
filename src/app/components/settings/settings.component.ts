@@ -49,30 +49,27 @@ export class SettingsComponent {
 
   exportTerrainData(): void {
     const state = this.wildernessMapService.getState();
-    const maps: TerrainMapExport[] = state.customMaps.map((cm) => ({
-      id: cm.id,
-      label: cm.label,
-      width: cm.width,
-      height: cm.height,
-      scale: cm.scale,
-      scaleUnit: cm.scaleUnit,
-      terrain: state.terrainMaps[cm.id] ?? {},
-      tokens: state.tokenMaps[cm.id] ?? [],
-    }));
     this.exportService.download('terrain-data', {
       exportType: 'terrain-maps',
-      version: 1,
+      version: 2,
       exportedAt: new Date().toISOString(),
-      maps,
+      customMaps: state.customMaps,
+      terrainMaps: state.terrainMaps,
+      tokenMaps: state.tokenMaps,
     });
   }
 
   async importTerrainData(event: Event): Promise<void> {
     const data = await this.readJsonFile(event);
-    if (data?.exportType !== 'terrain-maps' || !Array.isArray(data?.maps)) {
-      alert('Invalid terrain data file.'); return;
+    if (!data) return;
+    let result: { imported: number; skipped: number };
+    if (data.terrainMaps || data.customMaps || data.tokenMaps) {
+      result = this.wildernessMapService.importStateData(data);
+    } else if (Array.isArray(data.maps)) {
+      result = this.wildernessMapService.importMaps(data.maps);
+    } else {
+      result = { imported: 0, skipped: 0 };
     }
-    const result = this.wildernessMapService.importMaps(data.maps);
     alert(`Imported ${result.imported} map(s). ${result.skipped} skipped (already exist).`);
   }
 

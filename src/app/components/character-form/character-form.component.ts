@@ -9,14 +9,15 @@ import {
   calculateHitLocations, calculateDerivedStats, calculateTotalArmor, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
   CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS, ARMOR_TYPES,
   applySkillBonuses, enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES,
-  initializeSkillsWithModifiers, calculateSkillCategoryModifiers
+  initializeSkillsWithModifiers, calculateSkillCategoryModifiers,
+  WEAPON_SKILLS
 } from '../../models/character.model';
 import { CharacterService } from '../../services/character.service';
 import { DiceService } from '../../services/dice.service';
 import { GameSystemService } from '../../services/game-system.service';
 import { UIStateService } from '../../services/ui-state.service';
 import { ExportService } from '../../services/export.service';
-import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
+import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS, DB_SKILL_CATEGORIES } from '../../constants';
 import { CHARACTER_COLORS } from '../../constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
 import { CharacterCharacteristics } from '../character-characteristics/character-characteristics';
@@ -89,9 +90,11 @@ export class CharacterFormComponent implements OnInit {
   };
 
   skillCategories = SKILL_CATEGORIES;
+  dbSkillCategories = DB_SKILL_CATEGORIES;
   weaponList = WEAPON_LIST;
   shieldList = SHIELD_LIST;
   combatSkills = COMBAT_SKILLS;
+  weaponSkills = WEAPON_SKILLS;
   characterColors = CHARACTER_COLORS;
   cults = CULTS;
   homelands = HOMELANDS;
@@ -423,10 +426,18 @@ export class CharacterFormComponent implements OnInit {
     this.updateArmorFromShields();
   }
 
+  getDbSkillKeys(category: string): string[] {
+    return this.dbSkillCategories[category as keyof typeof this.dbSkillCategories] || [];
+  }
+  
   getSkillKeys(category: string): string[] {
     return this.skillCategories[category as keyof typeof this.skillCategories] || [];
   }
 
+  getDbCategoryKeys(): string[] {
+    return Object.keys(this.dbSkillCategories);
+  }
+  
   getCategoryKeys(): string[] {
     return Object.keys(this.skillCategories);
   }
@@ -490,7 +501,7 @@ export class CharacterFormComponent implements OnInit {
     });
   }
 
-  applyAllSkillBonuses(): void {
+  applyAllSkillBonuses(): void {//TODO: do also for DB
     if (!this.character.skills || !this.character.background) return;
 
     this.character.skills = applySkillBonuses(

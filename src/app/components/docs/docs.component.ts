@@ -25,13 +25,14 @@ const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
       filename: 'BASIC ROLE-PLAYING.md',
       name: 'Basic Roleplaying'
     },
+    // { filename: 'RuneQuest-Classic', name: 'RQ2 Rulebook', tocMaxLevel: 2 }
   ],
   dragonbane: [
-    {
-      filename: 'dragonbane/rules/Core-Rulebook.md',
-      name: 'Dragonbane Core Rulebook',
-      tocMaxLevel: 2
-    },
+    // {
+    //   filename: 'dragonbane/rules/Core-Rulebook.md',
+    //   name: 'Dragonbane Core Rulebook',
+    //   tocMaxLevel: 2
+    // },
     {
       filename: 'dragonbane/dragonbane-srd.md',
       name: 'Dragonbane Quickstart Rules',
@@ -48,10 +49,17 @@ const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
 
 const ADVENTURE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   runequest: [
-    {
-      filename: 'runequest/adventures/00-Gamemasters-Screen-Pack-Adventures.md',
-      name: 'CHA4029 Gamemaster\'s Screen Pack: Adventures'
-    }
+    { filename: 'runequest/adventures/01-Introduction.md', name: 'Introduction' },
+    { filename: 'runequest/adventures/02-Colymar-Tribe.md', name: 'The Colymar Tribe', tocMaxLevel: 2 },
+    { filename: 'runequest/adventures/03-Clearwine-Fort.md', name: 'Clearwine Fort', tocMaxLevel: 2 },
+    { filename: 'runequest/adventures/04-Other-Places.md', name: 'Other Places of Interest', tocMaxLevel: 2 },
+    { filename: 'runequest/adventures/05-Apple-Lane.md', name: 'Apple Lane', tocMaxLevel: 2 },
+    { filename: 'runequest/adventures/06-Rumors.md', name: 'Rumors' },
+    { filename: 'runequest/adventures/07-Defending-Apple-Lane.md', name: 'Defending Apple Lane', tocMaxLevel: 2 },
+    { filename: 'runequest/adventures/08-Cattle-Raid.md', name: 'Cattle Raid', tocMaxLevel: 2 },
+    { filename: 'runequest/adventures/09-The-Dragon-of-Thunder-Hills.md', name: 'The Dragon of Thunder Hills', tocMaxLevel: 2 },
+    { filename: 'runequest/adventures/10-Appendix-1-Adventure-Seeds.md', name: 'Appendix 1: Adventure Seeds' },
+    { filename: 'runequest/adventures/11-Appendix-2-Metals-and-Crystals.md', name: 'Appendix 2: Metals and Crystals' },
   ],
   dragonbane: []
 }
@@ -60,25 +68,26 @@ const ADVENTURE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
 const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
   runequest: [
     { filename: 'I-introduction', name: 'I. Introduction' },
-    { filename: 'II-character-creation', name: 'II. Character Creation' },
-    { filename: 'III-mechanics-and-melee', name: 'III. Mechanics and Melee' },
-    { filename: 'IV-combat-skills', name: 'IV. Combat Skills' },
-    { filename: 'V-basic-magic', name: 'V. Basic Magic' },
-    { filename: 'VI-other-skills', name: 'VI. Other Skills' },
-    { filename: 'VII-rune-magic', name: 'VII. Rune Magic' },
-    { filename: 'VIII-monsters', name: 'VIII. Monsters' },
-    { filename: 'IX-treasure', name: 'IX. Treasure Hoards' },
-    { filename: 'X-appendices', name: 'X. Appendices' }
+    { filename: 'II-character-creation', name: 'II. Character Creation', tocMaxLevel: 2 },
+    { filename: 'III-mechanics-and-melee', name: 'III. Mechanics and Melee', tocMaxLevel: 2 },
+    { filename: 'IV-combat-skills', name: 'IV. Combat Skills', tocMaxLevel: 2 },
+    { filename: 'V-basic-magic', name: 'V. Basic Magic', tocMaxLevel: 2 },
+    { filename: 'VI-other-skills', name: 'VI. Other Skills', tocMaxLevel: 2 },
+    { filename: 'VII-rune-magic', name: 'VII. Rune Magic', tocMaxLevel: 2 },
+    { filename: 'VIII-monsters', name: 'VIII. Monsters', tocMaxLevel: 2 },
+    { filename: 'IX-treasure', name: 'IX. Treasure Hoards', tocMaxLevel: 2 },
+    { filename: 'X-appendices', name: 'X. Appendices', tocMaxLevel: 2 }
   ],
   dragonbane: [
-    { filename: 'I-introduction', name: 'I. Introduction' },
-    { filename: 'II-your-player-character', name: 'II. Your Player Character' },
-    { filename: 'III-skills', name: 'III. Skills' },
-    { filename: 'IV-combat-and-damage', name: 'IV. Combat and Damage' },
-    { filename: 'V-magic', name: 'V. Magic' },
-    { filename: 'VI-gear', name: 'VI. Gear' },
-    { filename: 'VII-bestiary', name: 'VII. Bestiary' },
-    { filename: 'VIII-adventures', name: 'VIII. Adventures' }
+    { filename: 'Preface', name: 'Preface' },
+    { filename: 'Chapter-01-In-the-Oldest-Times', name: 'Chapter 1 – In the Oldest Times', tocMaxLevel: 2 },
+    { filename: 'Chapter-02-Your-Player-Character', name: 'Chapter 2 – Your Player Character', tocMaxLevel: 2 },
+    { filename: 'Chapter-03-Skills', name: 'Chapter 3 – Skills', tocMaxLevel: 2 },
+    { filename: 'Chapter-04-Combat-and-Damage', name: 'Chapter 4 – Combat & Damage', tocMaxLevel: 2 },
+    { filename: 'Chapter-05-Magic', name: 'Chapter 5 – Magic', tocMaxLevel: 2 },
+    { filename: 'Chapter-06-Gear', name: 'Chapter 6 – Gear', tocMaxLevel: 2 },
+    { filename: 'Chapter-07-Bestiary', name: 'Chapter 7 – Bestiary', tocMaxLevel: 2 },
+    { filename: 'Chapter-08-Adventures', name: 'Chapter 8 – Adventures', tocMaxLevel: 2 }
   ]
 };
 

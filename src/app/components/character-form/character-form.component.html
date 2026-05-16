@@ -191,6 +191,7 @@
               [weapons]="character.weapons!"
               [weaponList]="weaponList"
               [combatSkills]="combatSkills"
+              [weaponSkills]="weaponSkills"
               [stats]="character.stats"
               [resources]="character.resources"
               (addWeapon)="addWeapon()"
@@ -235,8 +236,11 @@
             <app-character-skills
               [skills]="character.skills!"
               [skillCategories]="skillCategories"
+              [dbSkillCategories]="dbSkillCategories"
               [getCategoryKeys]="getCategoryKeys.bind(this)"
               [getSkillKeys]="getSkillKeys.bind(this)"
+              [getDbCategoryKeys]="getDbCategoryKeys.bind(this)"
+              [getDbSkillKeys]="getDbSkillKeys.bind(this)"
               (applyBonuses)="applyAllSkillBonuses()"
             ></app-character-skills>
           </div>
