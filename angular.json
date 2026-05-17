@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "runequest-characters": {
+    "storm-gods": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -57,10 +57,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "runequest-characters:build:production"
+              "buildTarget": "storm-gods:build:production"
             },
             "development": {
-              "buildTarget": "runequest-characters:build:development"
+              "buildTarget": "storm-gods:build:development"
             }
           },
           "defaultConfiguration": "development"

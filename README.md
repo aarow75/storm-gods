@@ -86,7 +86,7 @@ Navigate to `http://localhost:4201/` in your browser.
 ## Project Structure
 
 ```
-runequest-characters/
+storm-gods/
 ├── src/
 │   ├── app/
 │   │   ├── components/

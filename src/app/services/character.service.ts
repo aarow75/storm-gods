@@ -13,7 +13,7 @@ import { GameSystemService } from './game-system.service';
   providedIn: 'root'
 })
 export class CharacterService {
-  private readonly STORAGE_KEY = 'runequest-characters';
+  private readonly STORAGE_KEY = 'runequest-characters';//TODO: make this key dynamic based on game system to allow multiple systems in the future
 
   constructor(private gameSystemService: GameSystemService) {}
 
