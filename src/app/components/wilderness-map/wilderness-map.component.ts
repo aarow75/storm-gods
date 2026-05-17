@@ -59,7 +59,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   scale = 6;
   scaleUnit: 'miles' | 'kilometers' = 'miles';
 
-  interactionMode: 'paint' | 'move' = 'paint';
+  interactionMode: 'paint' | 'move' = 'move';
   selectedTerrain: TerrainType = 'plains';
   selectedTokenId: string | null = null;
   isPainting = false;

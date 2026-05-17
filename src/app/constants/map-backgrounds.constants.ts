@@ -19,7 +19,7 @@ export const MAP_BACKGROUNDS: MapBackground[] = [
     imagePath: '/maps/Map-of-Glorantha.jpg',
     width: 34,
     height: 24,
-    scale: 28,
+    scale: 10,
     scaleUnit: 'miles',
   },
   {
@@ -28,7 +28,7 @@ export const MAP_BACKGROUNDS: MapBackground[] = [
     imagePath: '/maps/Tarsh.jpg',
     width: 34,
     height: 24,
-    scale: 3,
+    scale: 8,
     scaleUnit: 'miles',
   },
   {
@@ -37,7 +37,7 @@ export const MAP_BACKGROUNDS: MapBackground[] = [
     imagePath: '/maps/Dragon-Pass-Master-Map.png',
     width: 35,
     height: 40,
-    scale: 30,
+    scale: 5,
     scaleUnit: 'miles',
   },
   {
