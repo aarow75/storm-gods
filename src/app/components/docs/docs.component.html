@@ -1,27 +1,29 @@
 <div class="docs-container">
   <aside class="docs-sidebar">
     <nav class="docs-nav">
-      <div class="docs-nav-group">
-        <div>
-          <button (click)="toggleRulesMenu()" class="docs-nav-link docs-nav-toggle">
-            <span class="docs-nav-icon">&#x1F4D6;</span>
-            <span>Core Rules</span>
-            <span class="toggle-icon" [class.expanded]="isExpandedRules">▼</span>
-          </button>
-          @if (isExpandedRules && rulesDocuments().length > 0) {
-            <ul class="docs-nav-submenu">
-              @for (doc of rulesDocuments(); track doc.filename) {
-                <li>
-                  <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename, tocMaxLevel: doc.tocMaxLevel }"
-                     routerLinkActive="active" class="docs-nav-sublink">
-                    {{ doc.name }}
-                  </a>
-                </li>
-              }
-            </ul>
-          }
+      @if (rulesDocuments().length > 0) {
+        <div class="docs-nav-group">
+          <div>
+            <button (click)="toggleRulesMenu()" class="docs-nav-link docs-nav-toggle">
+              <span class="docs-nav-icon">&#x1F4D6;</span>
+              <span>Core Rules</span>
+              <span class="toggle-icon" [class.expanded]="isExpandedRules">▼</span>
+            </button>
+            @if (isExpandedRules) {
+              <ul class="docs-nav-submenu">
+                @for (doc of rulesDocuments(); track doc.filename) {
+                  <li>
+                    <a [routerLink]="gameSystemService.link('docs', 'rules')" [queryParams]="{ file: doc.filename, tocMaxLevel: doc.tocMaxLevel }"
+                       routerLinkActive="active" class="docs-nav-sublink">
+                      {{ doc.name }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         </div>
-      </div>
+      }
 
       @if (adventureDocuments().length > 0) {
         <div class="docs-nav-group">

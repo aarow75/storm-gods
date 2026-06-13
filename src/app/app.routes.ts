@@ -12,6 +12,7 @@ import { SettingsComponent } from './components/settings/settings.component';
 import { WildernessMapComponent } from './components/wilderness-map/wilderness-map.component';
 import { PublicationsComponent } from './components/publications/publications.component';
 import { DocsComponent } from './components/docs/docs.component';
+import { DocsHomeComponent } from './components/docs/docs-home.component';
 import { GameMastersScreenComponent } from './components/game-masters-screen/game-masters-screen.component';
 import { CampaignPlannerComponent } from './components/campaigns/campaign-planner/campaign-planner.component';
 import { CampaignDetailComponent } from './components/campaigns/campaign-detail/campaign-detail.component';
@@ -40,7 +41,7 @@ const gameSystemRoutes: Routes = [
       { path: 'publications', component: PublicationsComponent },
       { path: 'gm-screen', component: GameMastersScreenComponent },
       { path: 'page', component: MarkdownPageComponent },
-      { path: '', redirectTo: 'rules', pathMatch: 'full' }
+      { path: '', component: DocsHomeComponent, pathMatch: 'full' }
     ]
   },
   { path: 'bestiary', component: BestiaryComponent },
