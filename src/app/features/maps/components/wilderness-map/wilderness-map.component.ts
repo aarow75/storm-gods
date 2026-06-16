@@ -20,15 +20,15 @@ import { MAP_BACKGROUNDS } from '@maps/constants/map-backgrounds.constants';
 import { ENCOUNTER_TABLES } from '@bestiary/constants/encounters.constants';
 import { MONSTERS as BESTIARY_MONSTERS } from '@bestiary/constants/monsters.constants';
 import { WildernessMapService } from '@maps/services/wilderness-map.service';
-import { CharacterService } from '@characters/services/character.service';
+import { CharacterReadService } from '@shared/services/character-read.service';
 import { CombatService } from '@combat/services/combat.service';
 import { DiceService } from '@shared/services/dice.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { ExportService } from '@shared/services/export.service';
 import { Character } from '@characters/models/character.model';
-import { CombatParticipant, Monster as CombatMonster } from '@combat/models/combat.model';
+import { CombatParticipant, CombatMonster } from '@shared/models/combat-participant.model';
 import { Monster as BestiaryMonster } from '@bestiary/models/monster.model';
-import { getSizeModifier, getDexterityModifier } from '@characters/models/character.model';
+import { getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
 import { dijkstra } from '@maps/utils/hex-pathfinding';
 
 @Component({
@@ -122,7 +122,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
 
   constructor(
     private wildernessService: WildernessMapService,
-    private characterService: CharacterService,
+    private characterService: CharacterReadService,
     private combatService: CombatService,
     private diceService: DiceService,
     private router: Router,
@@ -132,7 +132,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
 
   ngOnInit(): void {
     this.state = this.wildernessService.getState();
-    this.characters = this.characterService.getCharacters();
+    this.characters = this.characterService.getAll();
     this.mapMode = this.state.mapMode ?? 'terrain';
     this.gridWidth = this.state.gridWidth ?? GRID_COLS;
     this.gridHeight = this.state.gridHeight ?? GRID_ROWS;

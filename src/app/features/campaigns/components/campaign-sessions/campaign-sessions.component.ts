@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CampaignData, SessionLogEntry } from '@campaigns/models/campaign.model';
 import { CampaignService } from '@campaigns/services/campaign.service';
-import { CharacterService } from '@characters/services/character.service';
+import { CharacterReadService } from '@shared/services/character-read.service';
 
 @Component({
   selector: 'app-campaign-sessions',
@@ -31,7 +31,7 @@ export class CampaignSessionsComponent implements OnInit, OnChanges {
 
   constructor(
     private campaignService: CampaignService,
-    public characterService: CharacterService
+    public characterService: CharacterReadService
   ) {}
 
   ngOnInit(): void {

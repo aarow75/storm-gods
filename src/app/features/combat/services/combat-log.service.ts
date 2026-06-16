@@ -1,17 +1,28 @@
 import { Injectable, signal } from '@angular/core';
+import { DataPort } from '@shared/services/data-port.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CombatLogService {
+export class CombatLogService implements DataPort {
   private readonly STORAGE_KEY = 'combat-log';
   private readonly SAVE_DELAY_MS = 500;
+
+  readonly dataPortLabel = 'Combat Log';
+  readonly dataPortKey = 'combat-log';
 
   private log = signal<string[]>([]);
   private saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     this.loadLog();
+  }
+
+  exportData(): unknown {
+    return {
+      exportedAt: new Date().toISOString(),
+      entries: this.getEntries(),
+    };
   }
 
   private loadLog(): void {

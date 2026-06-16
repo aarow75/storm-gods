@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CombatParticipant, Monster, CombatLogEntry, CombatMapState, CombatMapTemplate } from '@combat/models/combat.model';
-import { WEAPON_LIST } from '@characters/models/character.model';
+import { WEAPON_LIST } from '@shared/rules/game-rules';
 
 @Injectable({
   providedIn: 'root'

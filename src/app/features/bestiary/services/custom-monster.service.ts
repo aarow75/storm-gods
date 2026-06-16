@@ -1,11 +1,29 @@
 import { Injectable } from '@angular/core';
 import { Monster } from '@bestiary/models/monster.model';
+import { DataPort } from '@shared/services/data-port.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CustomMonsterService {
+export class CustomMonsterService implements DataPort {
   private readonly STORAGE_KEY = 'custom-monsters';
+
+  readonly dataPortLabel = 'Custom Monsters';
+  readonly dataPortKey = 'custom-monsters';
+
+  exportData(): unknown {
+    return {
+      exportedAt: new Date().toISOString(),
+      monsters: this.getMonsters(),
+    };
+  }
+
+  importData(rawData: unknown): string {
+    const data = rawData as any;
+    if (!data?.monsters) return 'Invalid monsters file.';
+    const result = this.importMonsters(data.monsters);
+    return `Imported ${result.imported} monster(s). ${result.skipped} skipped (already exist).`;
+  }
 
   getMonsters(): Monster[] {
     const data = localStorage.getItem(this.STORAGE_KEY);

@@ -8,14 +8,32 @@ import {
 import { CHARACTER_COLORS } from '@characters/constants/character-colors.constants';
 import { EQUIPMENT_DEFAULTS, MAGIC_DEFAULTS } from '@shared/constants/equipment.constants';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { DataPort } from '@shared/services/data-port.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CharacterService {
+export class CharacterService implements DataPort {
   private readonly STORAGE_KEY = 'runequest-characters';//TODO: make this key dynamic based on game system to allow multiple systems in the future
 
+  readonly dataPortLabel = 'Characters';
+  readonly dataPortKey = 'characters';
+
   constructor(private gameSystemService: GameSystemService) {}
+
+  exportData(): unknown {
+    return {
+      exportedAt: new Date().toISOString(),
+      characters: this.getCharacters(),
+    };
+  }
+
+  importData(rawData: unknown): string {
+    const data = rawData as any;
+    if (!data?.characters) return 'Invalid characters file.';
+    const result = this.importCharacters(data.characters);
+    return `Imported ${result.imported} character(s). ${result.skipped} skipped (already exist).`;
+  }
 
   getCharacters(): Character[] {
     const data = localStorage.getItem(this.STORAGE_KEY);

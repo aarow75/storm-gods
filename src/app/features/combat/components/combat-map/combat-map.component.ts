@@ -6,7 +6,8 @@ import {
   CombatParticipant, CombatMapState, CombatPosition,
   DungeonToken, DungeonTokenType, DUNGEON_TOKEN_DEFS, CombatMapTemplate,
 } from '@combat/models/combat.model';
-import { WEAPON_LIST, Character, calculateHitLocations } from '@characters/models/character.model';
+import { Character } from '@characters/models/character.model';
+import { WEAPON_LIST, calculateHitLocations } from '@shared/rules/game-rules';
 import { CombatService } from '@combat/services/combat.service';
 import { CombatLogService } from '@combat/services/combat-log.service';
 import { DiceService } from '@shared/services/dice.service';

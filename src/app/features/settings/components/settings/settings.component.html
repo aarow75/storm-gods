@@ -51,37 +51,12 @@
         <span class="col-header">Export</span>
       </div>
 
-      <div class="data-grid-row">
-        <span class="row-label">Characters</span>
+      <div class="data-grid-row" *ngFor="let port of dataPortService.getAllPorts()">
+        <span class="row-label">{{ port.dataPortLabel }}</span>
         <span>
-          <button (click)="importCharactersInput.click()" class="export-btn">Import</button>
-          <input #importCharactersInput type="file" accept=".json" hidden (change)="importCharacters($event)">
+          <button *ngIf="port.importData" (click)="importFromPort(port)" class="export-btn">Import</button>
         </span>
-        <span><button (click)="exportCharacters()" class="export-btn">Export</button></span>
-      </div>
-
-      <div class="data-grid-row">
-        <span class="row-label">Custom Monsters</span>
-        <span>
-          <button (click)="importMonstersInput.click()" class="export-btn">Import</button>
-          <input #importMonstersInput type="file" accept=".json" hidden (change)="importMonsters($event)">
-        </span>
-        <span><button (click)="exportCustomMonsters()" class="export-btn">Export</button></span>
-      </div>
-
-      <div class="data-grid-row">
-        <span class="row-label">Combat Log</span>
-        <span></span>
-        <span><button (click)="exportCombatLog()" class="export-btn">Export</button></span>
-      </div>
-
-      <div class="data-grid-row">
-        <span class="row-label">Terrain Maps</span>
-        <span>
-          <button (click)="importTerrainInput.click()" class="export-btn">Import</button>
-          <input #importTerrainInput type="file" accept=".json" hidden (change)="importTerrainData($event)">
-        </span>
-        <span><button (click)="exportTerrainData()" class="export-btn">Export</button></span>
+        <span><button (click)="exportFromPort(port)" class="export-btn">Export</button></span>
       </div>
     </div>
   </div>

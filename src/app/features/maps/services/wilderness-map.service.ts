@@ -1,9 +1,38 @@
 import { Injectable } from '@angular/core';
 import { CustomMap, DEFAULT_WILDERNESS_STATE, TerrainMapExport, TerrainType, WildernessMapState, WildernessToken } from '@maps/models/wilderness-map.model';
+import { DataPort } from '@shared/services/data-port.service';
 
 @Injectable({ providedIn: 'root' })
-export class WildernessMapService {
+export class WildernessMapService implements DataPort {
   private readonly STORAGE_KEY = 'runequest-wilderness-map';
+
+  readonly dataPortLabel = 'Terrain Maps';
+  readonly dataPortKey = 'terrain-data';
+
+  exportData(): unknown {
+    const state = this.getState();
+    return {
+      exportType: 'terrain-maps',
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      customMaps: state.customMaps,
+      terrainMaps: state.terrainMaps,
+      tokenMaps: state.tokenMaps,
+    };
+  }
+
+  importData(rawData: unknown): string {
+    const data = rawData as any;
+    let result: { imported: number; skipped: number };
+    if (data.terrainMaps || data.customMaps || data.tokenMaps) {
+      result = this.importStateData(data);
+    } else if (Array.isArray(data.maps)) {
+      result = this.importMaps(data.maps);
+    } else {
+      result = { imported: 0, skipped: 0 };
+    }
+    return `Imported ${result.imported} map(s). ${result.skipped} skipped (already exist).`;
+  }
 
   getState(): WildernessMapState {
     const data = localStorage.getItem(this.STORAGE_KEY);

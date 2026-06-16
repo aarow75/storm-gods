@@ -1,3 +1,7 @@
+import { CharacterStats } from '@shared/models/character-stats.model';
+
+export type { CharacterStats };
+
 export interface MonsterAttack {
   name: string;
   damage: string;
@@ -21,15 +25,7 @@ export interface Monster {
   gameSystem: 'runequest' | 'dragonbane' | 'both';
   category: 'humanoid' | 'beast' | 'undead' | 'chaos' | 'dragon' | 'spirit' | 'npc' | 'mount';
   description: string;
-  stats: {
-    STR: number;
-    CON: number;
-    SIZ: number;
-    DEX: number;
-    INT: number;
-    POW: number;
-    CHA: number;
-  };
+  stats: CharacterStats;
   hitPoints: number;
   armor: number;
   armorDescription: string;

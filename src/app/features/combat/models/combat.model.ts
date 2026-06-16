@@ -1,45 +1,8 @@
-export interface Monster {
-  id: string;
-  name: string;
-  hitPoints: number;
-  strikeRank: number;
-  armor: number;
-  weapons: MonsterWeapon[];
-  color?: string;
-}
+import { CombatMonster, CombatParticipant, MonsterWeapon } from '@shared/models/combat-participant.model';
 
-export interface MonsterWeapon {
-  name: string;
-  damage: string;
-  strikeRankModifier: number;
-  hitPoints?: number;
-}
-
-export interface CombatParticipant {
-  id: string;
-  name: string;
-  type: 'character' | 'monster';
-  characterId?: string;
-  monsterId?: string;
-  maxHitPoints: number;
-  currentHitPoints: boolean[]; // Array of checkboxes for tracking HP
-  baseStrikeRank: number;
-  selectedWeapon?: string;
-  selectedParryItem?: string; // weapon or shield name for parrying
-  finalStrikeRank: number;
-  selectedOpponentId?: string;
-  isDead?: boolean;
-  kills?: number;
-  color?: string;
-  locationDamage?: { [location: string]: number };
-  attacksUsed?: number;    // shots fired this round (for missile rate-of-fire tracking)
-  parriesAgainst?: { [attackerId: string]: number }; // parry attempts vs each attacker this round
-  distanceToOpponent?: number;  // meters to opponent at start of combat
-  movementThisRound?: number;   // meters moving this round (costs ceil(m/3) SR)
-  isSurprised?: boolean;        // distance-based SR penalty: +3 if within 3m, +1 if beyond; cleared on New Round
-  effectiveSR?: number;         // finalStrikeRank + movement cost + distance-based surprise penalty
-  movementRate?: number;        // squares/round; from character.derivedStats.movementRate; default 8
-}
+// Re-export under existing names so combat-feature code doesn't need updating
+export type Monster = CombatMonster;
+export type { CombatMonster, CombatParticipant, MonsterWeapon };
 
 export interface CombatLogEntry {
   timestamp: number;

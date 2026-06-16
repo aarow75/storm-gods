@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CampaignData, CampaignObjective, SessionLogEntry } from '@campaigns/models/campaign.model';
 import { Character } from '@characters/models/character.model';
-import { CharacterService } from '@characters/services/character.service';
+import { CharacterReadService } from '@shared/services/character-read.service';
 
 interface SkillEntry {
   name: string;
@@ -38,7 +38,7 @@ export class CampaignAnalyticsComponent implements OnInit {
   attendanceData: AttendanceData[] = [];
   topSkillsMap = new Map<string, SkillEntry[]>();
 
-  constructor(private characterService: CharacterService) {}
+  constructor(private characterService: CharacterReadService) {}
 
   ngOnInit(): void {
     this.loadAndCompute();
@@ -47,7 +47,7 @@ export class CampaignAnalyticsComponent implements OnInit {
   loadAndCompute(): void {
     // Load characters
     this.campaignCharacters = this.campaignData.campaign.characterIds
-      .map(id => this.characterService.getCharacter(id))
+      .map(id => this.characterService.getById(id))
       .filter((c): c is Character => c !== undefined);
 
     // Load sessions and objectives

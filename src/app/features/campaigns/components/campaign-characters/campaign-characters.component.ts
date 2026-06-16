@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { CampaignData } from '@campaigns/models/campaign.model';
 import { Character } from '@characters/models/character.model';
 import { CampaignService } from '@campaigns/services/campaign.service';
-import { CharacterService } from '@characters/services/character.service';
+import { CharacterReadService } from '@shared/services/character-read.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 
 @Component({
@@ -26,7 +26,7 @@ export class CampaignCharactersComponent implements OnInit, OnChanges {
 
   constructor(
     private campaignService: CampaignService,
-    private characterService: CharacterService,
+    private characterService: CharacterReadService,
     public gameSystemService: GameSystemService
   ) {}
 
@@ -41,7 +41,7 @@ export class CampaignCharactersComponent implements OnInit, OnChanges {
   }
 
   loadCharacters(): void {
-    const allCharacters = this.characterService.getCharacters();
+    const allCharacters = this.characterService.getAll();
     const campaignCharacterIds = new Set(this.campaignData.campaign.characterIds);
 
     this.campaignCharacters = allCharacters.filter(c => campaignCharacterIds.has(c.id));

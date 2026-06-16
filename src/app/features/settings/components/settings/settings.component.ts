@@ -2,12 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GameSystem, GameSystemService } from '@shared/services/game-system.service';
 import { UIStateService } from '@shared/services/ui-state.service';
-import { WildernessMapService } from '@maps/services/wilderness-map.service';
-import { CharacterService } from '@characters/services/character.service';
-import { CombatLogService } from '@combat/services/combat-log.service';
-import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
 import { ExportService } from '@shared/services/export.service';
-import { TerrainMapExport } from '@maps/models/wilderness-map.model';
+import { DataPort, DataPortService } from '@shared/services/data-port.service';
 
 @Component({
   selector: 'app-settings',
@@ -20,10 +16,7 @@ export class SettingsComponent {
   constructor(
     public gameSystemService: GameSystemService,
     public uiStateService: UIStateService,
-    private wildernessMapService: WildernessMapService,
-    private characterService: CharacterService,
-    private combatLogService: CombatLogService,
-    private customMonsterService: CustomMonsterService,
+    public dataPortService: DataPortService,
     private exportService: ExportService
   ) {}
 
@@ -47,68 +40,23 @@ export class SettingsComponent {
     this.uiStateService.resetFontSize();
   }
 
-  exportTerrainData(): void {
-    const state = this.wildernessMapService.getState();
-    this.exportService.download('terrain-data', {
-      exportType: 'terrain-maps',
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      customMaps: state.customMaps,
-      terrainMaps: state.terrainMaps,
-      tokenMaps: state.tokenMaps,
-    });
+  exportFromPort(port: DataPort): void {
+    this.exportService.download(port.dataPortKey, port.exportData() as object);
   }
 
-  async importTerrainData(event: Event): Promise<void> {
-    const data = await this.readJsonFile(event);
-    if (!data) return;
-    let result: { imported: number; skipped: number };
-    if (data.terrainMaps || data.customMaps || data.tokenMaps) {
-      result = this.wildernessMapService.importStateData(data);
-    } else if (Array.isArray(data.maps)) {
-      result = this.wildernessMapService.importMaps(data.maps);
-    } else {
-      result = { imported: 0, skipped: 0 };
-    }
-    alert(`Imported ${result.imported} map(s). ${result.skipped} skipped (already exist).`);
+  importFromPort(port: DataPort): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const data = await this.readJsonFile(e as Event);
+      if (data == null || !port.importData) return;
+      alert(port.importData(data));
+    };
+    input.click();
   }
 
-  exportCharacters(): void {
-    this.exportService.download('characters', {
-      exportedAt: new Date().toISOString(),
-      characters: this.characterService.getCharacters(),
-    });
-  }
-
-  exportCombatLog(): void {
-    this.exportService.download('combat-log', {
-      exportedAt: new Date().toISOString(),
-      entries: this.combatLogService.getEntries(),
-    });
-  }
-
-  exportCustomMonsters(): void {
-    this.exportService.download('custom-monsters', {
-      exportedAt: new Date().toISOString(),
-      monsters: this.customMonsterService.getMonsters(),
-    });
-  }
-
-  async importCharacters(event: Event): Promise<void> {
-    const data = await this.readJsonFile(event);
-    if (!data?.characters) { alert('Invalid characters file.'); return; }
-    const result = this.characterService.importCharacters(data.characters);
-    alert(`Imported ${result.imported} character(s). ${result.skipped} skipped (already exist).`);
-  }
-
-  async importMonsters(event: Event): Promise<void> {
-    const data = await this.readJsonFile(event);
-    if (!data?.monsters) { alert('Invalid monsters file.'); return; }
-    const result = this.customMonsterService.importMonsters(data.monsters);
-    alert(`Imported ${result.imported} monster(s). ${result.skipped} skipped (already exist).`);
-  }
-
-  private readJsonFile(event: Event): Promise<any> {
+  private readJsonFile(event: Event): Promise<unknown> {
     return new Promise((resolve) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) { resolve(null); return; }
