@@ -1,21 +1,5 @@
 import { inject } from '@angular/core';
 import { Routes, Router, CanActivateFn } from '@angular/router';
-import { CharacterListComponent } from './components/character-list/character-list.component';
-import { CharacterFormComponent } from './components/character-form/character-form.component';
-import { CombatTrackerComponent } from './components/combat-tracker/combat-tracker.component';
-import { CombatMapComponent } from './components/combat-map/combat-map.component';
-import { RulesReferenceComponent } from './components/rules-reference/rules-reference.component';
-import { MarkdownPageComponent } from './components/markdown-page/markdown-page.component';
-import { BestiaryComponent } from './components/bestiary/bestiary.component';
-import { MonsterCreatorComponent } from './components/monster-creator/monster-creator.component';
-import { SettingsComponent } from './components/settings/settings.component';
-import { WildernessMapComponent } from './components/wilderness-map/wilderness-map.component';
-import { PublicationsComponent } from './components/publications/publications.component';
-import { DocsComponent } from './components/docs/docs.component';
-import { DocsHomeComponent } from './components/docs/docs-home.component';
-import { GameMastersScreenComponent } from './components/game-masters-screen/game-masters-screen.component';
-import { CampaignPlannerComponent } from './components/campaigns/campaign-planner/campaign-planner.component';
-import { CampaignDetailComponent } from './components/campaigns/campaign-detail/campaign-detail.component';
 
 const LAST_USED_SYSTEM_KEY = 'gameSystem';
 
@@ -28,27 +12,105 @@ const redirectToLastSystem: CanActivateFn = () => {
 
 const gameSystemRoutes: Routes = [
   { path: '', redirectTo: 'characters', pathMatch: 'full' },
-  { path: 'characters', component: CharacterListComponent },
-  { path: 'create', component: CharacterFormComponent },
-  { path: 'combat', component: CombatTrackerComponent },
-  { path: 'combat-map', component: CombatMapComponent },
-  { path: 'wilderness-map', component: WildernessMapComponent },
+  {
+    path: 'characters',
+    loadComponent: () =>
+      import('@characters/components/character-list/character-list.component')
+        .then(m => m.CharacterListComponent)
+  },
+  {
+    path: 'create',
+    loadComponent: () =>
+      import('@characters/components/character-form/character-form.component')
+        .then(m => m.CharacterFormComponent)
+  },
+  {
+    path: 'combat',
+    loadComponent: () =>
+      import('@combat/components/combat-tracker/combat-tracker.component')
+        .then(m => m.CombatTrackerComponent)
+  },
+  {
+    path: 'combat-map',
+    loadComponent: () =>
+      import('@combat/components/combat-map/combat-map.component')
+        .then(m => m.CombatMapComponent)
+  },
+  {
+    path: 'wilderness-map',
+    loadComponent: () =>
+      import('@maps/components/wilderness-map/wilderness-map.component')
+        .then(m => m.WildernessMapComponent)
+  },
   {
     path: 'docs',
-    component: DocsComponent,
+    loadComponent: () =>
+      import('@docs/components/docs/docs.component')
+        .then(m => m.DocsComponent),
     children: [
-      { path: 'rules', component: RulesReferenceComponent },
-      { path: 'publications', component: PublicationsComponent },
-      { path: 'gm-screen', component: GameMastersScreenComponent },
-      { path: 'page', component: MarkdownPageComponent },
-      { path: '', component: DocsHomeComponent, pathMatch: 'full' }
+      {
+        path: 'rules',
+        loadComponent: () =>
+          import('@docs/components/rules-reference/rules-reference.component')
+            .then(m => m.RulesReferenceComponent)
+      },
+      {
+        path: 'publications',
+        loadComponent: () =>
+          import('@docs/components/publications/publications.component')
+            .then(m => m.PublicationsComponent)
+      },
+      {
+        path: 'gm-screen',
+        loadComponent: () =>
+          import('@docs/components/game-masters-screen/game-masters-screen.component')
+            .then(m => m.GameMastersScreenComponent)
+      },
+      {
+        path: 'page',
+        loadComponent: () =>
+          import('@docs/components/markdown-page/markdown-page.component')
+            .then(m => m.MarkdownPageComponent)
+      },
+      {
+        path: '',
+        loadComponent: () =>
+          import('@docs/components/docs/docs-home.component')
+            .then(m => m.DocsHomeComponent),
+        pathMatch: 'full'
+      }
     ]
   },
-  { path: 'bestiary', component: BestiaryComponent },
-  { path: 'monster-creator', component: MonsterCreatorComponent },
-  { path: 'settings', component: SettingsComponent },
-  { path: 'campaigns', component: CampaignPlannerComponent },
-  { path: 'campaigns/:campaignId', component: CampaignDetailComponent }
+  {
+    path: 'bestiary',
+    loadComponent: () =>
+      import('@bestiary/components/bestiary/bestiary.component')
+        .then(m => m.BestiaryComponent)
+  },
+  {
+    path: 'monster-creator',
+    loadComponent: () =>
+      import('@bestiary/components/monster-creator/monster-creator.component')
+        .then(m => m.MonsterCreatorComponent)
+  },
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('@settings/components/settings/settings.component')
+        .then(m => m.SettingsComponent)
+  },
+  {
+    path: 'campaigns',
+    loadComponent: () =>
+      import('@campaigns/components/campaign-planner/campaign-planner.component')
+        .then(m => m.CampaignPlannerComponent)
+  },
+  {
+    path: 'campaigns/:campaignId',
+    loadComponent: () =>
+      import('@campaigns/components/campaign-detail/campaign-detail.component')
+        .then(m => m.CampaignDetailComponent)
+  }
 ];
 
 export const routes: Routes = [

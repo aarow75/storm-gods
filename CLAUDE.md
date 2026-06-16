@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Runequest Character Manager** — An Angular application for creating and managing Runequest/Dragonbane RPG characters with complete character sheet functionality, dice rolling, combat tracking, bestiary, wilderness/combat maps, and localStorage persistence.
+**Runequest Character Manager** — An Angular application for creating and managing Runequest/Dragonbane RPG characters with complete character sheet functionality, dice rolling, combat tracking, bestiary, wilderness/combat maps, campaign management, and localStorage persistence.
 
 - **Framework**: Angular 21.2.7 with standalone components
 - **Language**: TypeScript 5.9
@@ -35,38 +35,100 @@ ng generate component path/to/component-name  # Create new component
 
 ## Architecture
 
-### High-Level Structure
+### Directory Structure
 
-The app uses a **modular component architecture** organized around multiple pages and sub-components:
+The app uses a **feature-based module architecture**. All code lives under `src/app/` organized into `features/` (domain-specific) and `shared/` (cross-cutting).
 
-- **Root Component** (`app.ts`): Manages navigation, game-system switching, and the dice roller overlay
-- **Character List** (`character-list.component.ts`): Grid of character cards; entry point for CRUD operations
-- **Character Form** (`character-form.component.ts`): Main editor; imports 16 sub-components for different character sheet sections
-- **Sub-components** (e.g., `character-characteristics`, `character-skills`, `character-armor`): Each focused on a single data section
-- **Page Components**: `combat-tracker`, `combat-map`, `wilderness-map`, `bestiary`, `monster-creator`, `rules-reference`, `publications`, `game-masters-screen`, `settings`
+```
+src/app/
+├── app.ts / app.routes.ts / app.config.ts   # Root component, lazy routes, DI config
+│
+├── features/
+│   ├── characters/          # Character creation and management
+│   │   ├── components/      # character-form, character-list, + 18 character-* sub-components
+│   │   ├── services/        # character.service.ts, character-update.service.ts
+│   │   ├── models/          # character.model.ts  (authoritative character types + calculations)
+│   │   └── constants/       # character-colors, cult-ranks, fantasy-names, skill-categories
+│   ├── combat/              # Combat tracker and hex map
+│   │   ├── components/      # combat-tracker, combat-map
+│   │   ├── services/        # combat.service.ts, combat-log.service.ts
+│   │   ├── models/          # combat.model.ts
+│   │   └── utils/           # damage-parser.ts
+│   ├── bestiary/            # Monster browser and creator
+│   │   ├── components/      # bestiary, monster-creator
+│   │   ├── services/        # custom-monster.service.ts
+│   │   ├── models/          # monster.model.ts
+│   │   └── constants/       # monsters, encounters, hit-location-templates
+│   ├── campaigns/           # Campaign management
+│   │   ├── components/      # campaign-planner, campaign-detail + 5 tab sub-components
+│   │   ├── services/        # campaign.service.ts
+│   │   └── models/          # campaign.model.ts
+│   ├── docs/                # Rules reference, publications, GM screen
+│   │   ├── components/      # docs, rules-reference, publications, game-masters-screen, markdown-page
+│   │   ├── services/        # markdown.service.ts
+│   │   └── constants/       # runequest-publications, dragonbane-publications
+│   ├── dice-roller/
+│   │   └── components/      # dice-roller
+│   ├── maps/                # Wilderness hex map
+│   │   ├── components/      # wilderness-map
+│   │   ├── services/        # wilderness-map.service.ts
+│   │   ├── models/          # wilderness-map.model.ts
+│   │   ├── utils/           # hex-pathfinding.ts
+│   │   └── constants/       # terrain, map-backgrounds
+│   └── settings/
+│       └── components/      # settings
+│
+└── shared/                  # Cross-cutting concerns used by multiple features
+    ├── services/            # game-system.service.ts, dice.service.ts, ui-state.service.ts, export.service.ts
+    ├── models/              # character-reference.model.ts (CharacterSummary — lightweight cross-feature type)
+    ├── constants/           # equipment.constants.ts
+    └── styles/              # variables.css, shared-form-styles.css, docs-common.css
+```
+
+### TypeScript Path Aliases
+
+All cross-feature imports use path aliases (configured in `tsconfig.app.json`) — never use long relative paths like `../../../../` for cross-feature imports:
+
+```typescript
+@shared/*        → src/app/shared/*
+@characters/*    → src/app/features/characters/*
+@combat/*        → src/app/features/combat/*
+@bestiary/*      → src/app/features/bestiary/*
+@campaigns/*     → src/app/features/campaigns/*
+@docs/*          → src/app/features/docs/*
+@maps/*          → src/app/features/maps/*
+@dice-roller/*   → src/app/features/dice-roller/*
+@settings/*      → src/app/features/settings/*
+```
+
+**Example usage:**
+```typescript
+import { Character } from '@characters/models/character.model';
+import { GameSystemService } from '@shared/services/game-system.service';
+import { CombatParticipant } from '@combat/models/combat.model';
+```
 
 ### Services Layer
 
-**Core Services**:
-- **`CharacterService`** — CRUD operations and localStorage persistence
-  - Loads/saves characters from `localStorage['runequest-characters']`
-  - Runs `migrateCharacter()` on every load to handle schema changes (backward compatibility)
-  - Applies schema defaults for missing fields
-- **`DiceService`** — Dice roll logic (XdY+modifier)
-- **`GameSystemService`** — URL-based game system (Runequest/Dragonbane); uses Angular signals; reads system from URL on navigation; provides `link()` helper and `switchSystem()` to navigate between systems; serves system-specific cults/occupations/homelands and localized labels
+**Shared services** (`shared/services/`) — used by multiple features, injected via `providedIn: 'root'`:
+- **`GameSystemService`** — URL-based game system (Runequest/Dragonbane); uses Angular signals; reads system from URL on navigation; provides `link()` helper and `switchSystem()`; serves system-specific cults/occupations/homelands and localized labels
+- **`DiceService`** — Dice roll logic (XdY+modifier); imports `UIStateService` for roll settings
+- **`UIStateService`** — Font size, collapsed sections, UI toggles; persisted to localStorage
+- **`ExportService`** — File download (browser + Capacitor native)
 
-**Supporting Services**:
-- **`CharacterUpdateService`** — Reactive updates to character data (used by form sub-components)
-- **`CombatService`** — Combat mechanics (hit locations, damage, parry/dodge, encumbrance)
-- **`CombatLogService`** — Event log for combat actions
-- **`CustomMonsterService`** — Persistence for user-created monsters
-- **`MarkdownService`** — Markdown rendering used by rules/docs components
-- **`UIStateService`** — Shared UI state across components
-- **`WildernessMapService`** — State management for wilderness hex map
+**Feature services** — owned by their feature, but some are injected cross-feature:
+- **`CharacterService`** (`@characters/services/`) — CRUD + localStorage persistence; runs `migrateCharacter()` on every load
+- **`CharacterUpdateService`** (`@characters/services/`) — RxJS Subject pub/sub for cross-component character list refresh
+- **`CombatService`** (`@combat/services/`) — Combat participants, strike rank, map state
+- **`CombatLogService`** (`@combat/services/`) — Event log for combat actions
+- **`CustomMonsterService`** (`@bestiary/services/`) — Persistence for user-created monsters
+- **`CampaignService`** (`@campaigns/services/`) — Campaign CRUD and session/objective persistence
+- **`MarkdownService`** (`@docs/services/`) — Markdown rendering and TOC generation
+- **`WildernessMapService`** (`@maps/services/`) — Wilderness map state persistence
 
 ### Models & Data Flow
 
-**Character Model** (`character.model.ts`):
+**Character Model** (`@characters/models/character.model.ts`) — the authoritative source for all character types:
 ```
 Character {
   id, name, color
@@ -82,94 +144,105 @@ Character {
   magic { spiritMagic[], runeMagic[], sorcery[] }
   resources { lunars, wheels, clacks, reputation, ransom }
   equipment [ { name, quantity, cost, hitPoints, encumbrance } ]
-  conditions [ string[] ]  // e.g. 'diseased', 'poisoned'
+  conditions [ string[] ]
   familyHistory, cultStatus, notes
 }
 ```
 
-**Key Calculations**:
+Also exported from `character.model.ts`: `WEAPON_LIST`, `SHIELD_LIST`, `ARMOR_TYPES`, and all calculation functions (`calculateDerivedStats`, `calculateHitLocations`, `getSizeModifier`, `getDexterityModifier`, etc.). Combat and bestiary features import these directly via `@characters/models/character.model` — this is an intentional dependency since combat rules are character rules.
+
+**`CharacterSummary`** (`@shared/models/character-reference.model.ts`) — lightweight interface (`id, name, color, gameSystem`) for contexts that don't need the full `Character` (campaign rosters, map tokens).
+
+**Key Calculations** (all pure functions in `character.model.ts`):
 - `calculateDerivedStats()` — Damage bonus, strike rank, healing rate, magic points, movement; encumbrance includes shields
 - `calculateHitLocations()` — HP per location from CON + SIZ
 - `calculateEncumbrance()` — Total weight from equipment + weapons + shields; applies defense penalty if over capacity
 - `calculateArmorFromShields()` — Adds shield AP to relevant hit locations
 - `calculateTotalArmor()` — Combines worn armor and shields per location
 
-All calculations are pure functions exported from `character.model.ts` and called by services.
-
 ### Constants & Game Data
 
-All game data is stored as TypeScript constants in `src/app/constants/`:
-- `skill-categories.constants.ts` — 30 skills organized by 8 categories
-- `cult-ranks.constants.ts` — Cult status ranks
-- `fantasy-names.constants.ts` — Name generation
-- `character-colors.constants.ts` — Unique colors for character cards
-- `equipment.constants.ts` — Equipment and shield definitions
-- `monsters.constants.ts` — Monster stat blocks
-- `encounters.constants.ts` — Random encounter tables
-- `hit-location-templates.constants.ts` — Hit location templates per creature type
-- `terrain.constants.ts` — Wilderness map terrain types
-- `map-backgrounds.constants.ts` — Background images for maps
-- `runequest-publications.constants.ts` / `dragonbane-publications.constants.ts` — Publication reference lists
+Constants are co-located with their feature:
+
+| Constants | Location |
+|---|---|
+| `skill-categories`, `cult-ranks`, `fantasy-names`, `character-colors` | `@characters/constants/` |
+| `equipment` (EQUIPMENT_DEFAULTS, MAGIC_DEFAULTS) | `@shared/constants/` |
+| `monsters`, `encounters`, `hit-location-templates` | `@bestiary/constants/` |
+| `runequest-publications`, `dragonbane-publications` | `@docs/constants/` |
+| `terrain`, `map-backgrounds` | `@maps/constants/` |
 
 ### Data Persistence & Migration
 
-- Characters stored in single localStorage key: `'runequest-characters'` as JSON
-- `CharacterService.migrateCharacter()` runs on load to:
-  - Add missing fields with defaults
-  - Upgrade old string-array equipment format to objects
-  - Recalculate derived stats if missing
-  - Ensure backward compatibility when schema changes
+All data stored in localStorage:
 
-**To add a new field**:
-1. Add to `Character` interface in `character.model.ts`
-2. Add default in `DEFAULT_CHARACTER` or specific interface (e.g., `DEFAULT_RUNES`)
-3. Add migration logic in `CharacterService.migrateCharacter()` if field may be missing in old data
+| Key | Owner |
+|---|---|
+| `runequest-characters` | `CharacterService` |
+| `gameSystem` | `GameSystemService` |
+| `runequest-combat`, `runequest-monsters`, `runequest-combat-log-history`, `runequest-combat-map`, `runequest-combat-map-templates` | `CombatService` |
+| `runequest-wilderness-map` | `WildernessMapService` |
+| `combat-log` | `CombatLogService` |
+| `runequest-ui-state` | `UIStateService` |
+| `custom-monsters` | `CustomMonsterService` |
+| `rq-campaigns-index`, `rq-campaign-*` | `CampaignService` |
+
+`CharacterService.migrateCharacter()` runs on every load to add missing fields, upgrade old formats, and maintain backward compatibility.
+
+**To add a new character field**:
+1. Add to `Character` interface in `@characters/models/character.model.ts`
+2. Add default in `DEFAULT_CHARACTER` or relevant `DEFAULT_*` constant
+3. Add migration logic in `CharacterService.migrateCharacter()`
 4. Default will auto-fill on load for existing characters
 
 ### Styling & Theming
 
 - **Global styles** — `src/styles.css` (reset, typography, root variables)
-- **Component styles** — Each component has co-located `.component.css` file
-- **Variables file** — `src/app/shared/styles/variables.css` (colors, spacing, responsive breakpoints)
-- **Shared form styles** — `src/app/shared/styles/shared-form-styles.css` (reusable form input classes)
+- **Component styles** — Each component has a co-located `.css` file
+- **Variables** — `src/app/shared/styles/variables.css` (colors, spacing, breakpoints)
+- **Shared form styles** — `src/app/shared/styles/shared-form-styles.css`
 
-**CSS Variable Usage**: All new CSS must use CSS variables from `variables.css` for colors and font properties. Do not hardcode color values (`#fff`, `rgb()`, named colors) or font properties (`font-size`, `font-weight`, `font-family`) in component `.css` files. Always reference variables via `var(--variable-name)` to ensure consistency and simplify future theme changes.
+**CSS Variable Usage**: All new CSS must use CSS variables from `variables.css`. Do not hardcode color values (`#fff`, `rgb()`, named colors) or font properties (`font-size`, `font-weight`, `font-family`). Always use `var(--variable-name)`.
 
-**Font Size Scaling**: Font sizes use `rem` units (base: 14px = 1rem) with semantic names:
-- `--font-size-xs` (10px) — Extra small, hints
-- `--font-size-sm` (11px) — Small, labels
-- `--font-size-md` (12px) — Medium-small
-- `--font-size-base` (13px) — Base variant
-- `--font-size-lg` (14px) — Large, default body text
-- `--font-size-xl` (16px) — Extra large, headings
-- `--font-size-2xl` (24px) — 2x large, main headings
+**CSS import paths**: Component CSS files import shared styles using relative paths. From `features/<feature>/components/<component>/`:
+```css
+@import '../../../../shared/styles/shared-form-styles.css';
+@import '../../../../shared/styles/variables.css';
+```
 
-**Spacing Variables**: All padding, margin, and gap values use semantic spacing variables:
-- `--spacing-xs` (2px), `--spacing-sm` (4px), `--spacing-md` (6px), `--spacing-lg` (8px), `--spacing-xl` (10px)
-- `--spacing-2xl` (12px), `--spacing-3xl` (15px), `--spacing-4xl` (16px), `--spacing-5xl` (20px), `--spacing-6xl` (30px)
+**Font Size Scaling**: Font sizes use `rem` units (base: 14px = 1rem):
+- `--font-size-xs` (10px), `--font-size-sm` (11px), `--font-size-md` (12px), `--font-size-base` (13px)
+- `--font-size-lg` (14px), `--font-size-xl` (16px), `--font-size-2xl` (24px)
 
-**Border Radius**: Border radius values use `--border-radius-sm` (3px), `--border-radius-md` (4px), `--border-radius-lg` (6px), `--border-radius-xl` (8px)
+**Spacing Variables**: `--spacing-xs` (2px) through `--spacing-6xl` (30px)
 
-Color scheme is configurable per character (`character.color` property). Form edit mode uses orange border/banner visual indicator.
+**Border Radius**: `--border-radius-sm` (3px) through `--border-radius-xl` (8px)
 
 ### Routing
 
 Game system is embedded in the URL prefix (`/runequest/...` or `/dragonbane/...`). Navigating to `/` redirects to the last used system (stored in `localStorage['gameSystem']`).
 
-Key routes (repeated under both `runequest` and `dragonbane`):
-- `/:system/characters` — Character list
-- `/:system/create` — Create new character
-- `/:system/combat` — Combat tracker
-- `/:system/combat-map` — Hex tactical map
-- `/:system/wilderness-map` — Overworld hex map
-- `/:system/docs/rules` — Rules reference
-- `/:system/docs/publications` — Publications list
-- `/:system/docs/gm-screen` — GM screen
-- `/:system/bestiary` — Monster browser
-- `/:system/monster-creator` — Custom monster builder
-- `/:system/settings` — App settings
+All routes use **`loadComponent()` lazy loading** — each feature is a separate JS chunk loaded on demand:
 
-Uses Angular Router's standalone APIs; no module-based routing. `GameSystemService.link()` builds route arrays prefixed with the current system.
+```
+/:system/characters          → CharacterListComponent
+/:system/create              → CharacterFormComponent
+/:system/combat              → CombatTrackerComponent
+/:system/combat-map          → CombatMapComponent
+/:system/wilderness-map      → WildernessMapComponent
+/:system/bestiary            → BestiaryComponent
+/:system/monster-creator     → MonsterCreatorComponent
+/:system/campaigns           → CampaignPlannerComponent
+/:system/campaigns/:id       → CampaignDetailComponent
+/:system/settings            → SettingsComponent
+/:system/docs                → DocsComponent (shell)
+/:system/docs/rules          → RulesReferenceComponent
+/:system/docs/publications   → PublicationsComponent
+/:system/docs/gm-screen      → GameMastersScreenComponent
+/:system/docs/page           → MarkdownPageComponent
+```
+
+`GameSystemService.link()` builds route arrays prefixed with the current system.
 
 ## Key Implementation Details
 
@@ -184,13 +257,11 @@ Uses Angular Router's standalone APIs; no module-based routing. `GameSystemServi
 ### Derived Stats & Combat Rules
 
 - **Damage Bonus** — Formula: `(STR + SIZ) / 8` → maps to d4/d6/d8/d10/d12 increments
-- **Strike Rank** — `SIZ modifier + DEX modifier` (from Runequest Strike Rank Modifier Table); affects turn order in combat. Base 0, modified by SIZ (22+=0, 15-21=+1, 7-14=+2, 1-6=+3) and DEX (19+=0, 16-18=+1, 13-15=+2, 9-12=+3, 6-8=+4, 1-5=+5)
-- **Hit Points per Location** — `(CON + SIZ) / 2`, distributed by location (head=1/4, limbs=1/4 each, torso=2/4)
+- **Strike Rank** — `SIZ modifier + DEX modifier`; base 0, modified by SIZ (22+=0, 15-21=+1, 7-14=+2, 1-6=+3) and DEX (19+=0, 16-18=+1, 13-15=+2, 9-12=+3, 6-8=+4, 1-5=+5)
+- **Hit Points per Location** — `(CON + SIZ) / 2`, distributed by location
 - **Healing Rate** — `(CON / 4)` per week
 - **Encumbrance** — Total equipment weight; if over STR limit, applies defense penalty
 - **Spirit Combat Damage** — `POW` stat used directly (no damage bonus)
-
-These formulas are game-system agnostic; `GameSystemService` allows Dragonbane variants to override labels/calculations if needed.
 
 ### Game System Switching
 
@@ -201,7 +272,19 @@ These formulas are game-system agnostic; `GameSystemService` allows Dragonbane v
 - `getSystemName()` — Returns `'RuneQuest'` or `'Dragonbane'`
 - `getCults()`, `getOccupations()`, `getHomelands()` — System-specific dropdown values
 - `getCultLabel()`, `getOccupationLabel()`, `getHomelandLabel()` — System-specific field labels
-- Used in app root, character form, and all navigation links
+
+### Cross-Feature Dependencies
+
+These are intentional, explicit dependencies (not accidents):
+
+| Consumer | Imports from | Reason |
+|---|---|---|
+| `combat-tracker`, `combat-map` | `@characters/models/character.model` | `Character`, `WEAPON_LIST`, `SHIELD_LIST`, calculation functions — combat rules are character rules |
+| `bestiary` | `@characters/models/character.model` | `getSizeModifier`, `getDexterityModifier` for monster strike rank |
+| `wilderness-map` | `@characters/models/character.model` | `Character` type for map tokens |
+| `bestiary` | `@combat/models/combat.model`, `@combat/services/combat.service` | Adding monsters to active combat |
+| `wilderness-map` | `@bestiary/constants/encounters.constants` | Encounter tables for hex encounters |
+| `settings` | `@combat/services/combat-log.service`, `@bestiary/services/custom-monster.service`, `@maps/services/wilderness-map.service` | Export/import/clear all data |
 
 ## Testing Notes
 
@@ -211,19 +294,28 @@ These formulas are game-system agnostic; `GameSystemService` allows Dragonbane v
 
 ## Common Patterns
 
+### Adding a New Feature Component
+
+1. Create the component under `src/app/features/<feature>/components/<name>/`
+2. Use Angular CLI: `ng generate component features/<feature>/components/<name>`
+3. Import shared services via aliases: `from '@shared/services/game-system.service'`
+4. Import feature-local files with relative paths: `from '../../models/...'`
+5. Add to `app.routes.ts` using `loadComponent()`
+6. CSS shared styles: `@import '../../../../shared/styles/shared-form-styles.css'`
+
 ### Adding a New Character Field
 
-1. Extend `Character` interface in `character.model.ts`
+1. Extend `Character` interface in `@characters/models/character.model.ts`
 2. Add default in appropriate `DEFAULT_*` constant
 3. Add migration in `CharacterService.migrateCharacter()`
 4. Create/extend sub-component to display/edit the field
-5. Add to form template and wire `@Input/@Output`
+5. Add to `character-form` template and wire `@Input/@Output`
 
 ### Adding a New Game System Variant
 
-1. Extend `GameSystemService` with system-specific data arrays and label getters
+1. Extend `GameSystemService` in `@shared/services/game-system.service.ts` with system-specific data and label getters
 2. Use `gameSystemService.gameSystem() === 'dragonbane'` where rules differ
-3. Add system-specific constants to the relevant constants file
+3. Add system-specific constants to the relevant feature's `constants/` folder
 
 ### Component Communication
 
@@ -233,8 +325,8 @@ These formulas are game-system agnostic; `GameSystemService` allows Dragonbane v
 
 ## Build & Deploy
 
-- **Development** — `npm start` hot-reloads on file changes
-- **Production** — `npm run build` outputs to `dist/runequest-characters/`
+- **Development** — `npm start` hot-reloads on file changes; port 4202
+- **Production** — `npm run build` outputs to `dist/runequest-characters/`; all routes code-split as lazy chunks
 - **Android** — Capacitor handles native app build; `npm run android` syncs and opens Android Studio
 - **Icons** — Auto-generated from source image via Capacitor Assets CLI
 

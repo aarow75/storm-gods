@@ -4,7 +4,19 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*":      ["src/app/shared/*"],
+      "@characters/*":  ["src/app/features/characters/*"],
+      "@combat/*":      ["src/app/features/combat/*"],
+      "@bestiary/*":    ["src/app/features/bestiary/*"],
+      "@campaigns/*":   ["src/app/features/campaigns/*"],
+      "@docs/*":        ["src/app/features/docs/*"],
+      "@maps/*":        ["src/app/features/maps/*"],
+      "@dice-roller/*": ["src/app/features/dice-roller/*"],
+      "@settings/*":    ["src/app/features/settings/*"]
+    }
   },
   "include": [
     "src/**/*.ts"

@@ -76,55 +76,33 @@ npm install
 
 # Start development server
 npm start
-
-# Or use Angular CLI directly
-ng serve --port 4201
 ```
 
-Navigate to `http://localhost:4201/` in your browser.
+Navigate to `http://localhost:4202/` in your browser.
 
 ## Project Structure
 
+The app uses a **feature-based module architecture** — each domain owns its components, services, models, and constants:
+
 ```
-storm-gods/
-├── src/
-│   ├── app/
-│   │   ├── components/
-│   │   │   ├── character-form/        # Character creation/editing form
-│   │   │   ├── character-list/        # Character cards display with create button
-│   │   │   ├── dice-roller/           # Standalone dice roller with boons/banes
-│   │   │   ├── combat-tracker/        # Full combat encounter management
-│   │   │   ├── combat-map/            # Tactical combat map with hex grid
-│   │   │   ├── wilderness-map/        # Wilderness map with terrain and token placement
-│   │   │   ├── rules-reference/       # Game rules database
-│   │   │   ├── bestiary/              # Monster database with filtering
-│   │   │   ├── monster-creator/       # Custom monster creation tool
-│   │   │   ├── publications/          # RuneQuest publications browser
-│   │   │   └── settings/              # Settings page (language, text size, game system)
-│   │   ├── models/
-│   │   │   ├── character.model.ts     # Character data models & calculations
-│   │   │   ├── combat.model.ts        # Combat mechanics and monster data
-│   │   │   └── monster.model.ts       # Monster definitions
-│   │   ├── services/
-│   │   │   ├── character.service.ts   # localStorage & migration
-│   │   │   ├── dice.service.ts        # Dice rolling logic
-│   │   │   ├── combat.service.ts      # Combat mechanics
-│   │   │   ├── game-system.service.ts # Game system state (RQ/Dragonbane)
-│   │   │   ├── translation.service.ts # i18n and localization
-│   │   │   └── ui-state.service.ts    # UI preferences (font size, etc.)
-│   │   ├── i18n/
-│   │   │   └── translations.ts        # English and Swedish translations
-│   │   ├── constants/
-│   │   │   ├── skill-categories.constants.ts
-│   │   │   ├── monsters.constants.ts
-│   │   │   ├── runequest-publications.constants.ts  # 47 RuneQuest publications (RQ2 & modern)
-│   │   │   └── [other game data constants]
-│   │   ├── styles.css                 # Global styles
-│   │   └── index.html
-├── CLAUDE.md                          # Project documentation for Claude Code
-├── SESSION_REPORT.md                  # Detailed development report
-└── README.md
+src/app/
+├── features/
+│   ├── characters/      # character-form, 18 sub-components, character-list + service/model/constants
+│   ├── combat/          # combat-tracker, combat-map + service/model/utils
+│   ├── bestiary/        # bestiary, monster-creator + service/model/constants
+│   ├── campaigns/       # campaign-planner, campaign-detail + 5 tabs + service/model
+│   ├── docs/            # rules-reference, publications, gm-screen, markdown-page + service/constants
+│   ├── dice-roller/     # dice-roller component
+│   ├── maps/            # wilderness-map + service/model/utils/constants
+│   └── settings/        # settings component
+└── shared/
+    ├── services/        # game-system, dice, ui-state, export  (used by all features)
+    ├── models/          # CharacterSummary (lightweight cross-feature interface)
+    ├── constants/       # equipment constants
+    └── styles/          # variables.css, shared-form-styles.css, docs-common.css
 ```
+
+All routes use `loadComponent()` lazy loading — each feature loads as a separate JS chunk. TypeScript path aliases (`@characters/*`, `@combat/*`, `@shared/*`, etc.) keep cross-feature imports clean. See [CLAUDE.md](CLAUDE.md) for full architecture details.
 
 ## Navigation Guide
 
@@ -255,16 +233,6 @@ Characters are stored in browser localStorage with the key `runequest-characters
 }
 ```
 
-## Session Statistics
-
-- **Development Time**: 44 minutes 53 seconds
-- **Total Changes**: 2,963 lines added, 641 lines removed
-- **Components Created**: 3 (CharacterForm, CharacterList, DiceRoller)
-- **Services Created**: 2 (CharacterService, DiceService)
-- **Cost**: $11.04 (Claude Sonnet 4.5)
-
-For detailed session information, see [SESSION_REPORT.md](SESSION_REPORT.md).
-
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
 
 ## Development server
@@ -272,17 +240,17 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 To start a local development server, run:
 
 ```bash
-ng serve
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Once the server is running, open your browser and navigate to `http://localhost:4202/`. The application will automatically reload whenever you modify any of the source files.
 
 ## Code scaffolding
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Angular CLI includes powerful code scaffolding tools. To generate a new component under its feature folder, run:
 
 ```bash
-ng generate component component-name
+ng generate component features/<feature>/components/<component-name>
 ```
 
 For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:

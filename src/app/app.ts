@@ -2,9 +2,9 @@ import { Component, OnInit, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { DiceRollerComponent } from './components/dice-roller/dice-roller.component';
-import { GameSystemService } from './services/game-system.service';
-import { UIStateService } from './services/ui-state.service';
+import { DiceRollerComponent } from '@dice-roller/components/dice-roller/dice-roller.component';
+import { GameSystemService } from '@shared/services/game-system.service';
+import { UIStateService } from '@shared/services/ui-state.service';
 
 @Component({
   selector: 'app-root',
