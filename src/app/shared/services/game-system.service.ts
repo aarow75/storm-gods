@@ -1,8 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { GameSystem } from '@shared/models/game-system.model';
+import { GameSystemRules } from '@shared/rules/game-system-rules.interface';
+import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
 
-export type GameSystem = 'runequest' | 'dragonbane';
+export type { GameSystem };
 
 export interface GameSystemData {
   cults: string[];
@@ -184,5 +187,9 @@ export class GameSystemService {
 
   getSelectCultLabel(): string {
     return this.gameSystem() === 'runequest' ? 'Select Cult' : 'Select Belief';
+  }
+
+  getRules(): GameSystemRules {
+    return getRulesForSystem(this.gameSystem());
   }
 }

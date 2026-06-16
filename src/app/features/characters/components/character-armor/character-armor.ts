@@ -1,8 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ArmorLocations, ARMOR_TYPES } from '@characters/models/character.model';
+import { ArmorLocations } from '@characters/models/character.model';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { ArmorTypeDefinition } from '@shared/rules/game-system-rules.interface';
 
 @Component({
   standalone: true,
@@ -17,16 +18,18 @@ export class CharacterArmor {
   @Output() applyToAll = new EventEmitter<void>();
   @Output() armorTypeChange = new EventEmitter<string>();
 
-  armorTypes = ARMOR_TYPES;
-
   constructor(public gameSystemService: GameSystemService) {}
+
+  get armorTypes(): ArmorTypeDefinition[] {
+    return this.gameSystemService.getRules().getArmorTypes();
+  }
 
   get heading(): string {
     return 'Armor';
   }
 
   get isRuneQuest(): boolean {
-    return this.gameSystemService.gameSystem() === 'runequest';
+    return this.gameSystemService.getRules().usesHitLocations();
   }
 
   getArmorLocationKeys(): string[] {

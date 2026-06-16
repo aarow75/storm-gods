@@ -3,21 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GameSystemService } from '@shared/services/game-system.service';
 
-const RUNEQUEST_CONDITIONS = [
-  { name: 'Prone', effect: 'Melee attackers +20%, ranged attackers -20%' },
-  { name: 'Blinded', effect: '-50% to all skills except close combat' },
-  { name: 'Poisoned', effect: 'Varies by poison; often damage/round or -skill modifier' },
-  { name: 'Stunned', effect: 'Cannot act; roll CON to recover' },
-  { name: 'Fatigued', effect: '-5% per fatigue level; can only cast 1 spell/round' },
-  { name: 'Confused', effect: 'Cannot take effective actions; react randomly' }
-];
-
-const DRAGONBANE_CONDITIONS = [
-  { name: 'Wounded', effect: 'Reduced movement and combat effectiveness' },
-  { name: 'Stunned', effect: 'Cannot act this round' },
-  { name: 'Exhausted', effect: 'Reduced all physical actions' },
-];
-
 @Component({
   selector: 'app-character-conditions',
   imports: [CommonModule, FormsModule],
@@ -43,9 +28,7 @@ export class CharacterConditionsComponent {
   }
 
   private updateAvailableConditions(): void {
-    this.availableConditions = this.gameSystemService.gameSystem() === 'runequest'
-      ? RUNEQUEST_CONDITIONS
-      : DRAGONBANE_CONDITIONS;
+    this.availableConditions = this.gameSystemService.getRules().getConditions();
   }
 
   toggleCondition(conditionName: string): void {

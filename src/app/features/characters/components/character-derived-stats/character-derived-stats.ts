@@ -23,7 +23,7 @@ export class CharacterDerivedStats {
   }
 
   get isRuneQuest(): boolean {
-    return this.gameSystemService.gameSystem() === 'runequest';
+    return this.gameSystemService.getRules().usesHitLocations();
   }
 
   get strikeRankBreakdown(): string {

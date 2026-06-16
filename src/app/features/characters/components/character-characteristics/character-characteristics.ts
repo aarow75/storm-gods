@@ -25,18 +25,14 @@ export class CharacterCharacteristics {
   }
 
   get dexLabel(): string {
-    return this.gameSystemService.gameSystem() === 'runequest'
-      ? 'DEX (Dexterity)'
-      : 'AGL (Agility)';
+    return this.gameSystemService.getRules().getStatDefinitions().find(s => s.key === 'DEX')?.label ?? 'DEX (Dexterity)';
   }
 
   get powLabel(): string {
-    return this.gameSystemService.gameSystem() === 'runequest'
-      ? 'POW (Power)'
-      : 'WIL (Willpower)';
+    return this.gameSystemService.getRules().getStatDefinitions().find(s => s.key === 'POW')?.label ?? 'POW (Power)';
   }
 
   get showSiz(): boolean {
-    return this.gameSystemService.gameSystem() === 'runequest';
+    return this.gameSystemService.getRules().getStatDefinitions().find(s => s.key === 'SIZ')?.visible ?? true;
   }
 }

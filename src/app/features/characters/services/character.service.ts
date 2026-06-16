@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import {
   Character, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES,
-  DEFAULT_CULT_STATUS,
-  calculateHitLocations, calculateDerivedStats
+  DEFAULT_CULT_STATUS
 } from '@characters/models/character.model';
+import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
 import { CHARACTER_COLORS } from '@characters/constants/character-colors.constants';
 import { EQUIPMENT_DEFAULTS, MAGIC_DEFAULTS } from '@shared/constants/equipment.constants';
 import { GameSystemService } from '@shared/services/game-system.service';
@@ -56,8 +56,9 @@ export class CharacterService implements DataPort {
 
     // Ensure derivedStats exist
     if (!char.derivedStats) {
+      const rules = getRulesForSystem(char.gameSystem || 'runequest');
       char.derivedStats = char.stats
-        ? calculateDerivedStats(char.stats, char.equipment || [], char.weapons || [], char.shields || [])
+        ? rules.calculateDerivedStats(char.stats, char.equipment || [], char.weapons || [], char.shields || [])
         : { ...DEFAULT_DERIVED_STATS };
     }
 
@@ -79,8 +80,9 @@ export class CharacterService implements DataPort {
 
     // Ensure hitLocations exist
     if (!char.hitLocations) {
-      char.hitLocations = char.stats
-        ? calculateHitLocations(char.stats.CON || 10, char.stats.SIZ || 10)
+      const rules = getRulesForSystem(char.gameSystem || 'runequest');
+      char.hitLocations = (char.stats && rules.usesHitLocations())
+        ? rules.calculateHitLocations(char.stats) ?? { ...DEFAULT_HIT_LOCATIONS }
         : { ...DEFAULT_HIT_LOCATIONS };
     }
 

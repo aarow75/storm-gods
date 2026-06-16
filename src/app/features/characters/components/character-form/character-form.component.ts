@@ -338,16 +338,22 @@ export class CharacterFormComponent implements OnInit {
 
   calculateHitPoints(): void {
     if (this.character.stats && this.character.hitLocations) {
-      this.character.hitLocations = calculateHitLocations(
-        this.character.stats.CON,
-        this.character.stats.SIZ
-      );
+      const rules = this.gameSystemService.getRules();
+      if (rules.usesHitLocations()) {
+        this.character.hitLocations = rules.calculateHitLocations(this.character.stats) ?? this.character.hitLocations;
+      }
     }
   }
 
   calculateDerivedValues(): void {
     if (this.character.stats) {
-      this.character.derivedStats = calculateDerivedStats(this.character.stats, this.character.equipment || [], this.character.weapons || [], this.character.shields || []);
+      const rules = this.gameSystemService.getRules();
+      this.character.derivedStats = rules.calculateDerivedStats(
+        this.character.stats,
+        this.character.equipment ?? [],
+        this.character.weapons ?? [],
+        this.character.shields ?? []
+      );
       this.calculateHitPoints();
     }
   }
@@ -501,15 +507,13 @@ export class CharacterFormComponent implements OnInit {
     });
   }
 
-  applyAllSkillBonuses(): void {//TODO: do also for DB
+  applyAllSkillBonuses(): void {
     if (!this.character.skills || !this.character.background) return;
-
-    this.character.skills = applySkillBonuses(
-      DEFAULT_SKILLS,
-      this.character.background.occupation,
-      this.character.background.homeland,
-      this.character.background.cult
-    );
+    const rules = this.gameSystemService.getRules();
+    this.character.skills = rules.applyBackgroundBonuses(
+      rules.getDefaultSkills(),
+      this.character.background
+    ) as CharacterSkills;
   }
 
   onRuneChange(): void {
