@@ -1,6 +1,6 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, AfterViewInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   DEFAULT_WILDERNESS_STATE,
@@ -21,7 +21,7 @@ import { ENCOUNTER_TABLES } from '@bestiary/constants/encounters.constants';
 import { MONSTERS as BESTIARY_MONSTERS } from '@bestiary/constants/monsters.constants';
 import { WildernessMapService } from '@maps/services/wilderness-map.service';
 import { CharacterReadService } from '@shared/services/character-read.service';
-import { CombatService } from '@combat/services/combat.service';
+import { EncounterLaunchService } from '@combat/services/encounter-launch.service';
 import { DiceService } from '@shared/services/dice.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { ExportService } from '@shared/services/export.service';
@@ -123,9 +123,8 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   constructor(
     private wildernessService: WildernessMapService,
     private characterService: CharacterReadService,
-    private combatService: CombatService,
+    private encounterLaunchService: EncounterLaunchService,
     private diceService: DiceService,
-    private router: Router,
     public gameSystemService: GameSystemService,
     private exportService: ExportService
   ) {}
@@ -448,11 +447,10 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     const combatMonster = this.convertBestiaryMonster(bestiaryMonster);
-    const existingParticipants = this.combatService.getCombatParticipants();
     const participants: CombatParticipant[] = [];
 
     for (let i = 0; i < count; i++) {
-      const id = this.combatService.generateId();
+      const id = this.encounterLaunchService.generateId();
       const baseStrikeRank = combatMonster.strikeRank;
       const firstWeapon = combatMonster.weapons[0]?.name || 'Bite';
       const weapon = combatMonster.weapons.find((w) => w.name === firstWeapon);
@@ -481,13 +479,8 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
       participants.push(participant);
     }
 
-    const allParticipants = [...existingParticipants, ...participants];
-    this.combatService.saveCombatParticipants(
-      this.combatService.sortParticipantsByStrikeRank(allParticipants)
-    );
-
     this.encounterResult = null;
-    this.router.navigate(this.gameSystemService.link('combat'));
+    this.encounterLaunchService.launchEncounter(participants);
   }
 
   onHexClick(q: number, r: number): void {

@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MONSTERS } from '@bestiary/constants/monsters.constants';
 import { ENCOUNTER_TABLES, EncounterTable } from '@bestiary/constants/encounters.constants';
 import { HIT_LOCATION_TEMPLATES } from '@bestiary/constants/hit-location-templates.constants';
@@ -11,6 +11,7 @@ import { getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules'
 import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { CombatService } from '@combat/services/combat.service';
+import { EncounterLaunchService } from '@combat/services/encounter-launch.service';
 
 @Component({
   selector: 'app-bestiary',
@@ -68,7 +69,7 @@ export class BestiaryComponent implements OnInit {
     private customMonsterService: CustomMonsterService,
     public gameSystemService: GameSystemService,
     private combatService: CombatService,
-    private router: Router
+    private encounterLaunchService: EncounterLaunchService
   ) {}
 
   ngOnInit(): void {
@@ -221,9 +222,7 @@ export class BestiaryComponent implements OnInit {
       color: `hsl(${Math.random() * 360}, 70%, 50%)`
     };
 
-    const participants = this.combatService.getCombatParticipants();
-    participants.push(combatParticipant);
-    this.combatService.saveCombatParticipants(participants);
+    this.encounterLaunchService.addParticipants([combatParticipant]);
 
     this.addedToCombat.set(true);
     this.addedCreatureName.set(creatureName);
@@ -235,7 +234,7 @@ export class BestiaryComponent implements OnInit {
   }
 
   navigateToCombat(): void {
-    this.router.navigate(this.gameSystemService.link('combat'));
+    this.encounterLaunchService.navigateToCombat();
   }
 
   getGameSystemName(system: string): string {
