@@ -80,7 +80,7 @@ src/app/
 │
 └── shared/                  # Cross-cutting concerns used by multiple features
     ├── services/            # game-system.service.ts, dice.service.ts, ui-state.service.ts, export.service.ts
-    ├── models/              # character-reference.model.ts (CharacterSummary — lightweight cross-feature type)
+    ├── models/              # character-stats.model.ts, game-system.model.ts, combat-participant.model.ts
     ├── constants/           # equipment.constants.ts
     └── styles/              # variables.css, shared-form-styles.css, docs-common.css
 ```
@@ -150,8 +150,6 @@ Character {
 ```
 
 Also exported from `character.model.ts`: `WEAPON_LIST`, `SHIELD_LIST`, `ARMOR_TYPES`, and all calculation functions (`calculateDerivedStats`, `calculateHitLocations`, `getSizeModifier`, `getDexterityModifier`, etc.). Combat and bestiary features import these directly via `@characters/models/character.model` — this is an intentional dependency since combat rules are character rules.
-
-**`CharacterSummary`** (`@shared/models/character-reference.model.ts`) — lightweight interface (`id, name, color, gameSystem`) for contexts that don't need the full `Character` (campaign rosters, map tokens).
 
 **Key Calculations** (all pure functions in `character.model.ts`):
 - `calculateDerivedStats()` — Damage bonus, strike rank, healing rate, magic points, movement; encumbrance includes shields

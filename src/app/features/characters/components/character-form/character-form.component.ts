@@ -8,7 +8,7 @@ import {
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES, DEFAULT_CULT_STATUS,
   calculateHitLocations, calculateDerivedStats, calculateTotalArmor, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
   CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS, ARMOR_TYPES,
-  applySkillBonuses, enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES,
+  enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES,
   initializeSkillsWithModifiers, calculateSkillCategoryModifiers,
   WEAPON_SKILLS
 } from '@characters/models/character.model';

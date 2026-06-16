@@ -331,7 +331,7 @@ export const DEFAULT_RESOURCES: Resources = {
   ransom: 0
 };
 
-export function calculateArmorFromWornArmor(armorType?: string): ArmorLocations {
+function calculateArmorFromWornArmor(armorType?: string): ArmorLocations {
   const baseArmor: ArmorLocations = {
     'Right Leg': 0,
     'Left Leg': 0,
@@ -359,7 +359,7 @@ export function calculateArmorFromWornArmor(armorType?: string): ArmorLocations 
   };
 }
 
-export function calculateArmorFromShields(shields: Shield[]): ArmorLocations {
+function calculateArmorFromShields(shields: Shield[]): ArmorLocations {
   const shieldArmor: ArmorLocations = {
     'Right Leg': 0,
     'Left Leg': 0,
@@ -663,10 +663,6 @@ export const SORCERY_SPELLS = [
   'Ward'
 ];
 
-export const DB_KIN_BASE_CHANCE: Record<string, Partial<CharacterStats>> = {
-
-}
-
 // Skill bonuses by occupation
 export const OCCUPATION_SKILL_BONUSES: Record<string, Partial<CharacterSkills>> = {
   'Warrior': {
@@ -839,7 +835,7 @@ export function applySkillBonuses(
 }
 
 // Skill category mappings for applying characteristic modifiers (RQ2 rule)
-export const SKILL_CATEGORY_MAP: Record<string, string> = {
+const SKILL_CATEGORY_MAP: Record<string, string> = {
   // Agility Skills (STR, SIZ, DEX, POW)
   'Climb': 'Agility',
   'Dodge': 'Agility',
@@ -903,7 +899,7 @@ export function calculateSkillCategoryModifiers(stats: CharacterStats): Record<s
 }
 
 // Apply skill category modifiers to skills (RQ2: add modifier to base chance)
-export function applySkillCategoryModifiers(
+function applySkillCategoryModifiers(
   skills: CharacterSkills,
   categoryModifiers: Record<string, number>
 ): CharacterSkills {
