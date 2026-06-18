@@ -60,3 +60,6 @@ baseline.json
 
 # Potentially copyrighted docs should not be committed - files referenced here in the code should be added by the user, not committed
 #/public/docs/**
+
+playwright-report/
+test-results/
