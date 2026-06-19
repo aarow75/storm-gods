@@ -1,0 +1,1 @@
+import{o as r,q as o,r as n}from"./chunk-BUCZJSH6.js";var c=new o("DataPort"),e=class t{ports;constructor(a){this.ports=a??[]}getAllPorts(){return[...this.ports]}static \u0275fac=function(i){return new(i||t)(n(c,8))};static \u0275prov=r({token:t,factory:t.\u0275fac,providedIn:"root"})};export{c as a,e as b};

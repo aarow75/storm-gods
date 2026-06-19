@@ -1,0 +1,1 @@
+import{a as e,o as a}from"./chunk-BUCZJSH6.js";var r=class t{characterUpdatedSource=new e;characterUpdated$=this.characterUpdatedSource.asObservable();notifyCharacterUpdated(){this.characterUpdatedSource.next()}static \u0275fac=function(c){return new(c||t)};static \u0275prov=a({token:t,factory:t.\u0275fac,providedIn:"root"})};export{r as a};
