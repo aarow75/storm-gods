@@ -6,7 +6,8 @@ const LAST_USED_SYSTEM_KEY = 'gameSystem';
 const redirectToLastSystem: CanActivateFn = () => {
   const router = inject(Router);
   const stored = localStorage.getItem(LAST_USED_SYSTEM_KEY);
-  const system = stored === 'dragonbane' ? 'dragonbane' : 'runequest';
+  const valid = ['runequest', 'dragonbane', 'kal-arath'];
+  const system = valid.includes(stored ?? '') ? stored! : 'runequest';
   return router.parseUrl(`/${system}/characters`);
 };
 
@@ -116,6 +117,7 @@ const gameSystemRoutes: Routes = [
 export const routes: Routes = [
   { path: 'runequest', children: gameSystemRoutes },
   { path: 'dragonbane', children: gameSystemRoutes },
+  { path: 'kal-arath', children: gameSystemRoutes },
   { path: '', pathMatch: 'full', canActivate: [redirectToLastSystem], children: [] },
   { path: '**', canActivate: [redirectToLastSystem], children: [] }
 ];

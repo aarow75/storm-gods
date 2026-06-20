@@ -14,7 +14,7 @@ export interface Character {
   id: string;
   name: string;
   color?: string;
-  gameSystem?: 'runequest' | 'dragonbane';
+  gameSystem?: 'runequest' | 'dragonbane' | 'kal-arath';
   background: CharacterBackground;
   stats: CharacterStats;
   derivedStats: DerivedStats;
@@ -124,11 +124,18 @@ export interface Passion {
   value: number;
 }
 
+export interface DragonbaneSpell {
+  discipline: string;
+  name: string;
+}
+
 export interface Magic {
   spiritMagic: Spell[];
   runeMagic: RuneSpell[];
   sorcery: Spell[];
   runePoints: number;
+  doom?: string;
+  dragonbaneSpells?: DragonbaneSpell[];
 }
 
 export interface Spell {
@@ -155,6 +162,15 @@ export interface Resources {
   clacks: number;
   reputation: number;
   ransom: number;
+  // Kal-Arath fields
+  silver?: number;
+  fatePoints?: number;
+  level?: number;
+  xp?: number;
+  // Dragonbane fields
+  copper?: number;
+  gold?: number;
+  advancementMarks?: number;
 }
 
 export interface CharacterSkills {
@@ -397,22 +413,36 @@ export function calculateTotalArmor(armorType?: string, shields: Shield[] = []):
   };
 }
 
+function getConHPModifier(con: number): number {
+  if (con <= 4)  return -2;
+  if (con <= 6)  return -1;
+  if (con <= 12) return 0;
+  if (con <= 16) return 1;
+  if (con <= 20) return 2;
+  return 3;
+}
+
+function getPowHPModifier(pow: number): number {
+  if (pow <= 8)  return -1;
+  if (pow <= 12) return 0;
+  return 1;
+}
+
 export function calculateDerivedStats(stats: CharacterStats, equipment: EquipmentItem[] = [], weapons: Weapon[] = [], shields: Shield[] = []): DerivedStats {
-  const totalHP = Math.round((stats.CON + stats.SIZ) / 2);
+  // RQ2: Total HP = SIZ + HP modifier(CON) + HP modifier(POW)
+  const totalHP = Math.max(1, stats.SIZ + getConHPModifier(stats.CON) + getPowHPModifier(stats.POW));
   const strSiz = stats.STR + stats.SIZ;
 
-  // Damage Bonus calculation (RQ2 standard progression)
+  // Damage Bonus: RQ2 table — 1–6: -1D4, 7–12: none, 13–16: +1D4, 17–20: +1D6, each +8 adds +1D6
   let damageBonus = '0';
-  if (strSiz <= 6) damageBonus = '0';
-  else if (strSiz <= 12) damageBonus = '1d4';
-  else if (strSiz <= 18) damageBonus = '1d6';
-  else if (strSiz <= 24) damageBonus = '1d8';
-  else if (strSiz <= 30) damageBonus = '1d10';
-  else if (strSiz <= 36) damageBonus = '1d12';
-  else if (strSiz <= 42) damageBonus = '1d12+1d4';
-  else if (strSiz <= 48) damageBonus = '2d12';
-  else if (strSiz <= 54) damageBonus = '2d12+1d4';
-  else damageBonus = '3d12';
+  if (strSiz <= 6)  damageBonus = '-1d4';
+  else if (strSiz <= 12) damageBonus = '0';
+  else if (strSiz <= 16) damageBonus = '+1d4';
+  else if (strSiz <= 20) damageBonus = '+1d6';
+  else {
+    const extraD6 = Math.floor((strSiz - 13) / 8) + 1;
+    damageBonus = `+${extraD6}d6`;
+  }
 
   // Spirit Combat Damage (RQ2: POW value used directly, not rolled)
   const spiritCombatDamage = stats.POW.toString();
@@ -420,21 +450,15 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
   // Strike Rank: base 0 + SIZ modifier + DEX modifier
   let strikeRank = getSizeModifier(stats.SIZ) + getDexterityModifier(stats.DEX);
 
-  // Encumbrance calculations: equipment + weapons + shields
-  // NOTE: RQ2 standard defines carrying capacity as STR (in this simplified implementation)
-  // Full rules may specify STR × 3 kg. This should be verified against official RQ2 materials.
-  // Current implementation: carrying capacity = STR, penalties apply for each point over capacity
-  const maxEncumbrance = stats.STR;
+  // RQ2: Max ENC = (STR + CON) / 2, capped at STR
+  const maxEncumbrance = Math.min(stats.STR, Math.floor((stats.STR + stats.CON) / 2));
   const equipmentENC = equipment.reduce((sum, item) => sum + item.encumbrance * item.quantity, 0);
   const weaponsENC = weapons.reduce((sum, w) => sum + (WEAPON_LIST.find(wd => wd.name === w.name)?.encumbrance || 0), 0);
   const shieldsENC = shields.reduce((sum, s) => sum + (SHIELD_LIST.find(sd => sd.name === s.name)?.encumbrance || 0), 0);
   const totalENC = equipmentENC + weaponsENC + shieldsENC;
   const overENC = Math.max(0, totalENC - maxEncumbrance);
 
-  // Apply encumbrance penalties (RQ2 standard):
-  // - Strike Rank: +1 per point over capacity
-  // - Movement: -1 MOV per point over capacity (minimum 0)
-  // - Defense: -5% dodge per point over capacity
+  // RQ2 encumbrance penalties per point over max: -1 MOV, +1 SR, -5% defense
   const movementRate = Math.max(0, 8 - overENC);
   strikeRank += overENC;
   const encumbranceDefensePenalty = overENC * 5;
@@ -533,14 +557,14 @@ export const COMBAT_SKILLS = [
   'Unarmed',
   'Shield'
 ];
-// For Dragonbane
+// For Dragonbane — 9 weapon skills matching the core rulebook
 export const WEAPON_SKILLS = [
   'Axes (STR)',
   'Bows (AGL)',
   'Crossbows (AGL)',
   'Hammers (STR)',
   'Knives (AGL)',
-  'Slings (AGL)',
+  'Shields (STR)',
   'Spears (STR)',
   'Staves (AGL)',
   'Swords (STR)',
@@ -662,6 +686,10 @@ export const SORCERY_SPELLS = [
   'Venom',
   'Ward'
 ];
+
+// FIXME: Dragonbane kin stat modifiers are not implemented — kin dropdown values exist in GameSystemService
+// but no base-chance adjustments are applied for Wolfkin, Stillkin, etc. during character creation.
+// Add a DB_KIN_BASE_CHANCE record here and apply it in initializeSkillsWithModifiers for the dragonbane system.
 
 // Skill bonuses by occupation
 export const OCCUPATION_SKILL_BONUSES: Record<string, Partial<CharacterSkills>> = {

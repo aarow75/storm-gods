@@ -158,8 +158,7 @@
           }
         </div>
 
-        <!-- Shields Component (RuneQuest only) -->
-        @if (gameSystemService.gameSystem() === 'runequest') {
+        <!-- Shields Component -->
         <div class="form-section" [class.collapsed]="isSectionCollapsed('shields')">
           <div class="section-header" (click)="toggleSection('shields')">
             <h4>Shields</h4>
@@ -177,7 +176,6 @@
           </div>
           }
         </div>
-        }
 
         <!-- Weapons Component -->
         <div class="form-section" [class.collapsed]="isSectionCollapsed('weapons')">
@@ -192,6 +190,8 @@
               [weaponList]="weaponList"
               [combatSkills]="combatSkills"
               [weaponSkills]="weaponSkills"
+              [gameSystem]="gameSystemService.gameSystem()"
+              [currencyLabel]="currencyLabel"
               [stats]="character.stats"
               [resources]="character.resources"
               (addWeapon)="addWeapon()"
@@ -337,6 +337,7 @@
           <div class="section-content">
             <app-character-magic
               [magic]="character.magic!"
+              [pact]="character.background?.cult ?? ''"
               [spiritMagicSpells]="spiritMagicSpells"
               [sorcerySpells]="sorcerySpells"
               [getAvailableRuneSpells]="getAvailableRuneSpells.bind(this)"
@@ -349,6 +350,8 @@
               (removeSpell)="removeSpell($event.type, $event.index)"
               (addRuneSpell)="addRuneSpell()"
               (removeRuneSpell)="removeRuneSpell($event)"
+              (addDragonbaneSpell)="addDragonbaneSpell($event)"
+              (removeDragonbaneSpell)="removeDragonbaneSpell($event)"
             ></app-character-magic>
           </div>
           }
@@ -369,7 +372,8 @@
           }
         </div>
 
-        <!-- Conditions Component -->
+        <!-- Conditions Component (not for Kal-Arath) -->
+        @if (gameSystemService.gameSystem() !== 'kal-arath') {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('conditions')">
           <div class="section-header" (click)="toggleSection('conditions')">
             <h4>Conditions</h4>
@@ -384,6 +388,7 @@
           </div>
           }
         </div>
+        }
         
         <!-- Notes Component -->
         <div class="form-section" [class.collapsed]="isSectionCollapsed('notes')">

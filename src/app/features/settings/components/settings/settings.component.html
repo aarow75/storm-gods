@@ -19,6 +19,12 @@
         class="system-toggle-btn system-toggle-db">
         Dragonbane
       </button>
+      <button
+        (click)="switchSystem('kal-arath')"
+        [class.active]="gameSystemService.gameSystem() === 'kal-arath'"
+        class="system-toggle-btn system-toggle-ka">
+        Kal-Arath
+      </button>
     </div>
   </div>
 

@@ -24,3 +24,17 @@
     width: 70px;
     text-align: center;
 }
+
+.resource-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.resource-hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-align: center;
+    white-space: nowrap;
+}

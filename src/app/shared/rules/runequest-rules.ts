@@ -14,7 +14,7 @@ import {
 } from '@characters/models/character.model';
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
-  SkillDefinition, SkillCategory, ArmorTypeDefinition
+  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses
 } from './game-system-rules.interface';
 
 const CONDITIONS: ConditionDefinition[] = [
@@ -88,7 +88,8 @@ export class RuneQuestRules implements GameSystemRules {
     stats: CharacterStats,
     equipment: EquipmentItem[],
     weapons: Weapon[],
-    shields: Shield[]
+    shields: Shield[],
+    _background?: BackgroundForBonuses
   ): DerivedStats {
     return rqCalculateDerivedStats(stats, equipment, weapons, shields);
   }
@@ -119,7 +120,8 @@ export class RuneQuestRules implements GameSystemRules {
 
   applyBackgroundBonuses(
     skills: Record<string, number>,
-    background: Pick<CharacterBackground, 'occupation' | 'homeland' | 'cult'>
+    background: Pick<CharacterBackground, 'occupation' | 'homeland' | 'cult' | 'age'>,
+    _stats?: CharacterStats
   ): Record<string, number> {
     return rqApplySkillBonuses(
       skills as any,
@@ -147,5 +149,9 @@ export class RuneQuestRules implements GameSystemRules {
 
   getMagicSystemType(): string {
     return 'runequest';
+  }
+
+  getCurrencyLabel(): string {
+    return 'L';
   }
 }

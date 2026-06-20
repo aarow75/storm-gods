@@ -17,7 +17,7 @@ import { DiceService } from '@shared/services/dice.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { UIStateService } from '@shared/services/ui-state.service';
 import { ExportService } from '@shared/services/export.service';
-import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS, DB_SKILL_CATEGORIES } from '../../constants';
+import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS, DB_SKILL_CATEGORIES, KA_SKILL_CATEGORIES } from '../../constants';
 import { CHARACTER_COLORS } from '@characters/constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
 import { CharacterCharacteristics } from '../character-characteristics/character-characteristics';
@@ -90,9 +90,14 @@ export class CharacterFormComponent implements OnInit {
   };
 
   skillCategories = SKILL_CATEGORIES;
-  dbSkillCategories = DB_SKILL_CATEGORIES;
-  weaponList = WEAPON_LIST;
-  shieldList = SHIELD_LIST;
+  get dbSkillCategories() {
+    return this.gameSystemService.gameSystem() === 'kal-arath'
+      ? KA_SKILL_CATEGORIES
+      : DB_SKILL_CATEGORIES;
+  }
+  get weaponList() { return this.gameSystemService.getRules().getWeaponList(); }
+  get shieldList() { return this.gameSystemService.getRules().getShieldList(); }
+  get currencyLabel() { return this.gameSystemService.getRules().getCurrencyLabel(); }
   combatSkills = COMBAT_SKILLS;
   weaponSkills = WEAPON_SKILLS;
   characterColors = CHARACTER_COLORS;
@@ -144,8 +149,17 @@ export class CharacterFormComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       if (params['id']) {
         this.editCharacter(params['id']);
+      } else {
+        this.character.stats = { ...this.systemDefaultStats };
       }
     });
+  }
+
+  private get systemDefaultStats(): CharacterStats {
+    if (this.gameSystemService.gameSystem() === 'kal-arath') {
+      return { STR: 1, CON: 1, SIZ: 0, DEX: 1, INT: 1, POW: 0, CHA: 1 };
+    }
+    return { ...DEFAULT_STATS };
   }
 
   saveCharacter(): void {
@@ -174,6 +188,7 @@ export class CharacterFormComponent implements OnInit {
       id: this.editMode && this.editingId ? this.editingId : '',
       name: this.character.name!,
       color: this.character.color,
+      gameSystem: this.gameSystemService.gameSystem(),
       background: this.character.background!,
       stats: this.character.stats!,
       derivedStats: this.character.derivedStats!,
@@ -190,6 +205,8 @@ export class CharacterFormComponent implements OnInit {
       equipment: this.character.equipment!,
       notes: this.character.notes!,
       cultStatus: this.character.cultStatus
+      // TODO: `conditions` is missing here — every save silently wipes active conditions (Prone, Stunned, etc.)
+      // Add: conditions: this.character.conditions ?? []
     };
 
     if (this.editMode && this.editingId) {
@@ -213,9 +230,14 @@ export class CharacterFormComponent implements OnInit {
   editCharacter(id: string): void {
     const character = this.characterService.getCharacter(id);
     if (character) {
+      if (character.gameSystem && character.gameSystem !== this.gameSystemService.gameSystem()) {
+        this.router.navigate(this.gameSystemService.link('characters'));
+        return;
+      }
       this.character = {
         name: character.name,
         color: character.color,
+        gameSystem: character.gameSystem,
         background: { ...character.background },
         stats: { ...character.stats },
         derivedStats: { ...character.derivedStats },
@@ -231,7 +253,9 @@ export class CharacterFormComponent implements OnInit {
           spiritMagic: character.magic?.spiritMagic ? [...character.magic.spiritMagic.map(s => ({ ...s }))] : [],
           runeMagic: character.magic?.runeMagic ? [...character.magic.runeMagic.map(s => ({ ...s }))] : [],
           sorcery: character.magic?.sorcery ? [...character.magic.sorcery.map(s => ({ ...s }))] : [],
-          runePoints: character.magic?.runePoints || 0
+          runePoints: character.magic?.runePoints || 0,
+          doom: character.magic?.doom || '',
+          dragonbaneSpells: character.magic?.dragonbaneSpells ? [...character.magic.dragonbaneSpells.map(s => ({ ...s }))] : [],
         },
         resources: { ...character.resources },
         equipment: character.equipment ? [...character.equipment] : [],
@@ -274,25 +298,15 @@ export class CharacterFormComponent implements OnInit {
   }
 
   rollAll3D6(): void {
-    if (this.character.stats) {
-      this.character.stats.STR = this.diceService.roll3D6Configured();
-      this.character.stats.CON = this.diceService.roll3D6Configured();
-      this.character.stats.SIZ = this.diceService.roll3D6Configured();
-      this.character.stats.DEX = this.diceService.roll3D6Configured();
-      this.character.stats.INT = this.diceService.roll3D6Configured();
-      this.character.stats.POW = this.diceService.roll3D6Configured();
-      this.character.stats.CHA = this.diceService.roll3D6Configured();
-      this.calculateDerivedValues();
-
-      // Mark all stats as randomized
-      this.randomizedFields.add('str');
-      this.randomizedFields.add('con');
-      this.randomizedFields.add('siz');
-      this.randomizedFields.add('dex');
-      this.randomizedFields.add('int');
-      this.randomizedFields.add('pow');
-      this.randomizedFields.add('cha');
+    if (!this.character.stats) return;
+    const visibleKeys = this.gameSystemService.getRules().getStatDefinitions()
+      .filter(s => s.visible)
+      .map(s => s.key);
+    for (const key of visibleKeys) {
+      this.character.stats[key] = this.diceService.roll3D6Configured();
+      this.randomizedFields.add(key.toLowerCase());
     }
+    this.calculateDerivedValues();
   }
 
   randomizeCharacter(): void {
@@ -304,8 +318,10 @@ export class CharacterFormComponent implements OnInit {
     this.character.name = this.fantasyNames[randomNameIndex];
     this.randomizedFields.add('name');
 
-    // Randomize all stats
-    this.rollAll3D6();
+    // Randomize all stats (point-buy systems skip this)
+    if (this.gameSystemService.gameSystem() !== 'kal-arath') {
+      this.rollAll3D6();
+    }
 
     // Get dynamic lists based on current game system
     const cults = this.gameSystemService.getCults();
@@ -352,7 +368,8 @@ export class CharacterFormComponent implements OnInit {
         this.character.stats,
         this.character.equipment ?? [],
         this.character.weapons ?? [],
-        this.character.shields ?? []
+        this.character.shields ?? [],
+        this.character.background
       );
       this.calculateHitPoints();
     }
@@ -481,6 +498,18 @@ export class CharacterFormComponent implements OnInit {
     }
   }
 
+  addDragonbaneSpell(discipline: string): void {
+    if (!this.character.magic) return;
+    if (!this.character.magic.dragonbaneSpells) this.character.magic.dragonbaneSpells = [];
+    this.character.magic.dragonbaneSpells.push({ discipline, name: '' });
+  }
+
+  removeDragonbaneSpell(index: number): void {
+    if (this.character.magic?.dragonbaneSpells) {
+      this.character.magic.dragonbaneSpells.splice(index, 1);
+    }
+  }
+
   addEquipment(item: import('../../models/character.model').EquipmentItem): void {
     if (!this.character.equipment) {
       this.character.equipment = [];
@@ -512,7 +541,8 @@ export class CharacterFormComponent implements OnInit {
     const rules = this.gameSystemService.getRules();
     this.character.skills = rules.applyBackgroundBonuses(
       rules.getDefaultSkills(),
-      this.character.background
+      this.character.background,
+      this.character.stats
     ) as CharacterSkills;
   }
 
@@ -629,17 +659,18 @@ export class CharacterFormComponent implements OnInit {
       missing.push('- Character Name');
     }
 
-    // Required: All characteristics must be filled
+    // Required: all visible characteristics must be filled
     if (this.character.stats) {
-      const statNames = ['STR', 'CON', 'SIZ', 'DEX', 'INT', 'POW', 'CHA'];
-      statNames.forEach(stat => {
-        const value = this.character.stats![stat as keyof CharacterStats];
-        if (!value || value < 1) {
-          missing.push(`- ${stat} (Characteristic)`);
+      const visibleStats = this.gameSystemService.getRules().getStatDefinitions().filter(s => s.visible);
+      const isKA = this.gameSystemService.gameSystem() === 'kal-arath';
+      visibleStats.forEach(s => {
+        const value = this.character.stats![s.key];
+        if (value === undefined || value === null || (!isKA && value < 1)) {
+          missing.push(`- ${s.label} (Characteristic)`);
         }
       });
     } else {
-      missing.push('- All Characteristics (STR, CON, SIZ, DEX, INT, POW, CHA)');
+      missing.push('- All Characteristics');
     }
 
     // Required: Background fields
@@ -666,15 +697,16 @@ export class CharacterFormComponent implements OnInit {
         return !this.character.background?.homeland || this.character.background.homeland.trim() === '';
       case 'cult':
         return !this.character.background?.cult || this.character.background.cult.trim() === '';
-      case 'stats':
-        return !this.character.stats ||
-               this.character.stats.STR < 1 ||
-               this.character.stats.CON < 1 ||
-               this.character.stats.SIZ < 1 ||
-               this.character.stats.DEX < 1 ||
-               this.character.stats.INT < 1 ||
-               this.character.stats.POW < 1 ||
-               this.character.stats.CHA < 1;
+      case 'stats': {
+        if (!this.character.stats) return true;
+        const isKA = this.gameSystemService.gameSystem() === 'kal-arath';
+        return this.gameSystemService.getRules().getStatDefinitions()
+          .filter(s => s.visible)
+          .some(s => {
+            const v = this.character.stats![s.key];
+            return v === undefined || v === null || (!isKA && v < 1);
+          });
+      }
       default:
         return false;
     }
@@ -735,7 +767,7 @@ export class CharacterFormComponent implements OnInit {
     this.character = {
       name: '',
       background: { ...DEFAULT_BACKGROUND },
-      stats: { ...DEFAULT_STATS },
+      stats: { ...this.systemDefaultStats },
       derivedStats: { ...DEFAULT_DERIVED_STATS },
       skills: { ...DEFAULT_SKILLS },
       hitLocations: { ...DEFAULT_HIT_LOCATIONS },

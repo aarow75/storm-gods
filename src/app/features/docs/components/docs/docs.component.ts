@@ -20,19 +20,30 @@ interface CustomDocument {
 // Place the .md files in public/docs/ and use their path as `filename`.
 // Example: { filename: 'house-rules.md', name: 'House Rules', icon: '🏠' }
 const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
-  runequest: [],
-  dragonbane: []
+  runequest: [
+    { filename: 'RuneQuest-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' },
+    { filename: 'Dragonbane-vs-RuneQuest-Comparison.md', name: 'Dragonbane vs RuneQuest', icon: '⚖️' }
+  ],
+  dragonbane: [
+    { filename: 'Dragonbane-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' },
+    { filename: 'Dragonbane-vs-RuneQuest-Comparison.md', name: 'Dragonbane vs RuneQuest', icon: '⚖️' }
+  ],
+  'kal-arath': [
+    { filename: 'Kal-Arath-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' }
+  ]
 };
 
 const ADVENTURE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   runequest: [],
-  dragonbane: []
+  dragonbane: [],
+  'kal-arath': []
 }
 
 
 const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
   runequest: [],
-  dragonbane: []
+  dragonbane: [],
+  'kal-arath': []
 };
 
 @Component({

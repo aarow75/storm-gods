@@ -71,6 +71,12 @@ h1 {
   box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
 }
 
+.system-toggle-ka.active {
+  background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+  color: var(--color-bg-white);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
 .font-size-btn {
   padding: var(--spacing-2xl) var(--spacing-3xl);
   background-color: var(--color-bg-light);

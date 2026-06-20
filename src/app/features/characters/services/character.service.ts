@@ -24,7 +24,7 @@ export class CharacterService implements DataPort {
   exportData(): unknown {
     return {
       exportedAt: new Date().toISOString(),
-      characters: this.getCharacters(),
+      characters: this.getAllCharacters(),
     };
   }
 
@@ -35,17 +35,20 @@ export class CharacterService implements DataPort {
     return `Imported ${result.imported} character(s). ${result.skipped} skipped (already exist).`;
   }
 
-  getCharacters(): Character[] {
+  private getAllCharacters(): Character[] {
     const data = localStorage.getItem(this.STORAGE_KEY);
     if (!data) return [];
-
     const characters: any[] = JSON.parse(data);
     return characters.map(char => this.migrateCharacter(char));
   }
 
+  getCharacters(): Character[] {
+    const system = this.gameSystemService.gameSystem();
+    return this.getAllCharacters().filter(c => (c.gameSystem ?? 'runequest') === system);
+  }
+
   getCharacter(id: string): Character | undefined {
-    const characters = this.getCharacters();
-    return characters.find(c => c.id === id);
+    return this.getAllCharacters().find(c => c.id === id);
   }
 
   private migrateCharacter(char: any): Character {
@@ -115,11 +118,22 @@ export class CharacterService implements DataPort {
     if (!char.magic) {
       char.magic = { ...DEFAULT_MAGIC, spiritMagic: [], runeMagic: [], sorcery: [] };
     }
+    if (char.magic.doom === undefined) char.magic.doom = '';
+    if (!char.magic.dragonbaneSpells) char.magic.dragonbaneSpells = [];
 
     // Ensure resources exist
     if (!char.resources) {
       char.resources = { ...DEFAULT_RESOURCES };
     }
+    // Ensure Kal-Arath resource fields exist
+    if (char.resources.silver === undefined)     char.resources.silver = 0;
+    if (char.resources.fatePoints === undefined) char.resources.fatePoints = 1;
+    if (char.resources.level === undefined)      char.resources.level = 1;
+    if (char.resources.xp === undefined)         char.resources.xp = 0;
+    // Ensure Dragonbane resource fields exist
+    if (char.resources.copper === undefined)           char.resources.copper = 0;
+    if (char.resources.gold === undefined)             char.resources.gold = 0;
+    if (char.resources.advancementMarks === undefined) char.resources.advancementMarks = 0;
 
     // Ensure equipment array exists and migrate from legacy string[] format
     if (!char.equipment) {
@@ -185,19 +199,20 @@ export class CharacterService implements DataPort {
   }
 
   addCharacter(character: Character): void {
-    const characters = this.getCharacters();
+    const all = this.getAllCharacters();
     character.id = this.generateId();
 
-    // Assign a color based on the current count
+    // Assign a color based on the count within the current system
     if (!character.color) {
-      character.color = this.getNextColor(characters.length);
+      const systemCount = this.getCharacters().length;
+      character.color = this.getNextColor(systemCount);
     }
 
     // Set the game system to the current system
     character.gameSystem = this.gameSystemService.gameSystem();
 
-    characters.push(character);
-    this.saveCharacters(characters);
+    all.push(character);
+    this.saveCharacters(all);
   }
 
   private getNextColor(characterCount: number): string {
@@ -205,22 +220,21 @@ export class CharacterService implements DataPort {
   }
 
   updateCharacter(character: Character): void {
-    const characters = this.getCharacters();
-    const index = characters.findIndex(c => c.id === character.id);
+    const all = this.getAllCharacters();
+    const index = all.findIndex(c => c.id === character.id);
     if (index !== -1) {
-      characters[index] = character;
-      this.saveCharacters(characters);
+      all[index] = character;
+      this.saveCharacters(all);
     }
   }
 
   deleteCharacter(id: string): void {
-    const characters = this.getCharacters();
-    const filtered = characters.filter(c => c.id !== id);
-    this.saveCharacters(filtered);
+    const all = this.getAllCharacters();
+    this.saveCharacters(all.filter(c => c.id !== id));
   }
 
   importCharacters(incoming: any[]): { imported: number; skipped: number } {
-    const existing = this.getCharacters();
+    const existing = this.getAllCharacters();
     const existingIds = new Set(existing.map(c => c.id));
     const toAdd = incoming
       .filter(c => !existingIds.has(c.id))

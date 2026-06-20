@@ -134,6 +134,30 @@ h2 {
   border: 1px solid #fca5a5;
 }
 
+.game-system-badge.system-kal-arath {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #c4b5fd;
+}
+
+.single-armor-display {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) 0;
+}
+
+.armor-rating-label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+}
+
+.armor-rating-value {
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  color: var(--color-text-dark);
+}
+
 .hit-points-display {
   display: flex;
   align-items: center;

@@ -26,6 +26,27 @@ export class CharacterDerivedStats {
     return this.gameSystemService.getRules().usesHitLocations();
   }
 
+  get isKalArath(): boolean {
+    return this.gameSystemService.gameSystem() === 'kal-arath';
+  }
+
+  get showMagicPoints(): boolean {
+    return !this.isKalArath;
+  }
+
+  get showDamageBonus(): boolean {
+    return !this.isKalArath;
+  }
+
+  get healingRateLabel(): string {
+    return this.isKalArath ? 'Post-Battle Healing' : 'Healing Rate';
+  }
+
+  get encumbrancePenaltyText(): string {
+    if (this.isKalArath) return 'All physical rolls at disadvantage';
+    return `-${this.derivedStats.encumbranceDefensePenalty}% Dodge`;
+  }
+
   get strikeRankBreakdown(): string {
     if (!this.stats) return '';
     const siz = this.stats.SIZ;

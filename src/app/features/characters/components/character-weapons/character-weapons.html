@@ -34,6 +34,7 @@
           [name]="'weapon-damage-' + $index"
         />
       </div>
+      @if (getSkillsForWeapon(weapon); as skills) {
       <div class="form-group">
         <label [attr.for]="'weapon-skill-' + $index">Skill</label>
         <select
@@ -41,18 +42,12 @@
           [(ngModel)]="weapon.skill"
           [name]="'weapon-skill-' + $index"
         >
-          <optgroup label="Runequest">
-            @for (skill of combatSkills; track skill) {
-              <option [value]="skill">{{ skill }}</option>
-            }
-          </optgroup>
-          <optgroup label="Dragonbane">
-            @for (skill of weaponSkills; track skill) {
-              <option [value]="skill">{{ skill }}</option>
-            }
-          </optgroup>
+          @for (skill of skills; track skill) {
+            <option [value]="skill">{{ skill }}</option>
+          }
         </select>
       </div>
+      }
       @if (getMissileDef(weapon); as md) {
         <div class="missile-info">
           <span class="missile-tag">Missile</span>

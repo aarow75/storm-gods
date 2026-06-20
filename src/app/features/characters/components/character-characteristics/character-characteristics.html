@@ -1,44 +1,46 @@
 @if (heading) {
 <h4>{{ heading }}</h4>
 }
+@if (showRollButtons) {
 <div class="quick-roll">
   <button type="button" class="btn btn-roll-all" (click)="rollAll.emit()">
-    Roll All 3D6
+    {{ rollButtonLabel }}
   </button>
 </div>
+}
 
 <div class="stats-grid">
   <div class="form-group">
-    <label for="str" [class.success-label]="isFieldRandomized('str')">STR (Strength):</label>
+    <label for="str" [class.success-label]="isFieldRandomized('str')">{{ strLabel }}:</label>
     <div class="input-with-dice">
       <input
         type="number"
         id="str"
         [(ngModel)]="stats.STR"
         name="str"
-        min="1"
-        max="30"
+        [min]="statMin"
+        [max]="statMax"
         required
         [class.success-field]="isFieldRandomized('str')"
       />
-      <button type="button" class="btn-dice" (click)="rollStat.emit('STR')" title="Roll 3d6">3d6</button>
+      @if (showRollButtons) {<button type="button" class="btn-dice" (click)="rollStat.emit('STR')" title="Roll 3d6">3d6</button>}
     </div>
   </div>
 
   <div class="form-group">
-    <label for="con" [class.success-label]="isFieldRandomized('con')">CON (Constitution):</label>
+    <label for="con" [class.success-label]="isFieldRandomized('con')">{{ conLabel }}:</label>
     <div class="input-with-dice">
       <input
         type="number"
         id="con"
         [(ngModel)]="stats.CON"
         name="con"
-        min="1"
-        max="30"
+        [min]="statMin"
+        [max]="statMax"
         required
         [class.success-field]="isFieldRandomized('con')"
       />
-      <button type="button" class="btn-dice" (click)="rollStat.emit('CON')" title="Roll 3d6">3d6</button>
+      @if (showRollButtons) {<button type="button" class="btn-dice" (click)="rollStat.emit('CON')" title="Roll 3d6">3d6</button>}
     </div>
   </div>
 
@@ -51,12 +53,12 @@
         id="siz"
         [(ngModel)]="stats.SIZ"
         name="siz"
-        min="1"
-        max="30"
+        [min]="statMin"
+        [max]="statMax"
         required
         [class.success-field]="isFieldRandomized('siz')"
       />
-      <button type="button" class="btn-dice" (click)="rollStat.emit('SIZ')" title="Roll 3d6">3d6</button>
+      @if (showRollButtons) {<button type="button" class="btn-dice" (click)="rollStat.emit('SIZ')" title="Roll 3d6">3d6</button>}
     </div>
   </div>
   }
@@ -69,32 +71,33 @@
         id="dex"
         [(ngModel)]="stats.DEX"
         name="dex"
-        min="1"
-        max="30"
+        [min]="statMin"
+        [max]="statMax"
         required
         [class.success-field]="isFieldRandomized('dex')"
       />
-      <button type="button" class="btn-dice" (click)="rollStat.emit('DEX')" title="Roll 3d6">3d6</button>
+      @if (showRollButtons) {<button type="button" class="btn-dice" (click)="rollStat.emit('DEX')" title="Roll 3d6">3d6</button>}
     </div>
   </div>
 
   <div class="form-group">
-    <label for="int" [class.success-label]="isFieldRandomized('int')">INT (Intelligence):</label>
+    <label for="int" [class.success-label]="isFieldRandomized('int')">{{ intLabel }}:</label>
     <div class="input-with-dice">
       <input
         type="number"
         id="int"
         [(ngModel)]="stats.INT"
         name="int"
-        min="1"
-        max="30"
+        [min]="statMin"
+        [max]="statMax"
         required
         [class.success-field]="isFieldRandomized('int')"
       />
-      <button type="button" class="btn-dice" (click)="rollStat.emit('INT')" title="Roll 3d6">3d6</button>
+      @if (showRollButtons) {<button type="button" class="btn-dice" (click)="rollStat.emit('INT')" title="Roll 3d6">3d6</button>}
     </div>
   </div>
 
+  @if (showPow) {
   <div class="form-group">
     <label for="pow" [class.success-label]="isFieldRandomized('pow')">{{ powLabel }}:</label>
     <div class="input-with-dice">
@@ -103,29 +106,30 @@
         id="pow"
         [(ngModel)]="stats.POW"
         name="pow"
-        min="1"
-        max="30"
+        [min]="statMin"
+        [max]="statMax"
         required
         [class.success-field]="isFieldRandomized('pow')"
       />
-      <button type="button" class="btn-dice" (click)="rollStat.emit('POW')" title="Roll 3d6">3d6</button>
+      @if (showRollButtons) {<button type="button" class="btn-dice" (click)="rollStat.emit('POW')" title="Roll 3d6">3d6</button>}
     </div>
   </div>
+  }
 
   <div class="form-group">
-    <label for="cha" [class.success-label]="isFieldRandomized('cha')">CHA (Charisma):</label>
+    <label for="cha" [class.success-label]="isFieldRandomized('cha')">{{ chaLabel }}:</label>
     <div class="input-with-dice">
       <input
         type="number"
         id="cha"
         [(ngModel)]="stats.CHA"
         name="cha"
-        min="1"
-        max="30"
+        [min]="statMin"
+        [max]="statMax"
         required
         [class.success-field]="isFieldRandomized('cha')"
       />
-      <button type="button" class="btn-dice" (click)="rollStat.emit('CHA')" title="Roll 3d6">3d6</button>
+      @if (showRollButtons) {<button type="button" class="btn-dice" (click)="rollStat.emit('CHA')" title="Roll 3d6">3d6</button>}
     </div>
   </div>
 </div>

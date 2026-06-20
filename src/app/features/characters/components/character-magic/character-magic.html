@@ -1,152 +1,216 @@
 @if (heading) {
 <h4>{{ heading }}</h4>
 }
-<div class="magic-section">
-  <div class="form-group">
-    <label for="rune-points">Rune Points:</label>
-    <input
-      type="number"
-      id="rune-points"
-      [(ngModel)]="magic.runePoints"
-      name="rune-points"
-      min="0"
-    />
-  </div>
 
-  <h5>Spirit Magic</h5>
-  <div class="spells-list">
-    @for (spell of magic.spiritMagic; track spell) {
-      <div class="spell-row">
-        <div class="spell-name-wrapper">
-          <select
-            [id]="'spirit-spell-' + $index"
-            [value]="getSpiritSpellDropdownValue(spell)"
-            (change)="spell.name = $any($event.target).value"
-            [name]="'spirit-spell-dropdown-' + $index"
-          >
-            <option value="">Custom</option>
-            @for (spellName of spiritMagicSpells; track spellName) {
-              <option [value]="spellName">{{ spellName }}</option>
-            }
-          </select>
-          @if (isCustomSpell(spell.name, 'spirit')) {
+@if (isKalArath) {
+  <!-- Kal-Arath: Demonic Pact magic -->
+  <div class="magic-section">
+    <p class="magic-hint">Spells require a successful INT check vs. Difficulty (8 + Tier). On critical failure, an Arcane Disaster occurs.</p>
+
+    <div class="form-group">
+      <label for="ka-doom">Doom:</label>
+      <select id="ka-doom" [(ngModel)]="magic.doom" name="ka-doom">
+        <option value="">— Select Doom —</option>
+        @for (doom of kaDooms; track doom) {
+          <option [value]="doom">{{ doom }}</option>
+        }
+      </select>
+    </div>
+
+    @if (kalArathSpells.length > 0) {
+      <h5>Pact Spells</h5>
+      <div class="ka-spells-list">
+        @for (spell of kalArathSpells; track spell.name) {
+          <label class="ka-spell-row">
             <input
-              type="text"
-              class="custom-spell-input"
-              [(ngModel)]="spell.name"
-              [name]="'spirit-spell-custom-' + $index"
-              placeholder="Select Spell"
+              type="checkbox"
+              [checked]="isKaSpellKnown(spell.name)"
+              (change)="toggleKaSpell(spell)"
             />
+            <span class="ka-spell-name">{{ spell.name }}</span>
+            <span class="ka-spell-tier">Tier {{ spell.tier }}</span>
+          </label>
+        }
+      </div>
+    } @else {
+      <p class="magic-hint">Select a Demonic Pact in the Background section to see available spells.</p>
+    }
+  </div>
+} @else if (isDragonbane) {
+  <!-- Dragonbane: discipline-based magic (skills tracked in Skills section) -->
+  <div class="magic-section">
+    <p class="magic-hint">Magic disciplines (Animism, Elementalism, General Magic, Mentalism) are tracked as skills. Record spells known per discipline below.</p>
+
+    @for (discipline of dbDisciplines; track discipline) {
+      <div class="db-discipline-section">
+        <h5>{{ discipline }}</h5>
+        <div class="spells-list">
+          @for (spell of dbSpellsForDiscipline(discipline); track $index) {
+            <div class="spell-row">
+              <input
+                type="text"
+                [(ngModel)]="spell.name"
+                [name]="'db-spell-' + discipline + '-' + $index"
+                placeholder="Spell name"
+                class="db-spell-input"
+              />
+              <button type="button" class="btn-remove-small" (click)="onRemoveDragonbaneSpell(dbSpellIndex(discipline, $index))">×</button>
+            </div>
           }
+          <button type="button" class="btn-add-small" (click)="onAddDragonbaneSpell(discipline)">Add</button>
         </div>
-        <input
-          type="number"
-          [(ngModel)]="spell.points"
-          [name]="'spirit-spell-points-' + $index"
-          min="1"
-        />
-        <button type="button" class="btn-remove-small" (click)="onRemoveSpell('spiritMagic', $index)">×</button>
       </div>
     }
-    <button type="button" class="btn-add-small" (click)="onAddSpell('spiritMagic')">Add</button>
   </div>
+} @else {
+  <!-- RuneQuest magic -->
+  <div class="magic-section">
+    <div class="form-group">
+      <label for="rune-points">Rune Points:</label>
+      <input
+        type="number"
+        id="rune-points"
+        [(ngModel)]="magic.runePoints"
+        name="rune-points"
+        min="0"
+      />
+    </div>
 
-  <h5>Rune Magic</h5>
-  <div class="spells-list">
-    @for (spell of magic.runeMagic; track spell) {
-      <div class="rune-spell-row">
-        <div class="rune-spell-name-group">
-          <label [attr.for]="'rune-spell-' + $index">Spell Name</label>
-          <select
-            [id]="'rune-spell-' + $index"
-            [value]="getRuneSpellDropdownValue(spell)"
-            (change)="onRuneSpellChange($index, $any($event.target).value)"
-            [name]="'rune-spell-dropdown-' + $index"
-          >
-            <option value="">Custom</option>
-            @for (availSpell of getAvailableRuneSpells(); track availSpell.name) {
-              <option [value]="availSpell.name">{{ availSpell.name }}</option>
+    <h5>Spirit Magic</h5>
+    <div class="spells-list">
+      @for (spell of magic.spiritMagic; track spell) {
+        <div class="spell-row">
+          <div class="spell-name-wrapper">
+            <select
+              [id]="'spirit-spell-' + $index"
+              [value]="getSpiritSpellDropdownValue(spell)"
+              (change)="spell.name = $any($event.target).value"
+              [name]="'spirit-spell-dropdown-' + $index"
+            >
+              <option value="">Custom</option>
+              @for (spellName of spiritMagicSpells; track spellName) {
+                <option [value]="spellName">{{ spellName }}</option>
+              }
+            </select>
+            @if (isCustomSpell(spell.name, 'spirit')) {
+              <input
+                type="text"
+                class="custom-spell-input"
+                [(ngModel)]="spell.name"
+                [name]="'spirit-spell-custom-' + $index"
+                placeholder="Select Spell"
+              />
             }
-          </select>
-          @if (isCustomRuneSpell(spell)) {
-            <input
-              type="text"
-              class="custom-rune-spell-input"
-              [(ngModel)]="spell.name"
-              [name]="'rune-spell-custom-' + $index"
-              placeholder="Select Spell"
-            />
-          }
-        </div>
-        <div class="form-group">
-          <label [attr.for]="'rune-spell-cost-' + $index">Cost</label>
+          </div>
           <input
             type="number"
-            [id]="'rune-spell-cost-' + $index"
-            [(ngModel)]="spell.runePointCost"
-            [name]="'rune-spell-cost-' + $index"
+            [(ngModel)]="spell.points"
+            [name]="'spirit-spell-points-' + $index"
             min="1"
           />
+          <button type="button" class="btn-remove-small" (click)="onRemoveSpell('spiritMagic', $index)">×</button>
         </div>
-        <div class="form-group">
-          <label [attr.for]="'rune-spell-rune-' + $index">Rune</label>
-          <input
-            type="text"
-            [id]="'rune-spell-rune-' + $index"
-            [(ngModel)]="spell.associatedRune"
-            [name]="'rune-spell-rune-' + $index"
-          />
-        </div>
-        <div class="form-group">
-          <label [attr.for]="'rune-spell-reusable-' + $index">Reusable</label>
-          <input
-            type="checkbox"
-            [id]="'rune-spell-reusable-' + $index"
-            [(ngModel)]="spell.reusable"
-            [name]="'rune-spell-reusable-' + $index"
-          />
-        </div>
-        <button type="button" class="btn-remove-small" (click)="onRemoveRuneSpell($index)">×</button>
-      </div>
-    }
-    <button type="button" class="btn-add-small" (click)="onAddRuneSpell()">Add</button>
-  </div>
+      }
+      <button type="button" class="btn-add-small" (click)="onAddSpell('spiritMagic')">Add</button>
+    </div>
 
-  <h5>Sorcery</h5>
-  <div class="spells-list">
-    @for (spell of magic.sorcery; track spell) {
-      <div class="spell-row">
-        <div class="spell-name-wrapper">
-          <select
-            [id]="'sorcery-spell-' + $index"
-            [value]="getSorcerySpellDropdownValue(spell)"
-            (change)="spell.name = $any($event.target).value"
-            [name]="'sorcery-spell-dropdown-' + $index"
-          >
-            <option value="">Custom</option>
-            @for (spellName of sorcerySpells; track spellName) {
-              <option [value]="spellName">{{ spellName }}</option>
+    <h5>Rune Magic</h5>
+    <div class="spells-list">
+      @for (spell of magic.runeMagic; track spell) {
+        <div class="rune-spell-row">
+          <div class="rune-spell-name-group">
+            <label [attr.for]="'rune-spell-' + $index">Spell Name</label>
+            <select
+              [id]="'rune-spell-' + $index"
+              [value]="getRuneSpellDropdownValue(spell)"
+              (change)="onRuneSpellChange($index, $any($event.target).value)"
+              [name]="'rune-spell-dropdown-' + $index"
+            >
+              <option value="">Custom</option>
+              @for (availSpell of getAvailableRuneSpells(); track availSpell.name) {
+                <option [value]="availSpell.name">{{ availSpell.name }}</option>
+              }
+            </select>
+            @if (isCustomRuneSpell(spell)) {
+              <input
+                type="text"
+                class="custom-rune-spell-input"
+                [(ngModel)]="spell.name"
+                [name]="'rune-spell-custom-' + $index"
+                placeholder="Select Spell"
+              />
             }
-          </select>
-          @if (isCustomSpell(spell.name, 'sorcery')) {
+          </div>
+          <div class="form-group">
+            <label [attr.for]="'rune-spell-cost-' + $index">Cost</label>
+            <input
+              type="number"
+              [id]="'rune-spell-cost-' + $index"
+              [(ngModel)]="spell.runePointCost"
+              [name]="'rune-spell-cost-' + $index"
+              min="1"
+            />
+          </div>
+          <div class="form-group">
+            <label [attr.for]="'rune-spell-rune-' + $index">Rune</label>
             <input
               type="text"
-              class="custom-spell-input"
-              [(ngModel)]="spell.name"
-              [name]="'sorcery-spell-custom-' + $index"
-              placeholder="Select Spell"
+              [id]="'rune-spell-rune-' + $index"
+              [(ngModel)]="spell.associatedRune"
+              [name]="'rune-spell-rune-' + $index"
             />
-          }
+          </div>
+          <div class="form-group">
+            <label [attr.for]="'rune-spell-reusable-' + $index">Reusable</label>
+            <input
+              type="checkbox"
+              [id]="'rune-spell-reusable-' + $index"
+              [(ngModel)]="spell.reusable"
+              [name]="'rune-spell-reusable-' + $index"
+            />
+          </div>
+          <button type="button" class="btn-remove-small" (click)="onRemoveRuneSpell($index)">×</button>
         </div>
-        <input
-          type="number"
-          [(ngModel)]="spell.points"
-          [name]="'sorcery-spell-points-' + $index"
-          min="1"
-        />
-        <button type="button" class="btn-remove-small" (click)="onRemoveSpell('sorcery', $index)">×</button>
-      </div>
-    }
-    <button type="button" class="btn-add-small" (click)="onAddSpell('sorcery')">Add</button>
+      }
+      <button type="button" class="btn-add-small" (click)="onAddRuneSpell()">Add</button>
+    </div>
+
+    <h5>Sorcery</h5>
+    <div class="spells-list">
+      @for (spell of magic.sorcery; track spell) {
+        <div class="spell-row">
+          <div class="spell-name-wrapper">
+            <select
+              [id]="'sorcery-spell-' + $index"
+              [value]="getSorcerySpellDropdownValue(spell)"
+              (change)="spell.name = $any($event.target).value"
+              [name]="'sorcery-spell-dropdown-' + $index"
+            >
+              <option value="">Custom</option>
+              @for (spellName of sorcerySpells; track spellName) {
+                <option [value]="spellName">{{ spellName }}</option>
+              }
+            </select>
+            @if (isCustomSpell(spell.name, 'sorcery')) {
+              <input
+                type="text"
+                class="custom-spell-input"
+                [(ngModel)]="spell.name"
+                [name]="'sorcery-spell-custom-' + $index"
+                placeholder="Select Spell"
+              />
+            }
+          </div>
+          <input
+            type="number"
+            [(ngModel)]="spell.points"
+            [name]="'sorcery-spell-points-' + $index"
+            min="1"
+          />
+          <button type="button" class="btn-remove-small" (click)="onRemoveSpell('sorcery', $index)">×</button>
+        </div>
+      }
+      <button type="button" class="btn-add-small" (click)="onAddSpell('sorcery')">Add</button>
+    </div>
   </div>
-</div>
+}

@@ -5,13 +5,18 @@
   @for (resource of getResourceKeys(); track resource.key) {
     <div class="form-group">
       <label [attr.for]="'resource-' + resource.key">{{ resource.label }}:</label>
-      <input
-        type="number"
-        [id]="'resource-' + resource.key"
-        [(ngModel)]="resources[resource.key]"
-        [name]="'resource-' + resource.key"
-        min="0"
-      />
+      <div class="resource-input-group">
+        <input
+          type="number"
+          [id]="'resource-' + resource.key"
+          [(ngModel)]="resources[resource.key]"
+          [name]="'resource-' + resource.key"
+          min="0"
+        />
+        @if (resource.hint) {
+          <span class="resource-hint">{{ resource.hint }}</span>
+        }
+      </div>
     </div>
   }
 </div>

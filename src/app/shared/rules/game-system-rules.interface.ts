@@ -2,6 +2,8 @@ import { CharacterStats } from '@shared/models/character-stats.model';
 import { WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield } from '@shared/rules/game-rules';
 import { DerivedStats, EquipmentItem, CharacterBackground } from '@characters/models/character.model';
 
+export type BackgroundForBonuses = Pick<CharacterBackground, 'occupation' | 'homeland' | 'cult' | 'age'>;
+
 export interface StatDefinition {
   key: keyof CharacterStats;
   label: string;
@@ -38,7 +40,8 @@ export interface GameSystemRules {
     stats: CharacterStats,
     equipment: EquipmentItem[],
     weapons: Weapon[],
-    shields: Shield[]
+    shields: Shield[],
+    background?: BackgroundForBonuses
   ): DerivedStats;
 
   /** Whether this system uses per-location hit points. */
@@ -62,7 +65,8 @@ export interface GameSystemRules {
   /** Apply occupation, homeland, and cult bonuses to a skill set. */
   applyBackgroundBonuses(
     skills: Record<string, number>,
-    background: Pick<CharacterBackground, 'occupation' | 'homeland' | 'cult'>
+    background: BackgroundForBonuses,
+    stats?: CharacterStats
   ): Record<string, number>;
 
   /** Weapon definitions available for this system. */
@@ -79,4 +83,7 @@ export interface GameSystemRules {
 
   /** Identifier for the magic system used by this game system. */
   getMagicSystemType(): string;
+
+  /** Short currency label used when displaying weapon costs (e.g. "L", "GC", "S"). */
+  getCurrencyLabel(): string;
 }

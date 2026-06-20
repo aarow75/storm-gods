@@ -24,15 +24,28 @@ export class CharacterCharacteristics {
     return 'Characteristics';
   }
 
-  get dexLabel(): string {
-    return this.gameSystemService.getRules().getStatDefinitions().find(s => s.key === 'DEX')?.label ?? 'DEX (Dexterity)';
+  private statDef(key: string) {
+    return this.gameSystemService.getRules().getStatDefinitions().find(s => s.key === key);
   }
 
-  get powLabel(): string {
-    return this.gameSystemService.getRules().getStatDefinitions().find(s => s.key === 'POW')?.label ?? 'POW (Power)';
+  get strLabel(): string { return this.statDef('STR')?.label ?? 'STR (Strength)'; }
+  get conLabel(): string { return this.statDef('CON')?.label ?? 'CON (Constitution)'; }
+  get dexLabel(): string { return this.statDef('DEX')?.label ?? 'DEX (Dexterity)'; }
+  get intLabel(): string { return this.statDef('INT')?.label ?? 'INT (Intelligence)'; }
+  get powLabel(): string { return this.statDef('POW')?.label ?? 'POW (Power)'; }
+  get chaLabel(): string { return this.statDef('CHA')?.label ?? 'CHA (Charisma)'; }
+
+  get showSiz(): boolean { return this.statDef('SIZ')?.visible ?? true; }
+  get showPow(): boolean { return this.statDef('POW')?.visible ?? true; }
+
+  get statMin(): number { return this.gameSystemService.gameSystem() === 'kal-arath' ? -1 : 1; }
+  get statMax(): number { return this.gameSystemService.gameSystem() === 'kal-arath' ? 5 : 30; }
+
+  get showRollButtons(): boolean {
+    return this.gameSystemService.gameSystem() !== 'kal-arath';
   }
 
-  get showSiz(): boolean {
-    return this.gameSystemService.getRules().getStatDefinitions().find(s => s.key === 'SIZ')?.visible ?? true;
+  get rollButtonLabel(): string {
+    return 'Roll All 3D6';
   }
 }

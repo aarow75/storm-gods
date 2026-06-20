@@ -26,13 +26,4 @@ export class CharacterSkills {
   get heading(): string {
     return 'Skills';
   }
-
-  /**
-   * Converts a percentage skill value to a d20 equivalent
-   * Formula: percentage / 5 = d20 target
-   * e.g., 5% = 1, 25% = 5, 50% = 10, 100% = 20
-   */
-  percentageToD20(percentage: number): number {
-    return Math.round(percentage / 5);
-  }
 }

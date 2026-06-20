@@ -15,6 +15,8 @@ export class CharacterWeapons {
   @Input() weaponList!: WeaponDefinition[];
   @Input() combatSkills!: string[];
   @Input() weaponSkills!: string[];
+  @Input() gameSystem!: string;
+  @Input() currencyLabel: string = 'L';
   @Input() stats?: CharacterStats;
   @Input() resources?: Resources;
   @Output() addWeapon = new EventEmitter<void>();
@@ -29,10 +31,10 @@ export class CharacterWeapons {
   onRemoveWeapon(index: number): void { this.removeWeapon.emit(index); }
   onWeaponChange(index: number): void { this.weaponChange.emit(index); }
 
-  private totalLunars(): number {
+  private totalWealth(): number {
     if (!this.resources) return Infinity;
-    // 1 Wheel = 20 Lunars, 1 Clack = 0.1 Lunars
-    return this.resources.wheels * 20 + this.resources.lunars + this.resources.clacks / 10;
+    if (this.gameSystem === 'kal-arath') return this.resources.silver ?? 0;
+    return (this.resources.wheels ?? 0) * 20 + (this.resources.lunars ?? 0) + (this.resources.clacks ?? 0) / 10;
   }
 
   canMeetStats(def: WeaponDefinition): boolean {
@@ -42,7 +44,7 @@ export class CharacterWeapons {
 
   canAfford(def: WeaponDefinition): boolean {
     if (def.cost === 0) return true;
-    return this.totalLunars() >= def.cost;
+    return this.totalWealth() >= def.cost;
   }
 
   isWeaponDisabled(def: WeaponDefinition): boolean {
@@ -53,7 +55,7 @@ export class CharacterWeapons {
     const statPart = (def.minSTR > 0 || def.minDEX > 0)
       ? ` (STR ${def.minSTR}, DEX ${def.minDEX})`
       : '';
-    const costPart = def.cost > 0 ? ` — ${def.cost}L` : '';
+    const costPart = def.cost > 0 ? ` — ${def.cost}${this.currencyLabel}` : '';
     return `${def.name}${statPart}${costPart}`;
   }
 
@@ -65,12 +67,20 @@ export class CharacterWeapons {
       if (this.stats.STR < def.minSTR) reasons.push(`STR ${this.stats.STR} < ${def.minSTR} required`);
       if (this.stats.DEX < def.minDEX) reasons.push(`DEX ${this.stats.DEX} < ${def.minDEX} required`);
     }
-    if (!this.canAfford(def)) reasons.push(`costs ${def.cost}L (insufficient funds)`);
+    if (!this.canAfford(def)) reasons.push(`costs ${def.cost}${this.currencyLabel} (insufficient funds)`);
     return reasons.length > 0 ? reasons.join(', ') : null;
   }
 
   getMissileDef(weapon: Weapon): WeaponDefinition | null {
     const def = this.weaponList.find(w => w.name === weapon.name);
     return def?.isMissile ? def : null;
+  }
+
+  getSkillsForWeapon(weapon: Weapon): string[] | null {
+    const def = this.weaponList.find(w => w.name === weapon.name);
+    if (!def?.defaultSkill) return null;
+    if (this.gameSystem === 'dragonbane') return this.weaponSkills;
+    if (this.gameSystem === 'runequest') return this.combatSkills;
+    return null;
   }
 }

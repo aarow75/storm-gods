@@ -8,92 +8,91 @@
   </button>
   <h2>{{ gameSystemService.getSystemName() }} Game Master's Screen</h2>
 
-  <!-- Conditions Table -->
-  <section class="gm-section">
-    <h3>Conditions & Effects</h3>
-    <table class="gm-table">
-      <thead>
-        <tr>
-          <th>Condition</th>
-          <th>Effect</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (condition of conditions; track condition.name) {
-          <tr>
-            <td>{{ condition.name }}</td>
-            <td>{{ condition.effect }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </section>
-
-  <!-- Difficulty Levels -->
-  <section class="gm-section">
-    <h3>Difficulty Levels</h3>
-    <table class="gm-table">
-      <thead>
-        <tr>
-          <th>Level</th>
-          <th>Typical Chance</th>
-          <th>Modifier</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (level of difficultyLevels; track level.level) {
-          <tr>
-            <td>{{ level.level }}</td>
-            <td>{{ level.chance }}</td>
-            <td>{{ level.modifier }}</td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </section>
-
-  <!-- Runequest Specific Content -->
+  <!-- ═══════════════════════════════════════════════════════════════ RUNEQUEST -->
   @if (gameSystemService.gameSystem() === 'runequest') {
-    <!-- Hit Locations -->
+
+    <!-- Core Mechanic -->
     <section class="gm-section">
-      <h3>Hit Location (d20)</h3>
-      <table class="gm-table">
-        <thead>
-          <tr>
-            <th>Location</th>
-            <th>d20 Roll</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (loc of runesquestHitLocations; track loc.location) {
-            <tr>
-              <td>{{ loc.location }}</td>
-              <td>{{ loc.range }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+      <h3>Core Mechanic</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>D100 Roll-Under</h3>
+          <ul>
+            <li>Roll D100 <strong>equal to or under skill%</strong> = success</li>
+            <li><strong>01–05:</strong> Automatic success (attacks &amp; parries)</li>
+            <li><strong>96–00:</strong> Automatic failure (attacks &amp; parries)</li>
+            <li><strong>Total HP ≤ 0:</strong> Character dies immediately</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Characteristic Rolls</h3>
+          <table class="gm-table-small">
+            <thead><tr><th>Mult</th><th>Difficulty</th></tr></thead>
+            <tbody>
+              @for (row of rqCharacteristicRolls; track row.mult) {
+                <tr><td><strong>{{ row.mult }}</strong></td><td>{{ row.difficulty }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box">
+          <h3>Encumbrance</h3>
+          <ul>
+            <li><strong>Max ENC</strong> = avg of STR+CON, capped at STR</li>
+            <li>Per point over max: −1 movement, −5% defense, +1 SR, −5% all skills</li>
+          </ul>
+          <h3>Healing</h3>
+          <ul>
+            <li><strong>Natural:</strong> 1 HP per week per location</li>
+            <li>Limb at 0 HP needs healing to 1+ before it functions</li>
+            <li><strong>POW Recovery:</strong> 1/4 total POW per 6 hours</li>
+          </ul>
+        </div>
+      </div>
     </section>
 
-    <!-- Strike Rank Reference -->
+    <!-- Combat Sequence -->
+    <section class="gm-section">
+      <h3>Combat Sequence</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Melee Round Order</h3>
+          <ol class="kal-arath-numbered">
+            <li><strong>Declare Magic</strong> — all spells announced before action</li>
+            <li><strong>Movement</strong> — move in SR order</li>
+            <li><strong>Missile Fire</strong> — ranged attacks resolve</li>
+            <li><strong>Melee Combat</strong> — lowest Strike Rank acts first</li>
+            <li><strong>Magic Resolves</strong> — spells take effect (caster's SR + spell SR)</li>
+          </ol>
+        </div>
+        <div class="ref-box">
+          <h3>Strike Rank Factors</h3>
+          <ul>
+            <li><strong>Base:</strong> SIZ modifier + DEX modifier</li>
+            <li><strong>Weapon already drawn:</strong> +0</li>
+            <li><strong>Drawing weapon:</strong> +3</li>
+            <li><strong>From scabbard:</strong> +2</li>
+            <li><strong>Movement into melee:</strong> +1 SR per unit moved</li>
+          </ul>
+          <p class="note"><em>Lower SR acts first. Ties: simultaneous.</em></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Strike Rank Modifiers -->
     <section class="gm-section">
       <h3>Strike Rank Modifiers</h3>
       <div class="strike-rank-grid">
         <div class="strike-rank-column">
-          <h3>Size Modifier</h3>
+          <h3>SIZ Modifier</h3>
           <table class="gm-table-small">
-            <thead>
-              <tr>
-                <th>Size</th>
-                <th>Mod</th>
-              </tr>
-            </thead>
+            <thead><tr><th>SIZ</th><th>SR Mod</th></tr></thead>
             <tbody>
               @for (mod of strikeRankModifiers; track $index) {
                 @if (mod.siz) {
                   <tr>
                     <td>{{ mod.siz }}</td>
-                    <td>+{{ mod.sizMod }}</td>
+                    <td>{{ mod.sizMod !== undefined ? (mod.sizMod >= 0 ? '+' : '') + mod.sizMod : '' }}</td>
                   </tr>
                 }
               }
@@ -103,18 +102,13 @@
         <div class="strike-rank-column">
           <h3>DEX Modifier</h3>
           <table class="gm-table-small">
-            <thead>
-              <tr>
-                <th>DEX</th>
-                <th>Mod</th>
-              </tr>
-            </thead>
+            <thead><tr><th>DEX</th><th>SR Mod</th></tr></thead>
             <tbody>
               @for (mod of strikeRankModifiers; track $index) {
                 @if (mod.dex) {
                   <tr>
                     <td>{{ mod.dex }}</td>
-                    <td>+{{ mod.dexMod }}</td>
+                    <td>{{ mod.dexMod >= 0 ? '+' : '' }}{{ mod.dexMod }}</td>
                   </tr>
                 }
               }
@@ -122,125 +116,1024 @@
           </table>
         </div>
       </div>
-      <p class="note"><strong>Strike Rank = Base 0 + SIZ modifier + DEX modifier</strong></p>
-      <p class="note"><strong>Additional Modifiers:</strong></p>
-      <ul class="note-list">
-        <li><strong>Weapon Length:</strong> Longer weapons may modify strike rank (varies by weapon)</li>
-        <li><strong>POW:</strong> Used in spirit combat instead of physical damage (directly affects damage dealt)</li>
-      </ul>
     </section>
 
-    <!-- Magic Modifiers -->
+    <!-- Attack & Parry Results -->
     <section class="gm-section">
-      <h3>Magic Modifiers</h3>
+      <h3>Attack &amp; Parry Results</h3>
       <table class="gm-table">
-        <thead>
-          <tr>
-            <th>Situation</th>
-            <th>Modifier</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Result</th><th>Roll</th><th>Effect</th></tr></thead>
         <tbody>
-          @for (mod of magicModifiers; track mod.situation) {
+          @for (row of rqAttackResults; track row.result) {
             <tr>
-              <td>{{ mod.situation }}</td>
-              <td>{{ mod.modifier }}</td>
+              <td><strong>{{ row.result }}</strong></td>
+              <td>{{ row.roll }}</td>
+              <td>{{ row.effect }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <p class="weapon-category-label">Fumble Table (D100)</p>
+      <div class="kal-arath-weapons-grid">
+        <table class="gm-table">
+          <thead><tr><th>D100</th><th>Result</th></tr></thead>
+          <tbody>
+            @for (row of rqFumbleTable.slice(0, 5); track row.roll) {
+              <tr><td>{{ row.roll }}</td><td>{{ row.result }}</td></tr>
+            }
+          </tbody>
+        </table>
+        <table class="gm-table">
+          <thead><tr><th>D100</th><th>Result</th></tr></thead>
+          <tbody>
+            @for (row of rqFumbleTable.slice(5); track row.roll) {
+              <tr><td>{{ row.roll }}</td><td>{{ row.result }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Hit Locations & Damage -->
+    <section class="gm-section">
+      <h3>Hit Locations &amp; Damage</h3>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Hit Location (D20)</p>
+          <table class="gm-table">
+            <thead><tr><th>D20</th><th>Location</th></tr></thead>
+            <tbody>
+              @for (loc of runesquestHitLocations; track loc.location) {
+                <tr><td>{{ loc.range }}</td><td>{{ loc.location }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p class="weapon-category-label">Damage Results</p>
+          <table class="gm-table">
+            <thead><tr><th>Location</th><th>At 0 HP</th><th>At −(max HP)</th></tr></thead>
+            <tbody>
+              @for (row of rqDamageByLocation; track row.location) {
+                <tr>
+                  <td><strong>{{ row.location }}</strong></td>
+                  <td>{{ row.atZero }}</td>
+                  <td>{{ row.atNeg }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- HP per Location -->
+    <section class="gm-section">
+      <h3>HP per Location</h3>
+      <div class="table-scroll">
+        <table class="gm-table">
+          <thead>
+            <tr>
+              <th>Total HP</th>
+              <th>Head</th>
+              <th>Each Arm</th>
+              <th>Chest</th>
+              <th>Abdomen</th>
+              <th>Each Leg</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rqHpPerLocation; track row.totalHp) {
+              <tr>
+                <td><strong>{{ row.totalHp }}</strong></td>
+                <td>{{ row.head }}</td>
+                <td>{{ row.arm }}</td>
+                <td>{{ row.chest }}</td>
+                <td>{{ row.abdomen }}</td>
+                <td>{{ row.leg }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Damage Bonus -->
+    <section class="gm-section">
+      <h3>Damage Bonus</h3>
+      <p class="note">Add Damage Bonus (DB) to melee weapon damage rolls. Based on <strong>STR + SIZ</strong>.</p>
+      <table class="gm-table">
+        <thead><tr><th>STR + SIZ</th><th>Damage Bonus</th></tr></thead>
+        <tbody>
+          @for (row of rqDamageBonus; track row.strsiz) {
+            <tr><td>{{ row.strsiz }}</td><td><strong>{{ row.bonus }}</strong></td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Armor & Shields -->
+    <section class="gm-section">
+      <h3>Armor &amp; Shields</h3>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Armor (AP absorbed per hit)</p>
+          <table class="gm-table">
+            <thead><tr><th>Type</th><th>AP</th><th>ENC</th><th>DEX Penalty</th></tr></thead>
+            <tbody>
+              @for (row of rqArmorTable; track row.type) {
+                <tr>
+                  <td>{{ row.type }}</td>
+                  <td><strong>{{ row.ap }}</strong></td>
+                  <td>{{ row.enc }}</td>
+                  <td>{{ row.penalty }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p class="weapon-category-label">Shields (add to Parry skill)</p>
+          <table class="gm-table">
+            <thead><tr><th>Shield</th><th>Defense Bonus</th><th>HP</th><th>ENC</th></tr></thead>
+            <tbody>
+              @for (row of rqShieldTable; track row.type) {
+                <tr>
+                  <td>{{ row.type }}</td>
+                  <td><strong>{{ row.defBonus }}</strong></td>
+                  <td>{{ row.hp }}</td>
+                  <td>{{ row.enc }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <p class="note">Shield HP decreases when parrying damage that exceeds AP value.</p>
+          <p class="note"><strong>Helmet AP:</strong> Leather 1 · Bronze 4 · Iron 5</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Magic -->
+    <section class="gm-section">
+      <h3>Battle Magic</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Casting Rules</h3>
+          <ul>
+            <li><strong>POW</strong> = casting resource; recovered at 1/4 total per 6 hours</li>
+            <li><strong>INT</strong> = max POW of spells held in mind at once</li>
+            <li>Spell takes effect on caster's SR + Spell SR</li>
+            <li>Cast while fighting: normal penalties apply</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Spell Strike Rank</h3>
+          <table class="gm-table-small">
+            <thead><tr><th>POW Cost</th><th>SR</th></tr></thead>
+            <tbody>
+              @for (row of rqSpellSR; track row.powCost) {
+                <tr><td>{{ row.powCost }}</td><td>{{ row.sr }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box">
+          <h3>Spirit Combat</h3>
+          <ul>
+            <li>Both combatants roll <strong>POW vs. POW</strong> on Resistance Table</li>
+            <li>Winner reduces loser's POW by <strong>1D3</strong> per round</li>
+            <li>POW reaching 0 = death or possession</li>
+            <li>Shamans may engage spirits; others cannot initiate</li>
+          </ul>
+        </div>
+      </div>
+      <p class="weapon-category-label">Battle Magic Spells (POW Cost)</p>
+      <div class="table-scroll">
+        <table class="gm-table">
+          <thead><tr><th>Spell</th><th>Cost</th><th>Effect</th></tr></thead>
+          <tbody>
+            @for (spell of rqBattleMagicSpells; track spell.spell) {
+              <tr>
+                <td><strong>{{ spell.spell }}</strong></td>
+                <td>{{ spell.cost }}</td>
+                <td>{{ spell.effect }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  } <!-- end runequest -->
+
+  <!-- ══════════════════════════════════════════════════════════════ DRAGONBANE -->
+  @if (gameSystemService.gameSystem() === 'dragonbane') {
+
+    <!-- Core Mechanic -->
+    <section class="gm-section">
+      <h3>Core Mechanic</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>D20 Roll-Under</h3>
+          <ul>
+            <li>Roll D20 <strong>equal to or under skill level</strong> = success</li>
+            <li><strong>Dragon (1):</strong> Critical success — maximum effect</li>
+            <li><strong>Demon (20):</strong> Automatic failure — cannot push; triggers mishap on spells</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Push Rolls</h3>
+          <ul>
+            <li>On a failure, you may <strong>push</strong> — reroll once</li>
+            <li>A pushed Demon triggers a <strong>mishap</strong> (GM decides consequences)</li>
+            <li>Cannot push if you rolled a Demon (20) on the first roll</li>
+            <li>Characters with all 6 conditions <strong>cannot push</strong></li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Currency &amp; Time</h3>
+          <ul>
+            <li><strong>Currency:</strong> 10 CP = 1 SP · 10 SP = 1 GP</li>
+            <li><strong>Round</strong> = 10 seconds (combat)</li>
+            <li><strong>Stretch</strong> = 15 minutes (exploration)</li>
+            <li><strong>Shift</strong> = 6 hours (4 per day)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Conditions -->
+    <section class="gm-section">
+      <h3>Conditions</h3>
+      <p class="note">A conditioned character suffers a <strong>bane</strong> on all rolls using the linked attribute. All 6 conditions = cannot push rolls.</p>
+      <table class="gm-table">
+        <thead><tr><th>Condition</th><th>Attribute (bane)</th><th>Cure</th></tr></thead>
+        <tbody>
+          @for (row of dbConditions; track row.condition) {
+            <tr>
+              <td><strong>{{ row.condition }}</strong></td>
+              <td>{{ row.attribute }}</td>
+              <td>{{ row.cure }}</td>
             </tr>
           }
         </tbody>
       </table>
     </section>
 
-    <!-- Armor Locations Reference -->
+    <!-- Armor -->
     <section class="gm-section">
-      <h3>Armor Coverage</h3>
-      <div class="armor-ref">
-        <div class="armor-column">
-          <strong>Light Armor</strong>
-          <p>Covers most of body</p>
-          <p>No location penalties</p>
-        </div>
-        <div class="armor-column">
-          <strong>Medium Armor</strong>
-          <p>Heavy leather or chain</p>
-          <p>-5% DEX-based skills</p>
-        </div>
-        <div class="armor-column">
-          <strong>Heavy Armor</strong>
-          <p>Full plate or heavy chain</p>
-          <p>-10% DEX-based skills</p>
-        </div>
-      </div>
-    </section>
-  }
-
-  <!-- Dragonbane Specific Content -->
-  @if (gameSystemService.gameSystem() === 'dragonbane') {
-    <section class="gm-section">
-      <h3>Dragonbane Quick Reference</h3>
-      <div class="dragonbane-ref">
-        <div class="ref-box">
-          <h3>Difficulty Modifiers</h3>
-          <ul>
-            <li><strong>Simple:</strong> 6 (easy for trained characters)</li>
-            <li><strong>Standard:</strong> 9 (normal task)</li>
-            <li><strong>Hard:</strong> 12 (challenging)</li>
-            <li><strong>Very Hard:</strong> 15 (very difficult)</li>
-          </ul>
-        </div>
-        <div class="ref-box">
-          <h3>Roll Results</h3>
-          <ul>
-            <li><strong>Critical Failure:</strong> 1-3 (worse failure)</li>
-            <li><strong>Failure:</strong> 4-difficulty (no success)</li>
-            <li><strong>Success:</strong> difficulty+ (goal achieved)</li>
-            <li><strong>Critical Success:</strong> difficulty + 10+ (exceptional)</li>
-          </ul>
-        </div>
-        <div class="ref-box">
-          <h3>Combat Speed</h3>
-          <ul>
-            <li><strong>Initiative:</strong> d6 + modifiers, rolled each round</li>
-            <li><strong>Quick Action:</strong> Move or attack, not both</li>
-            <li><strong>Full Round:</strong> Movement + Attack</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="gm-section">
-      <h3>Dragonbane Armor</h3>
+      <h3>Armor</h3>
+      <p class="note">Subtract <strong>AR</strong> from all incoming damage (minimum 0). Shields add +2 AR and allow one parry reaction per round.</p>
       <table class="gm-table">
-        <thead>
-          <tr>
-            <th>Armor Type</th>
-            <th>Protection</th>
-            <th>Effect</th>
-          </tr>
-        </thead>
+        <thead><tr><th>Type</th><th>AR</th><th>Cost</th><th>Supply</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr>
-            <td>Padded</td>
-            <td>1d4</td>
-            <td>Light, agile</td>
-          </tr>
-          <tr>
-            <td>Leather</td>
-            <td>1d6</td>
-            <td>Standard</td>
-          </tr>
-          <tr>
-            <td>Chain</td>
-            <td>1d8</td>
-            <td>Heavy, slow</td>
-          </tr>
-          <tr>
-            <td>Plate</td>
-            <td>1d10</td>
-            <td>Very heavy</td>
-          </tr>
+          @for (row of dbArmorTable; track row.type) {
+            <tr>
+              <td>{{ row.type }}</td>
+              <td><strong>{{ row.ar }}</strong></td>
+              <td>{{ row.cost }}</td>
+              <td>{{ row.supply }}</td>
+              <td>{{ row.notes }}</td>
+            </tr>
+          }
         </tbody>
       </table>
     </section>
-  }
+
+    <!-- Combat Flow -->
+    <section class="gm-section">
+      <h3>Combat Flow</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Initiative &amp; Turn Structure</h3>
+          <ul>
+            <li>Each participant draws an <strong>initiative card (1–10)</strong>. Lower acts first.</li>
+            <li>On surprise: choose any initiative card value.</li>
+            <li>Each turn: <strong>1 Action + 1 Fast Action</strong> (or 2 Fast Actions)</li>
+          </ul>
+          <h3>Actions</h3>
+          <ul>
+            <li>Attack (melee or ranged)</li>
+            <li>Cast a spell</li>
+            <li>Use a skill</li>
+            <li>Retreat (EVADE to avoid free attack)</li>
+            <li>Grapple</li>
+            <li>Help an ally (+boon to their next roll)</li>
+            <li>Dash (move an extra full movement)</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Fast Actions</h3>
+          <ul>
+            <li>Move (up to movement value in meters)</li>
+            <li>Draw or sheathe weapon</li>
+            <li>Open a door</li>
+            <li>Pick up item</li>
+            <li>Stand up from prone</li>
+            <li>Drink a potion</li>
+            <li>Reload a crossbow</li>
+          </ul>
+          <h3>Reactions (outside your turn)</h3>
+          <ul>
+            <li><strong>Parry:</strong> Roll weapon skill to negate damage. Dragon = free counterattack; Demon = weapon takes Durability hit.</li>
+            <li><strong>Dodge (EVADE):</strong> Roll EVADE to avoid hit entirely. Demon = fall prone.</li>
+            <li>Parry <em>or</em> dodge — not both — against a single attack.</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Terrain &amp; Visibility</h3>
+          <ul>
+            <li><strong>Cramped space:</strong> Bane on two-handed/long weapon attacks</li>
+            <li><strong>Rough ground:</strong> Bane on AGL rolls while moving</li>
+            <li><strong>Dim light:</strong> Bane on attacks and AWARENESS</li>
+            <li><strong>Darkness:</strong> No ranged attacks; bane on all sight rolls</li>
+            <li><strong>Prone:</strong> Melee attackers get boon; ranged attackers get bane</li>
+            <li><strong>Mounted:</strong> Boon on attacks vs. unmounted; bane on attack without RIDING skill</li>
+            <li><strong>Sneak attack:</strong> Boon on attack; target cannot parry or dodge</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Special Attacks -->
+    <section class="gm-section">
+      <h3>Special Attacks</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Grapple</h3>
+          <p>Opposed STR vs. target STR or AGL (target's choice). Success: both grappled — neither moves or attacks normally; only knives usable. Each round: opposed STR to maintain or escape.</p>
+        </div>
+        <div class="ref-box">
+          <h3>Disarm</h3>
+          <p>Opposed weapon skill roll. Success: target drops weapon (lands D3m away, random direction).</p>
+          <h3>Topple</h3>
+          <p>Opposed STR roll instead of damage. Success: target falls prone and loses next fast action to stand.</p>
+        </div>
+        <div class="ref-box">
+          <h3>Shove</h3>
+          <p>Opposed STR roll. Success: push target back D3m. If they hit a wall: D3 damage + prone.</p>
+          <h3>Find Weak Spot</h3>
+          <p>Fast action. AWARENESS roll. Success: next attack this round ignores target's AR.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Critical Hits & Fumbles -->
+    <section class="gm-section">
+      <h3>Critical Hits &amp; Fumbles</h3>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Critical Hit — Melee (Dragon, roll D6)</p>
+          <table class="gm-table">
+            <thead><tr><th>D6</th><th>Effect</th></tr></thead>
+            <tbody>
+              @for (row of dbCriticalHitMelee; track row.d6) {
+                <tr><td><strong>{{ row.d6 }}</strong></td><td>{{ row.effect }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p class="weapon-category-label">Critical Hit — Ranged (Dragon, roll D6)</p>
+          <table class="gm-table">
+            <thead><tr><th>D6</th><th>Effect</th></tr></thead>
+            <tbody>
+              @for (row of dbCriticalHitRanged; track row.d6) {
+                <tr><td><strong>{{ row.d6 }}</strong></td><td>{{ row.effect }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Fumble — Melee (Demon, roll D6)</p>
+          <table class="gm-table">
+            <thead><tr><th>D6</th><th>Effect</th></tr></thead>
+            <tbody>
+              @for (row of dbFumbleMelee; track row.d6) {
+                <tr><td><strong>{{ row.d6 }}</strong></td><td>{{ row.effect }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p class="weapon-category-label">Fumble — Ranged (Demon, roll D6)</p>
+          <table class="gm-table">
+            <thead><tr><th>D6</th><th>Effect</th></tr></thead>
+            <tbody>
+              @for (row of dbFumbleRanged; track row.d6) {
+                <tr><td><strong>{{ row.d6 }}</strong></td><td>{{ row.effect }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Death & Dying -->
+    <section class="gm-section">
+      <h3>Death &amp; Dying</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Broken (0 HP)</h3>
+          <p>Character is helpless but not yet dead. At the start of each round, make a <strong>Death Roll (D20)</strong>:</p>
+          <ul>
+            <li><strong>1–10:</strong> Stable — roll again next round</li>
+            <li><strong>11–19:</strong> Closer to death — roll again; three consecutive = dead</li>
+            <li><strong>20:</strong> Immediate death</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Saving a Life</h3>
+          <ul>
+            <li><strong>Rally:</strong> Ally spends action + HEALING roll. Success: target regains 1 HP, no longer Broken.</li>
+            <li>No HEALING roll within <strong>3 rounds</strong> of reaching 0 HP = character dies.</li>
+            <li><strong>Instant Death:</strong> Damage equal to or exceeding <em>maximum HP</em> in a single hit.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="weapon-category-label">Severe Injury Table (D20) — triggered on Critical Hit result 6</p>
+      <div class="kal-arath-weapons-grid">
+        <table class="gm-table">
+          <thead><tr><th>D20</th><th>Injury</th></tr></thead>
+          <tbody>
+            @for (row of dbSevereInjury.slice(0, 6); track row.d20) {
+              <tr><td><strong>{{ row.d20 }}</strong></td><td>{{ row.injury }}</td></tr>
+            }
+          </tbody>
+        </table>
+        <table class="gm-table">
+          <thead><tr><th>D20</th><th>Injury</th></tr></thead>
+          <tbody>
+            @for (row of dbSevereInjury.slice(6); track row.d20) {
+              <tr><td><strong>{{ row.d20 }}</strong></td><td>{{ row.injury }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Healing -->
+    <section class="gm-section">
+      <h3>Healing &amp; Rest</h3>
+      <table class="gm-table">
+        <thead><tr><th>Rest Type</th><th>Duration</th><th>HP</th><th>WP</th><th>Conditions</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Round Rest</strong></td>
+            <td>Brief pause in combat</td>
+            <td>—</td>
+            <td>D6 WP</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td><strong>Stretch Rest</strong></td>
+            <td>~15 minutes</td>
+            <td>D6 HP</td>
+            <td>D6 WP</td>
+            <td>Remove 1 (Memento: +1 additional, once/session)</td>
+          </tr>
+          <tr>
+            <td><strong>Shift Rest</strong></td>
+            <td>~6 hours sleep</td>
+            <td>All</td>
+            <td>All</td>
+            <td>All</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">Need 2 shift rests per day (~8 hours sleep total) or gain <strong>Exhausted</strong>. Elf Inner Peace: during stretch rest, gain +D6 HP, +D6 WP, +1 extra condition removed.</p>
+    </section>
+
+    <!-- Magic -->
+    <section class="gm-section">
+      <h3>Magic</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Casting Spells</h3>
+          <ol class="kal-arath-numbered">
+            <li>Declare spell and <strong>Power Level</strong> (1–3)</li>
+            <li>Pay WP: <strong>2 WP per Power Level</strong> (PL1=2, PL2=4, PL3=6)</li>
+            <li>Roll the magic school skill</li>
+            <li>Success = spell works. Failure = WP still spent, no effect.</li>
+            <li>Dragon (1) = maximum effect. Demon (20) = Magical Mishap.</li>
+          </ol>
+        </div>
+        <div class="ref-box">
+          <h3>Magic Rules</h3>
+          <ul>
+            <li><strong>Prepared spells:</strong> = your INT base chance (not trained skill)</li>
+            <li><strong>Magic Tricks:</strong> always prepared; cost 1 WP; auto-succeed (no roll)</li>
+            <li><strong>Metal armor while casting:</strong> Bane on the magic school roll</li>
+            <li><strong>Schools:</strong> General Magic · Animism · Elementalism · Mentalism</li>
+          </ul>
+        </div>
+      </div>
+      <p class="weapon-category-label">Magical Mishap (Demon on spell roll — D20)</p>
+      <div class="kal-arath-weapons-grid">
+        <table class="gm-table">
+          <thead><tr><th>D20</th><th>Mishap</th></tr></thead>
+          <tbody>
+            @for (row of dbMagicalMishap.slice(0, 10); track row.d20) {
+              <tr><td><strong>{{ row.d20 }}</strong></td><td>{{ row.mishap }}</td></tr>
+            }
+          </tbody>
+        </table>
+        <table class="gm-table">
+          <thead><tr><th>D20</th><th>Mishap</th></tr></thead>
+          <tbody>
+            @for (row of dbMagicalMishap.slice(10); track row.d20) {
+              <tr><td><strong>{{ row.d20 }}</strong></td><td>{{ row.mishap }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Hazards & Fear -->
+    <section class="gm-section">
+      <h3>Hazards &amp; Fear</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Fear (WIL roll on failure → D8)</h3>
+          <table class="gm-table-small">
+            <thead><tr><th>D8</th><th>Effect</th></tr></thead>
+            <tbody>
+              @for (row of dbFearTable; track row.d8) {
+                <tr><td><strong>{{ row.d8 }}</strong></td><td>{{ row.effect }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box">
+          <h3>Falling</h3>
+          <ul>
+            <li><strong>Up to 3m:</strong> D6 damage (AR ignored)</li>
+            <li><strong>4–6m:</strong> 2D6 damage</li>
+            <li><strong>7–10m:</strong> 4D6 damage</li>
+            <li><strong>11m+:</strong> 8D6 damage (likely instant death)</li>
+          </ul>
+          <h3>Poison</h3>
+          <ul>
+            <li><strong>Lethal:</strong> CON roll vs. virulence each round; fail = D6 damage; 3 failures = dead</li>
+            <li><strong>Paralyzing:</strong> CON roll vs. virulence; fail = paralyzed D6 stretches</li>
+            <li><strong>Sleeping:</strong> CON roll vs. virulence; fail = sleep D6 shifts</li>
+          </ul>
+          <h3>Hunger / Cold / Sleep Deprivation</h3>
+          <ul>
+            <li><strong>Hunger:</strong> After 24h without food = Exhausted. Each additional 24h = another condition.</li>
+            <li><strong>Cold:</strong> After 1 shift exposed without gear = Sickly. Each further shift = another condition.</li>
+            <li><strong>Sleep deprivation:</strong> After missing 1 shift rest = Dazed. Each further shift = another condition.</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Disease</h3>
+          <p>Each disease has a <strong>Virulence</strong> rating. At end of each shift, make CON roll vs. Virulence. Fail = gain a condition. All 6 conditions filled = death. Recovery: 3 consecutive successful CON rolls.</p>
+          <h3>Drowning</h3>
+          <p>Non-swimmers must roll SWIMMING each round in deep water. Failure = begin drowning: lose D6 HP per round until rescued.</p>
+          <h3>Darkness</h3>
+          <ul>
+            <li>Cannot make ranged attacks</li>
+            <li>Bane on all rolls requiring sight</li>
+            <li>Hidden enemies in darkness cannot be targeted</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  } <!-- end dragonbane -->
+
+  <!-- ══════════════════════════════════════════════════════════════ KAL-ARATH -->
+  @if (gameSystemService.gameSystem() === 'kal-arath') {
+
+    <!-- Core Resolution -->
+    <section class="gm-section">
+      <h3>Core Resolution</h3>
+      <p class="note"><strong>Roll 2d6 + Stat vs. 8</strong> to succeed at standard tasks. Success rates: 0 = 41% · +1 = 58% · +2 = 72% · +3 = 83% · +5 = 97%</p>
+      <table class="gm-table">
+        <thead><tr><th>Situation</th><th>Roll</th></tr></thead>
+        <tbody>
+          @for (row of kalArathCoreResolution; track row.situation) {
+            <tr><td>{{ row.situation }}</td><td>{{ row.roll }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Stats -->
+    <section class="gm-section">
+      <h3>Stats</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Stat Reference</h3>
+          <table class="gm-table-small">
+            <thead><tr><th>Stat</th><th>Use</th></tr></thead>
+            <tbody>
+              @for (row of kalArathStats; track row.stat) {
+                <tr><td><strong>{{ row.stat }}</strong></td><td>{{ row.use }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box">
+          <h3>Carry &amp; Encumbrance</h3>
+          <ul>
+            <li><strong>Carry Limit:</strong> STR+8 items</li>
+            <li><strong>Over limit:</strong> Disadvantage on physical rolls</li>
+            <li><strong>Double limit:</strong> Cannot move</li>
+          </ul>
+          <h3>Brawling</h3>
+          <ul>
+            <li><strong>Damage:</strong> d6/d (roll 2d6, take worst)</li>
+            <li><strong>Grapple:</strong> Opponent limited to light weapons; STR check to break free each round</li>
+            <li><strong>Two players fighting:</strong> Opposed Dodge/Attack rolls</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Initiative & Combat Flow -->
+    <section class="gm-section">
+      <h3>Initiative &amp; Combat Flow</h3>
+      <div class="ref-box">
+        <h3>Combat Sequence</h3>
+        <ol class="kal-arath-numbered">
+          <li><strong>Initiative:</strong> d6+AGI, 4+ = player side goes first. Natural 1 always loses.</li>
+          <li><strong>Attack (melee/brawl):</strong> 2d6+STR vs. 8</li>
+          <li><strong>Attack (missile):</strong> 2d6+AGI vs. 8</li>
+          <li><strong>Attack (magic):</strong> 2d6+INT vs. spell difficulty</li>
+          <li><strong>Dodge (defender's turn):</strong> 2d6+AGI vs. 8</li>
+          <li><strong>Damage:</strong> Roll weapon dice, subtract armor, apply to HP. Damage dice explode — a 6 is rerolled once; if a second 6 comes up, count as-is.</li>
+          <li><strong>Critical hit:</strong> Double damage dice. | <strong>Critical dodge:</strong> Counterattack (sword); varies by weapon.</li>
+          <li><strong>Critical failure on attack:</strong> Broken bowstring, lost weapon, fall prone, etc.</li>
+          <li><strong>Critical failure on dodge:</strong> Enemy doubles damage dice.</li>
+        </ol>
+        <p class="note"><strong>Optional level modifier:</strong> +/- 1 to attack and dodge per level difference between opponents.</p>
+      </div>
+    </section>
+
+    <!-- Weapons -->
+    <section class="gm-section">
+      <h3>Weapons</h3>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Light (d6/d — roll 2d6, take worst)</p>
+          <table class="gm-table">
+            <thead><tr><th>Weapon</th><th>Special</th></tr></thead>
+            <tbody>
+              @for (w of kalArathWeaponsLight; track w.weapon) {
+                <tr><td>{{ w.weapon }}</td><td>{{ w.special }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p class="weapon-category-label">Heavy (d6/a — roll 2d6, take best) — ALL TWO-HANDED</p>
+          <table class="gm-table">
+            <thead><tr><th>Weapon</th><th>Special</th></tr></thead>
+            <tbody>
+              @for (w of kalArathWeaponsHeavy; track w.weapon) {
+                <tr><td>{{ w.weapon }}</td><td>{{ w.special }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="weapon-category-label">Medium (d6)</p>
+      <table class="gm-table">
+        <thead><tr><th>Weapon</th><th>Special</th></tr></thead>
+        <tbody>
+          @for (w of kalArathWeaponsMedium; track w.weapon) {
+            <tr><td>{{ w.weapon }}</td><td>{{ w.special }}</td></tr>
+          }
+        </tbody>
+      </table>
+      <p class="weapon-category-label">Missile</p>
+      <table class="gm-table">
+        <thead><tr><th>Weapon</th><th>Dmg</th><th>Special</th></tr></thead>
+        <tbody>
+          @for (w of kalArathWeaponsMissile; track w.weapon) {
+            <tr><td>{{ w.weapon }}</td><td>{{ w.dmg }}</td><td>{{ w.special }}</td></tr>
+          }
+        </tbody>
+      </table>
+      <p class="note"><strong>Dual Wield:</strong> Roll both weapons, take best. Medium+Light or Light+Light only.</p>
+    </section>
+
+    <!-- Armor -->
+    <section class="gm-section">
+      <h3>Armor</h3>
+      <table class="gm-table">
+        <thead><tr><th>Type</th><th>Reduction</th><th>Notes</th></tr></thead>
+        <tbody>
+          @for (row of kalArathArmor; track row.type) {
+            <tr><td>{{ row.type }}</td><td>{{ row.reduction }}</td><td>{{ row.notes }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Death & Wounding -->
+    <section class="gm-section">
+      <h3>Death &amp; Wounding</h3>
+      <p class="note">Triggered at 0 HP. Each additional hit at 0 HP adds a cumulative <strong>–2</strong> to the roll. Below adjusted 7–8 = out of action.</p>
+      <table class="gm-table">
+        <thead><tr><th>Roll (2d6)</th><th>Result</th></tr></thead>
+        <tbody>
+          @for (row of kalArathDeathWounding; track row.roll) {
+            <tr><td><strong>{{ row.roll }}</strong></td><td>{{ row.result }}</td></tr>
+          }
+        </tbody>
+      </table>
+      <p class="note">All injuries stack. Permanent HP loss below 1 = dead.</p>
+    </section>
+
+    <!-- Healing -->
+    <section class="gm-section">
+      <h3>Healing</h3>
+      <table class="gm-table">
+        <thead><tr><th>When</th><th>Recovery</th></tr></thead>
+        <tbody>
+          @for (row of kalArathHealing; track row.when) {
+            <tr><td>{{ row.when }}</td><td>{{ row.recovery }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Morale & Reactions -->
+    <section class="gm-section">
+      <h3>Morale &amp; Reactions</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Morale Check</h3>
+          <p>Check when an enemy group:</p>
+          <ul>
+            <li>Is reduced by 50% in number</li>
+            <li>Takes ≥50% max HP in a single hit</li>
+            <li>Loses their leader</li>
+          </ul>
+          <p><strong>Roll 2d6</strong> — higher than their Morale: flee/surrender. Lower: fight on.</p>
+        </div>
+        <div class="ref-box">
+          <h3>Reaction Check (2d6+PRE)</h3>
+          <table class="gm-table-small">
+            <thead><tr><th>Roll</th><th>Reaction</th></tr></thead>
+            <tbody>
+              @for (row of kalArathReaction; track row.roll) {
+                <tr><td>{{ row.roll }}</td><td>{{ row.reaction }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Magic -->
+    <section class="gm-section">
+      <h3>Magic</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Spell Tiers (2d6+INT vs. difficulty)</h3>
+          <table class="gm-table-small">
+            <thead><tr><th>Tier</th><th>Difficulty</th><th>Min INT</th></tr></thead>
+            <tbody>
+              @for (row of kalArathMagicTiers; track row.tier) {
+                <tr><td>{{ row.tier }}</td><td>{{ row.difficulty }}</td><td>{{ row.minInt }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="ref-box">
+          <h3>Casting Rules</h3>
+          <ul>
+            <li><strong>Critical success:</strong> Doubled effect</li>
+            <li><strong>Casting failure:</strong> 1 damage to caster; cannot cast again until rest</li>
+            <li><strong>Critical failure:</strong> Roll on Arcane Disaster table (below)</li>
+          </ul>
+        </div>
+      </div>
+      <p class="weapon-category-label">Arcane Disaster (2d6)</p>
+      <table class="gm-table">
+        <thead><tr><th>Roll</th><th>Disaster</th></tr></thead>
+        <tbody>
+          @for (row of kalArathArcaneDaster; track row.roll) {
+            <tr><td><strong>{{ row.roll }}</strong></td><td>{{ row.disaster }}</td></tr>
+          }
+        </tbody>
+      </table>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Demonic Pacts (d6)</p>
+          <table class="gm-table">
+            <thead><tr><th>d6</th><th>Pact</th></tr></thead>
+            <tbody>
+              @for (row of kalArathDemonicPacts; track row.d6) {
+                <tr><td>{{ row.d6 }}</td><td>{{ row.pact }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p class="weapon-category-label">Dooms (d6)</p>
+          <table class="gm-table">
+            <thead><tr><th>d6</th><th>Doom</th></tr></thead>
+            <tbody>
+              @for (row of kalArathDooms; track row.d6) {
+                <tr><td>{{ row.d6 }}</td><td>{{ row.doom }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overland Travel -->
+    <section class="gm-section">
+      <h3>Overland Travel (per day)</h3>
+      <div class="ref-box">
+        <h3>Daily Procedure</h3>
+        <ol class="kal-arath-numbered">
+          <li><strong>Roll Weather</strong> — d6 by season (see tables)</li>
+          <li><strong>Getting Lost</strong> — 1–2 on d6 = lost, stay in hex; roads/rivers/landmarks = safe</li>
+          <li><strong>Forage</strong> (if needed) — halves movement</li>
+          <li><strong>Roll POI</strong> — 5–6 on d6 = roll d66 POI table</li>
+          <li><strong>Roll Encounter</strong> — 5–6 on d6 = roll d66 Encounter + Reaction Check</li>
+          <li><strong>Camp</strong> — expend 1 ration; check Night Encounter (1–2 on d6)</li>
+          <li><strong>End of Day</strong> — journal, update status</li>
+        </ol>
+      </div>
+      <p class="note"><em>Weather by season, d66 POI table, and d66 Encounter table not yet available — see GM notes.</em></p>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Foraging Results (d6)</p>
+          <table class="gm-table">
+            <thead><tr><th>d6</th><th>Result</th></tr></thead>
+            <tbody>
+              @for (row of kalArathForaging; track row.d6) {
+                <tr><td>{{ row.d6 }}</td><td>{{ row.result }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <p class="weapon-category-label">Night Encounters (2d6)</p>
+          <table class="gm-table">
+            <thead><tr><th>2d6</th><th>Encounter</th></tr></thead>
+            <tbody>
+              @for (row of kalArathNightEncounters; track row.roll) {
+                <tr><td>{{ row.roll }}</td><td>{{ row.encounter }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="weapon-category-label">Herbs (d6)</p>
+      <table class="gm-table">
+        <thead><tr><th>d6</th><th>Herb</th><th>Effect</th></tr></thead>
+        <tbody>
+          @for (row of kalArathHerbs; track row.d6) {
+            <tr><td>{{ row.d6 }}</td><td>{{ row.herb }}</td><td>{{ row.effect }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Oracle -->
+    <section class="gm-section">
+      <h3>Oracle</h3>
+      <div class="ref-box">
+        <h3>Yes/No Answers</h3>
+        <ul>
+          <li><strong>Yes/No:</strong> d6 — 1–3 No, 4–6 Yes. Odd = "but." 1 or 6 = extreme result.</li>
+          <li><strong>Likely:</strong> 2d6, take highest. <strong>Unlikely:</strong> 2d6, take lowest. <strong>Extreme:</strong> 3d6.</li>
+          <li><strong>Insight:</strong> Roll 1–3 times on the d66 tables (story or descriptive) and synthesize.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Bestiary Quick Reference -->
+    <section class="gm-section">
+      <h3>Bestiary Quick Reference</h3>
+      <div class="table-scroll">
+        <table class="gm-table">
+          <thead>
+            <tr>
+              <th>Creature</th><th>HP</th><th>Armor</th><th>Attack</th><th>Morale</th><th>Special</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of kalArathBestiary; track row.creature) {
+              <tr>
+                <td>{{ row.creature }}</td>
+                <td>{{ row.hp }}</td>
+                <td>{{ row.armor }}</td>
+                <td>{{ row.attack }}</td>
+                <td>{{ row.morale }}</td>
+                <td>{{ row.special }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="weapon-category-label">Boss Room Creatures</p>
+      <div class="table-scroll">
+        <table class="gm-table">
+          <thead>
+            <tr>
+              <th>Creature</th><th>HP</th><th>Armor</th><th>Attack</th><th>Special</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of kalArathBossCreatures; track row.creature) {
+              <tr>
+                <td>{{ row.creature }}</td>
+                <td>{{ row.hp }}</td>
+                <td>{{ row.armor }}</td>
+                <td>{{ row.attack }}</td>
+                <td>{{ row.special }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Dungeon Quick Procedure -->
+    <section class="gm-section">
+      <h3>Dungeon Quick Procedure</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Generation</h3>
+          <ol class="kal-arath-numbered">
+            <li><strong>Nature (d6):</strong> 1=City Ruins / 2=Dungeon / 3=Temple / 4=Caverns / 5=Fort / 6=Special</li>
+            <li><strong>Size (d6):</strong> 1=Small(3) / 2–3=Medium(5) / 4=Large(7) / 5=Vast(9) / 6=Colossal(11)</li>
+            <li>Roll that many d6s — positions = layout, numbers = area type</li>
+            <li>6 = Boss Room (keep only the "deepest" 6; reroll others)</li>
+          </ol>
+        </div>
+        <div class="ref-box">
+          <h3>Area Type (d6)</h3>
+          <ul>
+            <li><strong>1</strong> — Empty</li>
+            <li><strong>2</strong> — Hazard/Trap</li>
+            <li><strong>3</strong> — Foe</li>
+            <li><strong>4</strong> — NPC</li>
+            <li><strong>5</strong> — Treasure</li>
+            <li><strong>6</strong> — Boss</li>
+          </ul>
+          <p><strong>Passage:</strong> d6 — 1=Foe encountered. Roll again in previously-visited areas on a 1.</p>
+          <p><strong>Treasure:</strong> d6 — 1–2 = guarded by a Foe first.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settlement Quick Procedure -->
+    <section class="gm-section">
+      <h3>Settlement Quick Procedure</h3>
+      <div class="ref-box">
+        <h3>Generation Steps</h3>
+        <ol class="kal-arath-numbered">
+          <li><strong>Size (d6):</strong> 1=Lone Dwelling / 2=Encampment / 3–4=Tribal Compound / 5=Village / 6=City</li>
+          <li><strong>Faction (d6):</strong> 1=Warlord / 2=Religious Sect / 3=Merchant/Guild / 4=Tribe / 5=Militia/Mercs / 6=Mixed (roll 3×, drop 6s)</li>
+          <li><strong>NPC (d66 ×3):</strong> Role + Motivation + Trait</li>
+          <li><strong>Resources (d6):</strong> 1=Livestock / 2=Metalwork / 3=Textiles / 4=Food / 5=Herbs/Specialty / 6=Information</li>
+          <li><strong>Conflict (d6):</strong> 1–2=Internal / 3–4=External Threat / 5=Resource Scarcity / 6=Stable</li>
+          <li><strong>Event (d6):</strong> 1=Festival / 2=Market Day / 3=Tournament / 4=Celebration / 5=Crisis / 6=Ordinary day</li>
+        </ol>
+      </div>
+      <p class="note"><em>NPC d66 tables (Role / Motivation / Trait) not yet available — see GM notes.</em></p>
+    </section>
+
+    <!-- XP & Leveling -->
+    <section class="gm-section">
+      <h3>XP &amp; Leveling</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Earning XP</h3>
+          <ul>
+            <li><strong>1 XP</strong> per meaningful session</li>
+            <li><strong>Bonus XP</strong> for significant events (max 2/session; more for major story milestones)</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Level Up (choose ONE)</h3>
+          <ul>
+            <li>Roll 6d6 vs. current HP — beat it = +d6 HP; fail = +1 HP</li>
+            <li>+1 to any stat (max +5)</li>
+          </ul>
+          <p><strong>Skills:</strong> Gained at levels 1, 3, 5, and 9 (max level), forfeiting the other advancement.</p>
+        </div>
+        <div class="ref-box">
+          <h3>Fate Point</h3>
+          <ul>
+            <li>1 per character (+ Mystic skill option)</li>
+            <li>Reroll any one of your own dice, once per session</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  } <!-- end kal-arath -->
 </div>

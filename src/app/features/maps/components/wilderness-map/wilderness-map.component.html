@@ -2,7 +2,6 @@
   <header class="page-header">
     <h1>Wilderness Map</h1>
     <div style="display: flex; gap: var(--spacing-lg); align-items: center;">
-      <a [routerLink]="gameSystemService.link('characters')" class="back-link">← Back to Characters</a>
       <button class="btn-fullscreen" (click)="toggleFullscreen()" [title]="isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'">
         {{ isFullscreen ? '✕' : '⛶' }}
       </button>

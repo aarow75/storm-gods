@@ -16,9 +16,25 @@ export class PublicationsComponent {
   constructor(public gameSystemService: GameSystemService) {}
 
   get publications() {
-    return this.gameSystemService.gameSystem() === 'runequest'
-      ? RUNEQUEST_PUBLICATIONS
-      : DRAGONBANE_PUBLICATIONS;
+    if (this.gameSystemService.gameSystem() === 'runequest') {
+      return RUNEQUEST_PUBLICATIONS;
+    } else if (this.gameSystemService.gameSystem() === 'dragonbane') {
+      return DRAGONBANE_PUBLICATIONS;
+    } else {
+      return [];
+    }
+  }
+
+  get isDragonbane() {
+    return this.gameSystemService.gameSystem() === 'dragonbane';
+  }
+
+  get isKalArath() {
+    return this.gameSystemService.gameSystem() === 'kal-arath';
+  }
+
+  get isRunequest() {
+    return this.gameSystemService.gameSystem() === 'runequest';
   }
 
   get rq2Publications() {
@@ -47,9 +63,5 @@ export class PublicationsComponent {
 
   get adventures() {
     return DRAGONBANE_PUBLICATIONS.filter((p) => !this.coreBooks.includes(p) && !this.bestiaries.includes(p) && !this.settings.includes(p) && !this.trudvangBooks.includes(p));
-  }
-
-  get isRunequest() {
-    return this.gameSystemService.gameSystem() === 'runequest';
   }
 }

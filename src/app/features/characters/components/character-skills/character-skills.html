@@ -19,7 +19,33 @@
               min="0"
               max="100"
             />
-            <span class="d20-equivalent">d20: {{ percentageToD20(skills[skill]) }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+} @else if (gameSystem === 'Kal-Arath') {
+  <p class="skills-hint">Mark abilities as acquired (1) or not (0). Abilities stack if taken more than once; starred (*) abilities may only be taken once.</p>
+  <div class="skills-section">
+    @for (category of getDbCategoryKeys(); track category) {
+    <div class="skill-category">
+      <h5>{{ category }}</h5>
+      <div class="skills-grid">
+        @for (skill of getDbSkillKeys(category); track skill) {
+        <div class="form-group skill-group">
+          <label [for]="skill">{{ skill }}:</label>
+          <div class="skill-input-wrapper">
+            <input
+              type="number"
+              [id]="skill"
+              [(ngModel)]="skills[skill]"
+              [name]="skill"
+              min="0"
+              max="5"
+            />
+            <span class="acquired-badge">{{ skills[skill] > 0 ? 'Acquired' : '—' }}</span>
           </div>
         </div>
         }
@@ -43,9 +69,8 @@
               [(ngModel)]="skills[skill]"
               [name]="skill"
               min="0"
-              max="100"
+              max="20"
             />
-            <span class="d20-equivalent">d20: {{ percentageToD20(skills[skill]) }}</span>
           </div>
         </div>
         }

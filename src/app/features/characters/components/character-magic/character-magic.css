@@ -1,3 +1,49 @@
 @import '../../../../shared/styles/shared-form-styles.css';
 
 /* Character Magic Specific Styles */
+
+.magic-hint {
+  font-style: italic;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.ka-spells-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.ka-spell-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+}
+
+.ka-spell-row:hover {
+  background: var(--color-bg-hover);
+}
+
+.ka-spell-name {
+  flex: 1;
+  font-size: var(--font-size-base);
+}
+
+.ka-spell-tier {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.db-discipline-section {
+  margin-bottom: var(--spacing-md);
+}
+
+.db-spell-input {
+  flex: 1;
+  min-width: 0;
+}

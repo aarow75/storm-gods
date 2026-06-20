@@ -2,9 +2,15 @@
 
 /* Character Skills Specific Styles */
 
-/* Override grid to accommodate skill label + input + d20 display */
+.skills-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  margin: 0 0 var(--spacing-3xl) 0;
+  font-style: italic;
+}
+
 .skills-grid {
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
   gap: 8px 12px !important;
 }
 
@@ -32,14 +38,14 @@
   flex-shrink: 0;
 }
 
-.d20-equivalent {
+.acquired-badge {
   font-size: var(--font-size-md);
   color: var(--color-text-tertiary);
   font-weight: 600;
   white-space: nowrap;
   padding: 2px 5px;
-  background: #f0f0f0;
-  border-radius: 3px;
+  background: var(--color-bg-secondary, #f0f0f0);
+  border-radius: var(--border-radius-sm);
   border: 1px solid var(--color-border);
   min-width: 45px;
   text-align: center;
