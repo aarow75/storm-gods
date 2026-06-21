@@ -55,23 +55,20 @@ export class CombatService {
     localStorage.setItem(this.MONSTERS_KEY, JSON.stringify(filtered));
   }
 
-  calculateFinalStrikeRank(baseStrikeRank: number, weaponName?: string): number {
-    if (!weaponName) return baseStrikeRank;
+  calculateFinalInitiative(baseInitiative: number, weaponName?: string): number {
+    if (!weaponName) return baseInitiative;
 
     const modifier = this.gameSystemService.getRules().getWeaponList().find(w => w.name === weaponName)?.strikeRank ?? 0;
-    return baseStrikeRank + modifier;
+    return baseInitiative + modifier;
   }
 
   calculateMovementSRCost(meters: number): number {
-    if (!meters || meters <= 0) return 0;
-    return Math.ceil(meters / 3);
+    return this.gameSystemService.getRules().getMovementInitiativeCost(meters);
   }
 
   calculateSurpriseDistancePenalty(isSurprised: boolean | undefined, opponentDistance: number): number {
     if (!isSurprised) return 0;
-    if (opponentDistance <= 3) return 3;
-    if (opponentDistance > 3) return 1;
-    return 0;
+    return this.gameSystemService.getRules().getSurpriseInitiativePenalty(opponentDistance);
   }
 
   getOpponentDistance(participant: CombatParticipant, allParticipants: CombatParticipant[], mapState: CombatMapState): number {

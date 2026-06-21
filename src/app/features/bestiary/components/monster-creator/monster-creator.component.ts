@@ -7,6 +7,8 @@ import { HIT_LOCATION_TEMPLATES } from '@bestiary/constants/hit-location-templat
 import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { ExportService } from '@shared/services/export.service';
+import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
+import { StatDefinition } from '@shared/rules/game-system-rules.interface';
 
 @Component({
   selector: 'app-monster-creator',
@@ -133,7 +135,7 @@ export class MonsterCreatorComponent implements OnInit {
       name: '',
       description: '',
       category: 'humanoid',
-      gameSystem: 'runequest',
+      gameSystem: this.gameSystemService.gameSystem(),
       hitPoints: 10,
       armor: 0,
       armorDescription: '',
@@ -223,6 +225,22 @@ export class MonsterCreatorComponent implements OnInit {
 
   removeAbility(index: number): void {
     this.form.specialAbilities.splice(index, 1);
+  }
+
+  get activeStatDefs(): StatDefinition[] {
+    return getRulesForSystem(this.form.gameSystem).getStatDefinitions().filter(s => s.visible !== false);
+  }
+
+  get usesStrikeRank(): boolean {
+    return getRulesForSystem(this.form.gameSystem).usesStrikeRank();
+  }
+
+  get showHitLocations(): boolean {
+    return getRulesForSystem(this.form.gameSystem).usesHitLocations();
+  }
+
+  get initiativeLabel(): string {
+    return getRulesForSystem(this.form.gameSystem).getInitiativeLabel();
   }
 
   getCategoryLabel(category: string): string {

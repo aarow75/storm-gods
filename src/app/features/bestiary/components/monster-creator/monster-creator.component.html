@@ -73,33 +73,37 @@
             <label for="movement">Movement Rate</label>
             <input id="movement" type="number" [(ngModel)]="form.movement" min="0" />
           </div>
-          <div class="form-group">
-            <label for="strikeRank">Strike Rank (Base)</label>
-            <input id="strikeRank" type="number" [(ngModel)]="form.strikeRank" min="0" />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="hitLocationTemplate">Hit Location Template</label>
-          <select id="hitLocationTemplate" [(ngModel)]="form.hitLocationTemplateId">
-            @for (tmpl of hitLocationTemplateOptions; track tmpl.value) {
-              <option [value]="tmpl.value">{{ tmpl.label }}</option>
-            }
-          </select>
-          @if (form.hitLocationTemplateId) {
-            <p class="form-hint">HP per location will be auto-calculated from CON + SIZ when displayed.</p>
+          @if (usesStrikeRank) {
+            <div class="form-group">
+              <label for="strikeRank">{{ initiativeLabel }} (Base)</label>
+              <input id="strikeRank" type="number" [(ngModel)]="form.strikeRank" min="0" />
+            </div>
           }
         </div>
+
+        @if (showHitLocations) {
+          <div class="form-group">
+            <label for="hitLocationTemplate">Hit Location Template</label>
+            <select id="hitLocationTemplate" [(ngModel)]="form.hitLocationTemplateId">
+              @for (tmpl of hitLocationTemplateOptions; track tmpl.value) {
+                <option [value]="tmpl.value">{{ tmpl.label }}</option>
+              }
+            </select>
+            @if (form.hitLocationTemplateId) {
+              <p class="form-hint">HP per location will be auto-calculated from CON + SIZ when displayed.</p>
+            }
+          </div>
+        }
       </div>
 
       <!-- Stats Section -->
       <div class="form-section">
         <h4>Stats</h4>
         <div class="stats-grid">
-          @for (stat of ['STR', 'CON', 'SIZ', 'DEX', 'INT', 'POW', 'CHA']; track stat) {
+          @for (stat of activeStatDefs; track stat.key) {
             <div class="form-group">
-              <label [for]="'stat-' + stat">{{ stat }}</label>
-              <input [id]="'stat-' + stat" type="number" [ngModel]="getStat(stat)" (ngModelChange)="setStat(stat, $event)" min="1" max="21" />
+              <label [for]="'stat-' + stat.key">{{ stat.label }}</label>
+              <input [id]="'stat-' + stat.key" type="number" [ngModel]="getStat(stat.key)" (ngModelChange)="setStat(stat.key, $event)" min="1" max="21" />
             </div>
           }
         </div>

@@ -472,7 +472,7 @@
   padding-top: var(--spacing-2xl);
 }
 
-.expand-btn {
+.btn-collapse {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -488,12 +488,12 @@
   transition: all 0.2s ease;
 }
 
-.expand-btn:hover {
+.btn-collapse:hover {
   background-color: var(--color-bg-light);
   border-radius: var(--border-radius-md);
 }
 
-.expand-btn.expanded {
+.btn-collapse.expanded {
   color: var(--color-primary-blue-dark);
 }
 

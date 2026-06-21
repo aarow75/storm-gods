@@ -94,6 +94,44 @@ export interface GameSystemRules {
   /** Combat/status conditions available for this system. */
   getConditions(): ConditionDefinition[];
 
+  // ── Initiative / Strike Rank ──────────────────────────────────────────────
+
+  /** Whether this system uses Strike Rank for turn order. False = manual initiative field. */
+  usesStrikeRank(): boolean;
+
+  /** Label for the initiative column ("Strike Rank" for RQ, "Initiative" for others). */
+  getInitiativeLabel(): string;
+
+  /** SR cost for moving N meters this round. Returns 0 for systems without SR movement cost. */
+  getMovementInitiativeCost(meters: number): number;
+
+  /** SR penalty when surprised at a given distance. Returns 0 for systems without SR. */
+  getSurpriseInitiativePenalty(distanceMeters: number): number;
+
+  // ── Hit Locations ─────────────────────────────────────────────────────────
+
+  /** d20 roll → hit location name. Null for systems without hit locations. */
+  getHitLocationRollTable(): Record<number, string> | null;
+
+  /** Location name → wound effect. Null for systems without hit location effects. */
+  getLocationEffects(): Record<string, { label: string; fatal: boolean }> | null;
+
+  /** Ordered list of hit location names for the character sheet grid. Empty for systems without locations. */
+  getHitLocationsDisplayOrder(): string[];
+
+  // ── Characteristic Combat Bonuses ─────────────────────────────────────────
+
+  /**
+   * Characteristic-based bonuses to attack, parry, and dodge skill rolls.
+   * Returns { attack: 0, parry: 0, dodge: 0 } for systems that don't use this.
+   */
+  getAttackBonuses(stats: CharacterStats): { attack: number; parry: number; dodge: number };
+
+  /** Percentage penalty applied to each repeat parry against the same attacker. 0 for systems without this rule. */
+  getParryRepeatPenalty(): number;
+
+  // ─────────────────────────────────────────────────────────────────────────
+
   /** Identifier for the magic system used by this game system. */
   getMagicSystemType(): string;
 

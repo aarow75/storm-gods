@@ -38,7 +38,7 @@
               <a [routerLink]="gameSystemService.link('create')" [queryParams]="{ id: character.id }" class="btn btn-secondary btn-small">
                 View Details
               </a>
-              <button class="btn btn-remove btn-small" (click)="removeCharacter(character.id, $event)">
+              <button class="btn btn-danger btn-small" (click)="removeCharacter(character.id, $event)">
                 Remove
               </button>
             </div>

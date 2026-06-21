@@ -101,7 +101,7 @@
                 <div class="history-item">
                   <div class="history-item-header">
                     <span class="history-date">{{ log.date }}</span>
-                    <button class="btn-remove-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
+                    <button class="btn-icon-remove btn-small" (click)="deleteLogEntry(log.timestamp)">&times;</button>
                   </div>
                   <div class="history-entries">
                     @for (entry of log.entries; track entry) {
@@ -169,7 +169,7 @@
                       (click)="toggleCollapseParticipant(participant.id)">
                 {{ isParticipantCollapsed(participant.id) ? '▼' : '▲' }}
               </button>
-              <button class="btn-remove" (click)="removeParticipant(participant.id)">&times;</button>
+              <button class="btn-icon-remove" (click)="removeParticipant(participant.id)">&times;</button>
             </div>
           </div>
 
@@ -185,12 +185,12 @@
                   </strong>
                 </div>
                 <div class="collapsed-stat">
-                  <span class="stat-label">SR:</span>
+                  <span class="stat-label">{{ rules.getInitiativeLabel() }}:</span>
                   <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
                     {{ getDisplaySR(participant) }}
                   </strong>
                 </div>
-                @if (participant.movementThisRound !== undefined && participant.movementThisRound > 0) {
+                @if (rules.usesStrikeRank() && participant.movementThisRound !== undefined && participant.movementThisRound > 0) {
                   <div class="collapsed-stat">
                     <span class="stat-label">Mov:</span>
                     <span>{{ participant.movementThisRound }}m (+{{ getMovementSRCost(participant) }} SR)</span>
@@ -221,44 +221,47 @@
             <div class="participant-and-hit-locations">
             <div class="participant-details">
               <div class="detail-group">
-                <label>Strike Rank: <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
+                <label>{{ rules.getInitiativeLabel() }}: <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
                   {{ getDisplaySR(participant) }}
                 </strong></label>
-                <span class="sr-breakdown">
-                  Base: {{ participant.baseStrikeRank }}
-                  @if (participant.selectedWeapon) { + Wpn {{ participant.finalStrikeRank - participant.baseStrikeRank }} }
-                  @if (getMovementSRCost(participant) > 0) { + Move {{ getMovementSRCost(participant) }} }
-                  @if (getSurpriseDistancePenalty(participant) > 0) { + Surprised ({{ getOpponentDistanceDisplay(participant) }}m) {{ getSurpriseDistancePenalty(participant) }} }
-                </span>
+                @if (rules.usesStrikeRank()) {
+                  <span class="sr-breakdown">
+                    Base: {{ participant.baseStrikeRank }}
+                    @if (participant.selectedWeapon) { + Wpn {{ participant.finalStrikeRank - participant.baseStrikeRank }} }
+                    @if (getMovementSRCost(participant) > 0) { + Move {{ getMovementSRCost(participant) }} }
+                    @if (getSurpriseDistancePenalty(participant) > 0) { + Surprised ({{ getOpponentDistanceDisplay(participant) }}m) {{ getSurpriseDistancePenalty(participant) }} }
+                  </span>
+                }
               </div>
 
               <div class="detail-group">
                 <label>Armor: <strong [attr.title]="getArmorTooltip(participant)">{{ getArmorDisplay(participant) }}</strong></label>
               </div>
 
-              <div class="detail-group movement-row">
-                <label>Move:
-                  <input type="number" [(ngModel)]="participant.movementThisRound"
-                         (ngModelChange)="updateMovement(participant)"
-                         min="0" step="1" class="movement-input">
-                  <span class="sr-cost-badge" [class.has-cost]="getMovementSRCost(participant) > 0">
-                    m  (+{{ getMovementSRCost(participant) }} SR)
-                  </span>
-                </label>
-              </div>
+              @if (rules.usesStrikeRank()) {
+                <div class="detail-group movement-row">
+                  <label>Move:
+                    <input type="number" [(ngModel)]="participant.movementThisRound"
+                           (ngModelChange)="updateMovement(participant)"
+                           min="0" step="1" class="movement-input">
+                    <span class="sr-cost-badge" [class.has-cost]="getMovementSRCost(participant) > 0">
+                      m  (+{{ getMovementSRCost(participant) }} SR)
+                    </span>
+                  </label>
+                </div>
 
-
-              <div class="detail-group surprise-row">
-                <label class="surprise-label">
-                  <input type="checkbox" [checked]="participant.isSurprised"
-                         (change)="toggleSurprise(participant)">
-                  Surprised
-                  @if (participant.isSurprised) {
-                    <span class="surprise-badge">+{{ getSurpriseDistancePenalty(participant) }} SR</span>
-                    <span class="distance-info">({{ getOpponentDistanceDisplay(participant) }}m)</span>
-                  }
-                </label>
-              </div>
+                <div class="detail-group surprise-row">
+                  <label class="surprise-label">
+                    <input type="checkbox" [checked]="participant.isSurprised"
+                           (change)="toggleSurprise(participant)">
+                    Surprised
+                    @if (participant.isSurprised) {
+                      <span class="surprise-badge">+{{ getSurpriseDistancePenalty(participant) }} SR</span>
+                      <span class="distance-info">({{ getOpponentDistanceDisplay(participant) }}m)</span>
+                    }
+                  </label>
+                </div>
+              }
 
               <div class="detail-group">
                 <label for="opponent-{{ participant.id }}">Target:</label>
@@ -428,10 +431,7 @@
           </span>
           @if (getTotalAttackBonus(pendingAttack.attacker) > 0) {
             <span class="attack-bonus-chip">
-              +{{ getAttackerStrBonus(pendingAttack.attacker) }} STR
-              +{{ getAttackerIntBonus(pendingAttack.attacker) }} INT
-              +{{ getAttackerPowBonus(pendingAttack.attacker) }} POW
-              +{{ getAttackerDexBonus(pendingAttack.attacker) }} DEX
+              +{{ getTotalAttackBonus(pendingAttack.attacker) }} bonus
             </span>
           }
         </div>
@@ -485,40 +485,35 @@
             <button class="btn btn-dodge defense-btn" (click)="resolveDodge()">
               <span class="defense-btn-title">Dodge</span>
               <span class="defense-btn-sub">
-                ({{ getEffectiveDodgeSkill(pendingAttack.defender) + getDefenderDexBonus(pendingAttack.defender) + getDefenderIntBonus(pendingAttack.defender) }}%)
+                ({{ getEffectiveDodgeSkill(pendingAttack.defender) + getDodgeBonus(pendingAttack.defender) }}%)
               </span>
             </button>
 
           </div>
 
-          <div class="defense-stat-breakdown">
-            @if (pendingAttack.attacker.type === 'character') {
-              <div class="breakdown-section">
-                <span class="breakdown-label">Attack bonus ({{ pendingAttack.attacker.name }}):</span>
-                <span>STR +{{ getAttackerStrBonus(pendingAttack.attacker) }}%</span>
-                <span>INT +{{ getAttackerIntBonus(pendingAttack.attacker) }}%</span>
-                <span>POW +{{ getAttackerPowBonus(pendingAttack.attacker) }}%</span>
-                <span>DEX +{{ getAttackerDexBonus(pendingAttack.attacker) }}%</span>
-              </div>
-            }
-            @if (pendingAttack.defender.type === 'character') {
-              <div class="breakdown-section">
-                <span class="breakdown-label">Parry bonus ({{ pendingAttack.defender.name }}):</span>
-                <span>STR +{{ getDefenderStrBonus(pendingAttack.defender) }}%</span>
-                <span>SIZ +{{ getDefenderSizBonus(pendingAttack.defender) }}%</span>
-                <span>POW +{{ getDefenderPowBonus(pendingAttack.defender) }}%</span>
-                <span>DEX +{{ getDefenderDexBonus(pendingAttack.defender) }}%</span>
-                @if (getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) > 0) {
-                  <span class="penalty-text">-{{ getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}% repeat</span>
-                }
-              </div>
-              <div class="breakdown-section">
-                <span class="breakdown-label">Dodge bonus:</span>
-                <span>DEX +{{ getDefenderDexBonus(pendingAttack.defender) }}%</span>
-                <span>INT +{{ getDefenderIntBonus(pendingAttack.defender) }}%</span>
-              </div>
-            }
-          </div>
+          @if (rules.usesStrikeRank()) {
+            <div class="defense-stat-breakdown">
+              @if (pendingAttack.attacker.type === 'character' && getTotalAttackBonus(pendingAttack.attacker) !== 0) {
+                <div class="breakdown-section">
+                  <span class="breakdown-label">Attack bonus ({{ pendingAttack.attacker.name }}):</span>
+                  <span>+{{ getTotalAttackBonus(pendingAttack.attacker) }}%</span>
+                </div>
+              }
+              @if (pendingAttack.defender.type === 'character') {
+                <div class="breakdown-section">
+                  <span class="breakdown-label">Parry bonus ({{ pendingAttack.defender.name }}):</span>
+                  <span>+{{ getTotalParryBonus(pendingAttack.defender) }}%</span>
+                  @if (getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) > 0) {
+                    <span class="penalty-text">-{{ getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}% repeat</span>
+                  }
+                </div>
+                <div class="breakdown-section">
+                  <span class="breakdown-label">Dodge bonus:</span>
+                  <span>+{{ getDodgeBonus(pendingAttack.defender) }}%</span>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
     </div>

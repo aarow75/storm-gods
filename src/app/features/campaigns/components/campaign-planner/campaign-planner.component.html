@@ -1,9 +1,11 @@
 <div class="campaigns-container">
   <div class="campaigns-header">
     <h2>Campaigns</h2>
+    @if (campaigns.length > 0) {
     <button class="btn btn-primary btn-create-campaign" (click)="openCreateModal()">
       + New Campaign
     </button>
+    }
   </div>
 
   @if (campaigns.length === 0) {
@@ -45,7 +47,7 @@
             <a [routerLink]="gameSystemService.link('campaigns', campaign.id)" class="btn btn-secondary">
               View Details
             </a>
-            <button class="btn btn-remove" (click)="deleteCampaign(campaign.id, $event)">
+            <button class="btn btn-danger" (click)="deleteCampaign(campaign.id, $event)">
               Delete
             </button>
           </div>

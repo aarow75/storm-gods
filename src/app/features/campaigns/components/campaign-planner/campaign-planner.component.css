@@ -164,7 +164,7 @@
   font-size: var(--font-size-lg);
 }
 
-.campaign-actions .btn-remove {
+.campaign-actions .btn-danger {
   flex: 0.5;
 }
 

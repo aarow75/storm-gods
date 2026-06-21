@@ -240,4 +240,16 @@ export class KalArathRules implements GameSystemRules {
   getCurrencyLabel(): string {
     return 'S';
   }
+
+  usesStrikeRank(): boolean { return false; }
+  getInitiativeLabel(): string { return 'Initiative'; }
+  getMovementInitiativeCost(_meters: number): number { return 0; }
+  getSurpriseInitiativePenalty(_distanceMeters: number): number { return 0; }
+  getHitLocationRollTable(): null { return null; }
+  getLocationEffects(): null { return null; }
+  getHitLocationsDisplayOrder(): string[] { return []; }
+  getAttackBonuses(_stats: CharacterStats): { attack: number; parry: number; dodge: number } {
+    return { attack: 0, parry: 0, dodge: 0 };
+  }
+  getParryRepeatPenalty(): number { return 0; }
 }

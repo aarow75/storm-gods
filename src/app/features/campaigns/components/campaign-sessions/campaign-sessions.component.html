@@ -16,7 +16,7 @@
           <div class="session-header">
             <div class="session-number">Session {{ session.sessionNumber }}</div>
             <div class="session-date">{{ formatDate(session.date) }}</div>
-            <button class="btn btn-remove btn-small" (click)="deleteSession(session.id, $event)">Delete</button>
+            <button class="btn btn-danger btn-small" (click)="deleteSession(session.id, $event)">Delete</button>
           </div>
 
           <div class="session-content">

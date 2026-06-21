@@ -1,5 +1,5 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
-import { WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield } from '@shared/rules/game-rules';
+import { WeaponDefinition, ShieldDefinition, Weapon, Shield } from '@shared/rules/game-rules';
 import { DerivedStats, EquipmentItem, WEAPON_SKILLS } from '@characters/models/character.model';
 import { DB_SKILLS, DB_MAGIC_SKILLS, DB_SKILL_BY_ATTR, DB_SKILL_CATEGORIES } from '@characters/constants/skill-categories.constants';
 import {
@@ -327,4 +327,16 @@ export class DragonbaneRules implements GameSystemRules {
   getCurrencyLabel(): string {
     return 'GC';
   }
+
+  usesStrikeRank(): boolean { return false; }
+  getInitiativeLabel(): string { return 'Initiative'; }
+  getMovementInitiativeCost(_meters: number): number { return 0; }
+  getSurpriseInitiativePenalty(_distanceMeters: number): number { return 0; }
+  getHitLocationRollTable(): null { return null; }
+  getLocationEffects(): null { return null; }
+  getHitLocationsDisplayOrder(): string[] { return []; }
+  getAttackBonuses(_stats: CharacterStats): { attack: number; parry: number; dodge: number } {
+    return { attack: 0, parry: 0, dodge: 0 };
+  }
+  getParryRepeatPenalty(): number { return 0; }
 }

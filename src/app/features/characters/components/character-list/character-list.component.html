@@ -2,10 +2,12 @@
   @if (heading) {
   <div class="character-list-header">
     <h2>{{ heading }}</h2>
+    @if (characters.length > 0) {
     <a [routerLink]="gameSystemService.link('create')" class="btn-create-character">
       <span class="icon">➕</span>
       Create New Character
     </a>
+    }
   </div>
   }
 
@@ -158,8 +160,8 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn-edit" (click)="onEdit(character.id)">Edit</button>
-        <button class="btn btn-delete" (click)="deleteCharacter(character.id)">Delete</button>
+        <button class="btn btn-secondary" (click)="onEdit(character.id)">Edit</button>
+        <button class="btn btn-danger" (click)="deleteCharacter(character.id)">Delete</button>
       </div>
     </div>
     }

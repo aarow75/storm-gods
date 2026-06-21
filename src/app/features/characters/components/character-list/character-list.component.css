@@ -1,3 +1,5 @@
+@import '../../../../shared/styles/shared-form-styles.css';
+
 .character-list {
   padding: var(--spacing-5xl);
 }
@@ -303,24 +305,6 @@ h2 {
   cursor: pointer;
   font-size: var(--font-size-lg);
   transition: background-color 0.3s;
-}
-
-.btn-edit {
-  background-color: var(--color-primary-orange);
-  color: var(--color-bg-white);
-}
-
-.btn-edit:hover {
-  background-color: var(--color-primary-orange-dark);
-}
-
-.btn-delete {
-  background-color: var(--color-error);
-  color: var(--color-bg-white);
-}
-
-.btn-delete:hover {
-  background-color: var(--color-error-dark);
 }
 
 .skills-preview {

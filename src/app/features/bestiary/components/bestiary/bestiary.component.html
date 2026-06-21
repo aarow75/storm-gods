@@ -177,7 +177,7 @@
           <!-- Description (Expandable) -->
           <div class="description-container">
             <button
-              class="expand-btn"
+              class="btn-collapse"
               (click)="toggleExpanded(monster.id)"
               [class.expanded]="expandedMonsterId() === monster.id">
               {{ expandedMonsterId() === monster.id ? '▼' : '▶' }}

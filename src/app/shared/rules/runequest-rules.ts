@@ -150,6 +150,143 @@ export class RuneQuestRules implements GameSystemRules {
     return CONDITIONS;
   }
 
+  usesStrikeRank(): boolean {
+    return true;
+  }
+
+  getInitiativeLabel(): string {
+    return 'Strike Rank';
+  }
+
+  getMovementInitiativeCost(meters: number): number {
+    if (!meters || meters <= 0) return 0;
+    return Math.ceil(meters / 3);
+  }
+
+  getSurpriseInitiativePenalty(distanceMeters: number): number {
+    if (distanceMeters <= 3) return 3;
+    return 1;
+  }
+
+  getHitLocationRollTable(): Record<number, string> {
+    return {
+      1: 'Right Leg', 2: 'Right Leg', 3: 'Right Leg', 4: 'Right Leg',
+      5: 'Left Leg',  6: 'Left Leg',  7: 'Left Leg',  8: 'Left Leg',
+      9: 'Abdomen',  10: 'Abdomen',  11: 'Abdomen',
+      12: 'Chest',
+      13: 'Right Arm', 14: 'Right Arm', 15: 'Right Arm',
+      16: 'Left Arm',  17: 'Left Arm',  18: 'Left Arm',
+      19: 'Head', 20: 'Head',
+    };
+  }
+
+  getLocationEffects(): Record<string, { label: string; fatal: boolean }> {
+    return {
+      'Head':      { label: 'Instant Death', fatal: true  },
+      'Chest':     { label: 'Incapacitated', fatal: false },
+      'Abdomen':   { label: 'Incapacitated', fatal: false },
+      'Right Arm': { label: 'Arm Useless',   fatal: false },
+      'Left Arm':  { label: 'Arm Useless',   fatal: false },
+      'Right Leg': { label: 'Leg Useless',   fatal: false },
+      'Left Leg':  { label: 'Leg Useless',   fatal: false },
+    };
+  }
+
+  getHitLocationsDisplayOrder(): string[] {
+    return ['Head', 'Right Arm (Weapon)', 'Chest', 'Left Arm (Shield)', 'Abdomen', 'Right Leg', 'Left Leg'];
+  }
+
+  getAttackBonuses(stats: CharacterStats): { attack: number; parry: number; dodge: number } {
+    const str = stats.STR ?? 10;
+    const siz = stats.SIZ ?? 10;
+    const dex = stats.DEX ?? 10;
+    const int = stats.INT ?? 10;
+    const pow = stats.POW ?? 10;
+
+    const attackStr = this.atkStr(str);
+    const attackInt = this.atkInt(int);
+    const attackPow = this.atkPow(pow);
+    const attackDex = this.atkDex(dex);
+
+    const parryStr = this.parStr(str);
+    const parrySiz = this.parSiz(siz);
+    const parryPow = this.parPow(pow);
+    const parryDex = this.parDex(dex);
+
+    return {
+      attack: attackStr + attackInt + attackPow + attackDex,
+      parry:  parryStr + parrySiz + parryPow + parryDex,
+      dodge:  parryDex + attackInt,
+    };
+  }
+
+  getParryRepeatPenalty(): number {
+    return 20;
+  }
+
+  private atkStr(str: number): number {
+    if (str <= 8)  return -5;
+    if (str <= 12) return 0;
+    if (str <= 16) return 5;
+    if (str <= 20) return 10;
+    return 10 + Math.floor((str - 20) / 4) * 5;
+  }
+
+  private atkInt(int: number): number {
+    if (int <= 4)  return 0;
+    if (int <= 8)  return -10;
+    if (int <= 12) return -5;
+    if (int <= 16) return 5;
+    if (int <= 20) return 10;
+    return 10 + Math.floor((int - 20) / 4) * 5;
+  }
+
+  private atkPow(pow: number): number {
+    if (pow <= 12) return 0;
+    if (pow <= 20) return 5;
+    return 5 + Math.floor((pow - 20) / 4) * 5;
+  }
+
+  private atkDex(dex: number): number {
+    if (dex <= 4)  return -10;
+    if (dex <= 8)  return -5;
+    if (dex <= 12) return 0;
+    if (dex <= 16) return 5;
+    if (dex <= 20) return 10;
+    return 10 + Math.floor((dex - 20) / 4) * 5;
+  }
+
+  private parStr(str: number): number {
+    if (str <= 4)  return -5;
+    if (str <= 12) return 0;
+    if (str <= 16) return 5;
+    if (str <= 20) return 5;
+    return 5 + Math.floor((str - 20) / 4) * 5;
+  }
+
+  private parSiz(siz: number): number {
+    if (siz <= 4)  return 5;
+    if (siz <= 16) return 0;
+    if (siz <= 20) return -5;
+    return -5 - Math.floor((siz - 20) / 4) * 5;
+  }
+
+  private parPow(pow: number): number {
+    if (pow <= 4)  return -5;
+    if (pow <= 12) return 0;
+    if (pow <= 20) return 5;
+    return 5 + Math.floor((pow - 20) / 4) * 5;
+  }
+
+  private parDex(dex: number): number {
+    if (dex <= 4)  return -10;
+    if (dex <= 8)  return -5;
+    if (dex <= 12) return 0;
+    if (dex <= 16) return 5;
+    if (dex <= 20) return 10;
+    return 10 + Math.floor((dex - 20) / 4) * 5;
+  }
+
   getMagicSystemType(): string {
     return 'runequest';
   }

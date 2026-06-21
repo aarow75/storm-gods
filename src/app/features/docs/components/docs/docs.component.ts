@@ -22,17 +22,27 @@ interface CustomDocument {
 const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   runequest: [
     { filename: 'RuneQuest-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' },
-    { filename: 'Dragonbane-vs-RuneQuest-Comparison.md', name: 'Dragonbane vs RuneQuest', icon: '⚖️' }
+    { filename: 'Dragonbane-vs-RuneQuest-Comparison.md', name: 'Dragonbane vs RuneQuest', icon: '⚖️' },
+    { filename: 'Kal-Arath-vs-RuneQuest-Comparison.md', name: 'Kal-Arath vs RuneQuest', icon: '⚖️' },
+    { filename: 'OSRIC-vs-RuneQuest-Comparison.md', name: 'OSRIC vs RuneQuest', icon: '⚖️' },
   ],
   dragonbane: [
     { filename: 'Dragonbane-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' },
-    { filename: 'Dragonbane-vs-RuneQuest-Comparison.md', name: 'Dragonbane vs RuneQuest', icon: '⚖️' }
+    { filename: 'Dragonbane-vs-RuneQuest-Comparison.md', name: 'Dragonbane vs RuneQuest', icon: '⚖️' },
+    { filename: 'Kal-Arath-vs-Dragonbane-Comparison.md', name: 'Kal-Arath vs Dragonbane', icon: '⚖️' },
+    { filename: 'OSRIC-vs-Dragonbane-Comparison.md', name: 'OSRIC vs Dragonbane', icon: '⚖️' },
   ],
   'kal-arath': [
-    { filename: 'Kal-Arath-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' }
+    { filename: 'Kal-Arath-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' },
+    { filename: 'Kal-Arath-vs-RuneQuest-Comparison.md', name: 'Kal-Arath vs RuneQuest', icon: '⚖️' },
+    { filename: 'Kal-Arath-vs-Dragonbane-Comparison.md', name: 'Kal-Arath vs Dragonbane', icon: '⚖️' },
+    { filename: 'Kal-Arath-vs-OSRIC-Comparison.md', name: 'Kal-Arath vs OSRIC', icon: '⚖️' },
   ],
   osric: [
-    { filename: 'OSRIC-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' }
+    { filename: 'OSRIC-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' },
+    { filename: 'OSRIC-vs-RuneQuest-Comparison.md', name: 'OSRIC vs RuneQuest', icon: '⚖️' },
+    { filename: 'OSRIC-vs-Dragonbane-Comparison.md', name: 'OSRIC vs Dragonbane', icon: '⚖️' },
+    { filename: 'Kal-Arath-vs-OSRIC-Comparison.md', name: 'Kal-Arath vs OSRIC', icon: '⚖️' },
   ]
 };
 

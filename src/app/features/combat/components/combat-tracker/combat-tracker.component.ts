@@ -14,30 +14,9 @@ import { CombatLogService } from '@combat/services/combat-log.service';
 import { DiceService } from '@shared/services/dice.service';
 import { CharacterUpdateService } from '@characters/services/character-update.service';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { CharacterStats } from '@shared/models/character-stats.model';
 import { parseDamageWithConditions } from '@combat/utils/damage-parser';
 
-// d20 → hit location (RuneQuest standard table)
-const HIT_LOCATION_TABLE: { [roll: number]: string } = {
-  1: 'Right Leg', 2: 'Right Leg', 3: 'Right Leg', 4: 'Right Leg',
-  5: 'Left Leg',  6: 'Left Leg',  7: 'Left Leg',  8: 'Left Leg',
-  9: 'Abdomen',  10: 'Abdomen',  11: 'Abdomen',
-  12: 'Chest',
-  13: 'Right Arm', 14: 'Right Arm', 15: 'Right Arm',
-  16: 'Left Arm',  17: 'Left Arm',  18: 'Left Arm',
-  19: 'Head', 20: 'Head',
-};
-
-const LOCATION_EFFECTS: { [location: string]: { label: string; fatal: boolean } } = {
-  'Head':      { label: 'Instant Death', fatal: true  },
-  'Chest':     { label: 'Incapacitated', fatal: false },
-  'Abdomen':   { label: 'Incapacitated', fatal: false },
-  'Right Arm': { label: 'Arm Useless',   fatal: false },
-  'Left Arm':  { label: 'Arm Useless',   fatal: false },
-  'Right Leg': { label: 'Leg Useless',   fatal: false },
-  'Left Leg':  { label: 'Leg Useless',   fatal: false },
-};
-
-const HIT_LOCATIONS_ORDER = ['Head', 'Right Arm (Weapon)', 'Chest', 'Left Arm (Shield)', 'Abdomen', 'Right Leg', 'Left Leg'];
 
 interface PendingAttack {
   attacker: CombatParticipant;
@@ -93,7 +72,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   // ── Participant Collapse State ─────────────────────────────────────────────────
   collapsedParticipants = new Set<string>();
 
-  readonly hitLocationsOrder = HIT_LOCATIONS_ORDER;
+  get rules() { return this.gameSystemService.getRules(); }
+  get hitLocationsOrder() { return this.rules.getHitLocationsDisplayOrder(); }
 
   private saveTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly SAVE_DELAY_MS = 300;
@@ -161,10 +141,16 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   loadData(): void {
-    this.characters = this.characterService.getCharacters();
-    this.defaultMonsters = structuredClone(DEFAULT_MONSTERS);
-    this.bestiaryMonsters = BESTIARY_MONSTERS.map(m => this.convertBestiaryMonster(m));
-    this.customMonsters = this.customMonsterService.getMonsters().map(m => this.convertBestiaryMonster(m));
+    const system = this.gameSystemService.gameSystem();
+    this.characters = this.characterService.getCharacters()
+      .filter(c => (c.gameSystem ?? 'runequest') === system);
+    this.defaultMonsters = system === 'runequest' ? structuredClone(DEFAULT_MONSTERS) : [];
+    this.bestiaryMonsters = BESTIARY_MONSTERS
+      .filter(m => m.gameSystem === system)
+      .map(m => this.convertBestiaryMonster(m));
+    this.customMonsters = this.customMonsterService.getMonsters()
+      .filter(m => m.gameSystem === system)
+      .map(m => this.convertBestiaryMonster(m));
     const savedCombatMonsters = this.combatService.getMonsters();
     this.monsters = [
       ...this.defaultMonsters,
@@ -239,7 +225,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       if (!character) return;
 
       const baseStrikeRank = character.derivedStats.strikeRank;
-      const finalStrikeRank = this.combatService.calculateFinalStrikeRank(baseStrikeRank, this.selectedWeapon);
+      const finalStrikeRank = this.combatService.calculateFinalInitiative(baseStrikeRank, this.selectedWeapon);
       const maxHP = character.derivedStats.maxHitPoints || character.derivedStats.totalHitPoints;
       const currentHP = character.derivedStats.totalHitPoints;
       const damageTaken = Math.max(0, maxHP - currentHP);
@@ -315,7 +301,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   onWeaponChange(participant: CombatParticipant): void {
     if (participant.type === 'character') {
-      participant.finalStrikeRank = this.combatService.calculateFinalStrikeRank(
+      participant.finalStrikeRank = this.combatService.calculateFinalInitiative(
         participant.baseStrikeRank, participant.selectedWeapon
       );
     } else {
@@ -408,7 +394,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   rollLocation(): { roll: number; location: string } {
     const roll = Math.floor(Math.random() * 20) + 1;
-    return { roll, location: HIT_LOCATION_TABLE[roll] };
+    return { roll, location: this.rules.getHitLocationRollTable()![roll] };
   }
 
   getLocationMaxHP(participant: CombatParticipant, location: string): number {
@@ -429,17 +415,20 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     return Math.max(0, this.getLocationMaxHP(participant, location) - this.getLocationDamage(participant, location));
   }
 
-  isLocationMaxed(participant: CombatParticipant, location: string): boolean {
+  isLocationMaxed(participant: CombatParticipant, location: string | undefined): boolean {
+    if (!location) return false;
     return this.getLocationDamage(participant, location) >= this.getLocationMaxHP(participant, location)
       && this.getLocationMaxHP(participant, location) > 0;
   }
 
-  getLocationEffectLabel(location: string): string {
-    return LOCATION_EFFECTS[location]?.label ?? '';
+  getLocationEffectLabel(location: string | undefined): string {
+    if (!location) return '';
+    return this.rules.getLocationEffects()?.[location]?.label ?? '';
   }
 
-  isLocationFatal(location: string): boolean {
-    return LOCATION_EFFECTS[location]?.fatal ?? false;
+  isLocationFatal(location: string | undefined): boolean {
+    if (!location) return false;
+    return this.rules.getLocationEffects()?.[location]?.fatal ?? false;
   }
 
   getLocationStatusClass(participant: CombatParticipant, location: string): string {
@@ -447,7 +436,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     if (!maxed) {
       return this.getLocationDamage(participant, location) > 0 ? 'loc-damaged' : 'loc-healthy';
     }
-    return LOCATION_EFFECTS[location]?.fatal ? 'loc-fatal' : 'loc-useless';
+    return this.rules.getLocationEffects()?.[location]?.fatal ? 'loc-fatal' : 'loc-useless';
   }
 
   getLocationShortName(location: string): string {
@@ -698,17 +687,9 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
     if (attackRoll > attackSkill) {
       // Miss — log and stop; no defence roll needed
-      const strB = this.getAttackerStrBonus(participant);
-      const intB = this.getAttackerIntBonus(participant);
-      const powB = this.getAttackerPowBonus(participant);
-      const dexB = this.getAttackerDexBonus(participant);
-      const baseSkill = attackSkill - strB - intB - powB - dexB;
-      const bonusParts = [
-        strB > 0 ? `+${strB} STR` : '',
-        intB > 0 ? `+${intB} INT` : '',
-        powB > 0 ? `+${powB} POW` : '',
-        dexB > 0 ? `+${dexB} DEX` : '',
-      ].filter(Boolean).join(' ');
+      const totalBonus = this.getTotalAttackBonus(participant);
+      const baseSkill = attackSkill - totalBonus;
+      const bonusParts = totalBonus > 0 ? `+${totalBonus} bonus` : '';
       this.combatLogService.addEntry(
         `[MISS] ${participant.name} → ${opponent.name}: attack failed! ` +
         `(rolled ${attackRoll} vs ${attackSkill}%` +
@@ -826,29 +807,21 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     }
 
     const baseParrySkill = this.getEffectiveParrySkill(defender);
-    const strB = this.getDefenderStrBonus(defender);
-    const sizB = this.getDefenderSizBonus(defender);
-    const powB = this.getDefenderPowBonus(defender);
-    const dexB = this.getDefenderDexBonus(defender);
-    const charBonus = strB + sizB + powB + dexB;
+    const charBonus = this.getTotalParryBonus(defender);
     const penalty = this.getParryPenalty(defender, attacker.id);
     const effectiveSkill = Math.max(5, baseParrySkill + charBonus - penalty);
     const roll = Math.floor(Math.random() * 100) + 1;
     const success = roll <= effectiveSkill;
 
-    // Track this parry attempt so subsequent ones get the -20% penalty
+    // Track this parry attempt so subsequent ones get the repeat-parry penalty
     if (!defender.parriesAgainst) defender.parriesAgainst = {};
     defender.parriesAgainst[attacker.id] = (defender.parriesAgainst[attacker.id] ?? 0) + 1;
 
     const weaponHP = this.getParryWeaponCurrentHP(defender);
     const armor = this.getArmorValue(defender, hitLocation);
 
-    // Build human-readable label for the log
     const bonusParts = [
-      strB > 0 ? `+${strB} STR` : '',
-      sizB > 0 ? `+${sizB} SIZ` : '',
-      powB > 0 ? `+${powB} POW` : '',
-      dexB > 0 ? `+${dexB} DEX` : '',
+      charBonus > 0 ? `+${charBonus}` : '',
       penalty > 0 ? `-${penalty} rpt` : '',
     ].filter(Boolean).join(' ');
     const skillLabel = bonusParts
@@ -914,16 +887,14 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const locationInfo = hitLocation ? ` (d20:${locationRoll} = ${hitLocation})` : '';
 
     const dodgeSkill = this.getEffectiveDodgeSkill(defender);
-    const dexBonus = this.getDefenderDexBonus(defender);
-    const intBonus = this.getDefenderIntBonus(defender);
+    const dodgeBonus = this.getDodgeBonus(defender);
     const encPenalty = this.getEncPenalty(defender);
-    const effectiveSkill = Math.max(5, dodgeSkill + dexBonus + intBonus - encPenalty);
+    const effectiveSkill = Math.max(5, dodgeSkill + dodgeBonus - encPenalty);
     const roll = Math.floor(Math.random() * 100) + 1;
     const success = roll <= effectiveSkill;
 
     const bonusParts = [
-      dexBonus > 0 ? `+${dexBonus} DEX` : '',
-      intBonus > 0 ? `+${intBonus} INT` : '',
+      dodgeBonus > 0 ? `+${dodgeBonus}` : '',
       encPenalty > 0 ? `-${encPenalty} ENC` : ''
     ].filter(Boolean).join(' ');
     const skillLabel = bonusParts
@@ -988,8 +959,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const locMax = this.getLocationMaxHP(defender, location);
       if (locMax > 0 && defender.locationDamage[location] >= locMax && prevDmg < locMax) {
         locationMaxed = true;
-        locationEffect = LOCATION_EFFECTS[location]?.label ?? '';
-        locationFatal = LOCATION_EFFECTS[location]?.fatal ?? false;
+        locationEffect = this.rules.getLocationEffects()?.[location]?.label ?? '';
+        locationFatal = this.rules.getLocationEffects()?.[location]?.fatal ?? false;
       }
     }
 
@@ -1046,45 +1017,28 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     return 0;
   }
 
-  getDefenderDexBonus(participant: CombatParticipant): number {
-    if (participant.type === 'character') {
-      const character = this.characters.find(c => c.id === participant.characterId);
-      return this.getParryDexBonus(character?.stats.DEX ?? 10);
-    }
-    return 0;
-  }
-
-  // ── Attacker characteristic bonuses (STR, INT, POW, DEX) ─────────────────
-
-  getAttackerStrBonus(participant: CombatParticipant): number {
-    if (participant.type !== 'character') return 0;
-    const char = this.characters.find(c => c.id === participant.characterId);
-    return this.getAttackStrBonus(char?.stats.STR ?? 10);
-  }
-
-  getAttackerIntBonus(participant: CombatParticipant): number {
-    if (participant.type !== 'character') return 0;
-    const char = this.characters.find(c => c.id === participant.characterId);
-    return this.getAttackIntBonus(char?.stats.INT ?? 10);
-  }
-
-  getAttackerPowBonus(participant: CombatParticipant): number {
-    if (participant.type !== 'character') return 0;
-    const char = this.characters.find(c => c.id === participant.characterId);
-    return this.getAttackPowBonus(char?.stats.POW ?? 10);
-  }
-
-  getAttackerDexBonus(participant: CombatParticipant): number {
-    if (participant.type !== 'character') return 0;
-    const char = this.characters.find(c => c.id === participant.characterId);
-    return this.getAttackDexBonus(char?.stats.DEX ?? 10);
+  private getParticipantStats(participant: CombatParticipant): CharacterStats | null {
+    if (participant.type !== 'character') return null;
+    return this.characters.find(c => c.id === participant.characterId)?.stats ?? null;
   }
 
   getTotalAttackBonus(participant: CombatParticipant): number {
-    return this.getAttackerStrBonus(participant)
-         + this.getAttackerIntBonus(participant)
-         + this.getAttackerPowBonus(participant)
-         + this.getAttackerDexBonus(participant);
+    const stats = this.getParticipantStats(participant);
+    return stats ? this.rules.getAttackBonuses(stats).attack : 0;
+  }
+
+  getTotalParryBonus(participant: CombatParticipant): number {
+    const stats = this.getParticipantStats(participant);
+    return stats ? this.rules.getAttackBonuses(stats).parry : 0;
+  }
+
+  getDodgeBonus(participant: CombatParticipant): number {
+    const stats = this.getParticipantStats(participant);
+    return stats ? this.rules.getAttackBonuses(stats).dodge : 0;
+  }
+
+  getParryPenalty(defender: CombatParticipant, attackerId: string): number {
+    return (defender.parriesAgainst?.[attackerId] ?? 0) * this.rules.getParryRepeatPenalty();
   }
 
   getEffectiveAttackSkill(participant: CombatParticipant): number {
@@ -1112,45 +1066,6 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const monster = this.monsters.find(m => m.id === participant.monsterId);
       return (monster?.weapons || []).filter(w => this.canWeaponParry(w.name)).map(w => w.name);
     }
-  }
-
-  // ── Defender parry characteristic bonuses (STR, SIZ, POW, DEX) ───────────
-
-  getDefenderStrBonus(participant: CombatParticipant): number {
-    if (participant.type !== 'character') return 0;
-    const char = this.characters.find(c => c.id === participant.characterId);
-    return this.getParryStrBonus(char?.stats.STR ?? 10);
-  }
-
-  getDefenderSizBonus(participant: CombatParticipant): number {
-    if (participant.type !== 'character') return 0;
-    const char = this.characters.find(c => c.id === participant.characterId);
-    return this.getParrySizBonus(char?.stats.SIZ ?? 10);
-  }
-
-  getDefenderPowBonus(participant: CombatParticipant): number {
-    if (participant.type !== 'character') return 0;
-    const char = this.characters.find(c => c.id === participant.characterId);
-    return this.getParryPowBonus(char?.stats.POW ?? 10);
-  }
-
-  getTotalParryBonus(participant: CombatParticipant): number {
-    return this.getDefenderStrBonus(participant)
-         + this.getDefenderSizBonus(participant)
-         + this.getDefenderPowBonus(participant)
-         + this.getDefenderDexBonus(participant);
-  }
-
-  getParryPenalty(defender: CombatParticipant, attackerId: string): number {
-    return (defender.parriesAgainst?.[attackerId] ?? 0) * 20;
-  }
-
-  getDefenderIntBonus(participant: CombatParticipant): number {
-    if (participant.type === 'character') {
-      const character = this.characters.find(c => c.id === participant.characterId);
-      return this.getAttackIntBonus(character?.stats.INT ?? 10);
-    }
-    return 0;
   }
 
   getParryWeaponCurrentHP(participant: CombatParticipant): number {
@@ -1503,73 +1418,4 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     return '';
   }
 
-  // ── Characteristic Bonus Lookup Tables ───────────────────────────────────
-
-  private getAttackStrBonus(str: number): number {
-    if (str <= 4) return -5;
-    if (str <= 8) return -5;
-    if (str <= 12) return 0;
-    if (str <= 16) return 5;
-    if (str <= 20) return 10;
-    return 10 + Math.floor((str - 20) / 4) * 5;
-  }
-
-  private getAttackIntBonus(int: number): number {
-    if (int <= 4) return 0;
-    if (int <= 8) return -10;
-    if (int <= 12) return -5;
-    if (int <= 16) return 5;
-    if (int <= 20) return 10;
-    return 10 + Math.floor((int - 20) / 4) * 5;
-  }
-
-  private getAttackPowBonus(pow: number): number {
-    if (pow <= 12) return 0;
-    if (pow <= 16) return 5;
-    if (pow <= 20) return 5;
-    return 5 + Math.floor((pow - 20) / 4) * 5;
-  }
-
-  private getAttackDexBonus(dex: number): number {
-    if (dex <= 4) return -10;
-    if (dex <= 8) return -5;
-    if (dex <= 12) return 0;
-    if (dex <= 16) return 5;
-    if (dex <= 20) return 10;
-    return 10 + Math.floor((dex - 20) / 4) * 5;
-  }
-
-  private getParryStrBonus(str: number): number {
-    if (str <= 4) return -5;
-    if (str <= 8) return 0;
-    if (str <= 12) return 0;
-    if (str <= 16) return 5;
-    if (str <= 20) return 5;
-    return 5 + Math.floor((str - 20) / 4) * 5;
-  }
-
-  private getParrySizBonus(siz: number): number {
-    if (siz <= 4) return 5;
-    if (siz <= 12) return 0;
-    if (siz <= 16) return 0;
-    if (siz <= 20) return -5;
-    return -5 - Math.floor((siz - 20) / 4) * 5;
-  }
-
-  private getParryPowBonus(pow: number): number {
-    if (pow <= 4) return -5;
-    if (pow <= 12) return 0;
-    if (pow <= 16) return 5;
-    if (pow <= 20) return 5;
-    return 5 + Math.floor((pow - 20) / 4) * 5;
-  }
-
-  private getParryDexBonus(dex: number): number {
-    if (dex <= 4) return -10;
-    if (dex <= 8) return -5;
-    if (dex <= 12) return 0;
-    if (dex <= 16) return 5;
-    if (dex <= 20) return 10;
-    return 10 + Math.floor((dex - 20) / 4) * 5;
-  }
 }
