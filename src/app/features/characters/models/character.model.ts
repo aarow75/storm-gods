@@ -424,7 +424,7 @@ export function calculateTotalArmor(armorType?: string, shields: Shield[] = []):
   };
 }
 
-function getConHPModifier(con: number): number {
+export function getConHPModifier(con: number): number {
   if (con <= 4)  return -2;
   if (con <= 6)  return -1;
   if (con <= 12) return 0;
@@ -433,7 +433,7 @@ function getConHPModifier(con: number): number {
   return 3;
 }
 
-function getPowHPModifier(pow: number): number {
+export function getPowHPModifier(pow: number): number {
   if (pow <= 8)  return -1;
   if (pow <= 12) return 0;
   return 1;
@@ -455,8 +455,8 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
     damageBonus = `+${extraD6}d6`;
   }
 
-  // Spirit Combat Damage (RQ2: POW value used directly, not rolled)
-  const spiritCombatDamage = stats.POW.toString();
+  // RQ2 spirit combat damage is 1D6 per round for winner; POW affects Spirit Combat skill (POW×3%), not damage
+  const spiritCombatDamage = '1d6';
 
   // Strike Rank: base 0 + SIZ modifier + DEX modifier
   let strikeRank = getSizeModifier(stats.SIZ) + getDexterityModifier(stats.DEX);
@@ -480,7 +480,7 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
     magicPoints: stats.POW,
     damageBonus: damageBonus,
     spiritCombatDamage: spiritCombatDamage,
-    healingRate: Math.ceil(stats.CON / 4),
+    healingRate: Math.ceil(stats.CON / 4), // RQG-style (CON/4); RQ2 Classic uses flat 1 HP/week
     movementRate: movementRate,
     strikeRank: strikeRank,
     maxEncumbrance: maxEncumbrance,

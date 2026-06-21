@@ -165,6 +165,8 @@ export class KalArathRules implements GameSystemRules {
     }, 0);
     const totalENC = equipmentENC + weaponsENC;
     const overENC = Math.max(0, totalENC - maxEncumbrance);
+    // Reference: at double max, character cannot move at all
+    const movementRate = totalENC >= maxEncumbrance * 2 ? 0 : 6;
 
     return {
       totalHitPoints: maxHitPoints,
@@ -174,7 +176,7 @@ export class KalArathRules implements GameSystemRules {
       spiritCombatDamage: '0',
       // End-of-battle healing: 1+TOU (min 1); full rest: d6+TOU
       healingRate: Math.max(1, 1 + tou),
-      movementRate: 6,
+      movementRate,
       strikeRank: 0,
       maxEncumbrance,
       totalEncumbrance: totalENC,

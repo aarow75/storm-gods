@@ -9,6 +9,7 @@ import {
   calculateDerivedStats as rqCalculateDerivedStats,
   calculateSkillCategoryModifiers as rqCalculateSkillCategoryModifiers,
   applySkillBonuses as rqApplySkillBonuses,
+  getConHPModifier, getPowHPModifier,
   DEFAULT_SKILLS, COMBAT_SKILLS,
   OCCUPATION_SKILL_BONUSES, HOMELAND_SKILL_BONUSES, CULT_SKILL_BONUSES
 } from '@characters/models/character.model';
@@ -100,7 +101,8 @@ export class RuneQuestRules implements GameSystemRules {
   }
 
   calculateHitLocations(stats: CharacterStats): HitLocations {
-    return rqCalculateHitLocations(stats.CON, stats.SIZ);
+    const totalHP = Math.max(1, stats.SIZ + getConHPModifier(stats.CON) + getPowHPModifier(stats.POW));
+    return rqCalculateHitLocations(totalHP);
   }
 
   getSkillDefinitions(): SkillDefinition[] {

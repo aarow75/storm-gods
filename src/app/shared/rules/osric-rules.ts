@@ -36,61 +36,60 @@ export const OSRIC_ARMOR_TYPES: ArmorTypeDefinition[] = [
 
 // DEX-to-AC modifier table (subtract from AC; high DEX improves AC)
 function getDexAcModifier(dex: number): number {
-  if (dex >= 18) return 4;
-  if (dex >= 16) return 3;
-  if (dex >= 14) return 2;
-  if (dex >= 12) return 1;
-  if (dex >= 9)  return 0;
-  if (dex >= 7)  return -1;
-  if (dex >= 5)  return -2;
-  if (dex >= 3)  return -3;
-  return -4;
+  if (dex >= 18) return 4;   // AC −4 (better)
+  if (dex >= 17) return 3;   // AC −3
+  if (dex >= 16) return 2;   // AC −2
+  if (dex >= 15) return 1;   // AC −1
+  if (dex >= 8)  return 0;   // no change (DEX 8–14)
+  if (dex >= 6)  return -1;  // AC +1 (DEX 6–7)
+  if (dex >= 5)  return -2;  // AC +2
+  if (dex >= 4)  return -3;  // AC +3
+  return -4;                  // AC +4 (DEX 3)
 }
 
 // DEX reaction/attack adjustment for missile weapons (add to attack roll)
 function getDexMissileModifier(dex: number): number {
-  if (dex >= 18) return 4;
-  if (dex >= 15) return 3;
-  if (dex >= 12) return 2;
-  if (dex >= 9)  return 1;
-  if (dex >= 6)  return 0;
-  if (dex >= 4)  return -1;
-  return -2;
+  if (dex >= 18) return 3;
+  if (dex >= 17) return 2;
+  if (dex >= 16) return 1;
+  if (dex >= 6)  return 0;   // DEX 6–15: no modifier
+  if (dex >= 5)  return -1;
+  if (dex >= 4)  return -2;
+  return -3;
 }
 
-// STR-based max carrying capacity in lbs
+// STR-based max carrying capacity in lbs (base 150 + STR weight adjustment)
 function getStrMaxEncumbrance(str: number): number {
-  if (str >= 18) return 150;
-  if (str >= 17) return 135;
-  if (str >= 16) return 120;
-  if (str >= 14) return 105;
-  if (str >= 12) return 85;
-  if (str >= 10) return 70;
-  if (str >= 8)  return 60;
-  if (str >= 6)  return 45;
-  if (str >= 4)  return 35;
-  return 25;
+  if (str >= 18) return 225;  // +75 lbs
+  if (str >= 17) return 200;  // +50 lbs
+  if (str >= 16) return 185;  // +35 lbs
+  if (str >= 14) return 170;  // +20 lbs
+  if (str >= 12) return 160;  // +10 lbs
+  if (str >= 8)  return 150;  // no adjustment (STR 8–11)
+  if (str >= 6)  return 135;  // −15 lbs
+  if (str >= 4)  return 125;  // −25 lbs
+  return 115;                  // −35 lbs (STR 3)
 }
 
-// STR-to-hit/damage bonus table as a display string
+// STR-to-hit/damage bonus string (hit/damage format)
 function getStrBonus(str: number): string {
-  if (str >= 18) return '+2/+3';
-  if (str >= 17) return '+1/+2';
-  if (str >= 16) return '+1/+1';
-  if (str >= 13) return '+0/+0';
-  if (str >= 9)  return '+0/+0';
-  if (str >= 7)  return '+0/-1';
-  if (str >= 5)  return '-1/-1';
-  if (str >= 3)  return '-2/-2';
-  return '-3/-3';
+  if (str >= 18) return '+1/+2';
+  if (str >= 17) return '+1/+1';
+  if (str >= 16) return '+0/+1';
+  if (str >= 8)  return '+0/+0';
+  if (str >= 6)  return '-1/+0';
+  if (str >= 4)  return '-2/-1';
+  return '-3/-1';
 }
 
-// CON-to-HP modifier per hit die
+// CON-to-HP modifier per hit die (fighter values used for CON 17+)
 function getConHpModifier(con: number): number {
   if (con >= 19) return 5;
+  if (con >= 18) return 4;
   if (con >= 17) return 3;
+  if (con >= 16) return 2;
   if (con >= 15) return 1;
-  if (con >= 7)  return 0;
+  if (con >= 8)  return 0;
   if (con >= 4)  return -1;
   return -2;
 }
@@ -467,14 +466,16 @@ export class OsricRules implements GameSystemRules {
     }, 0);
     const totalENC = equipmentENC + weaponsENC + shieldENC;
 
-    // Movement thresholds scale as quarters of max encumbrance
-    const t1 = Math.round(maxEncumbrance * 0.25);
-    const t2 = Math.round(maxEncumbrance * 0.5);
-    const t3 = Math.round(maxEncumbrance * 0.75);
-    let movementRate = 12;
-    if (totalENC > t3)      movementRate = 3;
-    else if (totalENC > t2) movementRate = 6;
-    else if (totalENC > t1) movementRate = 9;
+    // Effective weight for tier lookup: subtract STR bonus from carried weight
+    const strAdj = maxEncumbrance - 150;
+    const effectiveENC = totalENC - strAdj;
+    // Fixed movement tiers per OSRIC encumbrance table (lbs → ft/round)
+    let movementRate: number;
+    if (effectiveENC > 150)      movementRate = 0;
+    else if (effectiveENC > 105) movementRate = 3;
+    else if (effectiveENC > 70)  movementRate = 6;
+    else if (effectiveENC > 35)  movementRate = 9;
+    else                         movementRate = 12;
 
     // STR bonus string (hit/damage) and DEX missile attack adjustment
     const strBonus = getStrBonus(str);
@@ -547,7 +548,7 @@ export class OsricRules implements GameSystemRules {
   }
 
   getMagicSystemType(): string {
-    return 'dragonbane';
+    return 'osric';
   }
 
   getCurrencyLabel(): string {

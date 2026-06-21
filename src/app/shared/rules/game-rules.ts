@@ -140,8 +140,7 @@ const HIT_LOCATION_TABLE: Array<{ maxHP: number; head: number; arm: number; abdo
   { maxHP: 21, head: 7, arm: 5, abdomen: 7, chest: 8, leg: 8 },
 ];
 
-export function calculateHitLocations(con: number, siz: number): HitLocations {
-  const totalHP = Math.ceil((con + siz) / 2);
+export function calculateHitLocations(totalHP: number): HitLocations {
   const row = HIT_LOCATION_TABLE.find(r => totalHP <= r.maxHP) ?? HIT_LOCATION_TABLE[HIT_LOCATION_TABLE.length - 1];
   return {
     'Right Leg': row.leg,

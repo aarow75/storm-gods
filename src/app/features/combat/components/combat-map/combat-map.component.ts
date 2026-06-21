@@ -729,7 +729,7 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
       const character = this.characterService.getCharacter(participant.characterId!);
       return character?.hitLocations[location as keyof typeof character.hitLocations] ?? 0;
     }
-    const locs = calculateHitLocations(participant.maxHitPoints, participant.maxHitPoints);
+    const locs = calculateHitLocations(participant.maxHitPoints);
     return locs[location] ?? 0;
   }
 

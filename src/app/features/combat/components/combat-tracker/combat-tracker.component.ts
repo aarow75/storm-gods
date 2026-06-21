@@ -417,7 +417,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       return character?.hitLocations[location] ?? 0;
     }
     // Monsters: derive from total HP using the standard RQ ratios
-    const locs = calculateHitLocations(participant.maxHitPoints, participant.maxHitPoints);
+    const locs = calculateHitLocations(participant.maxHitPoints);
     return locs[location] ?? 0;
   }
 
