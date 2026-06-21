@@ -89,11 +89,11 @@ export class CharacterListComponent implements OnInit, OnDestroy {
   }
 
   showStrikeRank(character: Character): boolean {
-    return character.gameSystem !== 'dragonbane' && character.gameSystem !== 'kal-arath';
+    return character.gameSystem !== 'dragonbane' && character.gameSystem !== 'kal-arath' && character.gameSystem !== 'osric';
   }
 
   showMagicPoints(character: Character): boolean {
-    return character.gameSystem !== 'kal-arath';
+    return character.gameSystem !== 'kal-arath' && character.gameSystem !== 'osric';
   }
 
   magicPointsLabel(character: Character): string {
@@ -101,7 +101,7 @@ export class CharacterListComponent implements OnInit, OnDestroy {
   }
 
   showDamageBonus(character: Character): boolean {
-    return character.gameSystem !== 'kal-arath';
+    return character.gameSystem !== 'kal-arath' && character.gameSystem !== 'osric';
   }
 
   showHealingRate(character: Character): boolean {

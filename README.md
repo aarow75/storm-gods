@@ -1,6 +1,6 @@
 # Runequest Character Manager
 
-A comprehensive Angular application for creating and managing Runequest and Dragonbane RPG characters with complete character sheet functionality, combat tracking, dice rolling, and localStorage persistence.
+A comprehensive Angular application for creating and managing RPG characters across multiple game systems — RuneQuest, Dragonbane, Kal-Arath, and OSRIC — with complete character sheet functionality, combat tracking, dice rolling, bestiary, wilderness maps, campaign management, and localStorage persistence.
 
 ![Angular](https://img.shields.io/badge/Angular-21.2.7-red)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
@@ -10,58 +10,65 @@ A comprehensive Angular application for creating and managing Runequest and Drag
 
 ### Complete Character Sheet Management
 - **Full CRUD Operations**: Create, Read, Update, Delete characters
-- **30 Skills** organized in 8 categories (Combat, Magic, Knowledge, Communication, etc.)
-- **7 Characteristics**: STR, CON, SIZ, DEX, INT, POW, CHA with 3d6 dice rollers
-- **Derived Stats**: Auto-calculated HP, Magic Points, Damage Bonus, Strike Rank, Healing Rate
-- **Hit Locations**: Individual HP tracking for 7 body locations
-- **Armor System**: Armor points per location with quick-apply feature
-- **26 Weapons**: Pre-defined weapons with auto-fill damage and skill association
-- **Runes System**: Elemental, Power, and Form Runes (17 total)
-- **Passions**: Dynamic passion tracking with percentage values
-- **Magic System**: Spirit Magic, Rune Magic, and Sorcery spell management
-- **Resources**: Currency (Lunars/Wheels/Clacks), Reputation, Ransom
+- **System-specific Stats**: Each game system defines its own visible stats and labels
+  - RuneQuest / Dragonbane: STR, CON, SIZ, DEX, INT, POW, CHA (3–18 range)
+  - Kal-Arath: STR, TOU, AGI, INT, PRE as signed modifiers (−1 to +5)
+  - OSRIC: STR, CON, DEX, INT, WIS, CHA (3–18 range; SIZ hidden)
+- **Derived Stats**: Auto-calculated HP, Magic Points, Damage Bonus, Strike Rank, Healing Rate (system-specific formulas)
+- **Hit Locations**: Individual HP tracking for 7 body locations (RuneQuest/Dragonbane); single HP pool for OSRIC and Kal-Arath
+- **Armor System**: Per-location armor points (RuneQuest); armor-as-damage-reduction (Kal-Arath); descending AC with DEX modifier (OSRIC)
+- **Weapon Lists**: Pre-defined weapons per system (26 RuneQuest weapons; Kal-Arath advantage/disadvantage dice d6/a, d6, d6/d; OSRIC melee and missile)
+- **Skills**: System-specific skill lists organized into categories, with background-driven starting bonuses
+- **Runes System**: Elemental, Power, and Form Runes (RuneQuest)
+- **Passions**: Dynamic passion tracking with percentage values (RuneQuest/Dragonbane)
+- **Magic Systems**:
+  - RuneQuest: Spirit Magic, Rune Magic, and Sorcery
+  - Kal-Arath: Pact magic with 6 pacts (Blood, Destruction, Domination, Illumination, Shadow, …) and 5 tiers each
+  - OSRIC: Class-based spellcasting (Cleric, Druid, Illusionist, Magic User, Paladin, Ranger)
+  - Dragonbane: System-native magic
+- **Classes & Races (OSRIC)**: 9 classes (Fighter, Cleric, Thief, Magic User, Paladin, Ranger, Druid, Illusionist, Assassin) × 7 races with class abilities and hit-die tables
+- **Resources**: System-appropriate currency (Lunars/Wheels/Clacks for RuneQuest; Gold Coins for OSRIC, etc.)
 - **Equipment**: Dynamic equipment list
-- **Character Background**: Cult, Occupation, Homeland, Age, Gender
+- **Character Background**: System-specific cults/classes, occupations/professions, homelands/origins, age, gender
 - **Notes**: Large text area for character backstory
+- **Migration System**: Backward-compatible data migrations run on every load
 
 ### Dice Rolling Utility
 - **8 Dice Types**: d4, d6, d8, d10, d12, d20, 3d6, d% (percentile)
 - **Advanced Dice Features**: Boons and Banes with dual d20 rolling
 - **Animated Results**: Large display with roll animations
 - **Roll History**: Track last 10 rolls with clear function
-- **Color-coded Buttons**: Gradient-styled dice buttons
 - **Contextual Display**: Accessible on character/combat pages, hidden on reference pages
 
 ### Combat Tracking
 - **Combat Tracker**: Full combat encounter management with initiative, damage, and hit location tracking
 - **Initiative System**: Automatic strike rank calculation for all combatants
 - **Damage Resolution**: Hit location-specific damage tracking with armor mitigation
-- **Movement Tracking**: Movement phase management during combat
 - **NPC/Monster Support**: Add custom monsters to combat encounters
 
 ### Reference & Database
-- **Rules Reference**: Complete rules database with game system-specific content (includes melee round phases)
-- **Publications**: Browse all RuneQuest 2 (1978-1983) and modern RuneQuest: Roleplaying in Glorantha (2014-Present) publications with Chaosium catalog numbers and publication years
-- **Bestiary**: Pre-populated monster database with creature stats and abilities (searchable and filterable by game system)
+- **Rules Reference**: Game system-specific rules content
+- **Publications**: Browse publications across all supported systems:
+  - RuneQuest 2 (1978–1983) and modern RuneQuest: Roleplaying in Glorantha (2014–Present) with Chaosium catalog numbers
+  - OSRIC retroclone releases and TSR-era modules
+  - Dragonbane publications
+- **Bestiary**: Pre-populated monster database filterable by game system (RuneQuest, Dragonbane, OSRIC)
 - **Monster Creator**: Create and save custom monsters with full stat blocks
-- **Game System Filtering**: Filter creatures and rules by RuneQuest or Dragonbane system
+- **GM Screen**: Quick-reference tables
 
 ### Settings & Customization
-- **Game System Toggle**: Switch between RuneQuest and Dragonbane with system-specific rules and labels
-- **Text Size Adjustment**: Scalable UI with three text size options (decrease, reset, increase)
-- **Multi-Language Support**: English and Swedish localization with dynamic switching
-- **Settings Page**: Dedicated settings interface accessible from header gear icon
+- **Game System Toggle**: Switch between RuneQuest, Dragonbane, Kal-Arath, and OSRIC — each with system-specific rules, stats, labels, and UI
+- **Text Size Adjustment**: Scalable UI with three text size options
+- **Multi-Language Support**: English and Swedish localization
+- **Data Export/Import**: Export and import all character and campaign data
 
 ### User Experience
 - **localStorage Persistence**: All data saved locally in JSON format
-- **Character Color Coding**: Unique colors for character cards for easy visual identification
+- **Character Color Coding**: Unique colors for character cards
 - **Edit Mode**: Visual indicators with orange borders and character name banner
 - **Auto-calculations**: Derived stats and hit points calculated from characteristics
-- **Responsive Design**: Multi-column layouts (5-10 columns) with compact inputs on desktop, optimized for mobile
-- **Space-Optimized**: Numeric fields only 45-70px wide for efficiency
-- **Migration System**: Backward compatibility for data schema changes
-- **Form Validation**: Required fields and numeric range enforcement
-- **Optimized Navigation**: Context-sensitive page structure (Create Character on Characters page, Monster Creator on Bestiary page)
+- **Responsive Design**: Multi-column layouts optimized for desktop and mobile
+- **Migration System**: Schema migrations run automatically on load for backward compatibility
 
 ## Quick Start
 
@@ -97,12 +104,27 @@ src/app/
 │   └── settings/        # settings component
 └── shared/
     ├── services/        # game-system, dice, ui-state, export  (used by all features)
-    ├── models/          # CharacterSummary (lightweight cross-feature interface)
+    ├── models/          # CharacterStats, GameSystem type, combat-participant
+    ├── rules/           # GameSystemRules interface + factory + per-system implementations
+    │                    #   (runequest-rules, dragonbane-rules, kal-arath-rules, osric-rules)
     ├── constants/       # equipment constants
     └── styles/          # variables.css, shared-form-styles.css, docs-common.css
 ```
 
 All routes use `loadComponent()` lazy loading — each feature loads as a separate JS chunk. TypeScript path aliases (`@characters/*`, `@combat/*`, `@shared/*`, etc.) keep cross-feature imports clean. See [CLAUDE.md](CLAUDE.md) for full architecture details.
+
+### Game System Rules Architecture
+
+Each supported system implements the `GameSystemRules` interface (`shared/rules/game-system-rules.interface.ts`), which covers stat definitions, derived stat calculations, hit location logic, skill lists and categories, weapon/shield/armor lists, conditions, magic system type, and (for OSRIC) race/class ability tables and hit-die data. A factory (`game-system-rules.factory.ts`) returns the correct implementation based on the active `GameSystem` value.
+
+## Supported Game Systems
+
+| System | Stats | HP Model | Magic | Notes |
+|---|---|---|---|---|
+| **RuneQuest** | STR CON SIZ DEX INT POW CHA | Per location | Spirit / Rune / Sorcery | Glorantha cults and lore |
+| **Dragonbane** | Same fields, Dragonbane ranges | Per location | Dragonbane magic | Swedish RPG variant |
+| **Kal-Arath** | STR TOU AGI INT PRE (signed modifiers) | Single pool | Pact tiers (6 pacts × 5 tiers) | Custom indie system |
+| **OSRIC** | STR CON DEX INT WIS CHA | Single pool, class HD | Class-based spells | Old-school D&D retroclone, descending AC |
 
 ## Navigation Guide
 
@@ -112,46 +134,28 @@ The main navigation provides quick access to core features:
 - **Bestiary** — Browse creatures, create custom monsters (button in header)
 - **Combat Tracker** — Manage active combat encounters and initiative
 - **Wilderness Map** — Tactical hex-grid map for combat and exploration with token placement and pathfinding
-- **Rules Reference** — Look up game rules and mechanics including melee round phases
-- **Publications** — Browse RuneQuest publications by Chaosium catalog number across RQ2 and modern eras
-- **⚙️ Settings** — Configure game system, text size, and language
+- **Rules Reference** — Look up game rules and mechanics
+- **Publications** — Browse publications by system (RuneQuest, OSRIC, Dragonbane)
+- **⚙️ Settings** — Configure game system, text size, language, and data export/import
 
-The Dice Roller is available on character management and combat pages for quick dice rolls. It's hidden on reference pages (Bestiary, Rules Reference, Publications, Settings, Wilderness Map) to reduce visual clutter.
+The Dice Roller is available on character management and combat pages. It's hidden on reference pages (Bestiary, Rules Reference, Publications, Settings, Wilderness Map) to reduce visual clutter.
 
 ## Usage
 
 ### Creating a Character
-1. Enter character name
-2. Fill in background (cult, occupation, homeland, age, gender)
-3. Roll characteristics using 3d6 buttons or enter manually
+1. Select a game system from Settings (or via the URL prefix)
+2. Enter character name and fill in background (system-specific cult/class, occupation, homeland)
+3. Roll or enter stats (system-specific stat labels and ranges)
 4. Click "Calculate from Stats" to auto-generate derived attributes and hit points
-5. Adjust skills as needed (30 skills organized by category)
-6. Add weapons from dropdown list (26 pre-defined weapons)
-7. Set armor values per location
-8. Configure runes (Elemental, Power, Form)
-9. Add passions, magic spells, equipment, and notes
-10. Click "Create Character" to save
+5. Add weapons, armor, skills, magic, equipment, and notes
+6. Click "Create Character" to save
 
-### Using the Dice Roller
-- Click any dice button (d4, d6, d8, d10, d12, d20, 3d6, d%)
-- View large animated result display
-- Add Boons (advantages) or Banes (disadvantages) to reroll dice
-- See roll history (last 10 rolls)
-- Use for skill checks, damage rolls, etc.
-
-### Editing Characters
-- Click "Edit" button on any character card
-- Form highlights with orange border showing edit mode
-- Modify any fields
-- Click "Update Character" to save changes
-
-### Combat Encounters
+### Using the Combat Tracker
 1. Go to Combat Tracker
 2. Add characters or monsters to the encounter
-3. Initiative automatically calculated based on Strike Rank
-4. Apply damage to specific hit locations
-5. Track unconsciousness and death states
-6. Use dice roller for attack and damage rolls
+3. Initiative automatically calculated based on Strike Rank (or equivalent)
+4. Apply damage to specific hit locations (or total HP for OSRIC/Kal-Arath)
+5. Track conditions, unconsciousness, and death states
 
 ### Using the Wilderness Map
 1. Go to Wilderness Map page
@@ -161,29 +165,25 @@ The Dice Roller is available on character management and combat pages for quick 
    - **Custom Tokens**: Create custom tokens with names and colors
    - **Delete Tokens**: Click the × button next to any token to remove it individually
    - **Pathfinding**: Hover over hexes while a token is selected to see movement cost and path
-4. Switch between Terrain and Background Image modes for different map views
-5. Manage multiple maps: Create, load, and delete custom maps
+4. Switch between Terrain and Background Image modes
+5. Manage multiple maps: Create, load, and delete saved maps
 6. Scale maps with miles or kilometer units per hex
 
 ### Using the Bestiary & Monster Creator
-- **Bestiary**: Search and filter monsters by game system (RuneQuest/Dragonbane)
+- **Bestiary**: Search and filter monsters by game system (RuneQuest / Dragonbane / OSRIC)
 - **Monster Creator**: Create custom creatures with full stat blocks and save them
-- Filter by system to see only relevant creatures
 
 ### Browsing Publications
-- Go to Publications page
-- View all RuneQuest publications organized by era:
-  - **RuneQuest 2 (1978-1983)**: Classic editions and supplements
-  - **Modern RuneQuest: Roleplaying in Glorantha (2014-Present)**: Current edition releases
-- Sort by Chaosium catalog number (CHA####)
-- See publication year and descriptions for each title
-- View summary statistics at the bottom
+- Go to Publications page and select a system
+- **RuneQuest**: 22 RuneQuest 2 classics (CHA4001–CHA4023) + 25 modern RuneQuest: Roleplaying in Glorantha releases
+- **OSRIC**: Core rules, supplements, and TSR-era adventures
+- **Dragonbane**: Official Dragonbane releases
 
 ### Customizing Settings
-- Click ⚙️ gear icon in the top-right header
-- **Game System**: Toggle between RuneQuest (orange) and Dragonbane (green)
+- **Game System**: Toggle between RuneQuest, Dragonbane, Kal-Arath, and OSRIC
 - **Text Size**: Adjust UI text size with −/Reset/+ buttons
 - **Language**: Switch between English and Swedish
+- **Data**: Export or import all saved data (characters, campaigns, monsters, maps)
 
 ## Game System Accuracy
 
@@ -197,131 +197,69 @@ The Dice Roller is available on character management and combat pages for quick 
 - ✅ Three magic systems (Spirit Magic, Rune Magic, Sorcery)
 - ✅ Rune affinities system (Elemental, Power, Form runes)
 - ✅ Encumbrance and movement penalties
-- ✅ Parry and dodge mechanics
 - ✅ Hit location-specific armor application
 
 ### Dragonbane Support
-- ✅ Alternate characteristic names and ranges
 - ✅ Dragonbane-specific professions and beliefs
-- ✅ System-agnostic combat calculations with Dragonbane variants
 - ✅ Creature database with Dragonbane-specific monsters
 - ✅ Dynamic UI labels based on game system selection
-- ✅ Full character creation for both systems
+
+### Kal-Arath Support
+- ✅ 5 stats as signed modifiers (−1 to +5): STR, TOU, AGI, INT, PRE
+- ✅ 4 class archetypes: Warrior, Rogue, Mystic, Explorer
+- ✅ Pact magic: 6 pacts with 5 tiers each
+- ✅ Advantage/disadvantage weapon dice (d6/d, d6, d6/a)
+- ✅ Armor as damage reduction (Light 1 / Medium 2 / Heavy 3)
+- ✅ System-specific conditions (Broken, Shattered, Fatigued, Silenced, etc.)
+
+### OSRIC Support
+- ✅ 6 ability scores (STR, CON, DEX, INT, WIS, CHA; SIZ hidden)
+- ✅ 9 classes with class abilities and hit-die tables (Fighter d10, Cleric d8, Thief d6, Magic User d4, etc.)
+- ✅ 7 races with racial abilities (Dwarf, Elf, Gnome, Half-Elf, Halfling, Half-Orc, Human)
+- ✅ Descending AC with DEX modifier (base 10 unarmored, lower = better)
+- ✅ Class-based spellcasting tracked per character
+- ✅ OSRIC publications browser (core rules, supplements, adventures)
+- ✅ OSRIC monsters in bestiary
 
 ## Data Storage
 
-Characters are stored in browser localStorage with the key `runequest-characters`. Data is automatically migrated when schema changes occur, ensuring backward compatibility.
+All data is stored in browser localStorage and automatically migrated on load when schema changes occur.
 
-### Data Format
-```json
-{
-  "id": "unique-id",
-  "name": "Character Name",
-  "background": { "cult": "Orlanth", "occupation": "Warrior", ... },
-  "stats": { "STR": 15, "CON": 12, ... },
-  "derivedStats": { "totalHitPoints": 13, "damageBonus": "+1d4", ... },
-  "skills": { "Sword & Shield": 45, "Dodge": 35, ... },
-  "hitLocations": { "Head": 4, "Chest": 5, ... },
-  "armor": { "Head": 3, "Chest": 6, ... },
-  "weapons": [{ "name": "Broadsword", "damage": "1d8+1", "skill": "Sword & Shield" }],
-  "runes": { "elemental": {...}, "power": {...}, "form": {...} },
-  "passions": [{ "name": "Love (Family)", "value": 60 }],
-  "magic": { "spiritMagic": [...], "runeMagic": [...], "sorcery": [...] },
-  "resources": { "lunars": 100, "wheels": 50, ... },
-  "equipment": ["Backpack", "Rope", ...],
-  "notes": "Character backstory..."
-}
+| Key | Feature |
+|---|---|
+| `runequest-characters` | CharacterService |
+| `gameSystem` | GameSystemService |
+| `runequest-combat`, `runequest-monsters`, `runequest-combat-log-history`, `runequest-combat-map`, `runequest-combat-map-templates` | CombatService |
+| `runequest-wilderness-map` | WildernessMapService |
+| `combat-log` | CombatLogService |
+| `runequest-ui-state` | UIStateService |
+| `custom-monsters` | CustomMonsterService |
+| `rq-campaigns-index`, `rq-campaign-*` | CampaignService |
+
+## Development
+
+```bash
+npm start          # Dev server on http://localhost:4202
+npm run build      # Production build to dist/
+npm test           # Vitest unit tests
+npm run android    # Sync Capacitor and open Android Studio
 ```
+
+### Adding a New Game System
+
+1. Create `src/app/shared/rules/<system>-rules.ts` implementing `GameSystemRules`
+2. Register it in `game-system-rules.factory.ts`
+3. Add the system key to `GameSystem` type in `game-system.model.ts`
+4. Extend `GameSystemService` with system-specific cults/occupations/homelands and labels
+5. Add publications constants under `features/docs/constants/` if applicable
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.7.
-
-## Development server
-
-To start a local development server, run:
-
-```bash
-npm start
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4202/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component under its feature folder, run:
-
-```bash
-ng generate component features/<feature>/components/<component-name>
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-
-## Recent Updates (Session 2026-04-28)
-
-### New Features
-- **Wilderness Map Enhancements**: Added individual token deletion functionality. Each token now displays a delete button (×) that removes only that token, rather than requiring deletion of all tokens at once.
-- **Publications Browser**: New Publications page displaying all 47 RuneQuest publications:
-  - 22 RuneQuest 2 publications (CHA4001-CHA4023, 1978-1983)
-  - 25 Modern RuneQuest: Roleplaying in Glorantha publications (CHA4025-CHA4060, 2014-Present)
-  - Sortable by Chaosium catalog number with publication years and descriptions
-  - Statistics showing publication counts by era
-  - Added navigation link with 📚 library icon
-
-### Rules Reference Updates
-- **Melee Round Phases**: New comprehensive section detailing all 6 phases of combat:
-  1. Declare Actions & Modifiers
-  2. Calculate Strike Ranks
-  3. Act by Strike Rank
-  4. Resolve Attacks & Defenses
-  5. Apply Conditions
-  6. Round End & Reset
-  - Includes key points about simultaneous action at same Strike Rank
-
-### UI/UX Improvements
-- Dice roller now hidden on Publications page (consistent with other reference pages)
-- Updated navigation guide to reflect new Publications feature
-- Improved component organization with modular token management
 
 ## Future Features
 
 ### High Priority
-- [ ] Parry restrictions based on arm injuries (if left arm useless, can't parry with shield; if right arm useless, must drop shield)
 - [ ] Enhanced Dragonbane-specific rules and mechanics
+- [ ] Parry restrictions based on arm injuries
 - [ ] Character import/export functionality
 
 ### Medium Priority
@@ -334,4 +272,3 @@ For more information on using the Angular CLI, including detailed command refere
 - [ ] Cloud synchronization (optional account system)
 - [ ] Character sheet PDF export
 - [ ] Multi-player character management
-- [ ] Campaign/world management features

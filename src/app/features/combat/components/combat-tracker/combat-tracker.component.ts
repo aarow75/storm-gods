@@ -44,8 +44,8 @@ interface PendingAttack {
   defender: CombatParticipant;
   rawDamage: number;
   damageBreakdown: string;
-  hitLocation: string;
-  locationRoll: number;
+  hitLocation: string | undefined;
+  locationRoll: number | undefined;
   attackRoll: number;         // d100 roll made
   attackSkill: number;        // effective skill rolled against
 }
@@ -726,7 +726,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     }
 
     const result = this.diceService.rollDiceNotation(damage);
-    const { roll, location } = this.rollLocation();
+    const usesLocations = this.gameSystemService.getRules().usesHitLocations();
+    const { roll, location } = usesLocations ? this.rollLocation() : { roll: undefined, location: undefined };
 
     this.pendingAttack = {
       attacker: participant,
@@ -747,12 +748,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   resolveNoDefense(): void {
     if (!this.pendingAttack) return;
     const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
+    const locationInfo = hitLocation ? ` (d20:${locationRoll} = ${hitLocation})` : '';
 
     const armor = this.getArmorValue(defender, hitLocation);
     const finalDamage = Math.max(0, rawDamage - armor);
 
     this.combatLogService.addEntry(
-      `[ATTACK] ${attacker.name} → ${defender.name} (d20:${locationRoll} = ${hitLocation}): ${rawDamage} (${damageBreakdown}) - ${armor} armor = ${finalDamage} damage`
+      `[ATTACK] ${attacker.name} → ${defender.name}${locationInfo}: ${rawDamage} (${damageBreakdown}) - ${armor} armor = ${finalDamage} damage`
     );
 
     const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
@@ -812,6 +814,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   resolveParry(): void {
     if (!this.pendingAttack) return;
     const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
+    const locationInfo = hitLocation ? ` → ${hitLocation} (d20:${locationRoll})` : '';
 
     if (!this.isValidParryItem(defender)) {
       this.combatLogService.addEntry(
@@ -856,7 +859,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const excessDamage = Math.max(0, rawDamage - weaponHP);
       const finalDamage = Math.max(0, excessDamage - armor);
 
-      let logEntry = `[PARRY] ${defender.name} parries! (rolled ${roll} vs ${skillLabel}) → ${hitLocation} (d20:${locationRoll})`;
+      let logEntry = `[PARRY] ${defender.name} parries! (rolled ${roll} vs ${skillLabel})${locationInfo}`;
       if (excessDamage > 0) {
         logEntry += ` — ${defender.selectedParryItem} absorbs ${weaponHP}, ${excessDamage} excess - ${armor} armor = ${finalDamage} through`;
         this.damageParryWeapon(defender, excessDamage);
@@ -881,7 +884,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     } else {
       const finalDamage = Math.max(0, rawDamage - armor);
       this.combatLogService.addEntry(
-        `[PARRY FAILED] ${defender.name} failed to parry (rolled ${roll} vs ${skillLabel}) → ${hitLocation} (d20:${locationRoll}): ${finalDamage} damage`
+        `[PARRY FAILED] ${defender.name} failed to parry (rolled ${roll} vs ${skillLabel})${locationInfo}: ${finalDamage} damage`
       );
 
       const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
@@ -908,6 +911,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   resolveDodge(): void {
     if (!this.pendingAttack) return;
     const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
+    const locationInfo = hitLocation ? ` (d20:${locationRoll} = ${hitLocation})` : '';
 
     const dodgeSkill = this.getEffectiveDodgeSkill(defender);
     const dexBonus = this.getDefenderDexBonus(defender);
@@ -928,7 +932,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
     if (success) {
       this.combatLogService.addEntry(
-        `[DODGE] ${defender.name} dodges! (rolled ${roll} vs ${skillLabel}) — evades ${hitLocation} (d20:${locationRoll}) hit!`
+        `[DODGE] ${defender.name} dodges! (rolled ${roll} vs ${skillLabel}) — evades${locationInfo} hit!`
       );
       this.lastDamageRolls.set(attacker.id, {
         total: rawDamage, breakdown: damageBreakdown,
@@ -938,7 +942,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const armor = this.getArmorValue(defender, hitLocation);
       const finalDamage = Math.max(0, rawDamage - armor);
       this.combatLogService.addEntry(
-        `[DODGE FAILED] ${defender.name} fails dodge (rolled ${roll} vs ${skillLabel}) → ${hitLocation} (d20:${locationRoll}): ${finalDamage} damage`
+        `[DODGE FAILED] ${defender.name} fails dodge (rolled ${roll} vs ${skillLabel})${locationInfo}: ${finalDamage} damage`
       );
 
       const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);

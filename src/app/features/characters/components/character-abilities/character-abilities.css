@@ -6,7 +6,7 @@
 
 .abilities-group h5 {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -35,13 +35,13 @@
   border-color: var(--accent-color);
   background-color: var(--accent-bg);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-black-10);
 }
 
 .ability-card.acquired {
   border-color: var(--accent-color);
-  background: linear-gradient(135deg, var(--accent-bg) 0%, rgba(59, 130, 246, 0.05) 100%);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  background: linear-gradient(135deg, var(--accent-bg) 0%, var(--color-blue-medium-05) 100%);
+  box-shadow: 0 2px 8px var(--color-blue-medium-15);
 }
 
 .ability-checkbox {
@@ -66,7 +66,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-base);
   color: var(--text-color);
 }
@@ -77,9 +77,9 @@
 
 .level-badge {
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   background-color: var(--accent-color);
-  color: #fff;
+  color: var(--color-text-inverse);
   padding: 1px var(--spacing-sm);
   border-radius: var(--border-radius-sm);
   letter-spacing: 0.03em;

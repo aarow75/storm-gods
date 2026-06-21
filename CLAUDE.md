@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Runequest Character Manager** — An Angular application for creating and managing Runequest/Dragonbane RPG characters with complete character sheet functionality, dice rolling, combat tracking, bestiary, wilderness/combat maps, campaign management, and localStorage persistence.
+**Storm Gods Character Manager** — An Angular application for creating and managing RPG characters across multiple game systems, with complete character sheet functionality, dice rolling, combat tracking, bestiary, wilderness/combat maps, campaign management, and localStorage persistence.
 
 - **Framework**: Angular 21.2.7 with standalone components
 - **Language**: TypeScript 5.9
-- **Testing**: Vitest
+- **Testing**: Vitest (unit), Playwright (e2e)
 - **Mobile**: Capacitor 8 for Android
-- **Supported Systems**: Runequest and Dragonbane (URL-based via `GameSystemService`)
+- **Supported Systems**: Runequest, Dragonbane, Kal-Arath, OSRIC (URL-based via `GameSystemService`)
 
 ## Common Commands
 
@@ -24,6 +24,9 @@ npm run build             # Production build to dist/
 
 # Testing
 npm test                  # Run Vitest unit tests
+npm run test:e2e          # Run Playwright e2e tests (requires running dev server)
+npm run test:e2e:ui       # Playwright with interactive UI
+npm run test:e2e:headed   # Playwright in headed browser
 
 # Mobile
 npm run android           # Sync Capacitor files and open Android Studio
@@ -47,11 +50,11 @@ src/app/
 │   ├── characters/          # Character creation and management
 │   │   ├── components/      # character-form, character-list, + 18 character-* sub-components
 │   │   ├── services/        # character.service.ts, character-update.service.ts
-│   │   ├── models/          # character.model.ts  (authoritative character types + calculations)
+│   │   ├── models/          # character.model.ts (character types + re-exports from shared/rules)
 │   │   └── constants/       # character-colors, cult-ranks, fantasy-names, skill-categories
 │   ├── combat/              # Combat tracker and hex map
 │   │   ├── components/      # combat-tracker, combat-map
-│   │   ├── services/        # combat.service.ts, combat-log.service.ts
+│   │   ├── services/        # combat.service.ts, combat-log.service.ts, encounter-launch.service.ts
 │   │   ├── models/          # combat.model.ts
 │   │   └── utils/           # damage-parser.ts
 │   ├── bestiary/            # Monster browser and creator
@@ -60,13 +63,13 @@ src/app/
 │   │   ├── models/          # monster.model.ts
 │   │   └── constants/       # monsters, encounters, hit-location-templates
 │   ├── campaigns/           # Campaign management
-│   │   ├── components/      # campaign-planner, campaign-detail + 5 tab sub-components
+│   │   ├── components/      # campaign-planner, campaign-detail + 6 tab sub-components
 │   │   ├── services/        # campaign.service.ts
 │   │   └── models/          # campaign.model.ts
 │   ├── docs/                # Rules reference, publications, GM screen
-│   │   ├── components/      # docs, rules-reference, publications, game-masters-screen, markdown-page
+│   │   ├── components/      # docs, docs-home, rules-reference, publications, game-masters-screen, markdown-page
 │   │   ├── services/        # markdown.service.ts
-│   │   └── constants/       # runequest-publications, dragonbane-publications
+│   │   └── constants/       # runequest-publications, dragonbane-publications, osric-publications
 │   ├── dice-roller/
 │   │   └── components/      # dice-roller
 │   ├── maps/                # Wilderness hex map
@@ -79,9 +82,11 @@ src/app/
 │       └── components/      # settings
 │
 └── shared/                  # Cross-cutting concerns used by multiple features
-    ├── services/            # game-system.service.ts, dice.service.ts, ui-state.service.ts, export.service.ts
+    ├── services/            # game-system.service.ts, dice.service.ts, ui-state.service.ts,
+    │                        # export.service.ts, character-read.service.ts, data-port.service.ts
+    ├── rules/               # Per-system rules implementations (see Game Rules Layer below)
     ├── models/              # character-stats.model.ts, game-system.model.ts, combat-participant.model.ts
-    ├── constants/           # equipment.constants.ts
+    ├── constants/           # equipment.constants.ts (per-system equipment lists)
     └── styles/              # variables.css, shared-form-styles.css, docs-common.css
 ```
 
@@ -105,58 +110,98 @@ All cross-feature imports use path aliases (configured in `tsconfig.app.json`) �
 ```typescript
 import { Character } from '@characters/models/character.model';
 import { GameSystemService } from '@shared/services/game-system.service';
-import { CombatParticipant } from '@combat/models/combat.model';
+import { CombatParticipant } from '@shared/models/combat-participant.model';
 ```
+
+### Game Rules Layer
+
+`shared/rules/` contains the pluggable per-system rules architecture:
+
+- **`game-rules.ts`** — Shared types and RuneQuest data: `WeaponDefinition`, `ShieldDefinition`, `HitLocations`, `WEAPON_LIST`, `SHIELD_LIST`, `ARMOR_TYPES`, `getSizeModifier()`, `getDexterityModifier()`, `calculateHitLocations()`
+- **`game-system-rules.interface.ts`** — `GameSystemRules` interface that every system must implement (stat definitions, derived stats, hit locations, skills, weapons, armor, conditions, magic system, etc.)
+- **`game-system-rules.factory.ts`** — `getRulesForSystem(system)` returns the rules singleton for a given `GameSystem`
+- **`runequest-rules.ts`**, **`dragonbane-rules.ts`**, **`kal-arath-rules.ts`**, **`osric-rules.ts`** — Concrete implementations
+
+`GameSystemService.getRules()` returns the active system's `GameSystemRules`. Components should prefer `getRules()` over hard-coded system checks where possible.
+
+**Key `GameSystemRules` methods:**
+- `getStatDefinitions()` — Which stats exist and how to display them
+- `calculateDerivedStats(stats, equipment, weapons, shields, background?, armorType?)` — Full derived stat calculation
+- `usesHitLocations()` / `calculateHitLocations(stats)` — Whether and how to compute per-location HP
+- `getSkillDefinitions()` / `getDefaultSkills()` / `getSkillCategories()` — Skill system
+- `calculateSkillCategoryModifiers(stats)` — Characteristic-based skill bonuses
+- `applyBackgroundBonuses(skills, background, stats?)` — Occupation/homeland/cult bonuses
+- `getWeaponList()` / `getShieldList()` / `getArmorTypes()` / `getConditions()`
+- `getMagicSystemType()` — Identifier for which magic UI to show
+- `getRaceAbilities?(race)` / `getClassAbilities?(className)` — OSRIC racial/class features
+- `getClassHitDie?(className)` / `getConHpModifier?(con)` — OSRIC level-up HP rolling
 
 ### Services Layer
 
-**Shared services** (`shared/services/`) — used by multiple features, injected via `providedIn: 'root'`:
-- **`GameSystemService`** — URL-based game system (Runequest/Dragonbane); uses Angular signals; reads system from URL on navigation; provides `link()` helper and `switchSystem()`; serves system-specific cults/occupations/homelands and localized labels
-- **`DiceService`** — Dice roll logic (XdY+modifier); imports `UIStateService` for roll settings
+**Shared services** (`shared/services/`) — injected via `providedIn: 'root'`:
+- **`GameSystemService`** — URL-based game system signal; reads system from URL on navigation; provides `link()`, `switchSystem()`, `getRules()`, system-specific label getters, equipment lists, and currency helpers
+- **`CharacterReadService`** — Read-only facade over `CharacterService` for cross-feature consumers that don't need write access (`getAll()`, `getById()`, `getCharacter()`)
+- **`DataPortService`** — Collects all `DataPort` providers (via `DATA_PORT` injection token) for coordinated export/import in Settings; services register themselves in `app.config.ts`
+- **`DiceService`** — Dice roll logic (XdY+modifier)
 - **`UIStateService`** — Font size, collapsed sections, UI toggles; persisted to localStorage
 - **`ExportService`** — File download (browser + Capacitor native)
 
 **Feature services** — owned by their feature, but some are injected cross-feature:
-- **`CharacterService`** (`@characters/services/`) — CRUD + localStorage persistence; runs `migrateCharacter()` on every load
+- **`CharacterService`** (`@characters/services/`) — CRUD + localStorage persistence; runs `migrateCharacter()` on every load; implements `DataPort`
 - **`CharacterUpdateService`** (`@characters/services/`) — RxJS Subject pub/sub for cross-component character list refresh
 - **`CombatService`** (`@combat/services/`) — Combat participants, strike rank, map state
-- **`CombatLogService`** (`@combat/services/`) — Event log for combat actions
-- **`CustomMonsterService`** (`@bestiary/services/`) — Persistence for user-created monsters
+- **`CombatLogService`** (`@combat/services/`) — Event log for combat actions; implements `DataPort`
+- **`EncounterLaunchService`** (`@combat/services/`) — Narrow facade for adding participants and navigating to combat; use this instead of injecting `CombatService` directly when you only need to launch encounters
+- **`CustomMonsterService`** (`@bestiary/services/`) — Persistence for user-created monsters; implements `DataPort`
 - **`CampaignService`** (`@campaigns/services/`) — Campaign CRUD and session/objective persistence
 - **`MarkdownService`** (`@docs/services/`) — Markdown rendering and TOC generation
-- **`WildernessMapService`** (`@maps/services/`) — Wilderness map state persistence
+- **`WildernessMapService`** (`@maps/services/`) — Wilderness map state persistence; implements `DataPort`
+
+### DataPort Pattern
+
+Services that support export/import/clear implement the `DataPort` interface (`@shared/services/data-port.service.ts`) and register themselves as multi-providers in `app.config.ts`:
+
+```typescript
+{ provide: DATA_PORT, useExisting: CharacterService, multi: true }
+```
+
+`DataPortService` collects all registered ports so Settings can export or clear all data without importing each service directly.
 
 ### Models & Data Flow
 
-**Character Model** (`@characters/models/character.model.ts`) — the authoritative source for all character types:
+**Character Model** (`@characters/models/character.model.ts`) — defines character types and re-exports shared rule types:
+
 ```
 Character {
-  id, name, color
+  id, name, color, gameSystem
   background { cult, occupation, homeland, age, gender }
   stats { STR, CON, SIZ, DEX, INT, POW, CHA }
-  derivedStats { HP, MP, damage bonus, strike rank, encumbrance, healing rate, movement }
+  derivedStats { totalHitPoints, maxHitPoints, magicPoints, damageBonus, spiritCombatDamage,
+                 healingRate, movementRate, strikeRank, armorClass?, missileAttackBonus?,
+                 maxEncumbrance, totalEncumbrance, encumbranceDefensePenalty }
+  skills { Record<string, number> }
   hitLocations { Right Leg, Left Leg, Abdomen, Chest, Right Arm, Left Arm, Head }
   armor { per location }
-  weapons [ { name, damage, skill, currentHitPoints } ]
-  shields [ { name, ... } ]
+  armorType? // name of worn armor type
+  weapons [ { name, damage, skill, currentHitPoints? } ]
+  shields [ { name, skill, currentHitPoints? } ]
   runes { elemental, power, form }
   passions [ { name, value } ]
-  magic { spiritMagic[], runeMagic[], sorcery[] }
-  resources { lunars, wheels, clacks, reputation, ransom }
+  magic { spiritMagic[], runeMagic[], sorcery[], dragonbaneSpells[] }
+  resources { lunars, wheels, clacks, silver, gold, reputation, ransom }
   equipment [ { name, quantity, cost, hitPoints, encumbrance } ]
-  conditions [ string[] ]
-  familyHistory, cultStatus, notes
+  conditions? [ string[] ]
+  acquiredAbilities? [ string[] ]  // OSRIC: race/class abilities
+  cultStatus?, notes
 }
 ```
 
-Also exported from `character.model.ts`: `WEAPON_LIST`, `SHIELD_LIST`, `ARMOR_TYPES`, and all calculation functions (`calculateDerivedStats`, `calculateHitLocations`, `getSizeModifier`, `getDexterityModifier`, etc.). Combat and bestiary features import these directly via `@characters/models/character.model` — this is an intentional dependency since combat rules are character rules.
+`WEAPON_LIST`, `SHIELD_LIST`, `ARMOR_TYPES`, and shared calculation functions (`getSizeModifier`, `getDexterityModifier`, `calculateHitLocations`, `canWeaponParry`) live in `@shared/rules/game-rules.ts` and are re-exported from `character.model.ts` for backward compatibility.
 
-**Key Calculations** (all pure functions in `character.model.ts`):
-- `calculateDerivedStats()` — Damage bonus, strike rank, healing rate, magic points, movement; encumbrance includes shields
-- `calculateHitLocations()` — HP per location from CON + SIZ
-- `calculateEncumbrance()` — Total weight from equipment + weapons + shields; applies defense penalty if over capacity
-- `calculateArmorFromShields()` — Adds shield AP to relevant hit locations
-- `calculateTotalArmor()` — Combines worn armor and shields per location
+**Key Calculations** — `calculateDerivedStats()` is now system-specific (delegated to `GameSystemRules`). Shared helpers in `game-rules.ts`:
+- `getSizeModifier(siz)` / `getDexterityModifier(dex)` — Strike rank modifiers
+- `calculateHitLocations(stats)` — HP per location from CON + SIZ (RuneQuest)
+- `calculateTotalArmor(armorType?, shields)` — Combines worn armor and shields per location
 
 ### Constants & Game Data
 
@@ -165,9 +210,9 @@ Constants are co-located with their feature:
 | Constants | Location |
 |---|---|
 | `skill-categories`, `cult-ranks`, `fantasy-names`, `character-colors` | `@characters/constants/` |
-| `equipment` (EQUIPMENT_DEFAULTS, MAGIC_DEFAULTS) | `@shared/constants/` |
+| `equipment` (per-system equipment lists) | `@shared/constants/equipment.constants.ts` |
 | `monsters`, `encounters`, `hit-location-templates` | `@bestiary/constants/` |
-| `runequest-publications`, `dragonbane-publications` | `@docs/constants/` |
+| `runequest-publications`, `dragonbane-publications`, `osric-publications` | `@docs/constants/` |
 | `terrain`, `map-backgrounds` | `@maps/constants/` |
 
 ### Data Persistence & Migration
@@ -189,7 +234,7 @@ All data stored in localStorage:
 
 **To add a new character field**:
 1. Add to `Character` interface in `@characters/models/character.model.ts`
-2. Add default in `DEFAULT_CHARACTER` or relevant `DEFAULT_*` constant
+2. Add default in appropriate `DEFAULT_*` constant
 3. Add migration logic in `CharacterService.migrateCharacter()`
 4. Default will auto-fill on load for existing characters
 
@@ -218,7 +263,7 @@ All data stored in localStorage:
 
 ### Routing
 
-Game system is embedded in the URL prefix (`/runequest/...` or `/dragonbane/...`). Navigating to `/` redirects to the last used system (stored in `localStorage['gameSystem']`).
+Game system is embedded in the URL prefix. Navigating to `/` redirects to the last used system (stored in `localStorage['gameSystem']`). Valid systems: `runequest`, `dragonbane`, `kal-arath`, `osric`.
 
 All routes use **`loadComponent()` lazy loading** — each feature is a separate JS chunk loaded on demand:
 
@@ -233,7 +278,7 @@ All routes use **`loadComponent()` lazy loading** — each feature is a separate
 /:system/campaigns           → CampaignPlannerComponent
 /:system/campaigns/:id       → CampaignDetailComponent
 /:system/settings            → SettingsComponent
-/:system/docs                → DocsComponent (shell)
+/:system/docs                → DocsComponent (shell) → DocsHomeComponent (default child)
 /:system/docs/rules          → RulesReferenceComponent
 /:system/docs/publications   → PublicationsComponent
 /:system/docs/gm-screen      → GameMastersScreenComponent
@@ -249,27 +294,34 @@ All routes use **`loadComponent()` lazy loading** — each feature is a separate
 1. **Create Mode**: `character-form` loads with `null` id; shows "Create Character" button
 2. **Edit Mode**: Router passes character `:id`; form loads character data; button becomes "Update Character"; visual orange border shows edit state
 3. **Sub-component Communication**: Parent form passes character data as `@Input()` and captures updates via `@Output()` events
-4. **Auto-calculations**: "Calculate from Stats" button triggers `calculateDerivedStats()` and refreshes all dependent fields
+4. **Auto-calculations**: "Calculate from Stats" button delegates to `gameSystemService.getRules().calculateDerivedStats()` and refreshes all dependent fields
 5. **Save**: Calls `CharacterService.saveCharacter()` → persists to localStorage → routes back to list
 
 ### Derived Stats & Combat Rules
 
+These are RuneQuest-specific defaults; each system overrides via its `GameSystemRules` implementation:
+
 - **Damage Bonus** — Formula: `(STR + SIZ) / 8` → maps to d4/d6/d8/d10/d12 increments
 - **Strike Rank** — `SIZ modifier + DEX modifier`; base 0, modified by SIZ (22+=0, 15-21=+1, 7-14=+2, 1-6=+3) and DEX (19+=0, 16-18=+1, 13-15=+2, 9-12=+3, 6-8=+4, 1-5=+5)
-- **Hit Points per Location** — `(CON + SIZ) / 2`, distributed by location
+- **Hit Points per Location** — `(CON + SIZ) / 2`, distributed by location (RuneQuest/Kal-Arath only)
 - **Healing Rate** — `(CON / 4)` per week
 - **Encumbrance** — Total equipment weight; if over STR limit, applies defense penalty
 - **Spirit Combat Damage** — `POW` stat used directly (no damage bonus)
+- **OSRIC** — Uses AC (descending, 10 = unarmored), class hit dice, level-based HP, missile attack bonus; no hit locations
 
 ### Game System Switching
 
 `GameSystemService` (URL-based, Angular signals):
-- `gameSystem` — Signal containing `'runequest' | 'dragonbane'`; updated automatically on navigation
+- `gameSystem` — Signal containing `GameSystem` (`'runequest' | 'dragonbane' | 'kal-arath' | 'osric'`); updated automatically on navigation
 - `switchSystem(system)` — Navigate to the equivalent page under the other system
 - `link(...segments)` — Build a `routerLink` array prefixed with the current system
-- `getSystemName()` — Returns `'RuneQuest'` or `'Dragonbane'`
+- `getSystemName()` — Returns human-readable name (`'RuneQuest'`, `'Dragonbane'`, `'Kal-Arath'`, `'OSRIC'`)
 - `getCults()`, `getOccupations()`, `getHomelands()` — System-specific dropdown values
-- `getCultLabel()`, `getOccupationLabel()`, `getHomelandLabel()` — System-specific field labels
+- `getCultLabel()`, `getOccupationLabel()`, `getHomelandLabel()` — System-specific field labels (e.g. "Alignment", "Class", "Race" for OSRIC)
+- `getSelectCultLabel()`, `getSelectOccupationLabel()`, `getSelectHomelandLabel()` — Prompt labels for selects
+- `getRules()` — Returns the `GameSystemRules` instance for the active system
+- `getEquipmentList()` — System-specific equipment catalog
+- `getCurrencyLabel()` / `getPrimaryCurrencyKey()` — Currency display and storage key
 
 ### Cross-Feature Dependencies
 
@@ -280,15 +332,14 @@ These are intentional, explicit dependencies (not accidents):
 | `combat-tracker`, `combat-map` | `@characters/models/character.model` | `Character`, `WEAPON_LIST`, `SHIELD_LIST`, calculation functions — combat rules are character rules |
 | `bestiary` | `@characters/models/character.model` | `getSizeModifier`, `getDexterityModifier` for monster strike rank |
 | `wilderness-map` | `@characters/models/character.model` | `Character` type for map tokens |
-| `bestiary` | `@combat/models/combat.model`, `@combat/services/combat.service` | Adding monsters to active combat |
+| `bestiary` | `@combat/services/encounter-launch.service` | Adding monsters to active combat (via narrow facade) |
 | `wilderness-map` | `@bestiary/constants/encounters.constants` | Encounter tables for hex encounters |
-| `settings` | `@combat/services/combat-log.service`, `@bestiary/services/custom-monster.service`, `@maps/services/wilderness-map.service` | Export/import/clear all data |
+| `settings` | `DataPortService` + `DATA_PORT` token | Coordinated export/import/clear of all data |
 
 ## Testing Notes
 
-- **Vitest** is configured; tests are co-located (`.spec.ts` files)
-- `jsdom` provides DOM emulation
-- Services are injectable and can be mocked via DI in test specs
+- **Vitest** — Unit tests co-located as `.spec.ts` files; `jsdom` provides DOM emulation; services are injectable and can be mocked via DI
+- **Playwright** — E2e tests live in `e2e/`; test files cover bestiary, campaigns, characters, combat, dice-roller, docs/settings, and navigation; Playwright auto-starts `npm start` if the dev server isn't running
 
 ## Common Patterns
 
@@ -309,11 +360,15 @@ These are intentional, explicit dependencies (not accidents):
 4. Create/extend sub-component to display/edit the field
 5. Add to `character-form` template and wire `@Input/@Output`
 
-### Adding a New Game System Variant
+### Adding a New Game System
 
-1. Extend `GameSystemService` in `@shared/services/game-system.service.ts` with system-specific data and label getters
-2. Use `gameSystemService.gameSystem() === 'dragonbane'` where rules differ
-3. Add system-specific constants to the relevant feature's `constants/` folder
+1. Add the system slug to `GameSystem` type in `@shared/models/game-system.model.ts`
+2. Create a `<system>-rules.ts` file in `@shared/rules/` implementing `GameSystemRules`
+3. Register it in `game-system-rules.factory.ts`
+4. Add system data (cults/occupations/homelands, labels, currency) to `GameSystemService`
+5. Add the system's route prefix in `app.routes.ts`
+6. Add system-specific equipment list to `equipment.constants.ts` and wire in `GameSystemService.getEquipmentList()`
+7. Add publications constants to `@docs/constants/` if needed
 
 ### Component Communication
 
@@ -324,7 +379,7 @@ These are intentional, explicit dependencies (not accidents):
 ## Build & Deploy
 
 - **Development** — `npm start` hot-reloads on file changes; port 4202
-- **Production** — `npm run build` outputs to `dist/runequest-characters/`; all routes code-split as lazy chunks
+- **Production** — `npm run build` outputs to `dist/storm-gods/`; all routes code-split as lazy chunks
 - **Android** — Capacitor handles native app build; `npm run android` syncs and opens Android Studio
 - **Icons** — Auto-generated from source image via Capacitor Assets CLI
 
@@ -332,6 +387,7 @@ These are intentional, explicit dependencies (not accidents):
 
 - Movement in combat system
 - Improved UI theme, fonts, colors
-- Dragonbane-specific rules and stat differences
 - Advanced dice roller (modifiers, boon/bane with dual d20)
 - Editable character colors (no duplicates among first 5 characters)
+- Dragonbane-specific rules (Conditions, Willpower, etc.)
+- OSRIC multi-class support and spell lists

@@ -479,7 +479,7 @@ export class CharacterFormComponent implements OnInit {
   }
 
   private updateArmorFromShields(): void {
-    // Calculate total armor from worn armor + shields
+    if (!this.gameSystemService.getRules().usesHitLocations()) return;
     this.character.armor = calculateTotalArmor(this.character.armorType, this.character.shields || []);
   }
 

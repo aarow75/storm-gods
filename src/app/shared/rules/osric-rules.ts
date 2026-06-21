@@ -451,7 +451,7 @@ export class OsricRules implements GameSystemRules {
     const baseAc = OSRIC_ARMOR_TYPES.find(a => a.name === armorType)?.points ?? 10;
     const dexMod = getDexAcModifier(dex);
     const shieldBonus = shields.length;
-    const ac = Math.max(2, baseAc - dexMod - shieldBonus);
+    const ac = Math.max(-10, baseAc - dexMod - shieldBonus);
 
     // Encumbrance: STR-based max carry. Movement rate drops by tier.
     const maxEncumbrance = getStrMaxEncumbrance(str);

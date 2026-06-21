@@ -86,7 +86,7 @@ export class CharacterService implements DataPort {
       const rules = getRulesForSystem(char.gameSystem || 'runequest');
       char.hitLocations = (char.stats && rules.usesHitLocations())
         ? rules.calculateHitLocations(char.stats) ?? { ...DEFAULT_HIT_LOCATIONS }
-        : { ...DEFAULT_HIT_LOCATIONS };
+        : {};
     }
 
     // Ensure armor exists
