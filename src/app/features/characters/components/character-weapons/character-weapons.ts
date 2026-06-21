@@ -33,6 +33,8 @@ export class CharacterWeapons {
 
   private totalWealth(): number {
     if (!this.resources) return Infinity;
+    if (this.gameSystem === 'dragonbane') return this.resources.silver ?? 0;
+    if (this.gameSystem === 'osric') return this.resources.gold ?? 0;
     if (this.gameSystem === 'kal-arath') return this.resources.silver ?? 0;
     return (this.resources.wheels ?? 0) * 20 + (this.resources.lunars ?? 0) + (this.resources.clacks ?? 0) / 10;
   }

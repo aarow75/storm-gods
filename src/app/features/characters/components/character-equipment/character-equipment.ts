@@ -1,7 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { EquipmentItem, EquipmentDefinition, EQUIPMENT_LIST } from '@characters/models/character.model';
+import { EquipmentItem, EquipmentDefinition, Resources } from '@characters/models/character.model';
+import { GameSystemService } from '@shared/services/game-system.service';
 
 @Component({
   standalone: true,
@@ -13,25 +14,68 @@ import { EquipmentItem, EquipmentDefinition, EQUIPMENT_LIST } from '@characters/
 export class CharacterEquipment {
   @Input() equipment!: EquipmentItem[];
   @Input() maxEncumbrance = 0;
+  @Input() resources: Resources | undefined;
   @Output() addEquipment = new EventEmitter<EquipmentItem>();
   @Output() removeEquipment = new EventEmitter<number>();
+  @Output() deductCost = new EventEmitter<number>();
 
   selectedItemName = '';
   selectedQuantity = 1;
 
-  readonly equipmentList = EQUIPMENT_LIST;
-  readonly categories: string[];
+  constructor(public gameSystemService: GameSystemService) {}
 
-  constructor() {
-    this.categories = [...new Set(EQUIPMENT_LIST.map(item => item.category))];
+  get equipmentList(): EquipmentDefinition[] {
+    return this.gameSystemService.getEquipmentList();
+  }
+
+  get categories(): string[] {
+    return [...new Set(this.equipmentList.map(item => item.category))];
   }
 
   get heading(): string {
     return 'Equipment';
   }
 
+  get isDragonbane(): boolean {
+    return this.gameSystemService.gameSystem() === 'dragonbane';
+  }
+
+  get currencyLabel(): string {
+    return this.gameSystemService.getCurrencyLabel();
+  }
+
+  get durabilityLabel(): string {
+    return this.isDragonbane ? 'Supply' : 'Durability';
+  }
+
+  get currentBalance(): number {
+    if (!this.resources) return Infinity;
+    const key = this.gameSystemService.getPrimaryCurrencyKey();
+    return (this.resources as unknown as Record<string, number>)[key as string] ?? 0;
+  }
+
+  canAfford(item: EquipmentDefinition): boolean {
+    return item.cost * this.selectedQuantity <= this.currentBalance;
+  }
+
+  get selectedItemDef(): EquipmentDefinition | undefined {
+    return this.equipmentList.find(item => item.name === this.selectedItemName);
+  }
+
+  get canAffordSelected(): boolean {
+    return this.selectedItemDef ? this.canAfford(this.selectedItemDef) : true;
+  }
+
   getItemsByCategory(category: string): EquipmentDefinition[] {
     return this.equipmentList.filter(item => item.category === category);
+  }
+
+  getDurabilityDisplay(item: EquipmentItem): string {
+    if (this.isDragonbane) {
+      const def = this.equipmentList.find(d => d.name === item.name);
+      return def?.supply ?? '—';
+    }
+    return item.hitPoints > 0 ? String(item.hitPoints) : '—';
   }
 
   get totalEncumbrance(): number {
@@ -51,13 +95,19 @@ export class CharacterEquipment {
     const def = this.equipmentList.find(item => item.name === this.selectedItemName);
     if (!def) return;
 
+    const totalPrice = def.cost * this.selectedQuantity;
+
     this.addEquipment.emit({
       name: def.name,
       quantity: this.selectedQuantity,
       cost: def.cost,
       hitPoints: def.hitPoints,
-      encumbrance: def.encumbrance
+      encumbrance: def.encumbrance,
     });
+
+    if (totalPrice > 0) {
+      this.deductCost.emit(totalPrice);
+    }
 
     this.selectedItemName = '';
     this.selectedQuantity = 1;

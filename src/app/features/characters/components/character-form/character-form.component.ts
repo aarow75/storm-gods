@@ -578,6 +578,13 @@ export class CharacterFormComponent implements OnInit {
     }
   }
 
+  deductEquipmentCost(amount: number): void {
+    const key = this.gameSystemService.getPrimaryCurrencyKey();
+    const resources = this.character.resources as unknown as Record<string, number>;
+    const current = resources[key as string] ?? 0;
+    resources[key as string] = Math.max(0, current - amount);
+  }
+
   applyArmorToAll(): void {
     if (!this.character.armor) return;
     const armorValue = this.character.armor['Chest'];

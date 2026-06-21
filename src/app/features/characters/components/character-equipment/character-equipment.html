@@ -2,13 +2,18 @@
 <h4>{{ heading }}</h4>
 }
 <div class="equipment-section">
+  <div class="equipment-balance-row">
+    Balance: <strong>{{ currentBalance === (1/0) ? '∞' : currentBalance }} {{ currencyLabel }}</strong>
+  </div>
   <div class="equipment-add-row">
     <select [(ngModel)]="selectedItemName" name="equipment-select" class="equipment-select">
       <option value="">— Select item —</option>
       @for (category of categories; track category) {
         <optgroup [label]="category">
           @for (item of getItemsByCategory(category); track item.name) {
-            <option [value]="item.name">{{ item.name }}</option>
+            <option [value]="item.name" [disabled]="!canAfford(item)">
+              {{ item.name }} ({{ item.cost }} {{ currencyLabel }}){{ canAfford(item) ? '' : ' — insufficient funds' }}
+            </option>
           }
         </optgroup>
       }
@@ -20,7 +25,8 @@
       min="1"
       class="qty-input"
     />
-    <button type="button" class="btn-add-small" (click)="onAddEquipment()" [disabled]="!selectedItemName">
+    <button type="button" class="btn-add-small" (click)="onAddEquipment()"
+      [disabled]="!selectedItemName || !canAffordSelected">
       Add
     </button>
   </div>
@@ -34,8 +40,8 @@
           <th>Item</th>
           <th>Qty</th>
           <th>ENC</th>
-          <th>HP</th>
-          <th>Cost (L)</th>
+          <th>{{ durabilityLabel }}</th>
+          <th>Cost ({{ currencyLabel }})</th>
           <th></th>
         </tr>
       </thead>
@@ -53,7 +59,7 @@
               />
             </td>
             <td class="stat-cell">{{ item.encumbrance }}</td>
-            <td class="stat-cell">{{ item.hitPoints }}</td>
+            <td class="stat-cell">{{ getDurabilityDisplay(item) }}</td>
             <td class="stat-cell">{{ item.cost }}</td>
             <td>
               <button type="button" class="btn-remove-small" (click)="onRemoveEquipment($index)">×</button>
@@ -73,7 +79,11 @@
         @if (overEncumbrance > 0) {
           <tr class="penalty-row">
             <td colspan="6" class="penalty-text">
-              <strong>Over-encumbered by {{ overEncumbrance }}:</strong> -{{ overEncumbrance }} Movement Rate, -{{ overEncumbrance * 5 }}% Dodge, +{{ overEncumbrance }} Strike Rank
+              @if (isDragonbane) {
+                <strong>Over-encumbered by {{ overEncumbrance }} slot(s):</strong> Bane on all physical rolls (STR, AGL, CON)
+              } @else {
+                <strong>Over-encumbered by {{ overEncumbrance }}:</strong> -{{ overEncumbrance }} Movement Rate, -{{ overEncumbrance * 5 }}% Dodge, +{{ overEncumbrance }} Strike Rank
+              }
             </td>
           </tr>
         }

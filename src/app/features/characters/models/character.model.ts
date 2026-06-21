@@ -49,6 +49,7 @@ export interface EquipmentDefinition {
   cost: number;
   hitPoints: number;
   encumbrance: number;
+  supply?: string; // Dragonbane: 'Common' | 'Uncommon' | 'Rare'
 }
 
 export interface CharacterBackground {
@@ -488,74 +489,6 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
   };
 }
 
-export const EQUIPMENT_LIST: EquipmentDefinition[] = [
-  // Adventuring Gear
-  { name: 'Backpack', category: 'Adventuring Gear', cost: 3, hitPoints: 4, encumbrance: 1 },
-  { name: 'Bedroll', category: 'Adventuring Gear', cost: 2, hitPoints: 3, encumbrance: 1 },
-  { name: 'Blanket', category: 'Adventuring Gear', cost: 1, hitPoints: 2, encumbrance: 1 },
-  { name: 'Canteen', category: 'Adventuring Gear', cost: 1, hitPoints: 2, encumbrance: 0 },
-  { name: 'Flint & Steel', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Grappling Hook', category: 'Adventuring Gear', cost: 5, hitPoints: 6, encumbrance: 1 },
-  { name: 'Lantern', category: 'Adventuring Gear', cost: 5, hitPoints: 4, encumbrance: 0 },
-  { name: 'Oil Flask', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Rope (10m)', category: 'Adventuring Gear', cost: 2, hitPoints: 6, encumbrance: 1 },
-  { name: 'Sack', category: 'Adventuring Gear', cost: 1, hitPoints: 3, encumbrance: 0 },
-  { name: 'Torch', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Waterskin', category: 'Adventuring Gear', cost: 1, hitPoints: 2, encumbrance: 0 },
-  { name: 'Pole (3m)', category: 'Adventuring Gear', cost: 2, hitPoints: 6, encumbrance: 2 },
-  { name: 'Signal Whistle', category: 'Adventuring Gear', cost: 2, hitPoints: 1, encumbrance: 0 },
-  { name: 'Mirror (Small)', category: 'Adventuring Gear', cost: 5, hitPoints: 2, encumbrance: 0 },
-  { name: 'Bell', category: 'Adventuring Gear', cost: 2, hitPoints: 2, encumbrance: 0 },
-  { name: 'Candle', category: 'Adventuring Gear', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Chain (1m)', category: 'Adventuring Gear', cost: 5, hitPoints: 8, encumbrance: 1 },
-
-  // Clothing
-  { name: 'Boots', category: 'Clothing', cost: 5, hitPoints: 6, encumbrance: 1 },
-  { name: 'Cloak', category: 'Clothing', cost: 2, hitPoints: 4, encumbrance: 1 },
-  { name: 'Common Clothes', category: 'Clothing', cost: 3, hitPoints: 4, encumbrance: 1 },
-  { name: 'Fine Clothes', category: 'Clothing', cost: 20, hitPoints: 4, encumbrance: 1 },
-  { name: 'Gloves', category: 'Clothing', cost: 2, hitPoints: 3, encumbrance: 0 },
-  { name: 'Hat', category: 'Clothing', cost: 1, hitPoints: 2, encumbrance: 0 },
-
-  // Food & Provisions
-  { name: 'Rations (1 day)', category: 'Food & Provisions', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Rations (1 week)', category: 'Food & Provisions', cost: 6, hitPoints: 1, encumbrance: 2 },
-  { name: 'Ale (mug)', category: 'Food & Provisions', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Wine (bottle)', category: 'Food & Provisions', cost: 3, hitPoints: 1, encumbrance: 0 },
-  { name: 'Dried Meat', category: 'Food & Provisions', cost: 2, hitPoints: 1, encumbrance: 0 },
-
-  // Tools
-  { name: 'Chisel', category: 'Tools', cost: 2, hitPoints: 4, encumbrance: 0 },
-  { name: 'Crowbar', category: 'Tools', cost: 4, hitPoints: 10, encumbrance: 1 },
-  { name: 'Hammer', category: 'Tools', cost: 2, hitPoints: 6, encumbrance: 1 },
-  { name: 'Pickaxe', category: 'Tools', cost: 5, hitPoints: 8, encumbrance: 2 },
-  { name: 'Saw', category: 'Tools', cost: 3, hitPoints: 6, encumbrance: 1 },
-  { name: 'Shovel', category: 'Tools', cost: 4, hitPoints: 6, encumbrance: 1 },
-  { name: 'Thieves\' Tools', category: 'Tools', cost: 20, hitPoints: 3, encumbrance: 0 },
-  { name: 'Lock', category: 'Tools', cost: 5, hitPoints: 6, encumbrance: 0 },
-  { name: 'Padlock', category: 'Tools', cost: 4, hitPoints: 4, encumbrance: 0 },
-
-  // Medical
-  { name: 'Bandages', category: 'Medical', cost: 2, hitPoints: 1, encumbrance: 0 },
-  { name: 'Healer\'s Kit', category: 'Medical', cost: 10, hitPoints: 1, encumbrance: 1 },
-  { name: 'Healing Herbs', category: 'Medical', cost: 5, hitPoints: 1, encumbrance: 0 },
-  { name: 'Antidote', category: 'Medical', cost: 10, hitPoints: 1, encumbrance: 0 },
-  { name: 'Poison Antidote', category: 'Medical', cost: 15, hitPoints: 1, encumbrance: 0 },
-
-  // Writing & Navigation
-  { name: 'Map', category: 'Writing & Navigation', cost: 5, hitPoints: 1, encumbrance: 0 },
-  { name: 'Compass', category: 'Writing & Navigation', cost: 10, hitPoints: 1, encumbrance: 0 },
-  { name: 'Ink', category: 'Writing & Navigation', cost: 2, hitPoints: 1, encumbrance: 0 },
-  { name: 'Parchment (sheet)', category: 'Writing & Navigation', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Quill', category: 'Writing & Navigation', cost: 1, hitPoints: 1, encumbrance: 0 },
-  { name: 'Spellbook', category: 'Writing & Navigation', cost: 30, hitPoints: 4, encumbrance: 1 },
-
-  // Transport & Storage
-  { name: 'Saddlebags', category: 'Transport & Storage', cost: 5, hitPoints: 6, encumbrance: 1 },
-  { name: 'Saddlebags (Large)', category: 'Transport & Storage', cost: 10, hitPoints: 8, encumbrance: 2 },
-  { name: 'Cart', category: 'Transport & Storage', cost: 50, hitPoints: 20, encumbrance: 0 },
-  { name: 'Small Boat', category: 'Transport & Storage', cost: 100, hitPoints: 30, encumbrance: 0 },
-];
 
 // For Runequest
 export const COMBAT_SKILLS = [

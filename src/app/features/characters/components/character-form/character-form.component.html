@@ -216,8 +216,10 @@
             <app-character-equipment
               [equipment]="character.equipment!"
               [maxEncumbrance]="character.derivedStats?.maxEncumbrance || 0"
+              [resources]="character.resources"
               (addEquipment)="addEquipment($event)"
               (removeEquipment)="removeEquipment($event)"
+              (deductCost)="deductEquipmentCost($event)"
             ></app-character-equipment>
           </div>
           }

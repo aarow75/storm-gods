@@ -259,10 +259,17 @@
   border: 1px solid var(--color-primary-orange);
 }
 
-.system-both {
-  background-color: var(--color-bg-purple-light);
-  color: var(--color-primary-purple-dark);
-  border: 1px solid var(--color-primary-purple);
+
+.system-kal-arath {
+  background-color: var(--color-bg-red-lighter);
+  color: #7f1d1d;
+  border: 1px solid #b91c1c;
+}
+
+.system-osric {
+  background-color: var(--color-bg-green-light);
+  color: var(--color-primary-green-dark);
+  border: 1px solid var(--color-primary-green);
 }
 
 .category-badge {

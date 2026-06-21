@@ -2,7 +2,7 @@
   <div class="bestiary-header">
     <div>
       <h1>Monster Bestiary & Encounters</h1>
-      <p class="subtitle">Explore creatures and encounters across RuneQuest and DragonBane</p>
+      <p class="subtitle">Explore creatures and encounters across all game systems</p>
     </div>
     <a [routerLink]="gameSystemService.link('monster-creator')" class="btn-monster-creator">
       <span class="icon">🤖</span>
@@ -33,24 +33,14 @@
       <div class="filter-group">
         <label class="filter-label">Game System:</label>
         <div class="filter-bar">
-          <button
-            class="filter-btn"
-            [class.active]="systemFilter() === 'all'"
-            (click)="toggleSystemFilter('all')">
-            All
-          </button>
-          <button
-            class="filter-btn"
-            [class.active]="systemFilter() === 'runequest'"
-            (click)="toggleSystemFilter('runequest')">
-            RuneQuest
-          </button>
-          <button
-            class="filter-btn"
-            [class.active]="systemFilter() === 'dragonbane'"
-            (click)="toggleSystemFilter('dragonbane')">
-            DragonBane
-          </button>
+          @for (opt of systemOptions; track opt.value) {
+            <button
+              class="filter-btn"
+              [class.active]="systemFilter() === opt.value"
+              (click)="toggleSystemFilter(opt.value)">
+              {{ opt.label }}
+            </button>
+          }
         </div>
       </div>
 
@@ -122,34 +112,12 @@
 
           <!-- Stats Row -->
           <div class="stats-row">
-            <div class="stat-box">
-              <span class="stat-label">STR</span>
-              <span class="stat-value">{{ monster.stats.STR }}</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">CON</span>
-              <span class="stat-value">{{ monster.stats.CON }}</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">SIZ</span>
-              <span class="stat-value">{{ monster.stats.SIZ }}</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">DEX</span>
-              <span class="stat-value">{{ monster.stats.DEX }}</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">INT</span>
-              <span class="stat-value">{{ monster.stats.INT }}</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">POW</span>
-              <span class="stat-value">{{ monster.stats.POW }}</span>
-            </div>
-            <div class="stat-box">
-              <span class="stat-label">CHA</span>
-              <span class="stat-value">{{ monster.stats.CHA }}</span>
-            </div>
+            @for (stat of activeStatDefs(); track stat.key) {
+              <div class="stat-box">
+                <span class="stat-label">{{ shortStatLabel(stat.label) }}</span>
+                <span class="stat-value">{{ monster.stats[stat.key] }}</span>
+              </div>
+            }
           </div>
 
           <!-- HP, Armor, Movement Row -->

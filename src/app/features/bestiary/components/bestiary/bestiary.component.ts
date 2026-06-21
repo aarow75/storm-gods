@@ -10,6 +10,9 @@ import { CombatParticipant, CombatMonster } from '@shared/models/combat-particip
 import { getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
 import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { GameSystem } from '@shared/models/game-system.model';
+import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
+import { StatDefinition } from '@shared/rules/game-system-rules.interface';
 import { CombatService } from '@combat/services/combat.service';
 import { EncounterLaunchService } from '@combat/services/encounter-launch.service';
 
@@ -23,7 +26,14 @@ import { EncounterLaunchService } from '@combat/services/encounter-launch.servic
 export class BestiaryComponent implements OnInit {
   monsters: Monster[] = [];
   encounterTables: EncounterTable[] = ENCOUNTER_TABLES;
-  systemFilter = signal<'all' | 'runequest' | 'dragonbane'>('all');
+  systemFilter = signal<'all' | GameSystem>('all');
+  systemOptions: { value: 'all' | GameSystem; label: string }[] = [
+    { value: 'all', label: 'All' },
+    { value: 'runequest', label: 'RuneQuest' },
+    { value: 'dragonbane', label: 'DragonBane' },
+    { value: 'kal-arath', label: 'Kal-Arath' },
+    { value: 'osric', label: 'OSRIC' },
+  ];
   searchQuery = signal('');
   categoryFilter = signal<string>('all');
   expandedMonsterId = signal<string | null>(null);
@@ -42,10 +52,8 @@ export class BestiaryComponent implements OnInit {
 
     // Filter by system
     const systemFilter = this.systemFilter();
-    if (systemFilter === 'runequest') {
-      result = result.filter(m => m.gameSystem === 'runequest' || m.gameSystem === 'both');
-    } else if (systemFilter === 'dragonbane') {
-      result = result.filter(m => m.gameSystem === 'dragonbane' || m.gameSystem === 'both');
+    if (systemFilter !== 'all') {
+      result = result.filter(m => m.gameSystem === systemFilter);
     }
 
     // Filter by search query
@@ -63,6 +71,12 @@ export class BestiaryComponent implements OnInit {
     return result;
   });
 
+  activeStatDefs = computed<StatDefinition[]>(() => {
+    const filter = this.systemFilter();
+    const system: GameSystem = (filter === 'all' ? this.gameSystemService.gameSystem() : filter) as GameSystem;
+    return getRulesForSystem(system).getStatDefinitions().filter(s => s.visible !== false);
+  });
+
   categories = ['humanoid', 'beast', 'undead', 'chaos', 'dragon', 'spirit', 'npc', 'mount'];
 
   constructor(
@@ -73,6 +87,7 @@ export class BestiaryComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.systemFilter.set(this.gameSystemService.gameSystem());
     this.loadMonsters();
   }
 
@@ -92,7 +107,7 @@ export class BestiaryComponent implements OnInit {
     return monster.isCustom === true;
   }
 
-  toggleSystemFilter(system: 'all' | 'runequest' | 'dragonbane'): void {
+  toggleSystemFilter(system: 'all' | GameSystem): void {
     this.systemFilter.set(system);
   }
 
@@ -112,10 +127,16 @@ export class BestiaryComponent implements OnInit {
     }
   }
 
+  shortStatLabel(label: string): string {
+    return label.split(' (')[0];
+  }
+
   getSystemBadgeClass(gameSystem: string): string {
     if (gameSystem === 'runequest') return 'system-runequest';
     if (gameSystem === 'dragonbane') return 'system-dragonbane';
-    return 'system-both';
+    if (gameSystem === 'kal-arath') return 'system-kal-arath';
+    if (gameSystem === 'osric') return 'system-osric';
+    return '';
   }
 
   getCategoryLabel(category: string): string {
@@ -240,7 +261,9 @@ export class BestiaryComponent implements OnInit {
   getGameSystemName(system: string): string {
     if (system === 'runequest') return 'RuneQuest';
     if (system === 'dragonbane') return 'DragonBane';
-    return 'Both';
+    if (system === 'kal-arath') return 'Kal-Arath';
+    if (system === 'osric') return 'OSRIC';
+    return 'Universal';
   }
 
   getMonsterHitLocations(monster: Monster): { name: string; hp: number }[] | null {

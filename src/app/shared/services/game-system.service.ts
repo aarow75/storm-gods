@@ -4,6 +4,13 @@ import { filter } from 'rxjs/operators';
 import { GameSystem } from '@shared/models/game-system.model';
 import { GameSystemRules } from '@shared/rules/game-system-rules.interface';
 import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
+import { EquipmentDefinition, Resources } from '@characters/models/character.model';
+import {
+  RUNEQUEST_EQUIPMENT_LIST,
+  DRAGONBANE_EQUIPMENT_LIST,
+  OSRIC_EQUIPMENT_LIST,
+  KAL_ARATH_EQUIPMENT_LIST,
+} from '@shared/constants/equipment.constants';
 
 export type { GameSystem };
 
@@ -287,5 +294,26 @@ export class GameSystemService {
 
   getRules(): GameSystemRules {
     return getRulesForSystem(this.gameSystem());
+  }
+
+  getEquipmentList(): EquipmentDefinition[] {
+    if (this.gameSystem() === 'dragonbane') return DRAGONBANE_EQUIPMENT_LIST;
+    if (this.gameSystem() === 'osric') return OSRIC_EQUIPMENT_LIST;
+    if (this.gameSystem() === 'kal-arath') return KAL_ARATH_EQUIPMENT_LIST;
+    return RUNEQUEST_EQUIPMENT_LIST;
+  }
+
+  getCurrencyLabel(): string {
+    if (this.gameSystem() === 'dragonbane') return 'SP';
+    if (this.gameSystem() === 'osric') return 'GP';
+    if (this.gameSystem() === 'kal-arath') return 'Silver';
+    return 'L';
+  }
+
+  getPrimaryCurrencyKey(): keyof Resources {
+    if (this.gameSystem() === 'dragonbane') return 'silver';
+    if (this.gameSystem() === 'osric') return 'gold';
+    if (this.gameSystem() === 'kal-arath') return 'silver';
+    return 'lunars';
   }
 }
