@@ -30,20 +30,25 @@ const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   ],
   'kal-arath': [
     { filename: 'Kal-Arath-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' }
+  ],
+  osric: [
+    { filename: 'OSRIC-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' }
   ]
 };
 
 const ADVENTURE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   runequest: [],
   dragonbane: [],
-  'kal-arath': []
+  'kal-arath': [],
+  osric: []
 }
 
 
 const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
   runequest: [],
   dragonbane: [],
-  'kal-arath': []
+  'kal-arath': [],
+  osric: []
 };
 
 @Component({

@@ -1,0 +1,108 @@
+@import '../../../../shared/styles/variables.css';
+
+.abilities-group {
+  margin-bottom: var(--spacing-3xl);
+}
+
+.abilities-group h5 {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-lg);
+}
+
+.abilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.ability-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  background-color: var(--input-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ability-card:hover {
+  border-color: var(--accent-color);
+  background-color: var(--accent-bg);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ability-card.acquired {
+  border-color: var(--accent-color);
+  background: linear-gradient(135deg, var(--accent-bg) 0%, rgba(59, 130, 246, 0.05) 100%);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.ability-checkbox {
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: var(--accent-color);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.ability-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ability-name {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+}
+
+.ability-card.acquired .ability-name {
+  color: var(--accent-color);
+}
+
+.level-badge {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  background-color: var(--accent-color);
+  color: #fff;
+  padding: 1px var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  letter-spacing: 0.03em;
+}
+
+.ability-description {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.ability-card.acquired .ability-description {
+  color: var(--text-color);
+}
+
+.no-abilities {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .abilities-grid {
+    grid-template-columns: 1fr;
+  }
+}

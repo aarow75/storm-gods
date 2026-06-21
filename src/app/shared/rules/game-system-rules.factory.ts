@@ -3,11 +3,13 @@ import { GameSystemRules } from './game-system-rules.interface';
 import { RuneQuestRules } from './runequest-rules';
 import { DragonbaneRules } from './dragonbane-rules';
 import { KalArathRules } from './kal-arath-rules';
+import { OsricRules } from './osric-rules';
 
 const RULES: Record<GameSystem, GameSystemRules> = {
   runequest: new RuneQuestRules(),
   dragonbane: new DragonbaneRules(),
   'kal-arath': new KalArathRules(),
+  osric: new OsricRules(),
 };
 
 export function getRulesForSystem(system: GameSystem): GameSystemRules {

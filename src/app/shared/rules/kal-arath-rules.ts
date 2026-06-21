@@ -148,7 +148,8 @@ export class KalArathRules implements GameSystemRules {
     equipment: EquipmentItem[],
     weapons: Weapon[],
     _shields: Shield[],
-    _background?: BackgroundForBonuses
+    _background?: BackgroundForBonuses,
+    _armorType?: string
   ): DerivedStats {
     // TOU is stored in the CON field. HP = d6+TOU at creation; we show the average (4+TOU).
     const tou = stats.CON;

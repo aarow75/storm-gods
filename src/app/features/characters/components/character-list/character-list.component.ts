@@ -96,12 +96,20 @@ export class CharacterListComponent implements OnInit, OnDestroy {
     return character.gameSystem !== 'kal-arath';
   }
 
+  magicPointsLabel(character: Character): string {
+    return character.gameSystem === 'dragonbane' ? 'WP' : 'Magic Points';
+  }
+
   showDamageBonus(character: Character): boolean {
     return character.gameSystem !== 'kal-arath';
   }
 
+  showHealingRate(character: Character): boolean {
+    return character.gameSystem !== 'dragonbane';
+  }
+
   showMovement(character: Character): boolean {
-    return character.gameSystem !== 'dragonbane' && character.gameSystem !== 'kal-arath';
+    return character.gameSystem !== 'kal-arath';
   }
 
   showArmorRating(character: Character): boolean {

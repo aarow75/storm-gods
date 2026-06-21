@@ -19,11 +19,17 @@ export class CharacterSkills {
   @Input() getDbCategoryKeys!: () => string[];
   @Input() getDbSkillKeys!: (category: string) => string[];
 
+  @Input() occupation?: string;
   @Output() applyBonuses = new EventEmitter<void>();
 
   gameSystem = inject(GameSystemService).getSystemName();
 
   get heading(): string {
     return 'Skills';
+  }
+
+  get showThiefSkills(): boolean {
+    if (this.gameSystem !== 'OSRIC') return true;
+    return this.occupation === 'Thief' || this.occupation === 'Assassin';
   }
 }

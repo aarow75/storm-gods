@@ -47,13 +47,14 @@
         <div class="spells-list">
           @for (spell of dbSpellsForDiscipline(discipline); track $index) {
             <div class="spell-row">
-              <input
-                type="text"
-                [(ngModel)]="spell.name"
+              <select
                 [name]="'db-spell-' + discipline + '-' + $index"
-                placeholder="Spell name"
-                class="db-spell-input"
-              />
+                [(ngModel)]="spell.name"
+              >
+                @for (spellName of dbSpellListForDiscipline(discipline); track spellName) {
+                  <option [value]="spellName">{{ spellName }}</option>
+                }
+              </select>
               <button type="button" class="btn-remove-small" (click)="onRemoveDragonbaneSpell(dbSpellIndex(discipline, $index))">×</button>
             </div>
           }
@@ -61,6 +62,58 @@
         </div>
       </div>
     }
+  </div>
+} @else if (isOsric) {
+  <!-- OSRIC: Class-based spellcasting -->
+  <div class="magic-section">
+    @if (osricAvailableSpells.length > 0) {
+      <p class="magic-hint">Showing spells available to a level {{ level }} {{ occupation }}. Select from the dropdown or type a custom name.</p>
+    } @else {
+      <p class="magic-hint">No spells available — select a spellcasting class (Cleric, Druid, Illusionist, Magic User, Paladin, or Ranger) and set your level in the Resources section.</p>
+    }
+    <div class="spells-list">
+      @for (spell of magic.sorcery; track $index) {
+        <div class="spell-row">
+          <div class="spell-name-wrapper">
+            <select
+              [id]="'osric-spell-' + $index"
+              [value]="isCustomOsricSpell(spell.name) ? '' : spell.name"
+              (change)="onOsricSpellSelect($index, $any($event.target).value)"
+              [name]="'osric-spell-dropdown-' + $index"
+            >
+              <option value="">Custom</option>
+              @for (lvl of osricSpellLevels; track lvl) {
+                <optgroup [label]="'Level ' + lvl + ' Spells'">
+                  @for (name of osricSpellsForLevel(lvl); track name) {
+                    <option [value]="name">{{ name }}</option>
+                  }
+                </optgroup>
+              }
+            </select>
+            @if (isCustomOsricSpell(spell.name)) {
+              <input
+                type="text"
+                class="custom-spell-input"
+                [(ngModel)]="spell.name"
+                [name]="'osric-spell-custom-' + $index"
+                placeholder="Spell name"
+              />
+            }
+          </div>
+          <label class="level-label">Lvl</label>
+          <input
+            type="number"
+            [(ngModel)]="spell.points"
+            [name]="'osric-spell-level-' + $index"
+            min="1"
+            max="9"
+            class="spell-level-input"
+          />
+          <button type="button" class="btn-remove-small" (click)="onRemoveSpell('sorcery', $index)">×</button>
+        </div>
+      }
+      <button type="button" class="btn-add-small" (click)="onAddSpell('sorcery')">Add Spell</button>
+    </div>
   </div>
 } @else {
   <!-- RuneQuest magic -->

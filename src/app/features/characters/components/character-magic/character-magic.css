@@ -47,3 +47,13 @@
   flex: 1;
   min-width: 0;
 }
+
+.level-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.spell-level-input {
+  width: 48px;
+}

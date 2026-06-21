@@ -4,24 +4,35 @@
 <div class="derived-stats-grid">
   <div class="form-group">
     <label>Hit Points:</label>
-    <input type="number" [(ngModel)]="derivedStats.totalHitPoints" name="totalHP" readonly />
+    <input type="number" [(ngModel)]="derivedStats.totalHitPoints" name="totalHP" />
+    @if (isOsric && osricHpFormula) {
+    <span class="stat-breakdown">
+      {{ osricHpFormula }}
+      <button type="button" class="btn-roll-hp" (click)="rollOsricHp()">Roll</button>
+    </span>
+    }
   </div>
   @if (showMagicPoints) {
   <div class="form-group">
-    <label>Magic Points:</label>
+    <label>{{ magicPointsLabel }}:</label>
     <input type="number" [(ngModel)]="derivedStats.magicPoints" name="magicPoints" readonly />
   </div>
   }
   @if (showDamageBonus) {
   <div class="form-group">
-    <label>Damage Bonus:</label>
+    <label>{{ damageBonusLabel }}:</label>
     <input type="text" [(ngModel)]="derivedStats.damageBonus" name="damageBonus" readonly />
+    @if (isOsric) {
+    <span class="stat-breakdown">STR modifier (to-hit / damage)</span>
+    }
   </div>
   }
+  @if (showHealingRate) {
   <div class="form-group">
     <label>{{ healingRateLabel }}:</label>
     <input type="number" [(ngModel)]="derivedStats.healingRate" name="healingRate" readonly />
   </div>
+  }
   <div class="form-group">
     <label>Encumbrance:</label>
     <input type="text" [value]="derivedStats.totalEncumbrance + ' / ' + derivedStats.maxEncumbrance" readonly />
@@ -32,9 +43,28 @@
     <input type="number" [(ngModel)]="derivedStats.strikeRank" name="strikeRank" readonly />
     <span class="stat-breakdown">{{ strikeRankBreakdown }}</span>
   </div>
+  }
+  @if (showMovementRate) {
   <div class="form-group">
     <label>Movement Rate:</label>
     <input type="number" [(ngModel)]="derivedStats.movementRate" name="movementRate" readonly />
+  </div>
+  }
+  @if (isOsric) {
+  <div class="form-group">
+    <label>AC (Armor Class):</label>
+    <input type="number" [ngModel]="derivedStats.armorClass" name="armorClass" readonly />
+    <span class="stat-breakdown">Lower is better · 10 = unarmored · 3 = plate</span>
+  </div>
+  <div class="form-group">
+    <label>Missile Attack:</label>
+    <input type="text" [value]="missileAttackBonusText" readonly />
+    <span class="stat-breakdown">DEX reaction/attack adjustment</span>
+  </div>
+  <div class="form-group">
+    <label>Movement:</label>
+    <input type="number" [(ngModel)]="derivedStats.movementRate" name="movementRate" readonly />
+    <span class="stat-breakdown">×10 ft/round · 12 = 120 ft (unencumbered)</span>
   </div>
   }
   @if (derivedStats.encumbranceDefensePenalty > 0) {

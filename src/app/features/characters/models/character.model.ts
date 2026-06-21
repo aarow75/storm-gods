@@ -14,7 +14,7 @@ export interface Character {
   id: string;
   name: string;
   color?: string;
-  gameSystem?: 'runequest' | 'dragonbane' | 'kal-arath';
+  gameSystem?: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric';
   background: CharacterBackground;
   stats: CharacterStats;
   derivedStats: DerivedStats;
@@ -30,6 +30,7 @@ export interface Character {
   resources: Resources;
   equipment: EquipmentItem[];
   conditions?: string[]; // Active conditions like 'disease', 'poisoned', etc.
+  acquiredAbilities?: string[]; // OSRIC: names of race/class abilities the character has acquired
   notes: string;
   cultStatus?: CultStatus;
 }
@@ -67,6 +68,8 @@ export interface DerivedStats {
   healingRate: number;
   movementRate: number;
   strikeRank: number;
+  armorClass?: number; // OSRIC only — computed AC (10 = unarmored, lower = better)
+  missileAttackBonus?: number; // OSRIC only — DEX reaction/attack adjustment for missile weapons
   maxEncumbrance: number;
   totalEncumbrance: number;
   encumbranceDefensePenalty: number;
@@ -344,7 +347,14 @@ export const DEFAULT_RESOURCES: Resources = {
   wheels: 0,
   clacks: 0,
   reputation: 0,
-  ransom: 0
+  ransom: 0,
+  level: 1,
+  xp: 0,
+  silver: 0,
+  gold: 0,
+  fatePoints: 1,
+  copper: 0,
+  advancementMarks: 0,
 };
 
 function calculateArmorFromWornArmor(armorType?: string): ArmorLocations {

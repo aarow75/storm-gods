@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Magic, Spell, RuneSpell, DragonbaneSpell } from '@characters/models/character.model';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { KA_PACT_SPELLS, KA_DOOMS } from '@shared/rules/kal-arath-rules';
+import { getOsricAvailableSpells } from '@shared/rules/osric-rules';
+import { DB_SPELLS_BY_DISCIPLINE } from '@shared/rules/dragonbane-rules';
 
 const DB_DISCIPLINES = ['Animism', 'Elementalism', 'General Magic', 'Mentalism'] as const;
 
@@ -17,6 +19,8 @@ const DB_DISCIPLINES = ['Animism', 'Elementalism', 'General Magic', 'Mentalism']
 export class CharacterMagic {
   @Input() magic!: Magic;
   @Input() pact: string = '';
+  @Input() occupation: string = '';
+  @Input() level: number = 1;
   @Input() spiritMagicSpells!: string[];
   @Input() sorcerySpells!: string[];
   @Input() getAvailableRuneSpells!: () => RuneSpell[];
@@ -40,6 +44,10 @@ export class CharacterMagic {
 
   get isDragonbane(): boolean {
     return this.gameSystemService.gameSystem() === 'dragonbane';
+  }
+
+  get isOsric(): boolean {
+    return this.gameSystemService.gameSystem() === 'osric';
   }
 
   get heading(): string {
@@ -74,6 +82,11 @@ export class CharacterMagic {
     return -1;
   }
 
+  dbSpellListForDiscipline(discipline: string): string[] {
+    return DB_SPELLS_BY_DISCIPLINE[discipline] ?? [];
+  }
+
+
   isKaSpellKnown(name: string): boolean {
     return this.magic.sorcery.some(s => s.name === name);
   }
@@ -85,6 +98,31 @@ export class CharacterMagic {
     } else {
       this.magic.sorcery.push({ name: spell.name, points: spell.tier });
     }
+  }
+
+  get osricAvailableSpells(): { name: string; spellLevel: number }[] {
+    return getOsricAvailableSpells(this.occupation, this.level);
+  }
+
+  get osricSpellLevels(): number[] {
+    const levels = new Set(this.osricAvailableSpells.map(s => s.spellLevel));
+    return Array.from(levels).sort((a, b) => a - b);
+  }
+
+  osricSpellsForLevel(spellLevel: number): string[] {
+    return this.osricAvailableSpells
+      .filter(s => s.spellLevel === spellLevel)
+      .map(s => s.name);
+  }
+
+  onOsricSpellSelect(index: number, name: string): void {
+    const found = this.osricAvailableSpells.find(s => s.name === name);
+    this.magic.sorcery[index].name = name;
+    if (found) this.magic.sorcery[index].points = found.spellLevel;
+  }
+
+  isCustomOsricSpell(name: string): boolean {
+    return name !== '' && !this.osricAvailableSpells.some(s => s.name === name);
   }
 
   onAddSpell(type: 'spiritMagic' | 'sorcery'): void {

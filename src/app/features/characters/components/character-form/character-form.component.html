@@ -116,7 +116,10 @@
             <app-character-derived-stats
               [derivedStats]="character.derivedStats!"
               [stats]="character.stats"
+              [occupation]="character.background?.occupation"
+              [level]="character.resources?.level"
               (calculate)="calculateDerivedValues()"
+              (hpRolled)="onHpRolled($event)"
             ></app-character-derived-stats>
           </div>
           }
@@ -226,6 +229,7 @@
       <div class="form-col">
 
         <!-- Skills Component -->
+        @if (gameSystemService.gameSystem() !== 'osric' || osricClassHasThiefSkills) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('skills')">
           <div class="section-header" (click)="toggleSection('skills')">
             <h4>Skills</h4>
@@ -241,11 +245,13 @@
               [getSkillKeys]="getSkillKeys.bind(this)"
               [getDbCategoryKeys]="getDbCategoryKeys.bind(this)"
               [getDbSkillKeys]="getDbSkillKeys.bind(this)"
+              [occupation]="character.background?.occupation"
               (applyBonuses)="applyAllSkillBonuses()"
             ></app-character-skills>
           </div>
           }
         </div>
+        }
 
         <!-- Background Component -->
         <div class="form-section" [class.collapsed]="isSectionCollapsed('background')">
@@ -267,6 +273,26 @@
           </div>
           }
         </div>
+
+        <!-- Race & Class Abilities (OSRIC only) -->
+        @if (gameSystemService.gameSystem() === 'osric') {
+        <div class="form-section" [class.collapsed]="isSectionCollapsed('abilities')">
+          <div class="section-header" (click)="toggleSection('abilities')">
+            <h4>Race &amp; Class Abilities</h4>
+            <span class="collapse-toggle">{{ isSectionCollapsed('abilities') ? '▶' : '▼' }}</span>
+          </div>
+          @if (!isSectionCollapsed('abilities')) {
+          <div class="section-content">
+            <app-character-abilities
+              [occupation]="character.background?.occupation ?? ''"
+              [homeland]="character.background?.homeland ?? ''"
+              [acquiredAbilities]="character.acquiredAbilities || []"
+              (acquiredAbilitiesChange)="character.acquiredAbilities = $event"
+            ></app-character-abilities>
+          </div>
+          }
+        </div>
+        }
 
         <!-- Runes Component (RuneQuest only) -->
         @if (gameSystemService.gameSystem() === 'runequest') {
@@ -327,7 +353,8 @@
         </div>
         }
 
-        <!-- Magic Component -->
+        <!-- Magic Component (hidden for OSRIC non-spellcasting classes) -->
+        @if (gameSystemService.gameSystem() !== 'osric' || osricClassUsesMagic) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('magic')">
           <div class="section-header" (click)="toggleSection('magic')">
             <h4>Magic</h4>
@@ -338,6 +365,8 @@
             <app-character-magic
               [magic]="character.magic!"
               [pact]="character.background?.cult ?? ''"
+              [occupation]="character.background?.occupation ?? ''"
+              [level]="character.resources?.level ?? 1"
               [spiritMagicSpells]="spiritMagicSpells"
               [sorcerySpells]="sorcerySpells"
               [getAvailableRuneSpells]="getAvailableRuneSpells.bind(this)"
@@ -356,6 +385,7 @@
           </div>
           }
         </div>
+        }
 
         <!-- Resources Component -->
         <div class="form-section" [class.collapsed]="isSectionCollapsed('resources')">
@@ -372,8 +402,8 @@
           }
         </div>
 
-        <!-- Conditions Component (not for Kal-Arath) -->
-        @if (gameSystemService.gameSystem() !== 'kal-arath') {
+        <!-- Conditions Component (not for Kal-Arath or OSRIC) -->
+        @if (gameSystemService.gameSystem() !== 'kal-arath' && gameSystemService.gameSystem() !== 'osric') {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('conditions')">
           <div class="section-header" (click)="toggleSection('conditions')">
             <h4>Conditions</h4>

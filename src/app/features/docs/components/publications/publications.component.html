@@ -263,6 +263,159 @@
     </div>
   </div>
 </div>
+} @else if (isOsric) {
+<div class="publications-page">
+  <header class="page-header">
+    <h2>OSRIC Publications</h2>
+    <p class="page-subtitle">Old School Reference and Index Compilation — retroclone compatible with 1st Edition AD&D</p>
+  </header>
+
+  <div class="publications-container">
+    @if (osricCoreRules.length > 0) {
+    <div class="section">
+      <h3>Core Rules</h3>
+      <p class="section-description">The OSRIC rules are free and open — the PDF is available at no cost and print editions are sold at cost</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-owned">Owned</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of osricCoreRules; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-owned">
+            <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+          </div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (osricSupplements.length > 0) {
+    <div class="section">
+      <h3>Supplements</h3>
+      <p class="section-description">Monster references, NPC collections, and other OSRIC-original accessories</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-owned">Owned</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of osricSupplements; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-owned">
+            <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+          </div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (osricAdventures.length > 0) {
+    <div class="section">
+      <h3>Adventures & Modules</h3>
+      <p class="section-description">Adventures written natively for OSRIC</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-levels">Levels</div>
+          <div class="col-owned">Owned</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of osricAdventures; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-levels">{{ pub.levels || '—' }}</div>
+          <div class="col-owned">
+            <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+          </div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (osricTsrAdventures.length > 0 || osricTsrSupplements.length > 0) {
+    <div class="section">
+      <h3>Classic AD&D Compatible (TSR)</h3>
+      <p class="section-description">Original TSR modules and supplements fully compatible with OSRIC — sorted by publication year</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-levels">Levels</div>
+          <div class="col-owned">Owned</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of osricTsrSupplements; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-levels">{{ pub.levels || 'Supplement' }}</div>
+          <div class="col-owned">
+            <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+          </div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+        @for (pub of osricTsrAdventures; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-levels">{{ pub.levels || '—' }}</div>
+          <div class="col-owned">
+            <input type="checkbox" [checked]="pub.purchased || false" disabled class="purchase-checkbox" />
+          </div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ osricCoreRules.length }}</div>
+        <div class="stat-label">Core Rules</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ osricSupplements.length }}</div>
+        <div class="stat-label">Supplements</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ osricAdventures.length }}</div>
+        <div class="stat-label">OSRIC Adventures</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ osricTsrAdventures.length + osricTsrSupplements.length }}</div>
+        <div class="stat-label">TSR Compatible</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ publications.length }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+  </div>
+</div>
 } @else if (isKalArath) {
 <div class="publications-page">
   <header class="page-header">

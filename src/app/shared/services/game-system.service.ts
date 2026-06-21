@@ -18,7 +18,7 @@ export interface GameSystemData {
 })
 export class GameSystemService {
   private readonly STORAGE_KEY = 'gameSystem';
-  private static readonly SYSTEM_PATTERN = /^\/(runequest|dragonbane|kal-arath)(?:\/|$)/;
+  private static readonly SYSTEM_PATTERN = /^\/(runequest|dragonbane|kal-arath|osric)(?:\/|$)/;
 
   gameSystem = signal<GameSystem>(this.loadLastUsed());
 
@@ -110,6 +110,43 @@ export class GameSystemService {
     ]
   };
 
+  private osric: GameSystemData = {
+    // In OSRIC, "cult" maps to alignment (the 9-position law/chaos + good/evil matrix)
+    cults: [
+      'Lawful Good',
+      'Neutral Good',
+      'Chaotic Good',
+      'Lawful Neutral',
+      'True Neutral',
+      'Chaotic Neutral',
+      'Lawful Evil',
+      'Neutral Evil',
+      'Chaotic Evil',
+    ],
+    // Character classes from the OSRIC rulebook
+    occupations: [
+      'Assassin',
+      'Cleric',
+      'Druid',
+      'Fighter',
+      'Illusionist',
+      'Magic User',
+      'Paladin',
+      'Ranger',
+      'Thief',
+    ],
+    // Playable races from the OSRIC rulebook
+    homelands: [
+      'Human',
+      'Dwarf',
+      'Elf',
+      'Gnome',
+      'Half-Elf',
+      'Half-Orc',
+      'Halfling',
+    ],
+  };
+
   private dragonbane: GameSystemData = {
     // In Dragonbane, "cults" become more generic affiliations/beliefs
     cults: [
@@ -160,7 +197,7 @@ export class GameSystemService {
 
   private loadLastUsed(): GameSystem {
     const stored = localStorage.getItem(this.STORAGE_KEY);
-    if (stored === 'dragonbane' || stored === 'kal-arath') return stored;
+    if (stored === 'dragonbane' || stored === 'kal-arath' || stored === 'osric') return stored;
     return 'runequest';
   }
 
@@ -182,7 +219,7 @@ export class GameSystemService {
   /** Navigate to the equivalent page under the other game system. */
   switchSystem(system: GameSystem): void {
     if (system === this.gameSystem()) return;
-    const match = this.router.url.match(/^\/(runequest|dragonbane|kal-arath)(.*)$/);
+    const match = this.router.url.match(/^\/(runequest|dragonbane|kal-arath|osric)(.*)$/);
     const tail = match?.[2];
     const target = tail && tail !== '/' ? tail : '/characters';
     this.router.navigateByUrl(`/${system}${target}`);
@@ -190,51 +227,61 @@ export class GameSystemService {
 
   getCults(): string[] {
     if (this.gameSystem() === 'kal-arath') return this.kalArath.cults;
+    if (this.gameSystem() === 'osric') return this.osric.cults;
     return this.gameSystem() === 'runequest' ? this.runequest.cults : this.dragonbane.cults;
   }
 
   getOccupations(): string[] {
     if (this.gameSystem() === 'kal-arath') return this.kalArath.occupations;
+    if (this.gameSystem() === 'osric') return this.osric.occupations;
     return this.gameSystem() === 'runequest' ? this.runequest.occupations : this.dragonbane.occupations;
   }
 
   getHomelands(): string[] {
     if (this.gameSystem() === 'kal-arath') return this.kalArath.homelands;
+    if (this.gameSystem() === 'osric') return this.osric.homelands;
     return this.gameSystem() === 'runequest' ? this.runequest.homelands : this.dragonbane.homelands;
   }
 
   getSystemName(): string {
     if (this.gameSystem() === 'kal-arath') return 'Kal-Arath';
+    if (this.gameSystem() === 'osric') return 'OSRIC';
     return this.gameSystem() === 'runequest' ? 'RuneQuest' : 'Dragonbane';
   }
 
   getHomelandLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Origin';
+    if (this.gameSystem() === 'osric') return 'Race';
     return this.gameSystem() === 'runequest' ? 'Homeland' : 'Kin (Race)';
   }
 
   getOccupationLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Background';
+    if (this.gameSystem() === 'osric') return 'Class';
     return this.gameSystem() === 'runequest' ? 'Occupation' : 'Profession';
   }
 
   getCultLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Demonic Pact';
+    if (this.gameSystem() === 'osric') return 'Alignment';
     return this.gameSystem() === 'runequest' ? 'Cult/Religion' : 'Belief';
   }
 
   getSelectHomelandLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Select Origin';
+    if (this.gameSystem() === 'osric') return 'Select Race';
     return this.gameSystem() === 'runequest' ? 'Select Homeland' : 'Select Kin';
   }
 
   getSelectOccupationLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Select Background';
+    if (this.gameSystem() === 'osric') return 'Select Class';
     return this.gameSystem() === 'runequest' ? 'Select Occupation' : 'Select Profession';
   }
 
   getSelectCultLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Select Demonic Pact';
+    if (this.gameSystem() === 'osric') return 'Select Alignment';
     return this.gameSystem() === 'runequest' ? 'Select Cult' : 'Select Belief';
   }
 

@@ -7,7 +7,7 @@ import {
   DungeonToken, DungeonTokenType, DUNGEON_TOKEN_DEFS, CombatMapTemplate,
 } from '@combat/models/combat.model';
 import { Character } from '@characters/models/character.model';
-import { WEAPON_LIST, calculateHitLocations } from '@shared/rules/game-rules';
+import { calculateHitLocations } from '@shared/rules/game-rules';
 import { CombatService } from '@combat/services/combat.service';
 import { CombatLogService } from '@combat/services/combat-log.service';
 import { DiceService } from '@shared/services/dice.service';
@@ -515,7 +515,7 @@ export class CombatMapComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const weapon = WEAPON_LIST.find(w => w.name === weaponName);
+    const weapon = this.gameSystemService.getRules().getWeaponList().find(w => w.name === weaponName);
     const isMissileWeapon = weapon?.isMissile ?? false;
 
     // If out of melee range and weapon is not a missile weapon, end turn automatically

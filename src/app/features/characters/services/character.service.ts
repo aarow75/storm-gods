@@ -61,7 +61,7 @@ export class CharacterService implements DataPort {
     if (!char.derivedStats) {
       const rules = getRulesForSystem(char.gameSystem || 'runequest');
       char.derivedStats = char.stats
-        ? rules.calculateDerivedStats(char.stats, char.equipment || [], char.weapons || [], char.shields || [])
+        ? rules.calculateDerivedStats(char.stats, char.equipment || [], char.weapons || [], char.shields || [], undefined, char.armorType)
         : { ...DEFAULT_DERIVED_STATS };
     }
 
@@ -155,6 +155,11 @@ export class CharacterService implements DataPort {
     // Ensure notes exist
     if (!char.notes) {
       char.notes = '';
+    }
+
+    // Ensure acquiredAbilities exists (OSRIC race/class abilities)
+    if (!char.acquiredAbilities) {
+      char.acquiredAbilities = [];
     }
 
     // Ensure cult status exists

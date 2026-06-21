@@ -2,6 +2,13 @@
 
 /* Character Weapons Specific Styles */
 
+.weapon-skill-fixed {
+  display: block;
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary, #555);
+}
+
 .weapon-warning {
   display: block;
   margin-top: 4px;

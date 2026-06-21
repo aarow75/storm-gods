@@ -37,8 +37,40 @@
   <button type="button" class="btn-calculate" (click)="applyArmorToAll()">
     Apply to All
   </button>
+} @else if (isOsric) {
+  <!-- OSRIC: Armor type dropdown determines AC (descending scale, lower = better) -->
+  <div class="form-group">
+    <label for="armor-type">Armor Type:</label>
+    <select
+      id="armor-type"
+      [(ngModel)]="armorType"
+      (ngModelChange)="armorTypeChange.emit($event)"
+      name="armor-type"
+    >
+      @for (type of armorTypes; track type.name) {
+        <option [value]="type.name">{{ type.name }} (AC {{ type.points }})</option>
+      }
+    </select>
+  </div>
+  <p class="armor-hint">Shield adds −1 to AC. DEX modifier is applied automatically in Derived Stats.</p>
+} @else if (isDragonbane) {
+  <!-- Dragonbane: select armor type, AR is derived -->
+  <div class="form-group">
+    <label for="armor-type">Armor Type:</label>
+    <select
+      id="armor-type"
+      [(ngModel)]="armorType"
+      (ngModelChange)="armorTypeChange.emit($event)"
+      name="armor-type"
+    >
+      @for (type of armorTypes; track type.name) {
+        <option [value]="type.name">{{ type.name }} (AR {{ type.points }})</option>
+      }
+    </select>
+  </div>
+  <p class="armor-hint">AR {{ currentArmorRating }}. Shield adds +1 AR.</p>
 } @else {
-  <!-- Dragonbane: Single armor rating -->
+  <!-- Kal-Arath: Single armor rating -->
   <div class="single-armor">
     <div class="form-group">
       <label for="armor-rating">Armor Rating:</label>

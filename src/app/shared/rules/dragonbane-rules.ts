@@ -157,6 +157,31 @@ function getAgeModifiers(age: number): Partial<Record<keyof CharacterStats, numb
   return {};
 }
 
+export const DB_SPELLS_BY_DISCIPLINE: Record<string, string[]> = {
+  'Animism': [
+    'Animal Friendship', 'Bewitch Animal', 'Commune with Nature', 'Drain Life Force',
+    'Find the Path', 'Life Sense', "Nature's Armor", "Nature's Servant",
+    'Pass Without Trace', 'Plant Growth', 'Purify', 'Spirit Ward', 'Tree Walk', 'Warp Wood',
+  ],
+  'Elementalism': [
+    'Air Elemental', 'Breathe Water', 'Call Lightning', 'Dust Devil', 'Earth Strength',
+    'Earthquake', 'Extinguish', 'Fire Elemental', 'Flaming Weapon', 'Freeze',
+    'Gust of Wind', 'Ice Blast', 'Stone Skin', 'Tornado', 'Water Elemental',
+  ],
+  'General Magic': [
+    'Cantrip', 'Comprehend Language', 'Fetch', 'Flaming Hands', 'Harm', 'Heal',
+    'Identify', 'Illusion', 'Knock', 'Levitate', 'Light', 'Lock', 'Mend',
+    'Missile Shield', 'Protection', 'Push/Pull', 'Reveal/Conceal', 'Second Sight',
+    'Silence', 'Sleep', 'Sneak', 'Stun',
+  ],
+  'Mentalism': [
+    'Calm', 'Daze', 'Detect Thoughts', 'Dominate', 'Fear', 'Forget', 'Hallucination',
+    'Haste', 'Hex', 'Invisibility', 'Mental Blast', 'Mind Bond', 'Mind Shield',
+    'Paralyze', 'Project Mind', 'See Through Eyes', 'Suggestion', 'Telekinesis',
+    'Terror', 'True Sight',
+  ],
+};
+
 export class DragonbaneRules implements GameSystemRules {
   getStatDefinitions(): StatDefinition[] {
     return STAT_DEFINITIONS;
@@ -167,7 +192,8 @@ export class DragonbaneRules implements GameSystemRules {
     equipment: EquipmentItem[],
     weapons: Weapon[],
     shields: Shield[],
-    background?: BackgroundForBonuses
+    background?: BackgroundForBonuses,
+    _armorType?: string
   ): DerivedStats {
     const totalHP = stats.CON;
 

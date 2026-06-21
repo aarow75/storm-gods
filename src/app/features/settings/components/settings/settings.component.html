@@ -25,6 +25,12 @@
         class="system-toggle-btn system-toggle-ka">
         Kal-Arath
       </button>
+      <button
+        (click)="switchSystem('osric')"
+        [class.active]="gameSystemService.gameSystem() === 'osric'"
+        class="system-toggle-btn system-toggle-os">
+        OSRIC
+      </button>
     </div>
   </div>
 

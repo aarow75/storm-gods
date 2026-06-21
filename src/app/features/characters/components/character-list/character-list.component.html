@@ -64,14 +64,16 @@
         }
         @if (showMagicPoints(character)) {
         <div class="derived-stat">
-          <span class="derived-label">Magic Points</span>
+          <span class="derived-label">{{ magicPointsLabel(character) }}</span>
           <span class="derived-value">{{ character.derivedStats.magicPoints }}</span>
         </div>
         }
+        @if (showHealingRate(character)) {
         <div class="derived-stat">
           <span class="derived-label">{{ healingRateLabel(character) }}</span>
           <span class="derived-value">{{ character.derivedStats.healingRate }}</span>
         </div>
+        }
         @if (showMovement(character)) {
         <div class="derived-stat">
           <span class="derived-label">Movement</span>

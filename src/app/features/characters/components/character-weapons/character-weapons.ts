@@ -79,8 +79,14 @@ export class CharacterWeapons {
   getSkillsForWeapon(weapon: Weapon): string[] | null {
     const def = this.weaponList.find(w => w.name === weapon.name);
     if (!def?.defaultSkill) return null;
-    if (this.gameSystem === 'dragonbane') return this.weaponSkills;
+    if (this.gameSystem === 'dragonbane') return null;
     if (this.gameSystem === 'runequest') return this.combatSkills;
     return null;
+  }
+
+  getFixedSkill(weapon: Weapon): string | null {
+    if (this.gameSystem !== 'dragonbane') return null;
+    const def = this.weaponList.find(w => w.name === weapon.name);
+    return def?.defaultSkill ?? null;
   }
 }

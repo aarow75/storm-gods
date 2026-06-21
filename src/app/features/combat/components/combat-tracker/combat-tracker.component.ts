@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CombatParticipant, Monster, DEFAULT_MONSTERS } from '@combat/models/combat.model';
 import { Character } from '@characters/models/character.model';
-import { WEAPON_LIST, SHIELD_LIST, calculateHitLocations, getSizeModifier, getDexterityModifier, canWeaponParry } from '@shared/rules/game-rules';
+import { calculateHitLocations, getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
 import { Monster as BestiaryMonster } from '@bestiary/models/monster.model';
 import { MONSTERS as BESTIARY_MONSTERS } from '@bestiary/constants/monsters.constants';
 import { CharacterService } from '@characters/services/character.service';
@@ -107,6 +107,12 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     private characterUpdateService: CharacterUpdateService,
     public gameSystemService: GameSystemService
   ) {}
+
+  private get weaponList() { return this.gameSystemService.getRules().getWeaponList(); }
+  private get shieldList() { return this.gameSystemService.getRules().getShieldList(); }
+  private canWeaponParry(weaponName: string): boolean {
+    return this.weaponList.find(w => w.name === weaponName)?.canParry ?? false;
+  }
 
   get combatLog() {
     return this.combatLogService.getEntries();
@@ -456,7 +462,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   // ── Rate of fire ─────────────────────────────────────────────────────────
 
   getWeaponRateOfFire(participant: CombatParticipant): number {
-    const def = WEAPON_LIST.find(w => w.name === participant.selectedWeapon);
+    const def = this.weaponList.find(w => w.name === participant.selectedWeapon);
     if (!def?.isMissile) return Infinity; // melee: unlimited within pendingAttack constraint
     return def.rateOfFire ?? 1;
   }
@@ -468,7 +474,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   getWeaponMissileInfo(participant: CombatParticipant): { range: string; rof: number } | null {
-    const def = WEAPON_LIST.find(w => w.name === participant.selectedWeapon);
+    const def = this.weaponList.find(w => w.name === participant.selectedWeapon);
     if (!def?.isMissile) return null;
     return { range: def.range ?? '-', rof: def.rateOfFire ?? 1 };
   }
@@ -781,16 +787,16 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const shield = character.shields?.find(s => s.name === parryItem);
       if (shield) return true;
       const weapon = character.weapons.find(w => w.name === parryItem);
-      return weapon ? canWeaponParry(weapon.name) : false;
+      return weapon ? this.canWeaponParry(weapon.name) : false;
     }
     const monster = this.monsters.find(m => m.id === participant.monsterId);
     if (!monster) return false;
     const parryItem = participant.selectedParryItem;
-    return monster.weapons.some(w => w.name === parryItem && canWeaponParry(w.name));
+    return monster.weapons.some(w => w.name === parryItem && this.canWeaponParry(w.name));
   }
 
   getParryRestrictionReason(weaponName: string): string {
-    const weapon = WEAPON_LIST.find(w => w.name === weaponName);
+    const weapon = this.weaponList.find(w => w.name === weaponName);
     if (!weapon) return '';
     if (weapon.canParry) return '';
     if (weapon.isMissile) return 'Ranged weapons cannot parry';
@@ -1096,11 +1102,11 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const character = this.characters.find(c => c.id === participant.characterId);
       if (!character) return [];
       const shields = (character.shields || []).map(s => s.name);
-      const weapons = (character.weapons || []).filter(w => canWeaponParry(w.name)).map(w => w.name);
+      const weapons = (character.weapons || []).filter(w => this.canWeaponParry(w.name)).map(w => w.name);
       return [...shields, ...weapons];
     } else {
       const monster = this.monsters.find(m => m.id === participant.monsterId);
-      return (monster?.weapons || []).filter(w => canWeaponParry(w.name)).map(w => w.name);
+      return (monster?.weapons || []).filter(w => this.canWeaponParry(w.name)).map(w => w.name);
     }
   }
 
@@ -1150,19 +1156,19 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       if (!parryItem || !character) return 0;
       const shield = character.shields?.find(s => s.name === parryItem);
       if (shield) {
-        const maxHP = SHIELD_LIST.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
+        const maxHP = this.shieldList.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
         return shield.currentHitPoints ?? maxHP;
       }
       const weapon = character.weapons.find(w => w.name === parryItem);
       if (weapon) {
-        const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 0;
+        const maxHP = this.weaponList.find(wd => wd.name === weapon.name)?.hitPoints ?? 0;
         return weapon.currentHitPoints ?? maxHP;
       }
     } else {
       const monster = this.monsters.find(m => m.id === participant.monsterId);
       const weapon = monster?.weapons.find(w => w.name === participant.selectedParryItem);
       if (weapon) {
-        const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 8;
+        const maxHP = this.weaponList.find(wd => wd.name === weapon.name)?.hitPoints ?? 8;
         return weapon.hitPoints ?? maxHP;
       }
     }
@@ -1176,14 +1182,14 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       if (!parryItem || !character) return 0;
       const shield = character.shields?.find(s => s.name === parryItem);
       if (shield) {
-        return SHIELD_LIST.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
+        return this.shieldList.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
       }
       const weapon = character.weapons.find(w => w.name === parryItem);
-      return weapon ? (WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 0) : 0;
+      return weapon ? (this.weaponList.find(wd => wd.name === weapon.name)?.hitPoints ?? 0) : 0;
     }
     const monster = this.monsters.find(m => m.id === participant.monsterId);
     const weapon = monster?.weapons.find(w => w.name === participant.selectedWeapon);
-    return weapon ? (WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 8) : 0;
+    return weapon ? (this.weaponList.find(wd => wd.name === weapon.name)?.hitPoints ?? 8) : 0;
   }
 
   getWeaponHPDisplay(participant: CombatParticipant): string {
@@ -1204,7 +1210,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       if (!parryItem || !character) return;
       const shield = character.shields?.find(s => s.name === parryItem);
       if (shield) {
-        const maxHP = SHIELD_LIST.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
+        const maxHP = this.shieldList.find(sd => sd.name === shield.name)?.hitPoints ?? 0;
         shield.currentHitPoints = Math.max(0, (shield.currentHitPoints ?? maxHP) - damage);
         this.characterService.updateCharacter(character);
         this.characters = this.characterService.getCharacters();
@@ -1212,7 +1218,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       }
       const weapon = character.weapons.find(w => w.name === parryItem);
       if (weapon) {
-        const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 0;
+        const maxHP = this.weaponList.find(wd => wd.name === weapon.name)?.hitPoints ?? 0;
         weapon.currentHitPoints = Math.max(0, (weapon.currentHitPoints ?? maxHP) - damage);
         this.characterService.updateCharacter(character);
         this.characters = this.characterService.getCharacters();
@@ -1221,7 +1227,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const monster = this.monsters.find(m => m.id === participant.monsterId);
       const weapon = monster?.weapons.find(w => w.name === participant.selectedParryItem);
       if (weapon && monster) {
-        const maxHP = WEAPON_LIST.find(wd => wd.name === weapon.name)?.hitPoints ?? 8;
+        const maxHP = this.weaponList.find(wd => wd.name === weapon.name)?.hitPoints ?? 8;
         weapon.hitPoints = Math.max(0, (weapon.hitPoints ?? maxHP) - damage);
         if (this.isCustomMonster(monster.id)) this.combatService.saveMonster(monster);
       }
@@ -1398,7 +1404,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const weaponName = attacker.selectedWeapon;
     if (!weaponName) return { blocked: false, message: '' };
 
-    const weapon = WEAPON_LIST.find(w => w.name === weaponName);
+    const weapon = this.weaponList.find(w => w.name === weaponName);
     if (!weapon) return { blocked: false, message: '' };
 
     // Missile weapons can attack from any distance

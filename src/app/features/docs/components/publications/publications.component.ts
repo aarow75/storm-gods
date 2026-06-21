@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { RUNEQUEST_PUBLICATIONS } from '@docs/constants/runequest-publications.constants';
 import { DRAGONBANE_PUBLICATIONS } from '@docs/constants/dragonbane-publications.constants';
+import { OSRIC_PUBLICATIONS } from '@docs/constants/osric-publications.constants';
 import { GameSystemService } from '@shared/services/game-system.service';
 
 @Component({
@@ -20,6 +21,8 @@ export class PublicationsComponent {
       return RUNEQUEST_PUBLICATIONS;
     } else if (this.gameSystemService.gameSystem() === 'dragonbane') {
       return DRAGONBANE_PUBLICATIONS;
+    } else if (this.gameSystemService.gameSystem() === 'osric') {
+      return OSRIC_PUBLICATIONS;
     } else {
       return [];
     }
@@ -35,6 +38,30 @@ export class PublicationsComponent {
 
   get isRunequest() {
     return this.gameSystemService.gameSystem() === 'runequest';
+  }
+
+  get isOsric() {
+    return this.gameSystemService.gameSystem() === 'osric';
+  }
+
+  get osricCoreRules() {
+    return OSRIC_PUBLICATIONS.filter(p => p.category === 'rules');
+  }
+
+  get osricSupplements() {
+    return OSRIC_PUBLICATIONS.filter(p => p.category === 'supplement' && !p.isTsr);
+  }
+
+  get osricTsrSupplements() {
+    return OSRIC_PUBLICATIONS.filter(p => p.category === 'supplement' && p.isTsr);
+  }
+
+  get osricAdventures() {
+    return OSRIC_PUBLICATIONS.filter(p => p.category === 'adventure' && !p.isTsr);
+  }
+
+  get osricTsrAdventures() {
+    return OSRIC_PUBLICATIONS.filter(p => p.category === 'adventure' && p.isTsr);
   }
 
   get rq2Publications() {

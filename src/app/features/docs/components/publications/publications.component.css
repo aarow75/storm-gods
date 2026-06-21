@@ -162,6 +162,19 @@
   font-weight: 500;
 }
 
+.col-levels {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.page-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin: var(--spacing-xs) 0 0;
+}
+
 .dragonbane-table .table-header,
 .dragonbane-table .table-row {
   grid-template-columns: 2fr 45px 40px 1fr;
@@ -170,6 +183,16 @@
 .dragonbane-table .table-header:has(.col-publisher),
 .dragonbane-table .table-row:has(.col-publisher) {
   grid-template-columns: 2fr 45px 120px 40px 1.5fr;
+}
+
+.dragonbane-table .table-header:has(.col-levels),
+.dragonbane-table .table-row:has(.col-levels) {
+  grid-template-columns: 2fr 45px 120px 55px 40px 1.5fr;
+}
+
+.dragonbane-table .table-header:has(.col-levels):not(:has(.col-publisher)),
+.dragonbane-table .table-row:has(.col-levels):not(:has(.col-publisher)) {
+  grid-template-columns: 2fr 45px 55px 40px 1.5fr;
 }
 
 .col-owned {

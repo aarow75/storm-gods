@@ -1,0 +1,65 @@
+@if (raceAbilities.length > 0) {
+  <div class="abilities-group">
+    <h5>Racial Abilities ({{ homeland }})</h5>
+    <div class="abilities-grid">
+      @for (ability of raceAbilities; track ability.name) {
+        <div
+          class="ability-card"
+          [class.acquired]="isAcquired(ability.name)"
+          (click)="toggle(ability.name)">
+          <input
+            type="checkbox"
+            [id]="'ability-' + ability.name"
+            [checked]="isAcquired(ability.name)"
+            (change)="toggle(ability.name)"
+            (click)="$event.stopPropagation()"
+            class="ability-checkbox">
+          <label [for]="'ability-' + ability.name" class="ability-label" (click)="$event.stopPropagation()">
+            <span class="ability-name">
+              {{ ability.name }}
+              @if (ability.minLevel) {
+                <span class="level-badge">Lvl {{ ability.minLevel }}+</span>
+              }
+            </span>
+            <span class="ability-description">{{ ability.description }}</span>
+          </label>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (classAbilities.length > 0) {
+  <div class="abilities-group">
+    <h5>Class Abilities ({{ occupation }})</h5>
+    <div class="abilities-grid">
+      @for (ability of classAbilities; track ability.name) {
+        <div
+          class="ability-card"
+          [class.acquired]="isAcquired(ability.name)"
+          (click)="toggle(ability.name)">
+          <input
+            type="checkbox"
+            [id]="'ability-' + ability.name"
+            [checked]="isAcquired(ability.name)"
+            (change)="toggle(ability.name)"
+            (click)="$event.stopPropagation()"
+            class="ability-checkbox">
+          <label [for]="'ability-' + ability.name" class="ability-label" (click)="$event.stopPropagation()">
+            <span class="ability-name">
+              {{ ability.name }}
+              @if (ability.minLevel) {
+                <span class="level-badge">Lvl {{ ability.minLevel }}+</span>
+              }
+            </span>
+            <span class="ability-description">{{ ability.description }}</span>
+          </label>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+@if (raceAbilities.length === 0 && classAbilities.length === 0) {
+  <p class="no-abilities">Select a race and class above to see available abilities.</p>
+}

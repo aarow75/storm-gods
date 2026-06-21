@@ -1,5 +1,5 @@
 @if (heading) {
-<h4>{{ heading }} <button type="button" class="btn-calculate" (click)="applyBonuses.emit()">Apply Skill Bonuses</button></h4>
+<h4>{{ heading }} @if (showThiefSkills) {<button type="button" class="btn-calculate" (click)="applyBonuses.emit()">Apply Skill Bonuses</button>}</h4>
 }
 @if (gameSystem === 'RuneQuest') {
   <div class="skills-section">
@@ -53,6 +53,36 @@
     </div>
     }
   </div>
+} @else if (gameSystem === 'OSRIC') {
+  @if (showThiefSkills) {
+  <div class="skills-section">
+    @for (category of getDbCategoryKeys(); track category) {
+    <div class="skill-category">
+      <h5>{{ category }}</h5>
+      <div class="skills-grid">
+        @for (skill of getDbSkillKeys(category); track skill) {
+        <div class="form-group skill-group">
+          <label [for]="skill">{{ skill }}:</label>
+          <div class="skill-input-wrapper">
+            <input
+              type="number"
+              [id]="skill"
+              [(ngModel)]="skills[skill]"
+              [name]="skill"
+              min="0"
+              max="100"
+            />
+            <span class="acquired-badge">{{ skills[skill] > 0 ? skills[skill] + '%' : '—' }}</span>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+  </div>
+  } @else {
+  <p class="skills-hint">No advancement skills for this class. Thief skills are only available to Thieves and Assassins.</p>
+  }
 } @else {
   <div class="skills-section">
     @for (category of getDbCategoryKeys(); track category) {

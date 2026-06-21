@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { CombatParticipant, Monster, CombatLogEntry, CombatMapState, CombatMapTemplate } from '@combat/models/combat.model';
-import { WEAPON_LIST } from '@shared/rules/game-rules';
+import { GameSystemService } from '@shared/services/game-system.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CombatService {
+  constructor(private gameSystemService: GameSystemService) {}
   private readonly STORAGE_KEY = 'runequest-combat';
   private readonly MONSTERS_KEY = 'runequest-monsters';
   private readonly LOG_HISTORY_KEY = 'runequest-combat-log-history';
@@ -57,7 +58,7 @@ export class CombatService {
   calculateFinalStrikeRank(baseStrikeRank: number, weaponName?: string): number {
     if (!weaponName) return baseStrikeRank;
 
-    const modifier = WEAPON_LIST.find(w => w.name === weaponName)?.strikeRank ?? 0;
+    const modifier = this.gameSystemService.getRules().getWeaponList().find(w => w.name === weaponName)?.strikeRank ?? 0;
     return baseStrikeRank + modifier;
   }
 

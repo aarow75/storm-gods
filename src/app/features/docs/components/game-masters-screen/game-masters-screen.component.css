@@ -124,6 +124,15 @@
   transition: background-color 0.15s;
 }
 
+.gm-table td.turn-auto {
+  font-weight: 700;
+  color: #6d28d9;
+}
+
+.gm-table tr.table-separator td {
+  border-top: 2px solid rgba(0, 0, 0, 0.15);
+}
+
 .gm-table-small {
   width: 100%;
   border-collapse: collapse;

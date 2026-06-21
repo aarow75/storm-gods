@@ -35,18 +35,24 @@
         />
       </div>
       @if (getSkillsForWeapon(weapon); as skills) {
-      <div class="form-group">
-        <label [attr.for]="'weapon-skill-' + $index">Skill</label>
-        <select
-          [id]="'weapon-skill-' + $index"
-          [(ngModel)]="weapon.skill"
-          [name]="'weapon-skill-' + $index"
-        >
-          @for (skill of skills; track skill) {
-            <option [value]="skill">{{ skill }}</option>
-          }
-        </select>
-      </div>
+        <div class="form-group">
+          <label [attr.for]="'weapon-skill-' + $index">Skill</label>
+          <select
+            [id]="'weapon-skill-' + $index"
+            [(ngModel)]="weapon.skill"
+            [name]="'weapon-skill-' + $index"
+          >
+            @for (skill of skills; track skill) {
+              <option [value]="skill">{{ skill }}</option>
+            }
+          </select>
+        </div>
+      }
+      @if (getFixedSkill(weapon); as skill) {
+        <div class="form-group">
+          <label>Skill</label>
+          <span class="weapon-skill-fixed">{{ skill }}</span>
+        </div>
       }
       @if (getMissileDef(weapon); as md) {
         <div class="missile-info">

@@ -1136,4 +1136,351 @@
     </section>
 
   } <!-- end kal-arath -->
+
+  <!-- ══════════════════════════════════════════════════════════════════ OSRIC -->
+  @if (gameSystemService.gameSystem() === 'osric') {
+
+    <!-- Core Mechanic & Combat Sequence -->
+    <section class="gm-section">
+      <h3>Core Mechanic</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>To-Hit Roll</h3>
+          <ul>
+            <li>Roll <strong>d20 + modifiers</strong></li>
+            <li>Hit if result ≥ <strong>THAC0 − target AC</strong></li>
+            <li>Lower AC is better (AC 10 = unarmored; AC 2 = plate)</li>
+            <li>DEX AC modifier subtracts from AC (high DEX = lower AC)</li>
+            <li>Shield: +1 AC (reduces target's AC by 1)</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Combat Round Sequence</h3>
+          <ol class="kal-arath-numbered">
+            <li><strong>Surprise</strong> — d6 each side; 1–2 = surprised (that many segments)</li>
+            <li><strong>Declare Actions</strong> — spells must be named before initiative</li>
+            <li><strong>Initiative</strong> — d6 each side; higher roll wins</li>
+            <li><strong>Winner's side acts</strong></li>
+            <li><strong>Loser's side acts</strong></li>
+            <li>Repeat; damage from tied initiative is simultaneous</li>
+          </ol>
+        </div>
+        <div class="ref-box">
+          <h3>Spellcasting</h3>
+          <ul>
+            <li>Spell casting time in <strong>segments</strong> (6 seconds each)</li>
+            <li>Caster's segment + casting time = when spell fires</li>
+            <li>Any damage taken during casting <strong>loses the spell</strong></li>
+            <li>Caster loses DEX AC bonus while casting</li>
+            <li>0 HP → unconscious; loses 1 HP/round; dead at −10 HP</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- THAC0 Table -->
+    <section class="gm-section">
+      <h3>THAC0 by Class &amp; Level</h3>
+      <p class="note">Unarmored AC 10. Hit if d20 roll ≥ <strong>THAC0 − target AC</strong>. Add STR bonus (melee) or DEX missile bonus (ranged) to the roll.</p>
+      <div class="table-scroll">
+        <table class="gm-table">
+          <thead>
+            <tr>
+              <th>Class</th>
+              <th>1–2</th><th>3–4</th><th>5–6</th><th>7–8</th><th>9–10</th>
+              <th>11–12</th><th>13–14</th><th>15–16</th><th>17–18</th><th>19+</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of osricThac0; track row.classes) {
+              <tr>
+                <td><strong>{{ row.classes }}</strong></td>
+                <td>{{ row.l1_2 }}</td><td>{{ row.l3_4 }}</td><td>{{ row.l5_6 }}</td>
+                <td>{{ row.l7_8 }}</td><td>{{ row.l9_10 }}</td><td>{{ row.l11_12 }}</td>
+                <td>{{ row.l13_14 }}</td><td>{{ row.l15_16 }}</td><td>{{ row.l17_18 }}</td>
+                <td>{{ row.l19 }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Ability Score Modifiers -->
+    <section class="gm-section">
+      <h3>Ability Score Modifiers</h3>
+      <div class="kal-arath-weapons-grid">
+        <div>
+          <p class="weapon-category-label">Strength (hit / damage / encumbrance adj.)</p>
+          <table class="gm-table">
+            <thead><tr><th>STR</th><th>Hit</th><th>Dmg</th><th>Enc Adj</th></tr></thead>
+            <tbody>
+              @for (row of osricStrTable; track row.str) {
+                <tr>
+                  <td>{{ row.str }}</td>
+                  <td><strong>{{ row.hit }}</strong></td>
+                  <td><strong>{{ row.dmg }}</strong></td>
+                  <td>{{ row.enc }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <p class="note">† 18/xx and 19 Str apply to Fighters, Paladins, Rangers only.</p>
+        </div>
+        <div>
+          <p class="weapon-category-label">Dexterity (surprise / missile / AC modifier)</p>
+          <table class="gm-table">
+            <thead><tr><th>DEX</th><th>Surprise</th><th>Missile</th><th>AC Mod</th></tr></thead>
+            <tbody>
+              @for (row of osricDexTable; track row.dex) {
+                <tr>
+                  <td>{{ row.dex }}</td>
+                  <td>{{ row.surprise }}</td>
+                  <td>{{ row.missile }}</td>
+                  <td><strong>{{ row.ac }}</strong></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <p class="note">Negative AC modifier lowers AC (improves it). Positive raises AC (worsens it).</p>
+          <p class="weapon-category-label">Constitution (HP per die / resurrection / system shock)</p>
+          <table class="gm-table">
+            <thead><tr><th>CON</th><th>HP/Die</th><th>Resurrection</th><th>System Shock</th></tr></thead>
+            <tbody>
+              @for (row of osricConTable; track row.con) {
+                <tr>
+                  <td>{{ row.con }}</td>
+                  <td><strong>{{ row.hpMod }}</strong></td>
+                  <td>{{ row.res }}</td>
+                  <td>{{ row.shock }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <p class="note">† Higher CON HP bonus applies to Fighters, Paladins, Rangers only.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Combat Modifiers -->
+    <section class="gm-section">
+      <h3>Combat Modifiers</h3>
+      <table class="gm-table">
+        <thead><tr><th>Situation</th><th>Effect</th></tr></thead>
+        <tbody>
+          @for (row of osricCombatMods; track row.situation) {
+            <tr><td><strong>{{ row.situation }}</strong></td><td>{{ row.effect }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Saving Throws -->
+    <section class="gm-section">
+      <h3>Saving Throws</h3>
+      <p class="note">Roll <strong>d20 equal to or above</strong> the listed number to save. Categories: <strong>Death/Poison · Wands · Paralysis/Petrification · Breath · Rods/Staves/Spells</strong>. Use best applicable table for multi-/dual-classed characters.</p>
+      <div class="table-scroll">
+        <table class="gm-table">
+          <thead>
+            <tr>
+              <th>Class</th><th>Levels</th>
+              <th>Death / Poison</th><th>Wands</th><th>Paralysis</th><th>Breath</th><th>Spells</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of osricSavingThrows; track $index) {
+              <tr [class.table-separator]="row.lvl === '1–3' && $index > 0">
+                <td><strong>{{ row.cls }}</strong></td>
+                <td>{{ row.lvl }}</td>
+                <td>{{ row.death }}</td>
+                <td>{{ row.wands }}</td>
+                <td>{{ row.para }}</td>
+                <td>{{ row.breath }}</td>
+                <td>{{ row.spell }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Turning Undead -->
+    <section class="gm-section">
+      <h3>Turning the Undead</h3>
+      <p class="note">Cleric (and Paladin at level 3) rolls <strong>d20 ≥</strong> listed value. <strong>T</strong> = automatic turn. <strong>D</strong> = automatic destroy. Turned undead flee for 3d4 rounds. Evil clerics may <em>control</em> instead of turning.</p>
+      <div class="table-scroll">
+        <table class="gm-table">
+          <thead>
+            <tr>
+              <th>Undead Type</th>
+              <th>Cler 1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th>
+              <th>9–13</th><th>14–18</th><th>19+</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of osricTurnUndead; track row.type) {
+              <tr>
+                <td><strong>{{ row.type }}</strong></td>
+                <td [class.turn-auto]="row.c1 === 'T' || row.c1 === 'D'">{{ row.c1 }}</td>
+                <td [class.turn-auto]="row.c2 === 'T' || row.c2 === 'D'">{{ row.c2 }}</td>
+                <td [class.turn-auto]="row.c3 === 'T' || row.c3 === 'D'">{{ row.c3 }}</td>
+                <td [class.turn-auto]="row.c4 === 'T' || row.c4 === 'D'">{{ row.c4 }}</td>
+                <td [class.turn-auto]="row.c5 === 'T' || row.c5 === 'D'">{{ row.c5 }}</td>
+                <td [class.turn-auto]="row.c6 === 'T' || row.c6 === 'D'">{{ row.c6 }}</td>
+                <td [class.turn-auto]="row.c7 === 'T' || row.c7 === 'D'">{{ row.c7 }}</td>
+                <td [class.turn-auto]="row.c8 === 'T' || row.c8 === 'D'">{{ row.c8 }}</td>
+                <td [class.turn-auto]="row.c9_13 === 'T' || row.c9_13 === 'D'">{{ row.c9_13 }}</td>
+                <td [class.turn-auto]="row.c14_18 === 'T' || row.c14_18 === 'D'">{{ row.c14_18 }}</td>
+                <td [class.turn-auto]="row.c19 === 'T' || row.c19 === 'D'">{{ row.c19 }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Armor & AC -->
+    <section class="gm-section">
+      <h3>Armor &amp; Armor Class</h3>
+      <p class="note">Lower AC is better. Shield grants +1 AC (reduces AC by 1). DEX modifier subtracts from AC.</p>
+      <table class="gm-table">
+        <thead><tr><th>Armor</th><th>AC</th><th>Encumbrance</th><th>Max Move</th><th>Cost</th></tr></thead>
+        <tbody>
+          @for (row of osricArmorAc; track row.armor) {
+            <tr>
+              <td>{{ row.armor }}</td>
+              <td><strong>{{ row.ac }}</strong></td>
+              <td>{{ row.enc }}</td>
+              <td>{{ row.move }}</td>
+              <td>{{ row.cost }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- HP, Death & Healing -->
+    <section class="gm-section">
+      <h3>HP, Death &amp; Healing</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Damage &amp; Death</h3>
+          <ul>
+            <li><strong>0 HP:</strong> Unconscious; loses 1 HP/round from bleeding</li>
+            <li><strong>−10 HP:</strong> Dead</li>
+            <li>Any damage dealt to an unconscious character (other than bleeding) = <strong>instant death</strong></li>
+            <li>Bleeding stops if aid given in same round</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Natural Healing</h3>
+          <ul>
+            <li><strong>1 HP/day</strong> of complete rest</li>
+            <li>After 1 week rest: bonus recovery equal to CON bonus per week (if positive CON mod)</li>
+            <li>4 weeks total rest restores any character to full HP</li>
+            <li>Post-unconsciousness coma lasts 1d6 turns</li>
+            <li>Must rest 1 week before strenuous activity after hitting 0 HP</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Miscellaneous</h3>
+          <ul>
+            <li><strong>Level Drain:</strong> Lose 1 level; return to start of that level's XP. Drained below level 1 = death.</li>
+            <li><strong>Resurrection:</strong> Elves cannot be resurrected. Others need cleric magic + CON resurrection survival roll.</li>
+            <li><strong>Subdual damage:</strong> Half real + half non-lethal (heals at 1 HP/hour); both parties must agree before combat.</li>
+          </ul>
+          <p class="weapon-category-label">Falling Damage</p>
+          <table class="gm-table-small">
+            <thead><tr><th>Distance</th><th>Damage</th></tr></thead>
+            <tbody>
+              @for (row of osricFallingDamage; track row.distance) {
+                <tr><td>{{ row.distance }}</td><td><strong>{{ row.damage }}</strong></td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Encumbrance & Movement -->
+    <section class="gm-section">
+      <h3>Encumbrance &amp; Movement</h3>
+      <p class="note">Base carrying capacity: <strong>150 lbs</strong> + STR encumbrance bonus. Small races (dwarf, gnome, halfling) base move 90 ft; subtract 30 ft from all movement tiers. Armor may independently cap movement regardless of weight carried.</p>
+      <table class="gm-table">
+        <thead><tr><th>Weight Carried</th><th>Max Movement</th><th>Surprise</th></tr></thead>
+        <tbody>
+          @for (row of osricEncumbrance; track row.weight) {
+            <tr>
+              <td>{{ row.weight }}</td>
+              <td><strong>{{ row.move }}</strong></td>
+              <td>{{ row.surprise }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Morale -->
+    <section class="gm-section">
+      <h3>Morale</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Morale Check</h3>
+          <p><strong>Base Morale:</strong> 50% + 5% per Hit Die</p>
+          <p>Check when: 50% casualties, leader falls, or losing badly. Max <strong>2 checks per battle</strong> — fail the second = fight to death.</p>
+          <p class="note"><strong>Failure results:</strong> Failed by ≤25% = Fighting withdrawal · Failed by 26–50% = Flight · Failed by 51%+ = Surrender</p>
+        </div>
+        <div class="ref-box">
+          <h3>Morale Modifiers</h3>
+          <table class="gm-table-small">
+            <thead><tr><th>Situation</th><th>Modifier</th></tr></thead>
+            <tbody>
+              @for (row of osricMorale; track row.situation) {
+                <tr><td>{{ row.situation }}</td><td><strong>{{ row.mod }}</strong></td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thief Skills -->
+    <section class="gm-section">
+      <h3>Thief Skills</h3>
+      <p class="note">Starting values at level 1. Gain <strong>30 points</strong> per level to distribute (max 15 to any one skill per level). DEX and racial modifiers apply. Non-thieves/assassins cannot use these skills (exception: Climb Walls at much reduced chance).</p>
+      <table class="gm-table">
+        <thead><tr><th>Skill</th><th>Level 1</th><th>Notes</th></tr></thead>
+        <tbody>
+          @for (row of osricThiefSkills; track row.skill) {
+            <tr>
+              <td><strong>{{ row.skill }}</strong></td>
+              <td>{{ row.lv1 }}</td>
+              <td>{{ row.note }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>Backstab</h3>
+          <ul>
+            <li>Must be unobserved; attack from melee range</li>
+            <li>+4 to hit</li>
+            <li>Levels 1–4: ×2 damage · Levels 5–8: ×3 · Levels 9–12: ×4 · Level 13+: ×5</li>
+            <li>STR/magic bonuses do not multiply</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Experience &amp; Advancement</h3>
+          <ul>
+            <li><strong>Treasure XP:</strong> 1 XP per GP brought to home base</li>
+            <li><strong>Magic items kept:</strong> Max 1/10 their GP value in XP</li>
+            <li><strong>Training:</strong> ~1,500 gp per level + 1d4 weeks after reaching XP threshold</li>
+            <li><strong>Bonus XP:</strong> STR 16+ (Fighter), INT 16+ (MU) — +10% XP</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  } <!-- end osric -->
 </div>

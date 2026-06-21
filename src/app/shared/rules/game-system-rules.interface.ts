@@ -31,6 +31,18 @@ export interface ArmorTypeDefinition {
   points: number;
 }
 
+export interface AbilityDefinition {
+  name: string;
+  description: string;
+  minLevel?: number;
+}
+
+export interface ClassHitDie {
+  sides: number;
+  maxHdLevel: number;      // last level that earns a full hit die
+  bonusPerLevel: number;   // flat HP added per level above maxHdLevel
+}
+
 export interface GameSystemRules {
   /** Which stats exist and how to display them for this system. */
   getStatDefinitions(): StatDefinition[];
@@ -41,7 +53,8 @@ export interface GameSystemRules {
     equipment: EquipmentItem[],
     weapons: Weapon[],
     shields: Shield[],
-    background?: BackgroundForBonuses
+    background?: BackgroundForBonuses,
+    armorType?: string
   ): DerivedStats;
 
   /** Whether this system uses per-location hit points. */
@@ -86,4 +99,16 @@ export interface GameSystemRules {
 
   /** Short currency label used when displaying weapon costs (e.g. "L", "GC", "S"). */
   getCurrencyLabel(): string;
+
+  /** Race abilities for a given race name. Returns [] for systems without racial abilities. */
+  getRaceAbilities?(race: string): AbilityDefinition[];
+
+  /** Class abilities for a given class name. Returns [] for systems without class abilities. */
+  getClassAbilities?(className: string): AbilityDefinition[];
+
+  /** Hit die info for a class (for level-up HP rolling). Returns null for systems without class-based HD. */
+  getClassHitDie?(className: string): ClassHitDie | null;
+
+  /** CON modifier applied per hit die roll. Returns 0 for systems that don't use this. */
+  getConHpModifier?(con: number): number;
 }

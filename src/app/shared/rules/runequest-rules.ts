@@ -89,7 +89,8 @@ export class RuneQuestRules implements GameSystemRules {
     equipment: EquipmentItem[],
     weapons: Weapon[],
     shields: Shield[],
-    _background?: BackgroundForBonuses
+    _background?: BackgroundForBonuses,
+    _armorType?: string
   ): DerivedStats {
     return rqCalculateDerivedStats(stats, equipment, weapons, shields);
   }

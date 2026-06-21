@@ -443,4 +443,174 @@ export class GameMastersScreenComponent {
     { creature: 'Blood Demon (Pact)', hp: '5d6', armor: '2', attack: 'Claws 2d6', special: 'Morale 10' },
     { creature: 'Shadow Demon (Pact)', hp: '24', armor: '2', attack: '2d6', special: 'Morale 10' }
   ];
+
+  // ─── OSRIC Data ──────────────────────────────────────────────────────────────
+
+  osricCoreMechanic = [
+    { item: 'Attack Roll', rule: 'Roll d20 + modifiers. Hit if result ≥ (THAC0 − target AC).' },
+    { item: 'Critical / Fumble', rule: 'No automatic critical on 20; no automatic fumble on 1 by default (GM option).' },
+    { item: 'Melee to-hit', rule: 'STR hit bonus applies; DEX bonus does not.' },
+    { item: 'Missile to-hit', rule: 'DEX missile bonus applies; STR bonus applies only to hurled weapons.' },
+    { item: 'Surprise', rule: 'Roll d6 at encounter start. Roll 1: surprised 1 segment. Roll 2: surprised 2 segments. Roll 3+: not surprised.' },
+  ];
+
+  osricThac0 = [
+    { classes: 'Fighter / Paladin / Ranger', l1_2: 20, l3_4: 18, l5_6: 16, l7_8: 14, l9_10: 12, l11_12: 10, l13_14: 8, l15_16: 6, l17_18: 4, l19: 2 },
+    { classes: 'Cleric / Druid',            l1_2: 20, l3_4: 20, l5_6: 18, l7_8: 18, l9_10: 16, l11_12: 14, l13_14: 12, l15_16: 10, l17_18: 8, l19: 8 },
+    { classes: 'Thief / Assassin',          l1_2: 20, l3_4: 20, l5_6: 18, l7_8: 18, l9_10: 16, l11_12: 16, l13_14: 14, l15_16: 14, l17_18: 12, l19: 12 },
+    { classes: 'Magic User / Illusionist',  l1_2: 20, l3_4: 20, l5_6: 20, l7_8: 18, l9_10: 18, l11_12: 16, l13_14: 16, l15_16: 14, l17_18: 14, l19: 12 },
+  ];
+
+  osricStrTable = [
+    { str: '3',         hit: '−3', dmg: '−1', enc: '−35 lbs' },
+    { str: '4–5',       hit: '−2', dmg: '−1', enc: '−25 lbs' },
+    { str: '6–7',       hit: '−1', dmg: '0',  enc: '−15 lbs' },
+    { str: '8–11',      hit: '0',  dmg: '0',  enc: '0' },
+    { str: '12–13',     hit: '0',  dmg: '0',  enc: '+10 lbs' },
+    { str: '14–15',     hit: '0',  dmg: '0',  enc: '+20 lbs' },
+    { str: '16',        hit: '0',  dmg: '+1', enc: '+35 lbs' },
+    { str: '17',        hit: '+1', dmg: '+1', enc: '+50 lbs' },
+    { str: '18',        hit: '+1', dmg: '+2', enc: '+75 lbs' },
+    { str: '18/01–50',  hit: '+1', dmg: '+3', enc: '+100 lbs' },
+    { str: '18/51–75',  hit: '+2', dmg: '+3', enc: '+125 lbs' },
+    { str: '18/76–90',  hit: '+2', dmg: '+4', enc: '+150 lbs' },
+    { str: '18/91–99',  hit: '+2', dmg: '+5', enc: '+200 lbs' },
+    { str: '19',        hit: '+3', dmg: '+6', enc: '+300 lbs' },
+  ];
+
+  osricDexTable = [
+    { dex: '3',    surprise: '−3', missile: '−3', ac: '+4' },
+    { dex: '4',    surprise: '−2', missile: '−2', ac: '+3' },
+    { dex: '5',    surprise: '−1', missile: '−1', ac: '+2' },
+    { dex: '6–14', surprise: '0',  missile: '0',  ac: '0 or +1' },
+    { dex: '15',   surprise: '0',  missile: '0',  ac: '−1' },
+    { dex: '16',   surprise: '+1', missile: '+1', ac: '−2' },
+    { dex: '17',   surprise: '+2', missile: '+2', ac: '−3' },
+    { dex: '18–19',surprise: '+3', missile: '+3', ac: '−4' },
+  ];
+
+  osricConTable = [
+    { con: '3',    hpMod: '−2',     res: '40%',    shock: '35%' },
+    { con: '4–5',  hpMod: '−1',     res: '45–50%', shock: '40–45%' },
+    { con: '6–7',  hpMod: '−1',     res: '55–60%', shock: '50–55%' },
+    { con: '8–14', hpMod: '0',      res: '65–92%', shock: '60–88%' },
+    { con: '15',   hpMod: '+1',     res: '94%',    shock: '91%' },
+    { con: '16',   hpMod: '+2',     res: '96%',    shock: '95%' },
+    { con: '17',   hpMod: '+2/+3†', res: '98%',    shock: '97%' },
+    { con: '18',   hpMod: '+2/+4†', res: '100%',   shock: '99%' },
+    { con: '19',   hpMod: '+2/+5†', res: '100%',   shock: '99%' },
+  ];
+
+  osricCombatMods = [
+    { situation: 'Cover 25%',               effect: '−2 to attacker\'s to-hit' },
+    { situation: 'Cover 50%',               effect: '−4 to attacker\'s to-hit' },
+    { situation: 'Cover 75%',               effect: '−7 to attacker\'s to-hit' },
+    { situation: 'Invisible opponent',      effect: '−4 to attacker\'s to-hit; no flanking' },
+    { situation: 'Prone opponent',          effect: '+4 to hit; negates shield & DEX AC' },
+    { situation: 'Rear attack',             effect: '+2 to hit; negates shield & DEX AC' },
+    { situation: 'Stunned / Sleeping',      effect: '+4 to hit; negates shield & DEX AC' },
+    { situation: 'Flank attack',            effect: 'Negates shield; rear negates shield & DEX' },
+    { situation: 'Fleeing target',          effect: '+4 to hit on immediate attacks' },
+    { situation: 'Charge',                  effect: '+2 to hit; −DEX AC bonus to charger' },
+    { situation: 'Two-weapon fighting',     effect: 'Primary −2, off-hand −4 to hit (dagger/hand axe only)' },
+    { situation: 'Shooting into melee',     effect: 'Miss range: ally in line of fire may be hit instead' },
+  ];
+
+  osricSavingThrows = [
+    { cls: 'Fighter', lvl: '1–3',   death: 14, wands: 16, para: 15, breath: 17, spell: 17 },
+    { cls: 'Fighter', lvl: '4–6',   death: 13, wands: 15, para: 14, breath: 16, spell: 16 },
+    { cls: 'Fighter', lvl: '7–9',   death: 11, wands: 13, para: 12, breath: 13, spell: 14 },
+    { cls: 'Fighter', lvl: '10–12', death: 10, wands: 12, para: 11, breath: 11, spell: 12 },
+    { cls: 'Fighter', lvl: '13–15', death:  8, wands: 10, para:  9, breath:  9, spell: 10 },
+    { cls: 'Fighter', lvl: '16+',   death:  7, wands:  9, para:  8, breath:  7, spell:  8 },
+    { cls: 'Cleric',  lvl: '1–3',   death: 10, wands: 14, para: 13, breath: 16, spell: 15 },
+    { cls: 'Cleric',  lvl: '4–6',   death:  9, wands: 13, para: 12, breath: 15, spell: 14 },
+    { cls: 'Cleric',  lvl: '7–9',   death:  7, wands: 11, para: 10, breath: 13, spell: 12 },
+    { cls: 'Cleric',  lvl: '10–12', death:  6, wands: 10, para:  9, breath: 12, spell: 11 },
+    { cls: 'Cleric',  lvl: '13–15', death:  5, wands:  9, para:  8, breath: 11, spell: 10 },
+    { cls: 'Cleric',  lvl: '16+',   death:  4, wands:  8, para:  7, breath: 10, spell:  9 },
+    { cls: 'Thief',   lvl: '1–4',   death: 13, wands: 14, para: 12, breath: 16, spell: 15 },
+    { cls: 'Thief',   lvl: '5–8',   death: 12, wands: 12, para: 11, breath: 15, spell: 13 },
+    { cls: 'Thief',   lvl: '9–12',  death: 11, wands: 10, para: 10, breath: 14, spell: 11 },
+    { cls: 'Thief',   lvl: '13–16', death: 10, wands:  8, para:  9, breath: 13, spell:  9 },
+    { cls: 'Thief',   lvl: '17+',   death:  9, wands:  6, para:  8, breath: 12, spell:  7 },
+    { cls: 'MU/Ill.', lvl: '1–5',   death: 14, wands: 11, para: 13, breath: 15, spell: 12 },
+    { cls: 'MU/Ill.', lvl: '6–10',  death: 13, wands:  9, para: 11, breath: 13, spell: 10 },
+    { cls: 'MU/Ill.', lvl: '11–15', death: 11, wands:  7, para:  9, breath: 11, spell:  8 },
+    { cls: 'MU/Ill.', lvl: '16–20', death: 10, wands:  5, para:  7, breath:  9, spell:  6 },
+    { cls: 'MU/Ill.', lvl: '21+',   death:  8, wands:  3, para:  5, breath:  7, spell:  4 },
+  ];
+
+  osricTurnUndead = [
+    { type: 'Skeleton',  c1: '13', c2: '10', c3: '7',  c4: 'T',  c5: 'T',  c6: 'D',  c7: 'D',  c8: 'D',  c9_13: 'D', c14_18: 'D', c19: 'D' },
+    { type: 'Zombie',    c1: '16', c2: '13', c3: '10', c4: '7',  c5: 'T',  c6: 'T',  c7: 'D',  c8: 'D',  c9_13: 'D', c14_18: 'D', c19: 'D' },
+    { type: 'Ghoul',     c1: '19', c2: '16', c3: '13', c4: '10', c5: '7',  c6: 'T',  c7: 'T',  c8: 'D',  c9_13: 'D', c14_18: 'D', c19: 'D' },
+    { type: 'Shadow',    c1: '20', c2: '19', c3: '16', c4: '13', c5: '10', c6: '7',  c7: 'T',  c8: 'T',  c9_13: 'D', c14_18: 'D', c19: 'D' },
+    { type: 'Wight',     c1: '—',  c2: '20', c3: '19', c4: '16', c5: '13', c6: '10', c7: '7',  c8: 'T',  c9_13: 'T', c14_18: 'D', c19: 'D' },
+    { type: 'Ghast',     c1: '—',  c2: '—',  c3: '20', c4: '19', c5: '16', c6: '13', c7: '10', c8: '7',  c9_13: 'T', c14_18: 'T', c19: 'D' },
+    { type: 'Wraith',    c1: '—',  c2: '—',  c3: '—',  c4: '20', c5: '19', c6: '16', c7: '13', c8: '10', c9_13: '7', c14_18: 'T', c19: 'D' },
+    { type: 'Mummy',     c1: '—',  c2: '—',  c3: '—',  c4: '—',  c5: '20', c6: '19', c7: '16', c8: '13', c9_13: '10', c14_18: '7', c19: 'T' },
+    { type: 'Spectre',   c1: '—',  c2: '—',  c3: '—',  c4: '—',  c5: '—',  c6: '20', c7: '19', c8: '16', c9_13: '13', c14_18: '10', c19: '7' },
+    { type: 'Vampire',   c1: '—',  c2: '—',  c3: '—',  c4: '—',  c5: '—',  c6: '—',  c7: '20', c8: '19', c9_13: '16', c14_18: '13', c19: '10' },
+    { type: 'Ghost',     c1: '—',  c2: '—',  c3: '—',  c4: '—',  c5: '—',  c6: '—',  c7: '—',  c8: '20', c9_13: '19', c14_18: '16', c19: '13' },
+    { type: 'Lich',      c1: '—',  c2: '—',  c3: '—',  c4: '—',  c5: '—',  c6: '—',  c7: '—',  c8: '—',  c9_13: '20', c14_18: '19', c19: '16' },
+    { type: 'Special',   c1: '—',  c2: '—',  c3: '—',  c4: '—',  c5: '—',  c6: '—',  c7: '—',  c8: '—',  c9_13: '—',  c14_18: '20', c19: '19' },
+  ];
+
+  osricArmorAc = [
+    { armor: 'None',             ac: 10, enc: '—',    move: '120 ft', cost: '—' },
+    { armor: 'Leather',          ac:  8, enc: '15 lbs', move: '120 ft', cost: '5 gp' },
+    { armor: 'Padded Gambeson',  ac:  8, enc: '10 lbs', move: '90 ft',  cost: '4 gp' },
+    { armor: 'Studded Leather',  ac:  7, enc: '20 lbs', move: '90 ft',  cost: '15 gp' },
+    { armor: 'Ring Mail',        ac:  7, enc: '35 lbs', move: '90 ft',  cost: '30 gp' },
+    { armor: 'Scale / Lamellar', ac:  6, enc: '40 lbs', move: '60 ft',  cost: '45 gp' },
+    { armor: 'Chain Mail',       ac:  5, enc: '30 lbs', move: '90 ft',  cost: '75 gp' },
+    { armor: 'Elfin Chain',      ac:  5, enc: '15 lbs', move: '120 ft', cost: 'Gift only' },
+    { armor: 'Banded',           ac:  4, enc: '35 lbs', move: '90 ft',  cost: '90 gp' },
+    { armor: 'Splint',           ac:  4, enc: '40 lbs', move: '60 ft',  cost: '80 gp' },
+    { armor: 'Plate',            ac:  3, enc: '45 lbs', move: '60 ft',  cost: '400 gp' },
+    { armor: 'Field Plate (opt)',ac:  2, enc: '50 lbs', move: '90 ft',  cost: 'Varies' },
+    { armor: 'Shield',           ac: '+1', enc: '5–10 lbs', move: '—', cost: '10–15 gp' },
+  ];
+
+  osricEncumbrance = [
+    { weight: 'Up to 35 lbs',  move: '120 ft/round', surprise: '+1 (lighter than chain)' },
+    { weight: '36–70 lbs',     move: '90 ft/round',  surprise: 'Normal' },
+    { weight: '71–105 lbs',    move: '60 ft/round',  surprise: 'No bonuses' },
+    { weight: '106–150 lbs',   move: '30 ft/round',  surprise: 'No bonuses; −1 penalty' },
+    { weight: 'Over 150 lbs',  move: 'No movement',  surprise: '—' },
+  ];
+
+  osricFallingDamage = [
+    { distance: 'Less than 5 ft', damage: 'None' },
+    { distance: 'Up to 10 ft',    damage: '1d6' },
+    { distance: 'Up to 20 ft',    damage: '3d6' },
+    { distance: 'Up to 30 ft',    damage: '6d6' },
+    { distance: 'Up to 40 ft',    damage: '10d6' },
+    { distance: 'Up to 50 ft',    damage: '15d6' },
+    { distance: 'Over 50 ft',     damage: '20d6' },
+  ];
+
+  osricMorale = [
+    { situation: 'Per friend killed, surrendered, or fled', mod: '+5%' },
+    { situation: 'Own side at 25% casualties',             mod: '+5%' },
+    { situation: 'Numerical inferiority',                  mod: '+10%' },
+    { situation: 'Own side at 50% casualties',             mod: '+15%' },
+    { situation: 'Greatly outnumbered (2:1+)',             mod: '+20%' },
+    { situation: 'Own leader hors de combat',              mod: '+25%' },
+    { situation: 'Per foe killed, surrendered, or fled',   mod: '−5%' },
+    { situation: 'Inflicted 25% casualties on enemy',      mod: '−5%' },
+    { situation: 'Numerical superiority',                  mod: '−10%' },
+    { situation: 'Inflicted 50% casualties on enemy',      mod: '−15%' },
+  ];
+
+  osricThiefSkills = [
+    { skill: 'Climb Walls',       lv1: '85%', note: '' },
+    { skill: 'Find/Remove Traps', lv1: '10%', note: '' },
+    { skill: 'Hide in Shadows',   lv1: '10%', note: '' },
+    { skill: 'Move Quietly',      lv1: '15%', note: '' },
+    { skill: 'Open Locks',        lv1: '15%', note: '' },
+    { skill: 'Pick Pockets',      lv1: '30%', note: '20%+ failure alerts target' },
+    { skill: 'Read Languages',    lv1: '1%',  note: 'Level 10: read arcane scrolls' },
+  ];
 }

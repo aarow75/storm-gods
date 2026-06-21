@@ -30,6 +30,15 @@ export class CharacterResources {
         { key: 'xp',         label: 'XP' },
       ];
     }
+    if (system === 'osric') {
+      return [
+        { key: 'gold',   label: 'Gold (GP)' },
+        { key: 'silver', label: 'Silver (SP)', hint: '10 SP = 1 GP' },
+        { key: 'clacks', label: 'Copper (CP)', hint: '100 CP = 1 GP' },
+        { key: 'level',  label: 'Level' },
+        { key: 'xp',     label: 'XP' },
+      ];
+    }
     if (system === 'dragonbane') {
       return [
         { key: 'copper',           label: 'Copper',            hint: '10 copper = 1 silver' },

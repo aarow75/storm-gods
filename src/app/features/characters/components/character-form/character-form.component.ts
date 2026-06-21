@@ -6,12 +6,13 @@ import {
   Character, CharacterStats, CharacterSkills, ArmorLocations, Weapon, WeaponDefinition, Shield, ShieldDefinition, Passion, Spell, RuneSpell,
   DEFAULT_STATS, DEFAULT_SKILLS, DEFAULT_HIT_LOCATIONS, DEFAULT_BACKGROUND, DEFAULT_DERIVED_STATS,
   DEFAULT_ARMOR, DEFAULT_RUNES, DEFAULT_MAGIC, DEFAULT_RESOURCES, DEFAULT_CULT_STATUS,
-  calculateHitLocations, calculateDerivedStats, calculateTotalArmor, WEAPON_LIST, SHIELD_LIST, COMBAT_SKILLS,
-  CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS, ARMOR_TYPES,
+  calculateHitLocations, calculateDerivedStats, calculateTotalArmor, COMBAT_SKILLS,
+  CULTS, HOMELANDS, OCCUPATIONS, COMMON_PASSIONS, SPIRIT_MAGIC_SPELLS, SORCERY_SPELLS,
   enforceOpposedRunes, RUNE_SPELL_LIBRARY, OPPOSED_ELEMENTAL_RUNES, OPPOSED_POWER_RUNES,
   initializeSkillsWithModifiers, calculateSkillCategoryModifiers,
   WEAPON_SKILLS
 } from '@characters/models/character.model';
+import { OsricRules } from '@shared/rules/osric-rules';
 import { CharacterService } from '@characters/services/character.service';
 import { DiceService } from '@shared/services/dice.service';
 import { GameSystemService } from '@shared/services/game-system.service';
@@ -35,6 +36,8 @@ import { CharacterResources } from '../character-resources/character-resources';
 import { CharacterEquipment } from '../character-equipment/character-equipment';
 import { CharacterNotes } from '../character-notes/character-notes';
 import { CharacterConditionsComponent } from '../character-conditions/character-conditions.component';
+import { CharacterAbilities } from '../character-abilities/character-abilities';
+import { DB_SPELLS_BY_DISCIPLINE } from '@shared/rules/dragonbane-rules';
 
 @Component({
   selector: 'app-character-form',
@@ -57,7 +60,8 @@ import { CharacterConditionsComponent } from '../character-conditions/character-
     CharacterResources,
     CharacterEquipment,
     CharacterNotes,
-    CharacterConditionsComponent
+    CharacterConditionsComponent,
+    CharacterAbilities
   ],
   templateUrl: './character-form.component.html',
   styleUrl: './character-form.component.css'
@@ -86,18 +90,35 @@ export class CharacterFormComponent implements OnInit {
     equipment: [],
     notes: '',
     conditions: [],
+    acquiredAbilities: [],
     cultStatus: { ...DEFAULT_CULT_STATUS }
   };
 
   skillCategories = SKILL_CATEGORIES;
   get dbSkillCategories() {
-    return this.gameSystemService.gameSystem() === 'kal-arath'
-      ? KA_SKILL_CATEGORIES
-      : DB_SKILL_CATEGORIES;
+    const sys = this.gameSystemService.gameSystem();
+    if (sys === 'kal-arath') return KA_SKILL_CATEGORIES;
+    if (sys === 'osric') {
+      const cats: Record<string, string[]> = {};
+      for (const c of this.gameSystemService.getRules().getSkillCategories()) {
+        cats[c.name] = c.skills;
+      }
+      return cats;
+    }
+    return DB_SKILL_CATEGORIES;
   }
   get weaponList() { return this.gameSystemService.getRules().getWeaponList(); }
   get shieldList() { return this.gameSystemService.getRules().getShieldList(); }
   get currencyLabel() { return this.gameSystemService.getRules().getCurrencyLabel(); }
+  get osricClassUsesMagic(): boolean {
+    const rules = this.gameSystemService.getRules() as OsricRules;
+    return rules.classUsesMagic?.(this.character.background?.occupation ?? '') ?? true;
+  }
+
+  get osricClassHasThiefSkills(): boolean {
+    const occ = this.character.background?.occupation ?? '';
+    return occ === 'Thief' || occ === 'Assassin';
+  }
   combatSkills = COMBAT_SKILLS;
   weaponSkills = WEAPON_SKILLS;
   characterColors = CHARACTER_COLORS;
@@ -107,7 +128,6 @@ export class CharacterFormComponent implements OnInit {
   commonPassions = COMMON_PASSIONS;
   spiritMagicSpells = SPIRIT_MAGIC_SPELLS;
   sorcerySpells = SORCERY_SPELLS;
-  armorTypes = ARMOR_TYPES;
   runeSpellLibrary = RUNE_SPELL_LIBRARY;
   opposedElementalRunes = OPPOSED_ELEMENTAL_RUNES;
   opposedPowerRunes = OPPOSED_POWER_RUNES;
@@ -203,10 +223,10 @@ export class CharacterFormComponent implements OnInit {
       magic: this.character.magic!,
       resources: this.character.resources!,
       equipment: this.character.equipment!,
+      conditions: this.character.conditions ?? [],
+      acquiredAbilities: this.character.acquiredAbilities ?? [],
       notes: this.character.notes!,
-      cultStatus: this.character.cultStatus
-      // TODO: `conditions` is missing here — every save silently wipes active conditions (Prone, Stunned, etc.)
-      // Add: conditions: this.character.conditions ?? []
+      cultStatus: this.character.cultStatus,
     };
 
     if (this.editMode && this.editingId) {
@@ -259,6 +279,8 @@ export class CharacterFormComponent implements OnInit {
         },
         resources: { ...character.resources },
         equipment: character.equipment ? [...character.equipment] : [],
+        conditions: character.conditions ? [...character.conditions] : [],
+        acquiredAbilities: character.acquiredAbilities ? [...character.acquiredAbilities] : [],
         notes: character.notes || '',
         cultStatus: character.cultStatus ? {
           ...character.cultStatus,
@@ -361,17 +383,34 @@ export class CharacterFormComponent implements OnInit {
     }
   }
 
+  onHpRolled(hp: number): void {
+    if (this.character.derivedStats) {
+      this.character.derivedStats.totalHitPoints = hp;
+      this.character.derivedStats.maxHitPoints = hp;
+    }
+  }
+
   calculateDerivedValues(): void {
     if (this.character.stats) {
       const rules = this.gameSystemService.getRules();
+      const prevHp = this.character.derivedStats?.totalHitPoints;
+      const prevMaxHp = this.character.derivedStats?.maxHitPoints;
+
       this.character.derivedStats = rules.calculateDerivedStats(
         this.character.stats,
         this.character.equipment ?? [],
         this.character.weapons ?? [],
         this.character.shields ?? [],
-        this.character.background
+        this.character.background,
+        this.character.armorType
       );
       this.calculateHitPoints();
+
+      // OSRIC HP is rolled manually — don't overwrite a higher value with the formula default
+      if (this.gameSystemService.gameSystem() === 'osric' && prevHp != null && prevHp > this.character.derivedStats.totalHitPoints) {
+        this.character.derivedStats.totalHitPoints = prevHp;
+        this.character.derivedStats.maxHitPoints = prevMaxHp ?? prevHp;
+      }
     }
   }
 
@@ -446,7 +485,20 @@ export class CharacterFormComponent implements OnInit {
 
   onArmorTypeChange(armorType: string): void {
     this.character.armorType = armorType;
-    this.updateArmorFromShields();
+    const rules = this.gameSystemService.getRules();
+    if (rules.usesHitLocations()) {
+      this.updateArmorFromShields();
+    } else {
+      const def = rules.getArmorTypes().find(a => a.name === armorType);
+      const ar = def?.points ?? 0;
+      if (this.character.armor) {
+        const locations = ['Right Leg', 'Left Leg', 'Abdomen', 'Chest', 'Right Arm', 'Left Arm', 'Head'] as const;
+        for (const loc of locations) {
+          this.character.armor[loc] = ar;
+        }
+      }
+    }
+    this.calculateDerivedValues();
   }
 
   getDbSkillKeys(category: string): string[] {
@@ -501,7 +553,8 @@ export class CharacterFormComponent implements OnInit {
   addDragonbaneSpell(discipline: string): void {
     if (!this.character.magic) return;
     if (!this.character.magic.dragonbaneSpells) this.character.magic.dragonbaneSpells = [];
-    this.character.magic.dragonbaneSpells.push({ discipline, name: '' });
+    const defaultName = DB_SPELLS_BY_DISCIPLINE[discipline]?.[0] ?? '';
+    this.character.magic.dragonbaneSpells.push({ discipline, name: defaultName });
   }
 
   removeDragonbaneSpell(index: number): void {
