@@ -1,4 +1,5 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
+import { KAL_ARATH_NAMES } from '@characters/constants/kal-arath-names.constants';
 import { WeaponDefinition, ShieldDefinition, HitLocations } from '@shared/rules/game-rules';
 import { DerivedStats, EquipmentItem, Resources } from '@characters/models/character.model';
 import { KA_WARRIOR_SKILLS, KA_ROGUE_SKILLS, KA_MYSTIC_SKILLS, KA_EXPLORER_SKILLS, KA_SKILL_CATEGORIES } from '@characters/constants/skill-categories.constants';
@@ -231,6 +232,10 @@ export class KalArathRules implements GameSystemRules {
 
   getConditions(): ConditionDefinition[] {
     return CONDITIONS;
+  }
+
+  getCharacterNames(): string[] {
+    return KAL_ARATH_NAMES;
   }
 
   getMagicSystemType(): string {

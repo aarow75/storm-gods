@@ -59,7 +59,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   selectedWeapon = '';
   addParticipantSurprised = false;
 
-  lastDamageRolls: Map<string, { total: number; breakdown: string; finalDamage: number; armorAbsorbed: number; targetName: string }> = new Map();
+  lastDamageRolls: Map<string, { total: number; breakdown: string; finalDamage: number; armorAbsorbed: number; targetName: string; attackRollDisplay?: string }> = new Map();
   lastMissResult: Map<string, { targetName: string; attackRoll: number; attackSkill: number; display: string }> = new Map();
   showLogHistory = false;
 
@@ -725,6 +725,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       };
       this.endTurn(participant.id);
       this.lastMissResult.delete(participant.id);
+      if (!this.rules.usesParryDodge()) { this.resolveNoDefense(); return; }
       setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
       return;
     }
@@ -760,6 +761,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       };
       this.endTurn(participant.id);
       this.lastMissResult.delete(participant.id);
+      if (!this.rules.usesParryDodge()) { this.resolveNoDefense(); return; }
       setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
       return;
     }
@@ -797,6 +799,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       };
       this.endTurn(participant.id);
       this.lastMissResult.delete(participant.id);
+      if (!this.rules.usesParryDodge()) { this.resolveNoDefense(); return; }
       setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
       return;
     }
@@ -837,20 +840,22 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     };
     this.endTurn(participant.id);
     this.lastMissResult.delete(participant.id);
+    if (!this.rules.usesParryDodge()) { this.resolveNoDefense(); return; }
     setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
   }
 
   resolveNoDefense(): void {
     if (!this.pendingAttack) return;
-    const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
+    const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll, attackRollDisplay } = this.pendingAttack;
     const locationInfo = hitLocation ? ` (d20:${locationRoll} = ${hitLocation})` : '';
 
     const armor = this.getArmorValue(defender, hitLocation);
     const finalDamage = Math.max(0, rawDamage - armor);
 
     const armorInfo = armor > 0 ? ` - ${armor} armor = ${finalDamage}` : ` = ${finalDamage}`;
+    const toHitInfo = attackRollDisplay ? ` [${attackRollDisplay}]` : '';
     this.combatLogService.addEntry(
-      `[ATTACK] ${attacker.name} → ${defender.name}${locationInfo}: ${rawDamage} (${damageBreakdown})${armorInfo} damage`
+      `[ATTACK] ${attacker.name} → ${defender.name}${toHitInfo}${locationInfo}: ${rawDamage} (${damageBreakdown})${armorInfo} damage`
     );
 
     const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
@@ -868,7 +873,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
     this.lastDamageRolls.set(attacker.id, {
       total: rawDamage, breakdown: damageBreakdown,
-      finalDamage, armorAbsorbed: armor, targetName: defender.name
+      finalDamage, armorAbsorbed: armor, targetName: defender.name,
+      attackRollDisplay,
     });
 
     this.pendingAttack = null;

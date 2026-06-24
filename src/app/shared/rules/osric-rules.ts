@@ -1,4 +1,5 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
+import { FANTASY_NAMES } from '@characters/constants/fantasy-names.constants';
 import { WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield } from '@shared/rules/game-rules';
 import { DerivedStats, EquipmentItem, Resources } from '@characters/models/character.model';
 import {
@@ -554,6 +555,10 @@ export class OsricRules implements GameSystemRules {
 
   getConditions(): ConditionDefinition[] {
     return CONDITIONS;
+  }
+
+  getCharacterNames(): string[] {
+    return FANTASY_NAMES;
   }
 
   getMagicSystemType(): string {

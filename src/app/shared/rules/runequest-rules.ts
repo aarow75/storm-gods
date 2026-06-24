@@ -1,4 +1,5 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
+import { RUNEQUEST_NAMES } from '@characters/constants/runequest-names.constants';
 import {
   WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield,
   WEAPON_LIST, SHIELD_LIST, ARMOR_TYPES,
@@ -148,6 +149,10 @@ export class RuneQuestRules implements GameSystemRules {
 
   getConditions(): ConditionDefinition[] {
     return CONDITIONS;
+  }
+
+  getCharacterNames(): string[] {
+    return RUNEQUEST_NAMES;
   }
 
   usesStrikeRank(): boolean {

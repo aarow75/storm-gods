@@ -100,6 +100,9 @@ export interface GameSystemRules {
   /** Combat/status conditions available for this system. */
   getConditions(): ConditionDefinition[];
 
+  /** Pool of character names appropriate for this game system. */
+  getCharacterNames(): string[];
+
   // ── Initiative / Strike Rank ──────────────────────────────────────────────
 
   /** Whether this system uses Strike Rank for turn order. False = manual initiative field. */

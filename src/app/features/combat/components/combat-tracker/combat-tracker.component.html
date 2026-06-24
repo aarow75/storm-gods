@@ -209,7 +209,7 @@
                           [attr.data-participant-id]="participant.id"
                           (click)="rollWeaponDamage(participant)"
                           [disabled]="!participant.selectedOpponentId || !!pendingAttack">
-                    🎲 Roll
+                    🎲 Attack
                   </button>
                 }
               </div>
@@ -293,8 +293,8 @@
                             [attr.data-participant-id]="participant.id"
                             (click)="rollWeaponDamage(participant)"
                             [disabled]="!!participant.isDead || !!pendingAttack || !hasAttacksRemaining(participant)"
-                            [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll damage'">
-                      Roll
+                            [title]="!hasAttacksRemaining(participant) ? 'Rate of fire exhausted — click New Round to reset' : 'Roll attack'">
+                      Attack
                     </button>
                   </div>
                   @if (getWeaponMissileInfo(participant); as mi) {
@@ -337,6 +337,9 @@
                   <div class="damage-result">
                     <div class="damage-info">
                       <span class="result-target">vs {{ getLastDamageRoll(participant.id)?.targetName }}</span>
+                      @if (getLastDamageRoll(participant.id)?.attackRollDisplay) {
+                        <span class="result-attack-roll">{{ getLastDamageRoll(participant.id)?.attackRollDisplay }}</span>
+                      }
                       <span class="result-total">{{ getLastDamageRoll(participant.id)?.finalDamage }} damage dealt</span>
                       <span class="result-breakdown">
                         ({{ getLastDamageRoll(participant.id)?.breakdown }} = {{ getLastDamageRoll(participant.id)?.total }}

@@ -1,4 +1,5 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
+import { FANTASY_NAMES } from '@characters/constants/fantasy-names.constants';
 import { WeaponDefinition, ShieldDefinition, Weapon, Shield } from '@shared/rules/game-rules';
 import { DerivedStats, EquipmentItem, WEAPON_SKILLS, Resources } from '@characters/models/character.model';
 import { DB_SKILLS, DB_MAGIC_SKILLS, DB_SKILL_BY_ATTR, DB_SKILL_CATEGORIES } from '@characters/constants/skill-categories.constants';
@@ -318,6 +319,10 @@ export class DragonbaneRules implements GameSystemRules {
 
   getConditions(): ConditionDefinition[] {
     return CONDITIONS;
+  }
+
+  getCharacterNames(): string[] {
+    return FANTASY_NAMES;
   }
 
   getMagicSystemType(): string {

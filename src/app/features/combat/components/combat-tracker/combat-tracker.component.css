@@ -348,6 +348,12 @@
   font-weight: bold;
 }
 
+.result-attack-roll {
+  font-family: monospace;
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+}
+
 .result-total {
   font-weight: bold;
   font-size: var(--font-size-xl);

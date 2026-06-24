@@ -18,7 +18,7 @@ import { DiceService } from '@shared/services/dice.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { UIStateService } from '@shared/services/ui-state.service';
 import { ExportService } from '@shared/services/export.service';
-import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
+import { SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
 import { CHARACTER_COLORS } from '@characters/constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
 import { CharacterCharacteristics } from '../character-characteristics/character-characteristics';
@@ -146,7 +146,6 @@ export class CharacterFormComponent implements OnInit {
   lastShieldArmor: ArmorLocations | null = null;
 
   cultRanks = CULT_RANKS;
-  fantasyNames = FANTASY_NAMES;
 
   constructor(
     private characterService: CharacterService,
@@ -334,9 +333,8 @@ export class CharacterFormComponent implements OnInit {
     // Only for new characters, not editing
     if (this.editMode) return;
 
-    // Randomly select a character name from the fantasy names list
-    const randomNameIndex = Math.floor(Math.random() * this.fantasyNames.length);
-    this.character.name = this.fantasyNames[randomNameIndex];
+    const names = this.gameSystemService.getRules().getCharacterNames();
+    this.character.name = names[Math.floor(Math.random() * names.length)];
     this.randomizedFields.add('name');
 
     // Randomize all stats (point-buy systems skip this)

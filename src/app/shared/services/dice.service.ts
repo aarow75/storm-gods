@@ -117,21 +117,38 @@ export class DiceService {
         continue;
       }
 
-      // Check if it's a dice roll (e.g., "1d6", "2d8")
-      const diceMatch = segment.match(/(\d+)d(\d+)/);
+      // Check if it's a dice roll (e.g., "1d6", "2d8", "d6", "d6/a", "d6/d")
+      const diceMatch = segment.match(/^(\d*)d(\d+)(\/[ad])?$/);
       if (diceMatch) {
-        const count = parseInt(diceMatch[1]);
+        const count = diceMatch[1] ? parseInt(diceMatch[1]) : 1;
         const sides = parseInt(diceMatch[2]);
-        const roll = this.rollDice(count, sides);
+        const modifier = diceMatch[3]; // '/a' = advantage, '/d' = disadvantage
+
+        let roll: number;
+        let label: string;
+        if (modifier === '/a') {
+          const r1 = this.rollDice(count, sides);
+          const r2 = this.rollDice(count, sides);
+          roll = Math.max(r1, r2);
+          label = `${count}d${sides}/a[${r1},${r2}→${roll}]`;
+        } else if (modifier === '/d') {
+          const r1 = this.rollDice(count, sides);
+          const r2 = this.rollDice(count, sides);
+          roll = Math.min(r1, r2);
+          label = `${count}d${sides}/d[${r1},${r2}→${roll}]`;
+        } else {
+          roll = this.rollDice(count, sides);
+          label = `${count}d${sides}[${roll}]`;
+        }
 
         // Check if this should be subtracted
         const operator = (i > 0 && segments[i - 1] === '-') ? '-' : '+';
         if (operator === '-') {
           total -= roll;
-          parts.push(`-${count}d${sides}[${roll}]`);
+          parts.push(`-${label}`);
         } else {
           total += roll;
-          parts.push(`${count}d${sides}[${roll}]`);
+          parts.push(label);
         }
         continue;
       }
