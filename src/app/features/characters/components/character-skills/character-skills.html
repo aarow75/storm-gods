@@ -1,7 +1,7 @@
 @if (heading) {
 <h4>{{ heading }} @if (showThiefSkills) {<button type="button" class="btn-calculate" (click)="applyBonuses.emit()">Apply Skill Bonuses</button>}</h4>
 }
-@if (gameSystem === 'RuneQuest') {
+@if (gameSystemType === 'runequest') {
   <div class="skills-section">
     @for (category of getCategoryKeys(); track category) {
     <div class="skill-category">
@@ -26,7 +26,7 @@
     </div>
     }
   </div>
-} @else if (gameSystem === 'Kal-Arath') {
+} @else if (gameSystemType === 'kal-arath') {
   <p class="skills-hint">Mark abilities as acquired (1) or not (0). Abilities stack if taken more than once; starred (*) abilities may only be taken once.</p>
   <div class="skills-section">
     @for (category of getDbCategoryKeys(); track category) {
@@ -53,7 +53,7 @@
     </div>
     }
   </div>
-} @else if (gameSystem === 'OSRIC') {
+} @else if (gameSystemType === 'osric') {
   @if (showThiefSkills) {
   <div class="skills-section">
     @for (category of getDbCategoryKeys(); track category) {

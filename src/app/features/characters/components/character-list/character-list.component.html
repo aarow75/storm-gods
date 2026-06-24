@@ -28,7 +28,7 @@
         <h3>{{ character.name }}</h3>
         @if (character.gameSystem) {
           <span class="game-system-badge" [class]="'system-' + character.gameSystem">
-            {{ getGameSystemName(character.gameSystem) }}
+            {{ getGameSystemName(character) }}
           </span>
         }
       </div>

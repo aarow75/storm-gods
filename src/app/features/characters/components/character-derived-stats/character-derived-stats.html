@@ -5,7 +5,7 @@
   <div class="form-group">
     <label>Hit Points:</label>
     <input type="number" [(ngModel)]="derivedStats.totalHitPoints" name="totalHP" />
-    @if (isOsric && osricHpFormula) {
+    @if (osricHpFormula) {
     <span class="stat-breakdown">
       {{ osricHpFormula }}
       <button type="button" class="btn-dice" (click)="rollOsricHp()">Roll</button>

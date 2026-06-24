@@ -1,13 +1,24 @@
 import { Injectable } from '@angular/core';
 import { CustomMap, DEFAULT_WILDERNESS_STATE, TerrainMapExport, TerrainType, WildernessMapState, WildernessToken } from '@maps/models/wilderness-map.model';
 import { DataPort } from '@shared/services/data-port.service';
+import { GameSystemService } from '@shared/services/game-system.service';
 
 @Injectable({ providedIn: 'root' })
 export class WildernessMapService implements DataPort {
-  private readonly STORAGE_KEY = 'runequest-wilderness-map';
-
   readonly dataPortLabel = 'Terrain Maps';
   readonly dataPortKey = 'terrain-data';
+
+  constructor(private gameSystemService: GameSystemService) {
+    const existing = localStorage.getItem('wilderness-map');
+    if (existing && !localStorage.getItem(this.key())) {
+      localStorage.setItem(this.key(), existing);
+      localStorage.removeItem('wilderness-map');
+    }
+  }
+
+  private key(): string {
+    return `${this.gameSystemService.gameSystem()}-wilderness-map`;
+  }
 
   exportData(): unknown {
     const state = this.getState();
@@ -35,7 +46,7 @@ export class WildernessMapService implements DataPort {
   }
 
   getState(): WildernessMapState {
-    const data = localStorage.getItem(this.STORAGE_KEY);
+    const data = localStorage.getItem(this.key());
     const loaded = data ? JSON.parse(data) : { ...DEFAULT_WILDERNESS_STATE };
     loaded.terrainMaps ??= {};
     loaded.tokenMaps ??= {};
@@ -57,11 +68,11 @@ export class WildernessMapService implements DataPort {
 
   saveState(state: WildernessMapState): void {
     console.log('WildernessMapService.saveState():', state);
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(this.key(), JSON.stringify(state));
   }
 
   clearState(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(this.key());
   }
 
   importStateData(data: { customMaps?: CustomMap[]; terrainMaps?: Record<string, Record<string, TerrainType>>; tokenMaps?: Record<string, WildernessToken[]> }): { imported: number; skipped: number } {

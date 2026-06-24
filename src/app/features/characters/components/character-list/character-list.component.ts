@@ -68,15 +68,16 @@ export class CharacterListComponent implements OnInit, OnDestroy {
     return character.derivedStats.maxHitPoints || character.derivedStats.totalHitPoints;
   }
 
-  getGameSystemName(system: string): string {
-    if (system === 'dragonbane') return 'Dragonbane';
-    if (system === 'kal-arath') return 'Kal-Arath';
-    return 'RuneQuest';
+  private rulesFor(character: Character) {
+    return getRulesForSystem(character.gameSystem ?? 'runequest');
+  }
+
+  getGameSystemName(character: Character): string {
+    return this.rulesFor(character).getSystemName();
   }
 
   getVisibleStats(character: Character): { label: string; value: number }[] {
-    const rules = getRulesForSystem(character.gameSystem ?? 'runequest');
-    return rules.getStatDefinitions()
+    return this.rulesFor(character).getStatDefinitions()
       .filter(def => def.visible)
       .map(def => ({
         label: def.label.split(' ')[0],
@@ -85,31 +86,31 @@ export class CharacterListComponent implements OnInit, OnDestroy {
   }
 
   characterUsesHitLocations(character: Character): boolean {
-    return getRulesForSystem(character.gameSystem ?? 'runequest').usesHitLocations();
+    return this.rulesFor(character).usesHitLocations();
   }
 
   showStrikeRank(character: Character): boolean {
-    return character.gameSystem !== 'dragonbane' && character.gameSystem !== 'kal-arath' && character.gameSystem !== 'osric';
+    return this.rulesFor(character).usesStrikeRank();
   }
 
   showMagicPoints(character: Character): boolean {
-    return character.gameSystem !== 'kal-arath' && character.gameSystem !== 'osric';
+    return this.rulesFor(character).showsMagicPoints();
   }
 
   magicPointsLabel(character: Character): string {
-    return character.gameSystem === 'dragonbane' ? 'WP' : 'Magic Points';
+    return this.rulesFor(character).getMagicPointsLabel();
   }
 
   showDamageBonus(character: Character): boolean {
-    return character.gameSystem !== 'kal-arath' && character.gameSystem !== 'osric';
+    return this.rulesFor(character).showsDamageBonus();
   }
 
   showHealingRate(character: Character): boolean {
-    return character.gameSystem !== 'dragonbane';
+    return this.rulesFor(character).showsHealingRate();
   }
 
   showMovement(character: Character): boolean {
-    return character.gameSystem !== 'kal-arath';
+    return this.rulesFor(character).showsMovementRate();
   }
 
   showArmorRating(character: Character): boolean {
@@ -117,7 +118,7 @@ export class CharacterListComponent implements OnInit, OnDestroy {
   }
 
   healingRateLabel(character: Character): string {
-    return character.gameSystem === 'kal-arath' ? 'Post-Battle Healing' : 'Healing Rate';
+    return this.rulesFor(character).getHealingRateLabel();
   }
 
   getSingleArmorRating(character: Character): number {

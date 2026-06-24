@@ -1,8 +1,14 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield } from '@shared/rules/game-rules';
-import { DerivedStats, EquipmentItem, CharacterBackground } from '@characters/models/character.model';
+import { DerivedStats, EquipmentItem, CharacterBackground, Resources } from '@characters/models/character.model';
 
 export type BackgroundForBonuses = Pick<CharacterBackground, 'occupation' | 'homeland' | 'cult' | 'age'>;
+
+export type ToHitMechanic =
+  | { type: 'percentile' }                       // d100 ≤ skill (RuneQuest)
+  | { type: 'd20-under' }                        // d20 ≤ skill (Dragonbane)
+  | { type: 'd20-over-ac' }                      // d20 + bonus ≥ (20 − defenderAC) (OSRIC)
+  | { type: 'd6-pool'; difficulty: number };     // d6 + skill ≥ difficulty (Kal-Arath)
 
 export interface StatDefinition {
   key: keyof CharacterStats;
@@ -130,6 +136,28 @@ export interface GameSystemRules {
   /** Percentage penalty applied to each repeat parry against the same attacker. 0 for systems without this rule. */
   getParryRepeatPenalty(): number;
 
+  /** Whether this system uses skill-based parry and dodge rolls for defense resolution. False hides those options in the combat tracker. */
+  usesParryDodge(): boolean;
+
+  /** Whether parry weapons/shields take HP damage when blocking. False hides weapon HP tracking in the combat tracker. */
+  usesWeaponHP(): boolean;
+
+  /**
+   * Describes the to-hit mechanic used in combat.
+   * - 'percentile': d100 roll-under a skill % (RuneQuest default)
+   * - 'd20-under':  d20 roll-under a skill value (Dragonbane)
+   * - 'd20-over-ac': d20 + bonus ≥ (20 − defenderAC) (OSRIC)
+   * - 'd6-pool':    d6 + skill ≥ difficulty (Kal-Arath)
+   * Omit (or return undefined) to default to 'percentile'.
+   */
+  getToHitMechanic?(): ToHitMechanic;
+
+  /**
+   * For the 'd20-over-ac' mechanic: integer bonus added to the d20 roll.
+   * isRanged = true for missile weapons (DEX-based), false for melee (STR-based).
+   */
+  getD20AttackBonus?(stats: CharacterStats, isRanged: boolean): number;
+
   // ─────────────────────────────────────────────────────────────────────────
 
   /** Identifier for the magic system used by this game system. */
@@ -149,4 +177,57 @@ export interface GameSystemRules {
 
   /** CON modifier applied per hit die roll. Returns 0 for systems that don't use this. */
   getConHpModifier?(con: number): number;
+
+  // ── Character Sheet Display ───────────────────────────────────────────────
+
+  /** Human-readable name for this system (e.g. 'RuneQuest', 'Dragonbane'). */
+  getSystemName(): string;
+
+  /** Valid range for stat entry inputs. */
+  getStatRange(): { min: number; max: number };
+
+  /** Whether stat-rolling buttons are shown on the character form. */
+  canRollStats(): boolean;
+
+  /** Whether this system tracks magic points (or WP equivalent). */
+  showsMagicPoints(): boolean;
+
+  /** Label for the magic points field. */
+  getMagicPointsLabel(): string;
+
+  /** Whether this system shows a damage bonus field. */
+  showsDamageBonus(): boolean;
+
+  /** Label for the damage bonus field. */
+  getDamageBonusLabel(): string;
+
+  /** Whether this system shows a healing rate field. */
+  showsHealingRate(): boolean;
+
+  /** Label for the healing rate field. */
+  getHealingRateLabel(): string;
+
+  /** Whether this system shows a movement rate field. */
+  showsMovementRate(): boolean;
+
+  /** Human-readable description of the encumbrance penalty when over limit. */
+  getEncumbrancePenaltyText(derivedStats: DerivedStats): string;
+
+  /** Resource fields to display on the character sheet, in display order. */
+  getResourceFields(): { key: keyof Resources; label: string; hint?: string }[];
+
+  /** Primary wealth total for weapon affordability checks. */
+  getPrimaryWealthAmount(resources: Resources): number;
+
+  /** Whether weapon skills are fixed by the weapon definition rather than chosen from a list. */
+  weaponSkillIsFixed(): boolean;
+
+  /** Whether weapons show a skill chooser drawn from the character's combat skill list. */
+  weaponHasSelectableSkill(): boolean;
+
+  /** Default starting stat values for a new character of this system. */
+  getDefaultStats(): CharacterStats;
+
+  /** Hint text shown below the armor section (empty string if no hint needed). */
+  getArmorHint(): string;
 }

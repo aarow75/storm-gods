@@ -21,38 +21,6 @@ export class CharacterResources {
   }
 
   getResourceKeys(): { key: keyof Resources; label: string; hint?: string }[] {
-    const system = this.gameSystemService.gameSystem();
-    if (system === 'kal-arath') {
-      return [
-        { key: 'silver',     label: 'Silver' },
-        { key: 'fatePoints', label: 'Fate Points' },
-        { key: 'level',      label: 'Level' },
-        { key: 'xp',         label: 'XP' },
-      ];
-    }
-    if (system === 'osric') {
-      return [
-        { key: 'gold',   label: 'Gold (GP)' },
-        { key: 'silver', label: 'Silver (SP)', hint: '10 SP = 1 GP' },
-        { key: 'clacks', label: 'Copper (CP)', hint: '100 CP = 1 GP' },
-        { key: 'level',  label: 'Level' },
-        { key: 'xp',     label: 'XP' },
-      ];
-    }
-    if (system === 'dragonbane') {
-      return [
-        { key: 'copper',           label: 'Copper',            hint: '10 copper = 1 silver' },
-        { key: 'silver',           label: 'Silver',            hint: '10 silver = 1 gold' },
-        { key: 'gold',             label: 'Gold' },
-        { key: 'advancementMarks', label: 'Advancement Marks', hint: 'Roll D20 vs. skill to improve' },
-      ];
-    }
-    return [
-      { key: 'wheels',     label: 'Wheels (2 Gold)' },
-      { key: 'lunars',     label: 'Lunars (Silver)' },
-      { key: 'clacks',     label: 'Clacks (Copper)' },
-      { key: 'reputation', label: 'Reputation' },
-      { key: 'ransom',     label: 'Ransom' },
-    ];
+    return this.gameSystemService.getRules().getResourceFields();
   }
 }

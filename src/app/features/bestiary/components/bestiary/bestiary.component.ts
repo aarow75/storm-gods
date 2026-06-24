@@ -132,11 +132,7 @@ export class BestiaryComponent implements OnInit {
   }
 
   getSystemBadgeClass(gameSystem: string): string {
-    if (gameSystem === 'runequest') return 'system-runequest';
-    if (gameSystem === 'dragonbane') return 'system-dragonbane';
-    if (gameSystem === 'kal-arath') return 'system-kal-arath';
-    if (gameSystem === 'osric') return 'system-osric';
-    return '';
+    return gameSystem ? `system-${gameSystem}` : '';
   }
 
   getCategoryLabel(category: string): string {
@@ -259,11 +255,8 @@ export class BestiaryComponent implements OnInit {
   }
 
   getGameSystemName(system: string): string {
-    if (system === 'runequest') return 'RuneQuest';
-    if (system === 'dragonbane') return 'DragonBane';
-    if (system === 'kal-arath') return 'Kal-Arath';
-    if (system === 'osric') return 'OSRIC';
-    return 'Universal';
+    if (!system) return 'Universal';
+    return getRulesForSystem(system as GameSystem).getSystemName();
   }
 
   getMonsterHitLocations(monster: Monster): { name: string; hp: number }[] | null {

@@ -18,7 +18,7 @@ import { DiceService } from '@shared/services/dice.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { UIStateService } from '@shared/services/ui-state.service';
 import { ExportService } from '@shared/services/export.service';
-import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS, DB_SKILL_CATEGORIES, KA_SKILL_CATEGORIES } from '../../constants';
+import { FANTASY_NAMES, SKILL_CATEGORIES, CULT_RANKS } from '../../constants';
 import { CHARACTER_COLORS } from '@characters/constants/character-colors.constants';
 import { CharacterBackground } from '../character-background/character-background';
 import { CharacterCharacteristics } from '../character-characteristics/character-characteristics';
@@ -96,20 +96,22 @@ export class CharacterFormComponent implements OnInit {
 
   skillCategories = SKILL_CATEGORIES;
   get dbSkillCategories() {
-    const sys = this.gameSystemService.gameSystem();
-    if (sys === 'kal-arath') return KA_SKILL_CATEGORIES;
-    if (sys === 'osric') {
-      const cats: Record<string, string[]> = {};
-      for (const c of this.gameSystemService.getRules().getSkillCategories()) {
-        cats[c.name] = c.skills;
-      }
-      return cats;
+    const cats: Record<string, string[]> = {};
+    for (const c of this.gameSystemService.getRules().getSkillCategories()) {
+      cats[c.name] = c.skills;
     }
-    return DB_SKILL_CATEGORIES;
+    return cats;
   }
   get weaponList() { return this.gameSystemService.getRules().getWeaponList(); }
   get shieldList() { return this.gameSystemService.getRules().getShieldList(); }
   get currencyLabel() { return this.gameSystemService.getRules().getCurrencyLabel(); }
+  get isRuneQuest(): boolean { return this.gameSystemService.getRules().usesHitLocations(); }
+  get isOsric(): boolean { return this.gameSystemService.getRules().getMagicSystemType() === 'osric'; }
+  get showConditions(): boolean {
+    const t = this.gameSystemService.getRules().getMagicSystemType();
+    return t !== 'kal-arath' && t !== 'osric';
+  }
+
   get osricClassUsesMagic(): boolean {
     const rules = this.gameSystemService.getRules() as OsricRules;
     return rules.classUsesMagic?.(this.character.background?.occupation ?? '') ?? true;
@@ -176,10 +178,7 @@ export class CharacterFormComponent implements OnInit {
   }
 
   private get systemDefaultStats(): CharacterStats {
-    if (this.gameSystemService.gameSystem() === 'kal-arath') {
-      return { STR: 1, CON: 1, SIZ: 0, DEX: 1, INT: 1, POW: 0, CHA: 1 };
-    }
-    return { ...DEFAULT_STATS };
+    return this.gameSystemService.getRules().getDefaultStats();
   }
 
   saveCharacter(): void {
@@ -341,7 +340,7 @@ export class CharacterFormComponent implements OnInit {
     this.randomizedFields.add('name');
 
     // Randomize all stats (point-buy systems skip this)
-    if (this.gameSystemService.gameSystem() !== 'kal-arath') {
+    if (this.gameSystemService.getRules().canRollStats()) {
       this.rollAll3D6();
     }
 
@@ -407,7 +406,7 @@ export class CharacterFormComponent implements OnInit {
       this.calculateHitPoints();
 
       // OSRIC HP is rolled manually — don't overwrite a higher value with the formula default
-      if (this.gameSystemService.gameSystem() === 'osric' && prevHp != null && prevHp > this.character.derivedStats.totalHitPoints) {
+      if (this.gameSystemService.getRules().getMagicSystemType() === 'osric' && prevHp != null && prevHp > this.character.derivedStats.totalHitPoints) {
         this.character.derivedStats.totalHitPoints = prevHp;
         this.character.derivedStats.maxHitPoints = prevMaxHp ?? prevHp;
       }
@@ -722,10 +721,10 @@ export class CharacterFormComponent implements OnInit {
     // Required: all visible characteristics must be filled
     if (this.character.stats) {
       const visibleStats = this.gameSystemService.getRules().getStatDefinitions().filter(s => s.visible);
-      const isKA = this.gameSystemService.gameSystem() === 'kal-arath';
+      const statMin = this.gameSystemService.getRules().getStatRange().min;
       visibleStats.forEach(s => {
         const value = this.character.stats![s.key];
-        if (value === undefined || value === null || (!isKA && value < 1)) {
+        if (value === undefined || value === null || value < statMin) {
           missing.push(`- ${s.label} (Characteristic)`);
         }
       });
@@ -759,12 +758,12 @@ export class CharacterFormComponent implements OnInit {
         return !this.character.background?.cult || this.character.background.cult.trim() === '';
       case 'stats': {
         if (!this.character.stats) return true;
-        const isKA = this.gameSystemService.gameSystem() === 'kal-arath';
+        const statMin = this.gameSystemService.getRules().getStatRange().min;
         return this.gameSystemService.getRules().getStatDefinitions()
           .filter(s => s.visible)
           .some(s => {
             const v = this.character.stats![s.key];
-            return v === undefined || v === null || (!isKA && v < 1);
+            return v === undefined || v === null || v < statMin;
           });
       }
       default:

@@ -22,14 +22,14 @@ export class CharacterSkills {
   @Input() occupation?: string;
   @Output() applyBonuses = new EventEmitter<void>();
 
-  gameSystem = inject(GameSystemService).getSystemName();
+  gameSystemType = inject(GameSystemService).getRules().getMagicSystemType();
 
   get heading(): string {
     return 'Skills';
   }
 
   get showThiefSkills(): boolean {
-    if (this.gameSystem !== 'OSRIC') return true;
+    if (this.gameSystemType !== 'osric') return true;
     return this.occupation === 'Thief' || this.occupation === 'Assassin';
   }
 }

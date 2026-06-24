@@ -5,7 +5,7 @@ import {
   getSizeModifier, getDexterityModifier, calculateHitLocations as rqCalculateHitLocations
 } from '@shared/rules/game-rules';
 import {
-  DerivedStats, EquipmentItem, CharacterBackground,
+  DerivedStats, EquipmentItem, CharacterBackground, Resources,
   calculateDerivedStats as rqCalculateDerivedStats,
   calculateSkillCategoryModifiers as rqCalculateSkillCategoryModifiers,
   applySkillBonuses as rqApplySkillBonuses,
@@ -224,6 +224,9 @@ export class RuneQuestRules implements GameSystemRules {
     return 20;
   }
 
+  usesParryDodge(): boolean { return true; }
+  usesWeaponHP(): boolean { return true; }
+
   private atkStr(str: number): number {
     if (str <= 8)  return -5;
     if (str <= 12) return 0;
@@ -294,4 +297,38 @@ export class RuneQuestRules implements GameSystemRules {
   getCurrencyLabel(): string {
     return 'L';
   }
+
+  getSystemName(): string { return 'RuneQuest'; }
+  getStatRange(): { min: number; max: number } { return { min: 1, max: 30 }; }
+  canRollStats(): boolean { return true; }
+  showsMagicPoints(): boolean { return true; }
+  getMagicPointsLabel(): string { return 'Magic Points'; }
+  showsDamageBonus(): boolean { return true; }
+  getDamageBonusLabel(): string { return 'Damage Bonus'; }
+  showsHealingRate(): boolean { return true; }
+  getHealingRateLabel(): string { return 'Healing Rate'; }
+  showsMovementRate(): boolean { return true; }
+
+  getEncumbrancePenaltyText(derivedStats: DerivedStats): string {
+    return `-${derivedStats.encumbranceDefensePenalty}% Dodge`;
+  }
+
+  getResourceFields(): { key: keyof Resources; label: string; hint?: string }[] {
+    return [
+      { key: 'wheels',     label: 'Wheels (2 Gold)' },
+      { key: 'lunars',     label: 'Lunars (Silver)' },
+      { key: 'clacks',     label: 'Clacks (Copper)' },
+      { key: 'reputation', label: 'Reputation' },
+      { key: 'ransom',     label: 'Ransom' },
+    ];
+  }
+
+  getPrimaryWealthAmount(resources: Resources): number {
+    return (resources.wheels ?? 0) * 20 + (resources.lunars ?? 0) + (resources.clacks ?? 0) / 10;
+  }
+
+  weaponSkillIsFixed(): boolean { return false; }
+  weaponHasSelectableSkill(): boolean { return true; }
+  getDefaultStats(): CharacterStats { return { STR: 10, CON: 10, SIZ: 10, DEX: 10, INT: 10, POW: 10, CHA: 10 }; }
+  getArmorHint(): string { return ''; }
 }

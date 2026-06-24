@@ -25,51 +25,18 @@ export class CharacterDerivedStats {
     return 'Derived Statistics';
   }
 
-  get isRuneQuest(): boolean {
-    return this.gameSystemService.getRules().usesHitLocations();
-  }
+  private get rules() { return this.gameSystemService.getRules(); }
 
-  get isKalArath(): boolean {
-    return this.gameSystemService.gameSystem() === 'kal-arath';
-  }
+  get isRuneQuest(): boolean { return this.rules.usesHitLocations(); }
+  get isOsric(): boolean { return this.rules.getMagicSystemType() === 'osric'; }
 
-  get isOsric(): boolean {
-    return this.gameSystemService.gameSystem() === 'osric';
-  }
-
-  get isDragonbane(): boolean {
-    return this.gameSystemService.gameSystem() === 'dragonbane';
-  }
-
-  get showMagicPoints(): boolean {
-    return !this.isKalArath && !this.isOsric;
-  }
-
-  get magicPointsLabel(): string {
-    return this.isDragonbane ? 'WP' : 'Magic Points';
-  }
-
-  get showDamageBonus(): boolean {
-    return !this.isKalArath;
-  }
-
-  get damageBonusLabel(): string {
-    return this.isOsric ? 'STR Bonus' : 'Damage Bonus';
-  }
-
-  get showHealingRate(): boolean {
-    return !this.isDragonbane;
-  }
-
-  get healingRateLabel(): string {
-    if (this.isKalArath) return 'Post-Battle Healing';
-    if (this.isOsric) return 'Healing (HP/day)';
-    return 'Healing Rate';
-  }
-
-  get showMovementRate(): boolean {
-    return this.isRuneQuest || this.isDragonbane;
-  }
+  get showMagicPoints(): boolean { return this.rules.showsMagicPoints(); }
+  get magicPointsLabel(): string { return this.rules.getMagicPointsLabel(); }
+  get showDamageBonus(): boolean { return this.rules.showsDamageBonus(); }
+  get damageBonusLabel(): string { return this.rules.getDamageBonusLabel(); }
+  get showHealingRate(): boolean { return this.rules.showsHealingRate(); }
+  get healingRateLabel(): string { return this.rules.getHealingRateLabel(); }
+  get showMovementRate(): boolean { return this.rules.showsMovementRate(); }
 
   get osricHpFormula(): string {
     if (!this.occupation || !this.level) return '';
@@ -110,10 +77,7 @@ export class CharacterDerivedStats {
   }
 
   get encumbrancePenaltyText(): string {
-    if (this.isKalArath) return 'All physical rolls at disadvantage';
-    if (this.isOsric) return `Movement reduced; over ${this.derivedStats.maxEncumbrance} lbs = immobile`;
-    if (this.isDragonbane) return 'Bane on all physical rolls';
-    return `-${this.derivedStats.encumbranceDefensePenalty}% Dodge`;
+    return this.rules.getEncumbrancePenaltyText(this.derivedStats);
   }
 
   get strikeRankBreakdown(): string {

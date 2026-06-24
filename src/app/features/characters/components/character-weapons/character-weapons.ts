@@ -2,6 +2,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Weapon, WeaponDefinition, CharacterStats, Resources } from '@characters/models/character.model';
+import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
+import { GameSystem } from '@shared/models/game-system.model';
 
 @Component({
   standalone: true,
@@ -15,7 +17,7 @@ export class CharacterWeapons {
   @Input() weaponList!: WeaponDefinition[];
   @Input() combatSkills!: string[];
   @Input() weaponSkills!: string[];
-  @Input() gameSystem!: string;
+  @Input() gameSystem!: GameSystem;
   @Input() currencyLabel: string = 'L';
   @Input() stats?: CharacterStats;
   @Input() resources?: Resources;
@@ -33,10 +35,7 @@ export class CharacterWeapons {
 
   private totalWealth(): number {
     if (!this.resources) return Infinity;
-    if (this.gameSystem === 'dragonbane') return this.resources.silver ?? 0;
-    if (this.gameSystem === 'osric') return this.resources.gold ?? 0;
-    if (this.gameSystem === 'kal-arath') return this.resources.silver ?? 0;
-    return (this.resources.wheels ?? 0) * 20 + (this.resources.lunars ?? 0) + (this.resources.clacks ?? 0) / 10;
+    return getRulesForSystem(this.gameSystem).getPrimaryWealthAmount(this.resources);
   }
 
   canMeetStats(def: WeaponDefinition): boolean {
@@ -81,14 +80,14 @@ export class CharacterWeapons {
   getSkillsForWeapon(weapon: Weapon): string[] | null {
     const def = this.weaponList.find(w => w.name === weapon.name);
     if (!def?.defaultSkill) return null;
-    if (this.gameSystem === 'dragonbane') return null;
-    if (this.gameSystem === 'runequest') return this.combatSkills;
+    const rules = getRulesForSystem(this.gameSystem);
+    if (rules.weaponSkillIsFixed()) return null;
+    if (rules.weaponHasSelectableSkill()) return this.combatSkills;
     return null;
   }
 
   getFixedSkill(weapon: Weapon): string | null {
-    if (this.gameSystem !== 'dragonbane') return null;
-    const def = this.weaponList.find(w => w.name === weapon.name);
-    return def?.defaultSkill ?? null;
+    if (!getRulesForSystem(this.gameSystem).weaponSkillIsFixed()) return null;
+    return this.weaponList.find(w => w.name === weapon.name)?.defaultSkill ?? null;
   }
 }

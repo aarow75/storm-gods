@@ -306,18 +306,20 @@
                   }
                 </div>
 
-                <label for="parry-{{ participant.id }}" class="parry-label">Parry With:</label>
-                <select id="parry-{{ participant.id }}"
-                        [(ngModel)]="participant.selectedParryItem"
-                        [disabled]="!!participant.isDead"
-                        class="parry-select">
-                  <option value="">-- Select --</option>
-                  @for (item of getParticipantParryItems(participant); track item) {
-                    <option [value]="item">{{ item }}</option>
-                  }
-                </select>
+                @if (rules.usesParryDodge()) {
+                  <label for="parry-{{ participant.id }}" class="parry-label">Parry With:</label>
+                  <select id="parry-{{ participant.id }}"
+                          [(ngModel)]="participant.selectedParryItem"
+                          [disabled]="!!participant.isDead"
+                          class="parry-select">
+                    <option value="">-- Select --</option>
+                    @for (item of getParticipantParryItems(participant); track item) {
+                      <option [value]="item">{{ item }}</option>
+                    }
+                  </select>
+                }
 
-                @if (getWeaponHPDisplay(participant)) {
+                @if (rules.usesWeaponHP() && getWeaponHPDisplay(participant)) {
                   <div class="weapon-hp-row">
                     <span class="weapon-hp-label">Parry Item HP:</span>
                     <span class="weapon-hp-value"
@@ -348,7 +350,7 @@
                 @if (getLastMiss(participant.id); as miss) {
                   <div class="miss-result">
                     <span class="miss-badge">MISS</span>
-                    <span class="miss-info">vs {{ miss.targetName }} (rolled {{ miss.attackRoll }} vs {{ miss.attackSkill }}%)</span>
+                    <span class="miss-info">vs {{ miss.targetName }} ({{ miss.display }})</span>
                     <button class="btn-clear-result" (click)="clearMissResult(participant.id)">&times;</button>
                   </div>
                 }
@@ -427,7 +429,7 @@
         <!-- Attack roll result -->
         <div class="attack-roll-row">
           <span class="attack-hit-chip">
-            Hit! Rolled {{ pendingAttack.attackRoll }} vs {{ pendingAttack.attackSkill }}%
+            {{ pendingAttack.attackRollDisplay }}
           </span>
           @if (getTotalAttackBonus(pendingAttack.attacker) > 0) {
             <span class="attack-bonus-chip">
@@ -441,14 +443,16 @@
             Rolled <strong class="damage-number">{{ pendingAttack.rawDamage }}</strong>
             <span class="breakdown-text">({{ pendingAttack.damageBreakdown }})</span>
           </span>
-          <span class="hit-location-chip"
-                [class.loc-fatal]="isLocationFatal(pendingAttack.hitLocation)"
-                [class.loc-useless]="isLocationMaxed(pendingAttack.defender, pendingAttack.hitLocation) && !isLocationFatal(pendingAttack.hitLocation)">
-            d20:{{ pendingAttack.locationRoll }} → {{ pendingAttack.hitLocation }}
-            @if (isLocationMaxed(pendingAttack.defender, pendingAttack.hitLocation)) {
-              ({{ getLocationEffectLabel(pendingAttack.hitLocation) }})
-            }
-          </span>
+          @if (pendingAttack.hitLocation) {
+            <span class="hit-location-chip"
+                  [class.loc-fatal]="isLocationFatal(pendingAttack.hitLocation)"
+                  [class.loc-useless]="isLocationMaxed(pendingAttack.defender, pendingAttack.hitLocation) && !isLocationFatal(pendingAttack.hitLocation)">
+              d20:{{ pendingAttack.locationRoll }} → {{ pendingAttack.hitLocation }}
+              @if (isLocationMaxed(pendingAttack.defender, pendingAttack.hitLocation)) {
+                ({{ getLocationEffectLabel(pendingAttack.hitLocation) }})
+              }
+            </span>
+          }
         </div>
 
         <div class="defense-options">
@@ -460,34 +464,36 @@
               <span class="defense-btn-sub">No defense</span>
             </button>
 
-            <button class="btn btn-parry defense-btn"
-                    (click)="resolveParry()"
-                    [disabled]="!pendingAttack.defender.selectedParryItem || isWeaponBroken(pendingAttack.defender)">
-              <span class="defense-btn-title">Parry</span>
-              <span class="defense-btn-sub">
-                {{ pendingAttack.defender.selectedParryItem || 'No parry item' }}
-                ({{ getEffectiveParrySkill(pendingAttack.defender) + getTotalParryBonus(pendingAttack.defender) - getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}%)
-              </span>
-              @if (getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) > 0) {
-                <span class="defense-btn-sub penalty-text">
-                  -{{ getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}% repeat parry penalty
+            @if (rules.usesParryDodge()) {
+              <button class="btn btn-parry defense-btn"
+                      (click)="resolveParry()"
+                      [disabled]="!pendingAttack.defender.selectedParryItem || isWeaponBroken(pendingAttack.defender)">
+                <span class="defense-btn-title">Parry</span>
+                <span class="defense-btn-sub">
+                  {{ pendingAttack.defender.selectedParryItem || 'No parry item' }}
+                  ({{ getEffectiveParrySkill(pendingAttack.defender) + getTotalParryBonus(pendingAttack.defender) - getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}%)
                 </span>
-              }
-              @if (getWeaponHPDisplay(pendingAttack.defender)) {
-                <span class="defense-btn-sub weapon-hp-sub"
-                      [class.weapon-broken]="isWeaponBroken(pendingAttack.defender)">
-                  Item HP: {{ getWeaponHPDisplay(pendingAttack.defender) }}
-                  @if (isWeaponBroken(pendingAttack.defender)) { — BROKEN }
-                </span>
-              }
-            </button>
+                @if (getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) > 0) {
+                  <span class="defense-btn-sub penalty-text">
+                    -{{ getParryPenalty(pendingAttack.defender, pendingAttack.attacker.id) }}% repeat parry penalty
+                  </span>
+                }
+                @if (rules.usesWeaponHP() && getWeaponHPDisplay(pendingAttack.defender)) {
+                  <span class="defense-btn-sub weapon-hp-sub"
+                        [class.weapon-broken]="isWeaponBroken(pendingAttack.defender)">
+                    Item HP: {{ getWeaponHPDisplay(pendingAttack.defender) }}
+                    @if (isWeaponBroken(pendingAttack.defender)) { — BROKEN }
+                  </span>
+                }
+              </button>
 
-            <button class="btn btn-dodge defense-btn" (click)="resolveDodge()">
-              <span class="defense-btn-title">Dodge</span>
-              <span class="defense-btn-sub">
-                ({{ getEffectiveDodgeSkill(pendingAttack.defender) + getDodgeBonus(pendingAttack.defender) }}%)
-              </span>
-            </button>
+              <button class="btn btn-dodge defense-btn" (click)="resolveDodge()">
+                <span class="defense-btn-title">Dodge</span>
+                <span class="defense-btn-sub">
+                  ({{ getEffectiveDodgeSkill(pendingAttack.defender) + getDodgeBonus(pendingAttack.defender) }}%)
+                </span>
+              </button>
+            }
 
           </div>
 

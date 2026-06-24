@@ -16,33 +16,19 @@ import { GameSystemService } from '@shared/services/game-system.service';
 export class PublicationsComponent {
   constructor(public gameSystemService: GameSystemService) {}
 
+  private get systemType() { return this.gameSystemService.getRules().getMagicSystemType(); }
+
   get publications() {
-    if (this.gameSystemService.gameSystem() === 'runequest') {
-      return RUNEQUEST_PUBLICATIONS;
-    } else if (this.gameSystemService.gameSystem() === 'dragonbane') {
-      return DRAGONBANE_PUBLICATIONS;
-    } else if (this.gameSystemService.gameSystem() === 'osric') {
-      return OSRIC_PUBLICATIONS;
-    } else {
-      return [];
-    }
+    if (this.systemType === 'runequest') return RUNEQUEST_PUBLICATIONS;
+    if (this.systemType === 'dragonbane') return DRAGONBANE_PUBLICATIONS;
+    if (this.systemType === 'osric') return OSRIC_PUBLICATIONS;
+    return [];
   }
 
-  get isDragonbane() {
-    return this.gameSystemService.gameSystem() === 'dragonbane';
-  }
-
-  get isKalArath() {
-    return this.gameSystemService.gameSystem() === 'kal-arath';
-  }
-
-  get isRunequest() {
-    return this.gameSystemService.gameSystem() === 'runequest';
-  }
-
-  get isOsric() {
-    return this.gameSystemService.gameSystem() === 'osric';
-  }
+  get isDragonbane() { return this.systemType === 'dragonbane'; }
+  get isKalArath() { return this.systemType === 'kal-arath'; }
+  get isRunequest() { return this.systemType === 'runequest'; }
+  get isOsric() { return this.systemType === 'osric'; }
 
   get osricCoreRules() {
     return OSRIC_PUBLICATIONS.filter(p => p.category === 'rules');

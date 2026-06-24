@@ -1,10 +1,10 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { WeaponDefinition, ShieldDefinition, HitLocations } from '@shared/rules/game-rules';
-import { DerivedStats, EquipmentItem } from '@characters/models/character.model';
+import { DerivedStats, EquipmentItem, Resources } from '@characters/models/character.model';
 import { KA_WARRIOR_SKILLS, KA_ROGUE_SKILLS, KA_MYSTIC_SKILLS, KA_EXPLORER_SKILLS, KA_SKILL_CATEGORIES } from '@characters/constants/skill-categories.constants';
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
-  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses
+  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic
 } from './game-system-rules.interface';
 import { Weapon, Shield } from './game-rules';
 
@@ -241,6 +241,9 @@ export class KalArathRules implements GameSystemRules {
     return 'S';
   }
 
+  // Roll d6 + skill ≥ 4 to hit. Skill starts at 0 (50% base chance) and improves with advancement.
+  getToHitMechanic(): ToHitMechanic { return { type: 'd6-pool', difficulty: 4 }; }
+
   usesStrikeRank(): boolean { return false; }
   getInitiativeLabel(): string { return 'Initiative'; }
   getMovementInitiativeCost(_meters: number): number { return 0; }
@@ -252,4 +255,35 @@ export class KalArathRules implements GameSystemRules {
     return { attack: 0, parry: 0, dodge: 0 };
   }
   getParryRepeatPenalty(): number { return 0; }
+  usesParryDodge(): boolean { return false; }
+  usesWeaponHP(): boolean { return false; }
+
+  getSystemName(): string { return 'Kal-Arath'; }
+  getStatRange(): { min: number; max: number } { return { min: -1, max: 5 }; }
+  canRollStats(): boolean { return false; }
+  showsMagicPoints(): boolean { return false; }
+  getMagicPointsLabel(): string { return ''; }
+  showsDamageBonus(): boolean { return false; }
+  getDamageBonusLabel(): string { return ''; }
+  showsHealingRate(): boolean { return true; }
+  getHealingRateLabel(): string { return 'Post-Battle Healing'; }
+  showsMovementRate(): boolean { return false; }
+  getEncumbrancePenaltyText(_derivedStats: DerivedStats): string { return 'All physical rolls at disadvantage'; }
+
+  getResourceFields(): { key: keyof Resources; label: string; hint?: string }[] {
+    return [
+      { key: 'silver',     label: 'Silver' },
+      { key: 'fatePoints', label: 'Fate Points' },
+      { key: 'level',      label: 'Level' },
+      { key: 'xp',         label: 'XP' },
+    ];
+  }
+
+  getPrimaryWealthAmount(resources: Resources): number { return resources.silver ?? 0; }
+  weaponSkillIsFixed(): boolean { return false; }
+  weaponHasSelectableSkill(): boolean { return false; }
+  getDefaultStats(): CharacterStats { return { STR: 1, CON: 1, SIZ: 0, DEX: 1, INT: 1, POW: 0, CHA: 1 }; }
+  getArmorHint(): string {
+    return 'Armor reduces all incoming damage (Light: −1, Medium: −2, Heavy: −3). A shield adds −1 and can be sacrificed to reduce a single attack to 0 damage.';
+  }
 }

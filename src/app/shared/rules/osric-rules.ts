@@ -1,10 +1,10 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield } from '@shared/rules/game-rules';
-import { DerivedStats, EquipmentItem } from '@characters/models/character.model';
+import { DerivedStats, EquipmentItem, Resources } from '@characters/models/character.model';
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
   SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses,
-  AbilityDefinition, ClassHitDie
+  AbilityDefinition, ClassHitDie, ToHitMechanic
 } from './game-system-rules.interface';
 
 // OSRIC uses 6 ability scores. SIZ is hidden; POW field stores Wisdom.
@@ -71,7 +71,16 @@ function getStrMaxEncumbrance(str: number): number {
   return 115;                  // −35 lbs (STR 3)
 }
 
-// STR-to-hit/damage bonus string (hit/damage format)
+// STR to-hit bonus (integer, for d20 combat)
+function getStrToHitBonus(str: number): number {
+  if (str >= 17) return 1;
+  if (str >= 8)  return 0;
+  if (str >= 6)  return -1;
+  if (str >= 4)  return -2;
+  return -3;
+}
+
+// STR-to-hit/damage bonus string (hit/damage format) — shown on character sheet
 function getStrBonus(str: number): string {
   if (str >= 18) return '+1/+2';
   if (str >= 17) return '+1/+1';
@@ -575,6 +584,12 @@ export class OsricRules implements GameSystemRules {
     return getConHpModifier(con);
   }
 
+  getToHitMechanic(): ToHitMechanic { return { type: 'd20-over-ac' }; }
+
+  getD20AttackBonus(stats: CharacterStats, isRanged: boolean): number {
+    return isRanged ? getDexMissileModifier(stats.DEX) : getStrToHitBonus(stats.STR);
+  }
+
   usesStrikeRank(): boolean { return false; }
   getInitiativeLabel(): string { return 'Initiative'; }
   getMovementInitiativeCost(_meters: number): number { return 0; }
@@ -586,4 +601,37 @@ export class OsricRules implements GameSystemRules {
     return { attack: 0, parry: 0, dodge: 0 };
   }
   getParryRepeatPenalty(): number { return 0; }
+  usesParryDodge(): boolean { return false; }
+  usesWeaponHP(): boolean { return false; }
+
+  getSystemName(): string { return 'OSRIC'; }
+  getStatRange(): { min: number; max: number } { return { min: 1, max: 30 }; }
+  canRollStats(): boolean { return true; }
+  showsMagicPoints(): boolean { return false; }
+  getMagicPointsLabel(): string { return ''; }
+  showsDamageBonus(): boolean { return true; }
+  getDamageBonusLabel(): string { return 'STR Bonus'; }
+  showsHealingRate(): boolean { return true; }
+  getHealingRateLabel(): string { return 'Healing (HP/day)'; }
+  showsMovementRate(): boolean { return false; }
+
+  getEncumbrancePenaltyText(derivedStats: DerivedStats): string {
+    return `Movement reduced; over ${derivedStats.maxEncumbrance} lbs = immobile`;
+  }
+
+  getResourceFields(): { key: keyof Resources; label: string; hint?: string }[] {
+    return [
+      { key: 'gold',   label: 'Gold (GP)' },
+      { key: 'silver', label: 'Silver (SP)', hint: '10 SP = 1 GP' },
+      { key: 'clacks', label: 'Copper (CP)', hint: '100 CP = 1 GP' },
+      { key: 'level',  label: 'Level' },
+      { key: 'xp',     label: 'XP' },
+    ];
+  }
+
+  getPrimaryWealthAmount(resources: Resources): number { return resources.gold ?? 0; }
+  weaponSkillIsFixed(): boolean { return false; }
+  weaponHasSelectableSkill(): boolean { return false; }
+  getDefaultStats(): CharacterStats { return { STR: 10, CON: 10, SIZ: 0, DEX: 10, INT: 10, POW: 10, CHA: 10 }; }
+  getArmorHint(): string { return ''; }
 }

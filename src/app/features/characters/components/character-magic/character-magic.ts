@@ -38,17 +38,13 @@ export class CharacterMagic {
 
   constructor(public gameSystemService: GameSystemService) {}
 
-  get isKalArath(): boolean {
-    return this.gameSystemService.gameSystem() === 'kal-arath';
+  get magicSystemType(): string {
+    return this.gameSystemService.getRules().getMagicSystemType();
   }
 
-  get isDragonbane(): boolean {
-    return this.gameSystemService.gameSystem() === 'dragonbane';
-  }
-
-  get isOsric(): boolean {
-    return this.gameSystemService.gameSystem() === 'osric';
-  }
+  get isKalArath(): boolean { return this.magicSystemType === 'kal-arath'; }
+  get isDragonbane(): boolean { return this.magicSystemType === 'dragonbane'; }
+  get isOsric(): boolean { return this.magicSystemType === 'osric'; }
 
   get heading(): string {
     return 'Magic';

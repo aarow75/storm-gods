@@ -10,7 +10,7 @@ interface UIState {
   providedIn: 'root'
 })
 export class UIStateService {
-  private readonly STORAGE_KEY = 'runequest-ui-state';
+  private readonly STORAGE_KEY = 'ui-state';
   private readonly DEFAULT_FONT_SIZE = 14;
   private readonly MIN_FONT_SIZE = 10;
   private readonly MAX_FONT_SIZE = 20;
@@ -25,6 +25,11 @@ export class UIStateService {
 
   private loadState(): void {
     try {
+      const old = localStorage.getItem('runequest-ui-state');
+      if (old && !localStorage.getItem(this.STORAGE_KEY)) {
+        localStorage.setItem(this.STORAGE_KEY, old);
+        localStorage.removeItem('runequest-ui-state');
+      }
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
         const state: UIState = JSON.parse(stored);

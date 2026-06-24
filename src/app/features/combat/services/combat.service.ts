@@ -6,35 +6,40 @@ import { GameSystemService } from '@shared/services/game-system.service';
   providedIn: 'root'
 })
 export class CombatService {
+  private readonly STORAGE_KEY = 'combat';
+  private readonly MONSTERS_KEY = 'combat-monsters';
+  private readonly LOG_HISTORY_KEY = 'combat-log-history';
+  private readonly MAP_KEY = 'combat-map';
+  private readonly MAP_TEMPLATES_KEY = 'combat-map-templates';
+
   constructor(private gameSystemService: GameSystemService) {}
-  private readonly STORAGE_KEY = 'runequest-combat';
-  private readonly MONSTERS_KEY = 'runequest-monsters';
-  private readonly LOG_HISTORY_KEY = 'runequest-combat-log-history';
-  private readonly MAP_KEY = 'runequest-combat-map';
-  private readonly MAP_TEMPLATES_KEY = 'runequest-combat-map-templates';
+
+  private key(base: string): string {
+    return `${this.gameSystemService.gameSystem()}-${base}`;
+  }
 
   getCombatParticipants(): CombatParticipant[] {
-    const data = localStorage.getItem(this.STORAGE_KEY);
+    const data = localStorage.getItem(this.key(this.STORAGE_KEY));
     return data ? JSON.parse(data) : [];
   }
 
   saveCombatParticipants(participants: CombatParticipant[]): void {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(participants));
+    localStorage.setItem(this.key(this.STORAGE_KEY), JSON.stringify(participants));
   }
 
   clearCombat(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(this.key(this.STORAGE_KEY));
   }
 
   clearAllCombatState(): void {
-    localStorage.removeItem(this.STORAGE_KEY);
-    localStorage.removeItem(this.MAP_KEY);
-    localStorage.removeItem(this.ROUND_KEY);
-    localStorage.removeItem(this.ACTIVE_PARTICIPANT_KEY);
+    localStorage.removeItem(this.key(this.STORAGE_KEY));
+    localStorage.removeItem(this.key(this.MAP_KEY));
+    localStorage.removeItem(this.key(this.ROUND_KEY));
+    localStorage.removeItem(this.key(this.ACTIVE_PARTICIPANT_KEY));
   }
 
   getMonsters(): Monster[] {
-    const data = localStorage.getItem(this.MONSTERS_KEY);
+    const data = localStorage.getItem(this.key(this.MONSTERS_KEY));
     return data ? JSON.parse(data) : [];
   }
 
@@ -46,13 +51,13 @@ export class CombatService {
     } else {
       monsters.push(monster);
     }
-    localStorage.setItem(this.MONSTERS_KEY, JSON.stringify(monsters));
+    localStorage.setItem(this.key(this.MONSTERS_KEY), JSON.stringify(monsters));
   }
 
   deleteMonster(id: string): void {
     const monsters = this.getMonsters();
     const filtered = monsters.filter(m => m.id !== id);
-    localStorage.setItem(this.MONSTERS_KEY, JSON.stringify(filtered));
+    localStorage.setItem(this.key(this.MONSTERS_KEY), JSON.stringify(filtered));
   }
 
   calculateFinalInitiative(baseInitiative: number, weaponName?: string): number {
@@ -107,7 +112,7 @@ export class CombatService {
 
   // Combat Log History
   getCombatLogHistory(): CombatLogEntry[] {
-    const data = localStorage.getItem(this.LOG_HISTORY_KEY);
+    const data = localStorage.getItem(this.key(this.LOG_HISTORY_KEY));
     return data ? JSON.parse(data) : [];
   }
 
@@ -130,31 +135,31 @@ export class CombatService {
       history.splice(50);
     }
 
-    localStorage.setItem(this.LOG_HISTORY_KEY, JSON.stringify(history));
+    localStorage.setItem(this.key(this.LOG_HISTORY_KEY), JSON.stringify(history));
   }
 
   deleteCombatLogEntry(timestamp: number): void {
     const history = this.getCombatLogHistory();
     const filtered = history.filter(entry => entry.timestamp !== timestamp);
-    localStorage.setItem(this.LOG_HISTORY_KEY, JSON.stringify(filtered));
+    localStorage.setItem(this.key(this.LOG_HISTORY_KEY), JSON.stringify(filtered));
   }
 
   clearCombatLogHistory(): void {
-    localStorage.removeItem(this.LOG_HISTORY_KEY);
+    localStorage.removeItem(this.key(this.LOG_HISTORY_KEY));
   }
 
   // Combat Map State
   getCombatMapState(): CombatMapState {
-    const data = localStorage.getItem(this.MAP_KEY);
+    const data = localStorage.getItem(this.key(this.MAP_KEY));
     return data ? JSON.parse(data) : { positions: {}, movedThisRound: [] };
   }
 
   saveCombatMapState(state: CombatMapState): void {
-    localStorage.setItem(this.MAP_KEY, JSON.stringify(state));
+    localStorage.setItem(this.key(this.MAP_KEY), JSON.stringify(state));
   }
 
   clearCombatMapState(): void {
-    localStorage.removeItem(this.MAP_KEY);
+    localStorage.removeItem(this.key(this.MAP_KEY));
   }
 
   getMapTemplates(): CombatMapTemplate[] {
@@ -176,15 +181,15 @@ export class CombatService {
   }
 
   // Combat Round Management
-  private readonly ROUND_KEY = 'runequest-combat-round';
+  private readonly ROUND_KEY = 'combat-round';
 
   getCurrentRound(): number {
-    const round = localStorage.getItem(this.ROUND_KEY);
+    const round = localStorage.getItem(this.key(this.ROUND_KEY));
     return round ? parseInt(round, 10) : 0;
   }
 
   setCurrentRound(round: number): void {
-    localStorage.setItem(this.ROUND_KEY, round.toString());
+    localStorage.setItem(this.key(this.ROUND_KEY), round.toString());
   }
 
   incrementRound(): number {
@@ -198,18 +203,18 @@ export class CombatService {
   }
 
   // Active Participant Management
-  private readonly ACTIVE_PARTICIPANT_KEY = 'runequest-active-participant';
+  private readonly ACTIVE_PARTICIPANT_KEY = 'active-participant';
 
   getActiveParticipantId(): string | null {
-    const id = localStorage.getItem(this.ACTIVE_PARTICIPANT_KEY);
+    const id = localStorage.getItem(this.key(this.ACTIVE_PARTICIPANT_KEY));
     return id || null;
   }
 
   setActiveParticipantId(participantId: string | null): void {
     if (participantId) {
-      localStorage.setItem(this.ACTIVE_PARTICIPANT_KEY, participantId);
+      localStorage.setItem(this.key(this.ACTIVE_PARTICIPANT_KEY), participantId);
     } else {
-      localStorage.removeItem(this.ACTIVE_PARTICIPANT_KEY);
+      localStorage.removeItem(this.key(this.ACTIVE_PARTICIPANT_KEY));
     }
   }
 }

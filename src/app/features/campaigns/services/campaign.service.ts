@@ -15,19 +15,39 @@ import { GameSystemService } from '@shared/services/game-system.service';
   providedIn: 'root'
 })
 export class CampaignService {
-  private readonly INDEX_KEY = 'rq-campaigns-index';
-  private readonly CAMPAIGN_KEY_PREFIX = 'rq-campaign-';
+  private readonly INDEX_KEY = 'campaigns-index';
+  private readonly CAMPAIGN_KEY_PREFIX = 'campaign-';
 
   campaignsUpdated$ = new BehaviorSubject<Campaign[]>([]);
 
-  constructor(private gameSystemService: GameSystemService) {}
+  constructor(private gameSystemService: GameSystemService) {
+    this.migrateStorageKeys();
+  }
+
+  private migrateStorageKeys(): void {
+    const oldIndex = localStorage.getItem('rq-campaigns-index');
+    if (oldIndex && !localStorage.getItem(this.INDEX_KEY)) {
+      localStorage.setItem(this.INDEX_KEY, oldIndex);
+      localStorage.removeItem('rq-campaigns-index');
+      const ids: string[] = JSON.parse(oldIndex);
+      for (const id of ids) {
+        const oldCampaignKey = 'rq-campaign-' + id;
+        const newCampaignKey = this.CAMPAIGN_KEY_PREFIX + id;
+        const data = localStorage.getItem(oldCampaignKey);
+        if (data && !localStorage.getItem(newCampaignKey)) {
+          localStorage.setItem(newCampaignKey, data);
+          localStorage.removeItem(oldCampaignKey);
+        }
+      }
+    }
+  }
 
   getCampaigns(): Campaign[] {
+    const system = this.gameSystemService.gameSystem();
     const ids = this.getIndexIds();
-    const campaigns = ids
+    return ids
       .map(id => this.getCampaignData(id)?.campaign)
-      .filter((c): c is Campaign => c !== undefined);
-    return campaigns;
+      .filter((c): c is Campaign => c !== undefined && c.gameSystem === system);
   }
 
   getCampaign(id: string): Campaign | null {

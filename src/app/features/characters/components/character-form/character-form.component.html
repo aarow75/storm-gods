@@ -126,7 +126,7 @@
         </div>
 
         <!-- Hit Locations Component (RuneQuest only) -->
-        @if (gameSystemService.gameSystem() === 'runequest') {
+        @if (isRuneQuest) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('hitLocations')">
           <div class="section-header" (click)="toggleSection('hitLocations')">
             <h4>Hit Locations</h4>
@@ -277,7 +277,7 @@
         </div>
 
         <!-- Race & Class Abilities (OSRIC only) -->
-        @if (gameSystemService.gameSystem() === 'osric') {
+        @if (isOsric) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('abilities')">
           <div class="section-header" (click)="toggleSection('abilities')">
             <h4>Race &amp; Class Abilities</h4>
@@ -297,7 +297,7 @@
         }
 
         <!-- Runes Component (RuneQuest only) -->
-        @if (gameSystemService.gameSystem() === 'runequest') {
+        @if (isRuneQuest) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('runes')">
           <div class="section-header" (click)="toggleSection('runes')">
             <h4>Runes</h4>
@@ -316,7 +316,7 @@
         }
 
         <!-- Cult Status Component (RuneQuest only) -->
-        @if (gameSystemService.gameSystem() === 'runequest') {
+        @if (isRuneQuest) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('cultStatus')">
           <div class="section-header" (click)="toggleSection('cultStatus')">
             <h4>Cult Status</h4>
@@ -334,7 +334,7 @@
         }
 
         <!-- Passions Component (RuneQuest only) -->
-        @if (gameSystemService.gameSystem() === 'runequest') {
+        @if (isRuneQuest) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('passions')">
           <div class="section-header" (click)="toggleSection('passions')">
             <h4>Passions</h4>
@@ -405,7 +405,7 @@
         </div>
 
         <!-- Conditions Component (not for Kal-Arath or OSRIC) -->
-        @if (gameSystemService.gameSystem() !== 'kal-arath' && gameSystemService.gameSystem() !== 'osric') {
+        @if (showConditions) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('conditions')">
           <div class="section-header" (click)="toggleSection('conditions')">
             <h4>Conditions</h4>

@@ -1,11 +1,11 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, effect, signal } from '@angular/core';
 import { DataPort } from '@shared/services/data-port.service';
+import { GameSystemService } from '@shared/services/game-system.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CombatLogService implements DataPort {
-  private readonly STORAGE_KEY = 'combat-log';
   private readonly SAVE_DELAY_MS = 500;
 
   readonly dataPortLabel = 'Combat Log';
@@ -14,8 +14,15 @@ export class CombatLogService implements DataPort {
   private log = signal<string[]>([]);
   private saveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  constructor() {
-    this.loadLog();
+  constructor(private gameSystemService: GameSystemService) {
+    effect(() => {
+      this.gameSystemService.gameSystem(); // track system changes
+      this.loadLog();
+    });
+  }
+
+  private key(): string {
+    return `${this.gameSystemService.gameSystem()}-combat-log`;
   }
 
   exportData(): unknown {
@@ -26,20 +33,22 @@ export class CombatLogService implements DataPort {
   }
 
   private loadLog(): void {
-    const stored = localStorage.getItem(this.STORAGE_KEY);
+    const stored = localStorage.getItem(this.key());
     if (stored) {
       try {
         this.log.set(JSON.parse(stored));
       } catch {
         this.log.set([]);
       }
+    } else {
+      this.log.set([]);
     }
   }
 
   private debouncedSaveLog(): void {
     if (this.saveTimeout) clearTimeout(this.saveTimeout);
     this.saveTimeout = setTimeout(() => {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.log()));
+      localStorage.setItem(this.key(), JSON.stringify(this.log()));
       this.saveTimeout = null;
     }, this.SAVE_DELAY_MS);
   }
@@ -66,13 +75,13 @@ export class CombatLogService implements DataPort {
   clearLog(): void {
     this.log.set([]);
     if (this.saveTimeout) clearTimeout(this.saveTimeout);
-    localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(this.key());
   }
 
   flushLog(): void {
     if (this.saveTimeout) {
       clearTimeout(this.saveTimeout);
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.log()));
+      localStorage.setItem(this.key(), JSON.stringify(this.log()));
       this.saveTimeout = null;
     }
   }

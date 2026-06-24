@@ -33,11 +33,11 @@ export class CharacterArmor {
   }
 
   get isOsric(): boolean {
-    return this.gameSystemService.gameSystem() === 'osric';
+    return this.gameSystemService.getRules().getMagicSystemType() === 'osric';
   }
 
   get isDragonbane(): boolean {
-    return this.gameSystemService.gameSystem() === 'dragonbane';
+    return this.gameSystemService.getRules().getMagicSystemType() === 'dragonbane';
   }
 
   get currentArmorRating(): number {
@@ -46,10 +46,7 @@ export class CharacterArmor {
   }
 
   get armorHint(): string {
-    if (this.gameSystemService.gameSystem() === 'kal-arath') {
-      return 'Armor reduces all incoming damage (Light: −1, Medium: −2, Heavy: −3). A shield adds −1 and can be sacrificed to reduce a single attack to 0 damage.';
-    }
-    return 'In Dragonbane, armor is a single value that applies to your whole body.';
+    return this.gameSystemService.getRules().getArmorHint();
   }
 
   getArmorLocationKeys(): string[] {

@@ -221,14 +221,14 @@ All data stored in localStorage:
 
 | Key | Owner |
 |---|---|
-| `runequest-characters` | `CharacterService` |
+| `characters` | `CharacterService` |
 | `gameSystem` | `GameSystemService` |
-| `runequest-combat`, `runequest-monsters`, `runequest-combat-log-history`, `runequest-combat-map`, `runequest-combat-map-templates` | `CombatService` |
-| `runequest-wilderness-map` | `WildernessMapService` |
+| `combat`, `combat-monsters`, `combat-log-history`, `combat-map`, `combat-map-templates`, `combat-round`, `active-participant` | `CombatService` |
+| `wilderness-map` | `WildernessMapService` |
 | `combat-log` | `CombatLogService` |
-| `runequest-ui-state` | `UIStateService` |
+| `ui-state` | `UIStateService` |
 | `custom-monsters` | `CustomMonsterService` |
-| `rq-campaigns-index`, `rq-campaign-*` | `CampaignService` |
+| `campaigns-index`, `campaign-*` | `CampaignService` |
 
 `CharacterService.migrateCharacter()` runs on every load to add missing fields, upgrade old formats, and maintain backward compatibility.
 

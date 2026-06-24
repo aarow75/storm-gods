@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { CombatParticipant, Monster, DEFAULT_MONSTERS } from '@combat/models/combat.model';
 import { Character } from '@characters/models/character.model';
 import { calculateHitLocations, getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
+import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
 import { Monster as BestiaryMonster } from '@bestiary/models/monster.model';
 import { MONSTERS as BESTIARY_MONSTERS } from '@bestiary/constants/monsters.constants';
 import { CharacterService } from '@characters/services/character.service';
@@ -16,6 +17,7 @@ import { CharacterUpdateService } from '@characters/services/character-update.se
 import { GameSystemService } from '@shared/services/game-system.service';
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { parseDamageWithConditions } from '@combat/utils/damage-parser';
+import { ToHitMechanic } from '@shared/rules/game-system-rules.interface';
 
 
 interface PendingAttack {
@@ -25,8 +27,9 @@ interface PendingAttack {
   damageBreakdown: string;
   hitLocation: string | undefined;
   locationRoll: number | undefined;
-  attackRoll: number;         // d100 roll made
-  attackSkill: number;        // effective skill rolled against
+  attackRoll: number;
+  attackSkill: number;
+  attackRollDisplay: string;  // formatted hit description for the modal
 }
 
 @Component({
@@ -57,7 +60,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   addParticipantSurprised = false;
 
   lastDamageRolls: Map<string, { total: number; breakdown: string; finalDamage: number; armorAbsorbed: number; targetName: string }> = new Map();
-  lastMissResult: Map<string, { targetName: string; attackRoll: number; attackSkill: number }> = new Map();
+  lastMissResult: Map<string, { targetName: string; attackRoll: number; attackSkill: number; display: string }> = new Map();
   showLogHistory = false;
 
   pendingAttack: PendingAttack | null = null;
@@ -144,7 +147,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const system = this.gameSystemService.gameSystem();
     this.characters = this.characterService.getCharacters()
       .filter(c => (c.gameSystem ?? 'runequest') === system);
-    this.defaultMonsters = system === 'runequest' ? structuredClone(DEFAULT_MONSTERS) : [];
+    this.defaultMonsters = this.gameSystemService.getRules().usesHitLocations()
+      ? structuredClone(DEFAULT_MONSTERS) : [];
     this.bestiaryMonsters = BESTIARY_MONSTERS
       .filter(m => m.gameSystem === system)
       .map(m => this.convertBestiaryMonster(m));
@@ -681,24 +685,138 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       participant.attacksUsed = (participant.attacksUsed ?? 0) + 1;
     }
 
-    // Roll to hit: d100 under effective attack skill
+    const mechanic: ToHitMechanic = this.rules.getToHitMechanic?.() ?? { type: 'percentile' };
+
+    // ── OSRIC: d20 + bonus vs defender's Armor Class ─────────────────────────
+    if (mechanic.type === 'd20-over-ac') {
+      const isRanged = this.weaponList.find(w => w.name === participant.selectedWeapon)?.isMissile ?? false;
+      const stats = this.getParticipantStats(participant);
+      const attackBonus = stats ? (this.rules.getD20AttackBonus?.(stats, isRanged) ?? 0) : 0;
+      const d20Roll = Math.floor(Math.random() * 20) + 1;
+      const defenderAC = this.getDefenderAC(opponent);
+      const targetRoll = 20 - defenderAC;
+      const isHit = (d20Roll + attackBonus) >= targetRoll;
+
+      const bonusStr = attackBonus > 0 ? `+${attackBonus}` : attackBonus < 0 ? `${attackBonus}` : '';
+      const rollDisplay = bonusStr ? `${d20Roll}${bonusStr}=${d20Roll + attackBonus}` : `${d20Roll}`;
+      const hitDisplay = `d20: ${rollDisplay} vs AC ${defenderAC}`;
+
+      if (!isHit) {
+        this.combatLogService.addEntry(
+          `[MISS] ${participant.name} → ${opponent.name}: missed! (${hitDisplay}, needed ${targetRoll}+)`
+        );
+        this.lastMissResult.set(participant.id, {
+          targetName: opponent.name, attackRoll: d20Roll, attackSkill: targetRoll,
+          display: `${hitDisplay}, needed ${targetRoll}+`
+        });
+        this.saveCombat();
+        this.focusNextRollButton();
+        this.endTurn(participant.id);
+        return;
+      }
+
+      const result = this.diceService.rollDiceNotation(damage);
+      this.pendingAttack = {
+        attacker: participant, defender: opponent,
+        rawDamage: result.total, damageBreakdown: result.breakdown,
+        hitLocation: undefined, locationRoll: undefined,
+        attackRoll: d20Roll, attackSkill: targetRoll,
+        attackRollDisplay: `${hitDisplay} — hit!`,
+      };
+      this.endTurn(participant.id);
+      this.lastMissResult.delete(participant.id);
+      setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
+      return;
+    }
+
+    // ── Dragonbane: d20 roll-under skill ─────────────────────────────────────
+    if (mechanic.type === 'd20-under') {
+      const attackSkill = this.getEffectiveAttackSkill(participant);
+      const attackRoll = Math.floor(Math.random() * 20) + 1;
+      const isHit = attackRoll <= attackSkill;
+      const hitDisplay = `d20: ${attackRoll} vs ${attackSkill}`;
+
+      if (!isHit) {
+        this.combatLogService.addEntry(
+          `[MISS] ${participant.name} → ${opponent.name}: missed! (${hitDisplay})`
+        );
+        this.lastMissResult.set(participant.id, {
+          targetName: opponent.name, attackRoll, attackSkill,
+          display: hitDisplay
+        });
+        this.saveCombat();
+        this.focusNextRollButton();
+        this.endTurn(participant.id);
+        return;
+      }
+
+      const result = this.diceService.rollDiceNotation(damage);
+      this.pendingAttack = {
+        attacker: participant, defender: opponent,
+        rawDamage: result.total, damageBreakdown: result.breakdown,
+        hitLocation: undefined, locationRoll: undefined,
+        attackRoll, attackSkill,
+        attackRollDisplay: `${hitDisplay} — hit!`,
+      };
+      this.endTurn(participant.id);
+      this.lastMissResult.delete(participant.id);
+      setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
+      return;
+    }
+
+    // ── Kal-Arath: d6 + skill ≥ difficulty ──────────────────────────────────
+    if (mechanic.type === 'd6-pool') {
+      const attackSkill = this.getEffectiveAttackSkill(participant);
+      const d6Roll = Math.floor(Math.random() * 6) + 1;
+      const total = d6Roll + attackSkill;
+      const isHit = total >= mechanic.difficulty;
+      const skillStr = attackSkill > 0 ? `+${attackSkill}` : '';
+      const hitDisplay = `d6: ${d6Roll}${skillStr}=${total} vs ${mechanic.difficulty}+`;
+
+      if (!isHit) {
+        this.combatLogService.addEntry(
+          `[MISS] ${participant.name} → ${opponent.name}: missed! (${hitDisplay})`
+        );
+        this.lastMissResult.set(participant.id, {
+          targetName: opponent.name, attackRoll: d6Roll, attackSkill,
+          display: hitDisplay
+        });
+        this.saveCombat();
+        this.focusNextRollButton();
+        this.endTurn(participant.id);
+        return;
+      }
+
+      const result = this.diceService.rollDiceNotation(damage);
+      this.pendingAttack = {
+        attacker: participant, defender: opponent,
+        rawDamage: result.total, damageBreakdown: result.breakdown,
+        hitLocation: undefined, locationRoll: undefined,
+        attackRoll: d6Roll, attackSkill,
+        attackRollDisplay: `${hitDisplay} — hit!`,
+      };
+      this.endTurn(participant.id);
+      this.lastMissResult.delete(participant.id);
+      setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
+      return;
+    }
+
+    // ── RuneQuest: d100 roll-under skill percentage ───────────────────────────
     const attackSkill = this.getEffectiveAttackSkill(participant);
     const attackRoll = Math.floor(Math.random() * 100) + 1;
 
     if (attackRoll > attackSkill) {
-      // Miss — log and stop; no defence roll needed
       const totalBonus = this.getTotalAttackBonus(participant);
       const baseSkill = attackSkill - totalBonus;
       const bonusParts = totalBonus > 0 ? `+${totalBonus} bonus` : '';
+      const hitDisplay = `rolled ${attackRoll} vs ${attackSkill}%` +
+        (bonusParts ? ` (${baseSkill} skill ${bonusParts})` : '');
       this.combatLogService.addEntry(
-        `[MISS] ${participant.name} → ${opponent.name}: attack failed! ` +
-        `(rolled ${attackRoll} vs ${attackSkill}%` +
-        (bonusParts ? `: ${baseSkill} skill ${bonusParts}` : '') + `)`
+        `[MISS] ${participant.name} → ${opponent.name}: attack failed! (${hitDisplay})`
       );
       this.lastMissResult.set(participant.id, {
-        targetName: opponent.name,
-        attackRoll,
-        attackSkill
+        targetName: opponent.name, attackRoll, attackSkill,
+        display: hitDisplay
       });
       this.saveCombat();
       this.focusNextRollButton();
@@ -711,18 +829,14 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const { roll, location } = usesLocations ? this.rollLocation() : { roll: undefined, location: undefined };
 
     this.pendingAttack = {
-      attacker: participant,
-      defender: opponent,
-      rawDamage: result.total,
-      damageBreakdown: result.breakdown,
-      hitLocation: location,
-      locationRoll: roll,
-      attackRoll,
-      attackSkill,
+      attacker: participant, defender: opponent,
+      rawDamage: result.total, damageBreakdown: result.breakdown,
+      hitLocation: location, locationRoll: roll,
+      attackRoll, attackSkill,
+      attackRollDisplay: `Rolled ${attackRoll} vs ${attackSkill}%`,
     };
     this.endTurn(participant.id);
     this.lastMissResult.delete(participant.id);
-    // Focus "Take Hit" button in defense modal
     setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
   }
 
@@ -734,8 +848,9 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const armor = this.getArmorValue(defender, hitLocation);
     const finalDamage = Math.max(0, rawDamage - armor);
 
+    const armorInfo = armor > 0 ? ` - ${armor} armor = ${finalDamage}` : ` = ${finalDamage}`;
     this.combatLogService.addEntry(
-      `[ATTACK] ${attacker.name} → ${defender.name}${locationInfo}: ${rawDamage} (${damageBreakdown}) - ${armor} armor = ${finalDamage} damage`
+      `[ATTACK] ${attacker.name} → ${defender.name}${locationInfo}: ${rawDamage} (${damageBreakdown})${armorInfo} damage`
     );
 
     const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(defender, finalDamage, hitLocation);
@@ -1050,7 +1165,12 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         baseSkill = weapon ? (character.skills[weapon.skill] || 0) : 0;
       }
     } else {
-      baseSkill = 50; // default monster attack skill
+      // Default monster skill calibrated to ~50% hit rate per mechanic
+      const mechanic = this.rules.getToHitMechanic?.() ?? { type: 'percentile' as const };
+      baseSkill = mechanic.type === 'd20-under' ? 10   // d20 ≤ 10 = 50%
+                : mechanic.type === 'd6-pool'   ? 0    // d6+0 ≥ 4 = 50%
+                : mechanic.type === 'd20-over-ac' ? 0  // OSRIC: not used (uses AC directly)
+                : 50;                                   // percentile: 50%
     }
     return baseSkill + this.getTotalAttackBonus(participant);
   }
@@ -1289,7 +1409,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   }
 
   getGameSystemName(system: string | undefined): string {
-    return system === 'dragonbane' ? 'Dragonbane' : 'RuneQuest';
+    if (!system) return 'RuneQuest';
+    return getRulesForSystem(system as any).getSystemName();
   }
 
   getArmorValue(participant: CombatParticipant, location?: string): number {
@@ -1297,17 +1418,31 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const character = this.characters.find(c => c.id === participant.characterId);
       if (!character) return 0;
 
-      // If location is provided, always use location-specific armor
-      if (location) {
-        const locArmor = character.armor[location as keyof typeof character.armor];
-        return locArmor !== undefined ? locArmor : 0;
+      if (this.rules.usesHitLocations()) {
+        if (location) {
+          const locArmor = character.armor[location as keyof typeof character.armor];
+          return locArmor !== undefined ? locArmor : 0;
+        }
+        const values = Object.values(character.armor);
+        return values.length ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : 0;
       }
 
-      // No location provided, return average
-      const values = Object.values(character.armor);
-      return Math.round(values.reduce((s, v) => s + v, 0) / values.length);
+      // OSRIC: AC affects whether you're hit, not how much damage is taken
+      if (this.gameSystemService.gameSystem() === 'osric') return 0;
+      // Dragonbane, Kal-Arath: flat Armor Rating subtracts from damage
+      const armorDef = this.rules.getArmorTypes().find(a => a.name === character.armorType);
+      return armorDef?.points ?? 0;
     }
+    // OSRIC: monster.armor is AC, not damage reduction
+    if (this.gameSystemService.gameSystem() === 'osric') return 0;
     return this.monsters.find(m => m.id === participant.monsterId)?.armor || 0;
+  }
+
+  getDefenderAC(participant: CombatParticipant): number {
+    if (participant.type === 'character') {
+      return this.characters.find(c => c.id === participant.characterId)?.derivedStats.armorClass ?? 10;
+    }
+    return this.monsters.find(m => m.id === participant.monsterId)?.armor ?? 10;
   }
 
   clearDamageRoll(participantId: string): void { this.lastDamageRolls.delete(participantId); }
@@ -1391,31 +1526,30 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     if (participant.type === 'character' && participant.characterId) {
       const character = this.characters.find(c => c.id === participant.characterId);
       if (!character) return 'N/A';
-      const values = Object.values(character.armor);
-      const total = values.reduce((s, v) => s + v, 0);
-      const avg = Math.round(total / values.length);
-      const min = Math.min(...values);
-      const max = Math.max(...values);
-      return min === max ? `${min}` : `${min}-${max} (avg: ${avg})`;
+      if (this.rules.usesHitLocations()) {
+        const values = Object.values(character.armor);
+        if (!values.length) return '0';
+        const min = Math.min(...values), max = Math.max(...values);
+        const avg = Math.round(values.reduce((s, v) => s + v, 0) / values.length);
+        return min === max ? `${min}` : `${min}-${max} (avg: ${avg})`;
+      }
+      if (this.gameSystemService.gameSystem() === 'osric' && character.derivedStats.armorClass !== undefined) {
+        return `AC: ${character.derivedStats.armorClass}`;
+      }
+      const armorDef = this.rules.getArmorTypes().find(a => a.name === character.armorType);
+      return armorDef ? `${armorDef.points}` : '0';
     }
     return this.monsters.find(m => m.id === participant.monsterId)?.armor.toString() || '0';
   }
 
   getArmorTooltip(participant: CombatParticipant): string {
-    if (participant.type === 'character' && participant.characterId) {
-      const character = this.characters.find(c => c.id === participant.characterId);
-      if (!character) return '';
-      return [
-        `Head: ${character.armor['Head']}`,
-        `Chest: ${character.armor['Chest']}`,
-        `Abdomen: ${character.armor['Abdomen']}`,
-        `R.Arm: ${character.armor['Right Arm']}`,
-        `L.Arm: ${character.armor['Left Arm']}`,
-        `R.Leg: ${character.armor['Right Leg']}`,
-        `L.Leg: ${character.armor['Left Leg']}`
-      ].join(', ');
-    }
-    return '';
+    if (!this.rules.usesHitLocations()) return '';
+    if (participant.type !== 'character' || !participant.characterId) return '';
+    const character = this.characters.find(c => c.id === participant.characterId);
+    if (!character) return '';
+    return this.hitLocationsOrder
+      .map(loc => `${loc}: ${character.armor[loc] ?? 0}`)
+      .join(', ');
   }
 
 }

@@ -38,11 +38,11 @@ export class CharacterCharacteristics {
   get showSiz(): boolean { return this.statDef('SIZ')?.visible ?? true; }
   get showPow(): boolean { return this.statDef('POW')?.visible ?? true; }
 
-  get statMin(): number { return this.gameSystemService.gameSystem() === 'kal-arath' ? -1 : 1; }
-  get statMax(): number { return this.gameSystemService.gameSystem() === 'kal-arath' ? 5 : 30; }
+  get statMin(): number { return this.gameSystemService.getRules().getStatRange().min; }
+  get statMax(): number { return this.gameSystemService.getRules().getStatRange().max; }
 
   get showRollButtons(): boolean {
-    return this.gameSystemService.gameSystem() !== 'kal-arath';
+    return this.gameSystemService.getRules().canRollStats();
   }
 
   get rollButtonLabel(): string {

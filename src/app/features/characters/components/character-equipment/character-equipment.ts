@@ -37,7 +37,7 @@ export class CharacterEquipment {
   }
 
   get isDragonbane(): boolean {
-    return this.gameSystemService.gameSystem() === 'dragonbane';
+    return this.gameSystemService.getRules().getMagicSystemType() === 'dragonbane';
   }
 
   get currencyLabel(): string {

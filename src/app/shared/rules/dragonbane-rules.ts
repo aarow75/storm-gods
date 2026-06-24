@@ -1,10 +1,10 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { WeaponDefinition, ShieldDefinition, Weapon, Shield } from '@shared/rules/game-rules';
-import { DerivedStats, EquipmentItem, WEAPON_SKILLS } from '@characters/models/character.model';
+import { DerivedStats, EquipmentItem, WEAPON_SKILLS, Resources } from '@characters/models/character.model';
 import { DB_SKILLS, DB_MAGIC_SKILLS, DB_SKILL_BY_ATTR, DB_SKILL_CATEGORIES } from '@characters/constants/skill-categories.constants';
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
-  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses
+  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic
 } from './game-system-rules.interface';
 
 // Six conditions from the rulebook, each tied to an attribute. Suffering a condition
@@ -328,6 +328,8 @@ export class DragonbaneRules implements GameSystemRules {
     return 'GC';
   }
 
+  getToHitMechanic(): ToHitMechanic { return { type: 'd20-under' }; }
+
   usesStrikeRank(): boolean { return false; }
   getInitiativeLabel(): string { return 'Initiative'; }
   getMovementInitiativeCost(_meters: number): number { return 0; }
@@ -339,4 +341,33 @@ export class DragonbaneRules implements GameSystemRules {
     return { attack: 0, parry: 0, dodge: 0 };
   }
   getParryRepeatPenalty(): number { return 0; }
+  usesParryDodge(): boolean { return false; }
+  usesWeaponHP(): boolean { return false; }
+
+  getSystemName(): string { return 'Dragonbane'; }
+  getStatRange(): { min: number; max: number } { return { min: 1, max: 30 }; }
+  canRollStats(): boolean { return true; }
+  showsMagicPoints(): boolean { return true; }
+  getMagicPointsLabel(): string { return 'WP'; }
+  showsDamageBonus(): boolean { return true; }
+  getDamageBonusLabel(): string { return 'Damage Bonus'; }
+  showsHealingRate(): boolean { return false; }
+  getHealingRateLabel(): string { return ''; }
+  showsMovementRate(): boolean { return true; }
+  getEncumbrancePenaltyText(_derivedStats: DerivedStats): string { return 'Bane on all physical rolls'; }
+
+  getResourceFields(): { key: keyof Resources; label: string; hint?: string }[] {
+    return [
+      { key: 'copper',           label: 'Copper',            hint: '10 copper = 1 silver' },
+      { key: 'silver',           label: 'Silver',            hint: '10 silver = 1 gold' },
+      { key: 'gold',             label: 'Gold' },
+      { key: 'advancementMarks', label: 'Advancement Marks', hint: 'Roll D20 vs. skill to improve' },
+    ];
+  }
+
+  getPrimaryWealthAmount(resources: Resources): number { return resources.silver ?? 0; }
+  weaponSkillIsFixed(): boolean { return true; }
+  weaponHasSelectableSkill(): boolean { return false; }
+  getDefaultStats(): CharacterStats { return { STR: 10, CON: 10, SIZ: 0, DEX: 10, INT: 10, POW: 10, CHA: 10 }; }
+  getArmorHint(): string { return ''; }
 }

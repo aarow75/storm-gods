@@ -14,12 +14,24 @@ import { DataPort } from '@shared/services/data-port.service';
   providedIn: 'root'
 })
 export class CharacterService implements DataPort {
-  private readonly STORAGE_KEY = 'runequest-characters';//TODO: make this key dynamic based on game system to allow multiple systems in the future
+  private readonly STORAGE_KEY = 'characters';
 
   readonly dataPortLabel = 'Characters';
   readonly dataPortKey = 'characters';
 
-  constructor(private gameSystemService: GameSystemService) {}
+  constructor(private gameSystemService: GameSystemService) {
+    this.migrateKey('runequest-characters', this.STORAGE_KEY);
+  }
+
+  private migrateKey(oldKey: string, newKey: string): void {
+    if (!localStorage.getItem(newKey)) {
+      const old = localStorage.getItem(oldKey);
+      if (old) {
+        localStorage.setItem(newKey, old);
+        localStorage.removeItem(oldKey);
+      }
+    }
+  }
 
   exportData(): unknown {
     return {
