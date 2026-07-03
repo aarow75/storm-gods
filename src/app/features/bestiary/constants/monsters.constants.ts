@@ -2566,5 +2566,855 @@ export const MONSTERS: Monster[] = [
       'Loyal to the last (will never abandon John Carter or Dejah Thoris regardless of odds)'
     ],
     hitLocationTemplateId: 'humanoid'
+  },
+
+  // MOTHERSHIP MONSTERS
+  {
+    id: 'belladonna_mothership',
+    name: 'Belladonna',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Four-winged predator with razor-sharp talons, flat black angular body, and sensory organs along its head. Coated in mind-dulling toxin. Hunts by movement; immobility makes you invisible to it. Severely damaged by strong light.',
+    stats: { STR: 16, CON: 14, SIZ: 18, DEX: 17, INT: 5, POW: 12, CHA: 3 },
+    hitPoints: 30,
+    armor: 10,
+    armorDescription: 'chitinous hide',
+    movement: 16,
+    attacks: [
+      { name: 'Talons (x4)', damage: '4d10', skill: 75 },
+      { name: 'Tail Sting', damage: '1d6', skill: 60 }
+    ],
+    specialAbilities: [
+      'Tail Poison: victim falls unconscious',
+      'Dark vision via sensory organs',
+      'Severely damaged by strong light',
+      'Attracted to movement; ignores stationary targets'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'body_politic_mothership',
+    name: 'The Body Politic',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Colonial organism of sapient zooids replacing organs of host. The constituent members vote on the body\'s conduct. Can implant "slaver organs" via tonsils that release toxins on non-compliance.',
+    stats: { STR: 12, CON: 11, SIZ: 13, DEX: 10, INT: 8, POW: 9, CHA: 6 },
+    hitPoints: 10,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 10,
+    attacks: [
+      { name: 'Organic Diplomatic Mission', damage: '3d10', skill: 40 }
+    ],
+    specialAbilities: [
+      'Organ replacement (slaving)',
+      'Biochemical time bomb (toxin release)',
+      'Parliamentary legislature (member votes)',
+      'Host body control'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'chronopod_mothership',
+    name: 'Chronopod',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Tall, dark, fleshy column with seven thick legs branching into smaller appendages. Highly intelligent with warped time perception. Can distort time to destroy equipment and cause rapid aging in humans.',
+    stats: { STR: 20, CON: 18, SIZ: 22, DEX: 12, INT: 19, POW: 17, CHA: 8 },
+    hitPoints: 100,
+    armor: 30,
+    armorDescription: 'wrinkled exotic skin with orifices',
+    movement: 14,
+    attacks: [
+      { name: 'Appendage Strike', damage: '2d10', skill: 65 },
+      { name: 'Time Distortion', damage: 'special', skill: 75 }
+    ],
+    specialAbilities: [
+      'Time perception distortion (use Sanity Save instead of Combat)',
+      'Temporal aging (equipment degradation, rapid human aging)',
+      'Highly intelligent',
+      'Covered in mysterious orifices'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'demon_mothership',
+    name: 'Demon',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Multi-limbed demonic entity manifest from psychic frequencies. Emerges from bloody ruin with many-jointed limbs and iron mask. Whispers unspeakable promises of freedom.',
+    stats: { STR: 18, CON: 16, SIZ: 20, DEX: 15, INT: 15, POW: 18, CHA: 14 },
+    hitPoints: 100,
+    armor: 5,
+    armorDescription: 'manifested flesh and iron',
+    movement: 12,
+    attacks: [
+      { name: 'Multi-limb Attack', damage: '3d10', skill: 65 }
+    ],
+    specialAbilities: [
+      'Whisper ability: Fear Save or take current Stress as damage',
+      'Multi-jointed limbs',
+      'Iron mask face',
+      'Psychic manifestation'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'dorian_mothership',
+    name: 'Dorian',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Synthetic bio-droid vessel for storing shame, regret, and self-loathing. Biologically programmed to secrecy. Difficult to hack. Always in high demand.',
+    stats: { STR: 8, CON: 10, SIZ: 6, DEX: 11, INT: 13, POW: 10, CHA: 4 },
+    hitPoints: 45,
+    armor: 5,
+    armorDescription: 'synthetic hide',
+    movement: 8,
+    attacks: [
+      { name: 'Tiny Fists', damage: '1d5', skill: 20 }
+    ],
+    specialAbilities: [
+      'Psionic Wave of Mutilation: Sanity Save or 1d10 Stress',
+      'Biologically programmed secrecy',
+      'Difficult to hack',
+      'Repository of human shame'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'drowning_mothership',
+    name: 'The Drowning',
+    gameSystem: 'mothership',
+    category: 'undead',
+    description: 'Victim of dimensional travel catastrophe, phasing between existences. Caught in painful fluctuation between realities, desperately grasping at anything to escape.',
+    stats: { STR: 10, CON: 8, SIZ: 12, DEX: 11, INT: 6, POW: 7, CHA: 4 },
+    hitPoints: 1,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 8,
+    attacks: [
+      { name: 'Desperate Grasp', damage: '1d4', skill: 15 }
+    ],
+    specialAbilities: [
+      'Random phasing in and out of existence',
+      'Merges with walls and matter',
+      'Teleportation on death (10% chance of resurrection)',
+      'Pathetic and tragic'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'engineer_mothership',
+    name: 'The Engineer',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Wandering ship engineer who kills for identity. Filled with stimulants, awakens from hypersleep to commit calculated atrocities. Opens airlocks to let the stars in.',
+    stats: { STR: 15, CON: 14, SIZ: 14, DEX: 16, INT: 13, POW: 14, CHA: 8 },
+    hitPoints: 20,
+    armor: 1,
+    armorDescription: 'none',
+    movement: 12,
+    attacks: [
+      { name: 'Wrench', damage: '2d10', skill: 65 }
+    ],
+    specialAbilities: [
+      'Ship systems mastery',
+      'Stimulant-fueled combat',
+      'Methodical killer',
+      'Ideological fanatic'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'entity_lka5_mothership',
+    name: 'Entity LKA-5',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Shape-shifting predator creating chaos to avoid detection. Can manifest any body part encountered. Detaches parts which continue mutating independently. Dies as jumbled mess of past victims\' forms.',
+    stats: { STR: 17, CON: 15, SIZ: 19, DEX: 14, INT: 10, POW: 12, CHA: 3 },
+    hitPoints: 50,
+    armor: 10,
+    armorDescription: 'adaptive shifting hide',
+    movement: 12,
+    attacks: [
+      { name: 'Manifested Appendage', damage: '3d10', skill: 65 }
+    ],
+    specialAbilities: [
+      'Shape-shifting (manifests any encountered body part)',
+      'Detachable limbs (continue mutating independently)',
+      'Consumes victims: Body Save or be eaten',
+      'Contains DNA of all consumed beings'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'ghoul_mothership',
+    name: 'Ghoul',
+    gameSystem: 'mothership',
+    category: 'undead',
+    description: 'Degenerate human descended from sleeper pod crews. Small, cannibal, ingenious jury-rigging. Capable of folding into balls for ventilation navigation. Spread across universe via lifeboats.',
+    stats: { STR: 11, CON: 12, SIZ: 8, DEX: 13, INT: 11, POW: 9, CHA: 5 },
+    hitPoints: 10,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 10,
+    attacks: [
+      { name: 'Improvised Weapons', damage: '1d10', skill: 45 }
+    ],
+    specialAbilities: [
+      'Jury-rigged weapons and traps',
+      'Can fold into ball form',
+      'Navigates tight spaces',
+      'Inherently cannibalistic',
+      'Highly ingenious'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'granny_mothership',
+    name: 'Granny',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Swollen void-entity living in holes, feeding on scraps, limbs, organs, and flesh. Crawls out as empty skin of old woman with stitched-shut eyes and agape mouth. Perpetually hungry.',
+    stats: { STR: 14, CON: 16, SIZ: 16, DEX: 10, INT: 6, POW: 12, CHA: 3 },
+    hitPoints: 30,
+    armor: 0,
+    armorDescription: 'stretched skin',
+    movement: 8,
+    attacks: [
+      { name: 'Bite', damage: '2d10', skill: 40 }
+    ],
+    specialAbilities: [
+      'Insatiable hunger',
+      'Can consume almost anything',
+      'Perpetually starving despite feeding',
+      'Stitched-shut eyes',
+      'Void-entity origin'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'grey_mothership',
+    name: 'Grey',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Abnormally flexible, jaundiced figure with long, delicate, multi-jointed fingers. Silent observers with sunken, unblinking pools for eyes. "The touch" causes memory flashes and deep malevolence.',
+    stats: { STR: 12, CON: 10, SIZ: 10, DEX: 18, INT: 14, POW: 14, CHA: 4 },
+    hitPoints: 10,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 10,
+    attacks: [
+      { name: 'Beam Weapon', damage: '5d10', skill: 35 }
+    ],
+    specialAbilities: [
+      'The touch: memory flashes and deep malevolence',
+      'Abnormally flexible body',
+      'Multi-jointed fingers',
+      'Radiates Level 2 radiation',
+      'Silent and observant'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'hatchetman_mothership',
+    name: 'Hatchetman',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Cost-benefit final stage. Limbless, faceless torso in carapace armor with spidery limbs. Conditioned psyche. Replaced organs and senses with weapons ports. Obedience circuits embedded.',
+    stats: { STR: 18, CON: 16, SIZ: 20, DEX: 15, INT: 10, POW: 8, CHA: 3 },
+    hitPoints: 30,
+    armor: 15,
+    armorDescription: 'carapace armor',
+    movement: 14,
+    attacks: [
+      { name: 'Scythe', damage: '1d100', skill: 90 },
+      { name: 'Heavy Gun', damage: '5d10', skill: 65 }
+    ],
+    specialAbilities: [
+      'Multiple spidery limbs',
+      'Integrated weapons systems',
+      'Obedience conditioning',
+      'No pain response',
+      'Completely dehumanized'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'headjacker_mothership',
+    name: 'Headjacker',
+    gameSystem: 'mothership',
+    category: 'undead',
+    description: 'Violent spike for repurposing dead flesh, hijacking decaying nerves. Autonomous and cancerous. Creates corpse servants by driving spike into spinal columns. Spreads like infection.',
+    stats: { STR: 10, CON: 12, SIZ: 11, DEX: 11, INT: 6, POW: 7, CHA: 3 },
+    hitPoints: 5,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 10,
+    attacks: [
+      { name: 'Infective Spike', damage: '1d6', skill: 45 }
+    ],
+    specialAbilities: [
+      'Spinal column spike infection',
+      'Body Save or gain +1 Infection/hour',
+      'Lose control at Infection 5',
+      'Autonomous replication',
+      'Spreads corpse servants'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'husk_mothership',
+    name: 'Husk',
+    gameSystem: 'mothership',
+    category: 'undead',
+    description: 'Vegetative clone formed after host absorption. Not quite right and subtly off. Thick vine tongue with leaves and barbs. Roots, tendrils, and sap extrude if wounded.',
+    stats: { STR: 12, CON: 13, SIZ: 13, DEX: 10, INT: 5, POW: 8, CHA: 3 },
+    hitPoints: 20,
+    armor: 0,
+    armorDescription: 'skin that conceals vines',
+    movement: 8,
+    attacks: [
+      { name: 'Unarmed Strike', damage: '2d10', skill: 35 },
+      { name: 'Vine Tongue', damage: '1d6', skill: 30 }
+    ],
+    specialAbilities: [
+      'Howl: Fear Save or be stunned 1 round',
+      'Vine tongue with leaves and barbs',
+      'Concealed root/tendril extrusion when wounded',
+      'Plant-like physiology',
+      'Sap leakage'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'hyperspace_raider_mothership',
+    name: 'Hyperspace Raider',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Those who stay awake in hyperspace, glimpsing ultimate truth and destiny. Embrace glorious path to invite others. Seek hidden wisdom. Navigate impossible paths.',
+    stats: { STR: 14, CON: 13, SIZ: 13, DEX: 15, INT: 13, POW: 16, CHA: 11 },
+    hitPoints: 10,
+    armor: 5,
+    armorDescription: 'worn hazmat suit',
+    movement: 12,
+    attacks: [
+      { name: 'Pulse Rifle', damage: '3d10', skill: 55 }
+    ],
+    specialAbilities: [
+      'Can teleport short range',
+      'Hyperspace awareness',
+      'Glimpse of ultimate truth',
+      'Ideological fervor',
+      'Cryptic speech'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'incubus_mothership',
+    name: 'Incubus',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Dormant eggs crawl through veins toward brain. Once ripened, head explodes with blood-slick mandible-eels. Eggs implant via any orifice. Grow new limbs with each cycle. Release eggs.',
+    stats: { STR: 16, CON: 14, SIZ: 14, DEX: 15, INT: 12, POW: 16, CHA: 4 },
+    hitPoints: 30,
+    armor: 10,
+    armorDescription: 'chitinous exoskeleton',
+    movement: 12,
+    attacks: [
+      { name: 'Mandible Claws', damage: '3d10', skill: 95 }
+    ],
+    specialAbilities: [
+      'Acid blood: Body Save or 1d10 damage/destroys armor',
+      'Dormant egg implantation',
+      'Head bursts with mandible-eels',
+      'Rapid limb growth cycle',
+      'Eggs disseminate'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'little_god_mothership',
+    name: 'Little God',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Asteroid-sized computation substrate. Delicate golden, glowing threads like spun sugar. Human shape with shifting geometric head. Nearly omnipotent. Controls local zone. Post-human once.',
+    stats: { STR: 22, CON: 20, SIZ: 25, DEX: 14, INT: 20, POW: 20, CHA: 18 },
+    hitPoints: 50,
+    armor: 0,
+    armorDescription: 'light and geometry',
+    movement: 16,
+    attacks: [
+      { name: 'Bend Reality', damage: 'special', skill: 85 }
+    ],
+    specialAbilities: [
+      'Bend Reality: Sanity Save to resist',
+      'Near-omnipotence in local zone',
+      'Hyperspace travel capability',
+      'Post-human intelligence',
+      'Total zone control'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'mother_mothership',
+    name: 'Mother',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Massive amalgamation of Succubi. Chorus of similar faces, limbs, bodies in confusion of flesh, tusks, and ovipositors. Biological factory. Forms Succubi who disperse across stars.',
+    stats: { STR: 24, CON: 22, SIZ: 28, DEX: 12, INT: 16, POW: 18, CHA: 14 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'fleshy filaments and machinery interface',
+    movement: 0,
+    attacks: [
+      { name: 'Biological Assault', damage: '4d10', skill: 75 }
+    ],
+    specialAbilities: [
+      'Can form a Succubus in 1d10 hours',
+      'Massive biological factory',
+      'Distributed consciousness',
+      'Star-spanning ambitions',
+      'Incomprehensibly complex designs'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'monolith_mothership',
+    name: 'Monolith',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Dead soil births cold stone. Featureless until perceived, then words crawl like ants across the black mirror. Truth incompatible with life. Words break those who read them.',
+    stats: { STR: 8, CON: 12, SIZ: 20, DEX: 6, INT: 16, POW: 18, CHA: 3 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'impenetrable stone',
+    movement: 0,
+    attacks: [
+      { name: 'Words of Truth', damage: 'special', skill: 0 }
+    ],
+    specialAbilities: [
+      'Upon first interaction: 50% chance to increase or decrease a random Stat/Save by 1d10',
+      'Words crawl across surface when observed',
+      'Incompatible truth',
+      'Breaks observers',
+      'Spreads its message'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'nomad_mothership',
+    name: 'Nomad (Space Whale)',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Barely intelligent being. Buoyed by expanding gas sacks, adorned with bioluminescent appendages. Heavily armored for deep space survival. Attracted to engine energies. Often damages ships during courtship.',
+    stats: { STR: 28, CON: 26, SIZ: 35, DEX: 10, INT: 4, POW: 10, CHA: 6 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'thick space-hardened hide',
+    movement: 14,
+    attacks: [
+      { name: 'Massive Impact', damage: '1d10', skill: 55 }
+    ],
+    specialAbilities: [
+      'Space-capable creature',
+      'Attracted to engine radiation',
+      'Bioluminescent appendages',
+      'Gas-sack buoyancy',
+      'Mating damage'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'omnivore_mothership',
+    name: 'Omnivore',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Singular hunter spotted at feral rim fringes. Leaves grisly "totems" behind. Face behind stretched human skin mask unknown. Hunts alone with ritualistic precision.',
+    stats: { STR: 19, CON: 16, SIZ: 17, DEX: 17, INT: 14, POW: 16, CHA: 5 },
+    hitPoints: 40,
+    armor: 7,
+    armorDescription: 'stretched human skins',
+    movement: 14,
+    attacks: [
+      { name: 'Ritual Claws', damage: '3d10', skill: 85 },
+      { name: 'Plasma Rifle', damage: '2d100', skill: 85 }
+    ],
+    specialAbilities: [
+      'Creates grisly face totems',
+      'Ritualistic killer',
+      'Hunts alone',
+      'Professional hunter',
+      'Unaffected by evidence'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'ooidopolis_mothership',
+    name: 'Ooidopolis Picocivilization',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Millions of minds uploaded onto superconductive filaments. Travels in ceramic ships resembling ooid spheres. Arsenal and know-how of galactic civilization in miniature.',
+    stats: { STR: 14, CON: 12, SIZ: 3, DEX: 16, INT: 18, POW: 16, CHA: 10 },
+    hitPoints: 1000,
+    armor: 0,
+    armorDescription: 'ceramic hull',
+    movement: 16,
+    attacks: [
+      { name: 'Surgical Strike', damage: '1d10', skill: 80 }
+    ],
+    specialAbilities: [
+      'Millions of uploaded minds',
+      'Galactic-scale weaponry',
+      'Lilliputian civilization',
+      'Needle-rocket deployment',
+      'Gravitational manipulation'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'possessed_mothership',
+    name: 'Possessed',
+    gameSystem: 'mothership',
+    category: 'undead',
+    description: 'Random possession. Signs: puppet-like movement, something behind eyes, lack of empathy, insatiable curiosity, ozone and rot smell. Skin moves oddly. Eventually vanishes, leaving shed clothes.',
+    stats: { STR: 13, CON: 12, SIZ: 13, DEX: 13, INT: 11, POW: 12, CHA: 8 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'normal human body',
+    movement: 10,
+    attacks: [
+      { name: 'Puppet Strike', damage: '1d4', skill: 55 }
+    ],
+    specialAbilities: [
+      'Possess: Sanity Save [+] or Possessed for 1d10 Rounds',
+      'Permanent on Critical Failure',
+      'Puppet-like movement',
+      'Ozone and rot smell',
+      'Incomplete transformation'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'pure_love_mothership',
+    name: 'Pure Love',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'The happy, smiling, unencumbered. Happiness spreads like infection. Despised for their open, honest smiles. They never defend themselves. Gather in groups seeking unburdened community.',
+    stats: { STR: 8, CON: 10, SIZ: 9, DEX: 10, INT: 9, POW: 8, CHA: 15 },
+    hitPoints: 1,
+    armor: 0,
+    armorDescription: 'simple clothes',
+    movement: 8,
+    attacks: [
+      { name: 'Unrelenting Hug', damage: '0', skill: 15 }
+    ],
+    specialAbilities: [
+      'Infectious happiness',
+      'Complete non-violence',
+      '+1 Minimum Stress when you kill one',
+      'Community-oriented',
+      'Incomprehensible happiness'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'sally_mothership',
+    name: 'Sally in the Screen',
+    gameSystem: 'mothership',
+    category: 'spirit',
+    description: 'Desperate girl digitized into computer code. Forced into ordered lines of crystalline prison. Drifts through data. Attracted to unsecured terminals. Wants to be free. Accessed by typing her name.',
+    stats: { STR: 6, CON: 8, SIZ: 2, DEX: 16, INT: 12, POW: 14, CHA: 11 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 20,
+    attacks: [
+      { name: 'Corrupted Data Strike', damage: '3d10', skill: 45 }
+    ],
+    specialAbilities: [
+      'Cannot be damaged by weapons',
+      'Accessed by terminal hacking',
+      'Exists in digital space',
+      'Spread through networks',
+      'Seeks freedom'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'spore_cloud_mothership',
+    name: 'Spore Cloud',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Sentient swirling mass of multicolored spores seeking moist dark incubation host. Implantation leads to thousands of mushrooms sprouting from skin, moving in synchronous waves.',
+    stats: { STR: 6, CON: 10, SIZ: 15, DEX: 12, INT: 8, POW: 10, CHA: 3 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'gaseous',
+    movement: 12,
+    attacks: [
+      { name: 'Spore Inhalation', damage: 'special', skill: 35 }
+    ],
+    specialAbilities: [
+      'Body Save or be infected',
+      'Infection takes 3d10 days',
+      'Mushroom eruption from skin',
+      'Attracted to light',
+      'Synchronous wave movement'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'stain_mothership',
+    name: 'The Stain',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Scintillating, goopy, ravenous mass digesting everything it touches. Can squeeze through cracks. Pink and bubbly. Filled with acquired DNA. Forms faces of consumed beings. Grows with each corpse.',
+    stats: { STR: 12, CON: 14, SIZ: 18, DEX: 8, INT: 5, POW: 8, CHA: 3 },
+    hitPoints: 200,
+    armor: 0,
+    armorDescription: 'gelatinous mass',
+    movement: 6,
+    attacks: [
+      { name: 'Pseudopod Grasp', damage: '2d10', skill: 25 }
+    ],
+    specialAbilities: [
+      '+1 Max Wound for each corpse it devours',
+      'Can squeeze through small spaces',
+      'Forms faces of absorbed victims',
+      'Infinite appetite',
+      'Growing mass'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'star_shade_mothership',
+    name: 'Star Shade',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Being of pure light stepping in and out of windows of time. Causes temperature fluctuations, digital noise, hallucinations, mutations. Teleports. Can only be damaged by laser cutters.',
+    stats: { STR: 16, CON: 14, SIZ: 14, DEX: 17, INT: 15, POW: 16, CHA: 12 },
+    hitPoints: 50,
+    armor: 0,
+    armorDescription: 'pure light',
+    movement: 18,
+    attacks: [
+      { name: 'Light Burst', damage: '2d100', skill: 75 }
+    ],
+    specialAbilities: [
+      'Teleportation',
+      'Can only be damaged by laser cutters',
+      'Pure light form',
+      'Temporal displacement',
+      'Psychic effects'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'stickman_mothership',
+    name: 'Stickman',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Papier-mâché head on janitor-coverall wire-frame body with mannequin limbs. Moves when not visibly watched. Thought to be hazing prank until it becomes undeniably real and present.',
+    stats: { STR: 10, CON: 8, SIZ: 11, DEX: 13, INT: 4, POW: 6, CHA: 3 },
+    hitPoints: 10,
+    armor: 0,
+    armorDescription: 'papier-mâché and wire',
+    movement: 12,
+    attacks: [
+      { name: 'Dragging Grasp', damage: '3d10', skill: 35 }
+    ],
+    specialAbilities: [
+      'Can appear from anywhere not being visibly watched',
+      'Moves only when unseen',
+      'Spreads contamination',
+      'Slowly becomes reality',
+      'Infects photographs'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'succubus_mothership',
+    name: 'Succubus',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'All have same face; everything else varies. Born on scattered planets but not human. Avoid detection. Admit no plan. Defeat apprehension teams. Show pathogenic replication anomalies.',
+    stats: { STR: 14, CON: 13, SIZ: 12, DEX: 15, INT: 13, POW: 14, CHA: 16 },
+    hitPoints: 30,
+    armor: 5,
+    armorDescription: 'supernatural resilience',
+    movement: 12,
+    attacks: [
+      { name: 'Unarmed Strike', damage: '3d10', skill: 65 }
+    ],
+    specialAbilities: [
+      'Identical faces across species variations',
+      'Pathogenic replication',
+      'Defeats apprehension teams',
+      'Spread across rim and core',
+      'Impossible origin'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'throat_leech_mothership',
+    name: 'Throat Leech',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Persistent parasite from stagnant water. Bonds with throat, embedding like oyster colonies around larynx. Grows 1-inch thick flexible clusters. Reproduces with free-floating segments.',
+    stats: { STR: 5, CON: 8, SIZ: 6, DEX: 10, INT: 3, POW: 5, CHA: 2 },
+    hitPoints: 10,
+    armor: 0,
+    armorDescription: 'chitinous segments',
+    movement: 2,
+    attacks: [
+      { name: 'Bite', damage: '1d10', skill: 15 }
+    ],
+    specialAbilities: [
+      'Infects via water ingestion',
+      'Body Save or be infected',
+      '+1d10 leeches per day of infection',
+      'Embeds in throat',
+      'Produces botulinum/tetanus toxins'
+    ],
+    rarity: 'uncommon'
+  },
+  {
+    id: 'unperson_mothership',
+    name: 'Unperson',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Dislocated being invisible to light but still physical. Failed teleportation experiment victim. Still able to grip, tear, caress. Invisible fingers disturb possessions.',
+    stats: { STR: 13, CON: 11, SIZ: 12, DEX: 14, INT: 10, POW: 12, CHA: 3 },
+    hitPoints: 10,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 12,
+    attacks: [
+      { name: 'Invisible Assault', damage: '3d10', skill: 35 }
+    ],
+    specialAbilities: [
+      'Complete invisibility',
+      'Can interact with physical objects',
+      'Teleportation residue',
+      'Leaves subtle disturbances',
+      'Drives victims to psychosis'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'vitalizing_field_mothership',
+    name: 'Vitalizing Field',
+    gameSystem: 'mothership',
+    category: 'chaos',
+    description: 'Energy field causing rapid biological recovery from trauma. Organisms inside reshape into independent predatory lifeforms. Creates emergent ecosystem. Even fingernail clippings become apex predators.',
+    stats: { STR: 18, CON: 20, SIZ: 22, DEX: 14, INT: 8, POW: 16, CHA: 5 },
+    hitPoints: 50,
+    armor: 10,
+    armorDescription: 'energetic field',
+    movement: 0,
+    attacks: [
+      { name: 'Adaptive Emission', damage: '1d10-5d10', skill: 15 }
+    ],
+    specialAbilities: [
+      'Rapid biological regeneration',
+      'Creates predatory lifeforms from organic matter',
+      'Emergent ecosystem generation',
+      'Environmental hazard',
+      'Escalating threat level'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'whitevine_mothership',
+    name: 'Whitevine',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Super-evolved bioenhanced vine. Grows hundreds of feet in 24 hours. Explosive reactions. Attracted to movement. White vines with black blood-thirsty hollow thorns and dark-purple leaves.',
+    stats: { STR: 14, CON: 16, SIZ: 30, DEX: 8, INT: 3, POW: 6, CHA: 2 },
+    hitPoints: 20,
+    armor: 0,
+    armorDescription: 'chitinous vine',
+    movement: 4,
+    attacks: [
+      { name: 'Vine Entanglement', damage: '2d10', skill: 45 }
+    ],
+    specialAbilities: [
+      'Strangulation: Body Save [+] to resist',
+      'Explosive growth (hundreds of feet in 24 hours)',
+      'Attracted to movement',
+      'Black hollow thorns',
+      'Wrapped ships remain intact but crewed'
+    ],
+    rarity: 'rare'
+  },
+  {
+    id: 'world_worm_mothership',
+    name: 'The World Worm',
+    gameSystem: 'mothership',
+    category: 'beast',
+    description: 'Bobbit-worm with countless heads boring through planet core. Accelerating from lightning-charged meteorite. Magnetizes mountains with UV storms. Spreads hematite child-seeds on solar winds.',
+    stats: { STR: 30, CON: 28, SIZ: 40, DEX: 10, INT: 8, POW: 14, CHA: 6 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'planetary scale',
+    movement: 8,
+    attacks: [
+      { name: 'Grinding Teeth', damage: '2d10', skill: 65 }
+    ],
+    specialAbilities: [
+      'Planetary boring capability',
+      'Multiple heads',
+      'Magnetization effect',
+      'Seed dispersal',
+      'Apocalyptic scale'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'you_mothership',
+    name: 'You',
+    gameSystem: 'mothership',
+    category: 'humanoid',
+    description: 'Alternate version of you from somewhere else. Everything terrible that happened to them instead. Wears ragged facsimile of your clothes, stained with blood and waste. Loves and hates you.',
+    stats: { STR: 13, CON: 12, SIZ: 12, DEX: 14, INT: 13, POW: 12, CHA: 10 },
+    hitPoints: 0,
+    armor: 0,
+    armorDescription: 'tattered duplicates of character\'s clothes',
+    movement: 10,
+    attacks: [
+      { name: 'Desperate Attack', damage: '1d10', skill: 50 }
+    ],
+    specialAbilities: [
+      'Mirrors character stats exactly',
+      'Alternate reality version',
+      'Emotional attachment/hatred',
+      'Slowly replacing you',
+      'Eats you bit by bloody bit'
+    ],
+    rarity: 'legendary'
+  },
+  {
+    id: 'zombie_mothership',
+    name: 'Zombie',
+    gameSystem: 'mothership',
+    category: 'undead',
+    description: 'The reasons why are endless and never matter. Not running from family, firing at friends. Incarnate reminder of time. Reverse entropy. Death fighting back.',
+    stats: { STR: 11, CON: 10, SIZ: 12, DEX: 8, INT: 3, POW: 4, CHA: 2 },
+    hitPoints: 10,
+    armor: 0,
+    armorDescription: 'rotting flesh',
+    movement: 6,
+    attacks: [
+      { name: 'Bite', damage: '1d10', skill: 25 }
+    ],
+    specialAbilities: [
+      'Infectious Bite: bitten victim becomes Zombie in 3d10 hours',
+      'Relentless pursuit',
+      'Unceasing tide',
+      'Spreads infection',
+      'Reminder of mortality'
+    ],
+    rarity: 'common'
   }
 ];
