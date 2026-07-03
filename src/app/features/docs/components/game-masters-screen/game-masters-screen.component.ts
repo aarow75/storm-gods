@@ -613,4 +613,92 @@ export class GameMastersScreenComponent {
     { skill: 'Pick Pockets',      lv1: '30%', note: '20%+ failure alerts target' },
     { skill: 'Read Languages',    lv1: '1%',  note: 'Level 10: read arcane scrolls' },
   ];
+
+  // ─── Mothership Data ─────────────────────────────────────────────────────────
+
+  msClassSaves = [
+    { className: 'Teamster', sanity: 30, fear: 35, body: 30, armor: 35, skills: 'Zero-G, Mechanical Repair + 1 choice; +4 Skill Pts' },
+    { className: 'Android',  sanity: 25, fear: 35, body: 45, armor: 25, skills: 'Computers, Mathematics, Linguistics; +2 Skill Pts' },
+    { className: 'Scientist',sanity: 40, fear: 25, body: 25, armor: 25, skills: '2 of: Biology, Geology, Computers, Mathematics, Chemistry; +3 Skill Pts' },
+    { className: 'Marine',   sanity: 25, fear: 30, body: 35, armor: 50, skills: 'Military Training; +3 Skill Pts; nearby Marines grant +5/+5' },
+  ];
+
+  msSkillRanks = [
+    { rank: 'Untrained', bonus: '+0%', cost: '—',       note: 'May have Disadvantage on complex tasks' },
+    { rank: 'Trained',   bonus: '+10%', cost: '1 pt',   note: 'First rank; prerequisite for Expert' },
+    { rank: 'Expert',    bonus: '+15%', cost: '2 pts',  note: 'Requires Trained prerequisite' },
+    { rank: 'Master',    bonus: '+20%', cost: '3 pts',  note: 'Requires Expert prerequisite' },
+  ];
+
+  msWeapons = [
+    { name: 'Revolver',        dmg: '3d10', range: '2/30/125m',  shots: 8,   cost: '750 Cr',   note: 'Crit: Knock-down' },
+    { name: 'SMG',             dmg: '4d10', range: '10/75/150m', shots: '1(5)', cost: '1,200 Cr', note: 'Fully automatic' },
+    { name: 'Combat Shotgun',  dmg: '2d10', range: '10/20/30m',  shots: 4,   cost: '1,400 Cr', note: '½ dmg at med; ¼ at long' },
+    { name: 'Pulse Rifle',     dmg: '5d10', range: '15/125/300m',shots: '1(3)', cost: '1,600 Cr', note: 'Fully automatic; has grenade launcher' },
+    { name: 'Smart Rifle',     dmg: '1d10', range: '25/200/500m',shots: 12,  cost: '12,000 Cr',note: 'Crit: ×3 DMG; AP ammo' },
+    { name: 'Vibechete',       dmg: '2d10', range: 'CQC',        shots: '—', cost: '75 Cr',    note: 'Crit: Hack off limb' },
+    { name: 'Stun Baton',      dmg: '1d10', range: 'CQC',        shots: '—', cost: '115 Cr',   note: 'Crit: No save; Body save or stunned' },
+    { name: 'Frag Grenade',    dmg: '1d10', range: '20/30/40m',  shots: 1,   cost: '70 Cr',    note: '15m radius; can do 1 MDMG to ships' },
+    { name: 'Flame Thrower',   dmg: '2d10', range: '2/10/20m',   shots: 8,   cost: '2,000 Cr', note: 'Body save or catch fire: 1d10/turn' },
+  ];
+
+  msArmor = [
+    { type: 'Standard Crew Attire', bonus: '+0%',  notes: 'Default for all classes' },
+    { type: 'Hazard Suit',          bonus: '+5%',  notes: 'Air filter, 1hr air tank, heat/cold protection, comms' },
+    { type: 'Vaccsuit',             bonus: '+7%',  notes: '12hr O2 w/tank; Speed checks at Disadvantage' },
+    { type: 'Standard Battle Dress',bonus: '+10%', notes: 'Light plated; standard marine dress' },
+    { type: 'Advanced Battle Dress',bonus: '+15%', notes: 'Exoskeleton (carry ×2); Speed checks at Disadvantage' },
+  ];
+
+  msPanicTable = [
+    { roll: '2–3',  effect: 'Laser Focus — Advantage on all rolls for 1d10 hours' },
+    { roll: '4–5',  effect: 'Major Adrenaline Rush — Advantage for 3d10 minutes' },
+    { roll: '6–7',  effect: 'Minor Adrenaline Rush — Advantage for 1d10 minutes' },
+    { roll: '8–9',  effect: 'Anxious — gain 1 Stress' },
+    { roll: '10–11',effect: 'Nervous Twitch — gain 2 Stress; nearest crew gains 1 Stress' },
+    { roll: '12–13',effect: 'Cowardice — gain 1 Stress; Fear save to enter combat for 1d10 hours' },
+    { roll: '14–15',effect: 'Hallucinations — trouble distinguishing reality for 2d10 hours' },
+    { roll: '16–17',effect: 'Crippling Fear — gain permanent phobia; encounter triggers Fear save at Disadvantage' },
+    { roll: '18–19',effect: 'Overwhelmed — gain 1d10 Stress' },
+    { roll: '20–21',effect: 'Rattled — Disadvantage all rolls for 2d10 minutes' },
+    { roll: '22',   effect: 'Paranoid — Fear save on anyone joining group or gain 1 Stress (1d10 days)' },
+    { roll: '23',   effect: 'Death Drive — Sanity save vs. stranger/enemy or immediately attack (Stress×d10 days)' },
+    { roll: '24',   effect: 'Catatonic — unresponsive for Stress×d10 minutes' },
+    { roll: '25',   effect: 'Broken — Panic roll whenever nearby crew fails a save (Stress×d10 days)' },
+    { roll: '26',   effect: 'Psychotic — attack nearest crew member until dealing 2d10 damage' },
+    { roll: '27',   effect: 'Compounding Problems — roll twice on this table' },
+    { roll: '28',   effect: 'Descent into Madness — 2 new phobias; Stress cannot drop below 5' },
+    { roll: '29',   effect: 'Psychological Collapse — permanently insane; character played by Warden' },
+    { roll: '30',   effect: 'Heart Attack — instant death' },
+  ];
+
+  msUnconscious = [
+    { d10: '1',    result: 'Comatose & brain-dead; only extraordinary measures help' },
+    { d10: '2–3',  result: 'In 1d10 days: 1 HP. −5 STR, −5 SPD, −5 INT (permanent). Disadvantage all rolls 1d10 days. +1d10 Stress' },
+    { d10: '4–6',  result: 'In 1d10 hours: 1 HP. −5 STR, −5 SPD (permanent). Disadvantage all rolls 1d10 hrs. +3 Stress' },
+    { d10: '7–9',  result: 'In 1d10 minutes: 1 HP. −5 STR (permanent). Disadvantage all rolls 3d10 min. +2 Stress' },
+    { d10: '10',   result: 'Immediately: 1 HP. Disadvantage all rolls 1d10 minutes. +1 Stress' },
+  ];
+
+  msHealing = [
+    { outcome: 'Success',          result: 'Heal HP = amount roll succeeded by (Body score − roll)' },
+    { outcome: 'Critical Success', result: 'Double the amount healed' },
+    { outcome: 'Failure',          result: 'No healing' },
+    { outcome: 'Critical Failure', result: 'Lose 1d10 Health' },
+  ];
+
+  msCombatSequence = [
+    { step: '1', action: 'Check for Surprise', detail: 'Surprised crew: Fear save or stunned 1 round' },
+    { step: '2', action: 'Speed Check',         detail: 'Pass = act before enemies; crit success = extra action; crit fail = 1 action' },
+    { step: '3', action: 'Take 2 Actions',      detail: 'Significant: attack, bandage, reload, run; Insignificant: talk, look, cover' },
+    { step: '4', action: 'Attack (Ranged)',      detail: 'Attacker: Combat check vs. defender Armor save (opposed). Win = roll damage' },
+    { step: '5', action: 'Attack (CQC)',         detail: 'Attacker: Combat check. Defender chooses: Armor save / Combat counter / Body to flee' },
+    { step: '6', action: 'Damage Triggers',      detail: 'Panic if: critical hit OR > ½ max HP in one hit' },
+  ];
+
+  msXpTable = [
+    { level: 0, xp: 0   }, { level: 1, xp: 10  }, { level: 2, xp: 25  }, { level: 3, xp: 50  },
+    { level: 4, xp: 75  }, { level: 5, xp: 125 }, { level: 6, xp: 175 }, { level: 7, xp: 225 },
+    { level: 8, xp: 300 }, { level: 9, xp: 375 }, { level: 10, xp: 500 },
+  ];
 }

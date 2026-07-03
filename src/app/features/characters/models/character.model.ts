@@ -14,7 +14,7 @@ export interface Character {
   id: string;
   name: string;
   color?: string;
-  gameSystem?: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric';
+  gameSystem?: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership';
   background: CharacterBackground;
   stats: CharacterStats;
   derivedStats: DerivedStats;

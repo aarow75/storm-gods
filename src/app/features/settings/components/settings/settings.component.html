@@ -31,6 +31,12 @@
         class="system-toggle-btn system-toggle-os">
         OSRIC
       </button>
+      <button
+        (click)="switchSystem('mothership')"
+        [class.active]="gameSystemService.gameSystem() === 'mothership'"
+        class="system-toggle-btn system-toggle-ms">
+        Mothership
+      </button>
     </div>
   </div>
 

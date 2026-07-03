@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { RUNEQUEST_PUBLICATIONS } from '@docs/constants/runequest-publications.constants';
 import { DRAGONBANE_PUBLICATIONS } from '@docs/constants/dragonbane-publications.constants';
 import { OSRIC_PUBLICATIONS } from '@docs/constants/osric-publications.constants';
+import { MOTHERSHIP_PUBLICATIONS } from '@docs/constants/mothership-publications.constants';
 import { GameSystemService } from '@shared/services/game-system.service';
 
 @Component({
@@ -22,6 +23,7 @@ export class PublicationsComponent {
     if (this.systemType === 'runequest') return RUNEQUEST_PUBLICATIONS;
     if (this.systemType === 'dragonbane') return DRAGONBANE_PUBLICATIONS;
     if (this.systemType === 'osric') return OSRIC_PUBLICATIONS;
+    if (this.systemType === 'mothership') return MOTHERSHIP_PUBLICATIONS;
     return [];
   }
 
@@ -29,6 +31,19 @@ export class PublicationsComponent {
   get isKalArath() { return this.systemType === 'kal-arath'; }
   get isRunequest() { return this.systemType === 'runequest'; }
   get isOsric() { return this.systemType === 'osric'; }
+  get isMothership() { return this.systemType === 'mothership'; }
+
+  get mothershipCoreRules() {
+    return MOTHERSHIP_PUBLICATIONS.filter(p => p.category === 'rules');
+  }
+
+  get mothershipAdventures() {
+    return MOTHERSHIP_PUBLICATIONS.filter(p => p.category === 'adventure');
+  }
+
+  get mothershipSupplements() {
+    return MOTHERSHIP_PUBLICATIONS.filter(p => p.category === 'supplement');
+  }
 
   get osricCoreRules() {
     return OSRIC_PUBLICATIONS.filter(p => p.category === 'rules');

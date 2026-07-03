@@ -1770,5 +1770,801 @@ export const MONSTERS: Monster[] = [
     ],
     specialAbilities: ['Fire breath (cone 60ft, 3 times per day)', 'Fire immunity', 'Flight', 'Magic resistance (35%)', 'Frightful presence (CON vs POW or flee)', 'Spell-like abilities'],
     hitLocationTemplateId: 'quadruped'
+  },
+
+  // ─── Pellucidar Setting (all systems) ───────────────────────────────────────
+
+  // Beasts
+  {
+    id: 'tarag_rq',
+    name: 'Tarag (Saber-tooth Cat)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['pellucidar-plains', 'jungle', 'caves', 'hills'],
+    description: 'The apex predator of Pellucidar\'s open plains. The tarag is a massive saber-toothed cat whose elongated canines can pierce hide and bone alike. Lone hunters that stake out vast territories, they are feared by Gilak and Sagoth alike.',
+    stats: { STR: 22, CON: 16, SIZ: 18, DEX: 16, INT: 4, POW: 8, CHA: 4 },
+    hitPoints: 17,
+    armor: 1,
+    armorDescription: 'thick hide',
+    movement: 14,
+    attacks: [
+      { name: 'Bite (saber lunge)', damage: '1d10+2', skill: 70 },
+      { name: 'Claw (left)', damage: '1d8+2', skill: 65 },
+      { name: 'Claw (right)', damage: '1d8+2', skill: 65 }
+    ],
+    specialAbilities: [
+      'Saber lunge (successful bite adds +1d6 ripping damage from the elongated canines)',
+      'Sprint charge (first attack each combat from concealment at +20% skill)',
+      'Territorial (will pursue fleeing prey relentlessly)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'jalok_rq',
+    name: 'Jalok (Hyena-dog)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'common',
+    terrain: ['pellucidar-plains', 'hills', 'jungle'],
+    description: 'A large, spotted hyena-like predator that hunts in packs across the Lidi Plains. Individually unremarkable, a jalok pack is a serious threat even to armed parties. They harry targets to exhaustion before closing in.',
+    stats: { STR: 12, CON: 12, SIZ: 10, DEX: 14, INT: 4, POW: 6, CHA: 3 },
+    hitPoints: 11,
+    armor: 0,
+    armorDescription: 'short fur',
+    movement: 12,
+    attacks: [
+      { name: 'Bite', damage: '1d6+1', skill: 55 },
+      { name: 'Claw', damage: '1d4', skill: 45 }
+    ],
+    specialAbilities: [
+      'Pack tactics (+10% attack skill when 3 or more jaloks are present)',
+      'Relentless pursuit (ignores fatigue penalties when chasing prey)',
+      'Bone-crusher jaw (can worry a grappled target for 1d4 damage each round)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'tandor_rq',
+    name: 'Tandor (Mammoth)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'common',
+    terrain: ['pellucidar-plains', 'tundra', 'hills'],
+    description: 'The mighty tandor is a shaggy mammoth that roams in great herds across Pellucidar\'s open lands. Usually placid, a startled or enraged tandor is among the most lethal creatures a traveller can face. Gilak tribes revere and hunt them for food, hide, and ivory.',
+    stats: { STR: 35, CON: 22, SIZ: 35, DEX: 6, INT: 4, POW: 8, CHA: 5 },
+    hitPoints: 29,
+    armor: 3,
+    armorDescription: 'thick hide and matted fur',
+    movement: 12,
+    attacks: [
+      { name: 'Gore (tusks)', damage: '2d8+6', skill: 50 },
+      { name: 'Trample', damage: '3d8+6', skill: 40 }
+    ],
+    specialAbilities: [
+      'Trample (knocked-prone targets are trampled for automatic damage each round)',
+      'Herd morale (allied tandors within 30m grant +10 CON for morale checks)',
+      'Unstoppable charge (once a tandor charges, it cannot voluntarily halt for 3 rounds)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'ryth_rq',
+    name: 'Ryth (Giant Cave Bear)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['caves', 'mountains', 'forest', 'pellucidar-caves'],
+    description: 'Larger and more aggressive than any surface bear, the ryth is the dominant predator of Pellucidar\'s cave systems. The Gilaks tell stories of ryths that claimed entire cave complexes, driving out every other creature. Their hug attack can crush armored bone.',
+    stats: { STR: 30, CON: 24, SIZ: 28, DEX: 8, INT: 4, POW: 10, CHA: 4 },
+    hitPoints: 26,
+    armor: 3,
+    armorDescription: 'thick fur and heavy hide',
+    movement: 11,
+    attacks: [
+      { name: 'Bite', damage: '2d6+4', skill: 55 },
+      { name: 'Claw (left)', damage: '1d10+4', skill: 60 },
+      { name: 'Claw (right)', damage: '1d10+4', skill: 60 },
+      { name: 'Crushing hug', damage: '2d8+4', skill: 45 }
+    ],
+    specialAbilities: [
+      'Crushing hug (if both claws hit the same target, grapple and crush for 2d8+4 each round)',
+      'Keen smell (can track by scent, never surprised by approaching creatures)',
+      'Cave dweller (no movement penalty in darkness or tight spaces)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'lidi_rq',
+    name: 'Lidi (Sauropod)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'common',
+    terrain: ['pellucidar-plains', 'jungle', 'swamp'],
+    description: 'The great lidi are immense long-necked sauropods that graze the Lidi Plains in vast herds. Docile unless threatened, a startled lidi herd becomes an unstoppable stampede. Gilaks and Mezops sometimes ride domesticated lidi as mounts. Weapons smaller than a spear barely scratch them.',
+    stats: { STR: 40, CON: 30, SIZ: 50, DEX: 4, INT: 2, POW: 5, CHA: 2 },
+    hitPoints: 40,
+    armor: 4,
+    armorDescription: 'enormously thick hide',
+    movement: 10,
+    attacks: [
+      { name: 'Tail sweep', damage: '3d8+8', skill: 40 },
+      { name: 'Trample', damage: '5d8+8', skill: 30 },
+      { name: 'Neck strike', damage: '2d8+8', skill: 35 }
+    ],
+    specialAbilities: [
+      'Impervious hide (weapons dealing less than 1d6 base damage do not penetrate)',
+      'Herd stampede (panicked lidi herd: all creatures in path take trample damage, DEX×3 to dodge)',
+      'Domesticable (patient Gilaks can tame lidi as mounts or beasts of burden)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'thipdar_rq',
+    name: 'Thipdar (Giant Pterodactyl)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'common',
+    terrain: ['pellucidar-plains', 'pellucidar-coast', 'mountains', 'highlands'],
+    description: 'Enormous leathery-winged reptiles that soar on thermal currents high above Pellucidar\'s eternal sun. Thipdars are opportunistic hunters that prefer to swoop and snatch prey, carrying it aloft to be dropped on rocks below. The Mahars are themselves an evolved, intelligent form of thipdar.',
+    stats: { STR: 18, CON: 14, SIZ: 20, DEX: 14, INT: 4, POW: 8, CHA: 3 },
+    hitPoints: 17,
+    armor: 1,
+    armorDescription: 'leathery hide',
+    movement: 6,
+    attacks: [
+      { name: 'Beak', damage: '1d8+2', skill: 65 },
+      { name: 'Claw (left)', damage: '1d6+2', skill: 55 },
+      { name: 'Claw (right)', damage: '1d6+2', skill: 55 },
+      { name: 'Snatch (grapple)', damage: 'special', skill: 50 }
+    ],
+    specialAbilities: [
+      'Flight (movement 18 in the air; swooping dive gives +20% attack on first pass)',
+      'Snatch (STR vs STR contest; success carries prey aloft at flying speed)',
+      'Keen eyesight (spot creatures from extreme altitude; never surprised outdoors)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+
+  // Humanoids & Intelligent Creatures
+  {
+    id: 'sagoth_rq',
+    name: 'Sagoth (Gorilla-man)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'humanoid',
+    rarity: 'common',
+    terrain: ['pellucidar-plains', 'jungle', 'pellucidar-caves', 'mahar-territory'],
+    description: 'The military caste of Mahar civilization. Sagoths are massive gorilla-like humanoids bred or enslaved to guard the Mahars\' cities and enforce their will over human slaves. They communicate in grunts and a crude language, but follow Mahar telepathic commands with unswerving loyalty.',
+    stats: { STR: 22, CON: 18, SIZ: 20, DEX: 12, INT: 7, POW: 8, CHA: 5 },
+    hitPoints: 19,
+    armor: 1,
+    armorDescription: 'thick hide',
+    movement: 12,
+    attacks: [
+      { name: 'Club', damage: '2d6+4', skill: 60 },
+      { name: 'Spear', damage: '1d8+4', skill: 55 },
+      { name: 'Bite', damage: '1d6+4', skill: 50 }
+    ],
+    specialAbilities: [
+      'Mahar bond (sagoths within 30m of a Mahar fight at +20% skill and ignore fear effects)',
+      'Gorilla strength (automatically wins unarmed STR contests unless opponent has STR 25+)',
+      'Intimidating presence (opponents must pass a POW×3 check or lose 1d6 from their next skill roll)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'mahar_rq',
+    name: 'Mahar',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'chaos',
+    rarity: 'rare',
+    terrain: ['mahar-territory', 'pellucidar-caves'],
+    description: 'The Mahars are the dominant intelligence of Pellucidar — eyeless, telepathic pterosaurs of great cunning and ancient power. They cannot vocalize language but communicate mind-to-mind with perfect clarity. Their civilization predates humanity in Pellucidar by ages. They view humans as livestock and occasionally worship them as sacrificial offerings.',
+    stats: { STR: 16, CON: 16, SIZ: 18, DEX: 16, INT: 17, POW: 18, CHA: 12 },
+    hitPoints: 17,
+    armor: 2,
+    armorDescription: 'tough scales',
+    movement: 4,
+    attacks: [
+      { name: 'Beak', damage: '1d8+2', skill: 70 },
+      { name: 'Claw (left)', damage: '1d6+2', skill: 65 },
+      { name: 'Claw (right)', damage: '1d6+2', skill: 65 },
+      { name: 'Telepathic command', damage: 'POW vs POW (special)', skill: 85 }
+    ],
+    specialAbilities: [
+      'Telepathy (communicates silently up to 60m; can read surface thoughts of any creature in range)',
+      'Mind command (telepathic command: success forces one human-sized creature to obey a simple order)',
+      'Eyeless senses (perceives heat signatures and sound perfectly; immune to blindness and illusions)',
+      'Flight (movement 16 in air; rarely lands except to feed or perform rituals)',
+      'Sagoth authority (sagoths always obey a Mahar\'s telepathic commands without hesitation)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'horib_rq',
+    name: 'Horib (Snake-man)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'chaos',
+    rarity: 'uncommon',
+    terrain: ['jungle', 'swamp', 'pellucidar-caves'],
+    description: 'Reptilian humanoids with scaled hides and forked tongues, the Horibs are isolationist predators who regard all warm-blooded creatures as prey. Their venom can paralyze a man in seconds. They prefer to ambush from above or from water, striking without warning.',
+    stats: { STR: 14, CON: 14, SIZ: 14, DEX: 18, INT: 10, POW: 12, CHA: 4 },
+    hitPoints: 14,
+    armor: 3,
+    armorDescription: 'overlapping scales',
+    movement: 12,
+    attacks: [
+      { name: 'Bite (venomous)', damage: '1d6+venom', skill: 65 },
+      { name: 'Spear', damage: '1d8+1', skill: 60 },
+      { name: 'Tail whip', damage: '1d4', skill: 55 }
+    ],
+    specialAbilities: [
+      'Paralytic venom (CON vs POW each round after bite; failure means paralysis for 1d6 hours)',
+      'Ambush predator (+30% attack skill when striking from concealment)',
+      'Wall-climbing (can traverse vertical rock and tree surfaces at full movement)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+
+  // NPCs
+  {
+    id: 'gilak_warrior_rq',
+    name: 'Gilak Warrior',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'common',
+    terrain: ['pellucidar-plains', 'hills', 'jungle', 'pellucidar-caves'],
+    description: 'A Gilak is a primitive human of Pellucidar — Cro-Magnon in build, fierce and resourceful, armed with weapons of stone, bone, and flint. Gilak warriors defend their tribes against both beast and Sagoth slave-raider. Each tribe speaks a mutually unintelligible dialect.',
+    stats: { STR: 14, CON: 13, SIZ: 12, DEX: 14, INT: 10, POW: 11, CHA: 10 },
+    hitPoints: 13,
+    armor: 1,
+    armorDescription: 'hide armor',
+    movement: 10,
+    attacks: [
+      { name: 'Stone spear', damage: '1d8+1', skill: 55 },
+      { name: 'Flint knife', damage: '1d4+1', skill: 50 },
+      { name: 'Thrown rock', damage: '1d4', skill: 45 }
+    ],
+    specialAbilities: [
+      'Survival instinct (advantage on all rolls to find food, water, and shelter)',
+      'Tribal bonds (fights to the death to protect tribe members)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'mezop_archer_rq',
+    name: 'Mezop Archer',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['pellucidar-coast', 'jungle', 'pellucidar-plains'],
+    description: 'The Mezops are island-dwelling warriors who sail the Sojar Az with skill. Renowned for their archery, they serve as trusted allies of David Innes and the Federated Kingdoms. Their bone bows are powerful at range and their loyalty once earned is absolute.',
+    stats: { STR: 13, CON: 13, SIZ: 12, DEX: 16, INT: 11, POW: 11, CHA: 12 },
+    hitPoints: 13,
+    armor: 0,
+    armorDescription: 'none (unencumbered)',
+    movement: 10,
+    attacks: [
+      { name: 'Bone bow', damage: '1d8', skill: 75 },
+      { name: 'Knife', damage: '1d4+1', skill: 55 },
+      { name: 'Club', damage: '1d6+1', skill: 50 }
+    ],
+    specialAbilities: [
+      'Expert archer (may fire twice per round at -20% on the second shot)',
+      'Seafaring (skilled canoe and sailing navigation on inland seas)',
+      'Steadfast ally (once won over via Ja\'s recommendation or direct aid, morale never breaks)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'sagoth_captain_rq',
+    name: 'Sagoth Slave Handler (Captain)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['mahar-territory', 'pellucidar-caves', 'pellucidar-plains'],
+    description: 'Senior Sagoths who oversee slave columns and guard Mahar prison pens. They wear crude bone armor over their already-thick hides, and know how to organize other Sagoths into effective fighting formations. Killing a Captain causes a morale check among nearby Sagoths.',
+    stats: { STR: 24, CON: 20, SIZ: 22, DEX: 11, INT: 9, POW: 9, CHA: 7 },
+    hitPoints: 21,
+    armor: 2,
+    armorDescription: 'thick hide + bone plate',
+    movement: 11,
+    attacks: [
+      { name: 'Great club', damage: '2d8+5', skill: 70 },
+      { name: 'Whip', damage: '1d4+1 (entangle)', skill: 65 }
+    ],
+    specialAbilities: [
+      'Tactical command (sagoths within 30m fight at +10% while captain lives)',
+      'Whip entangle (on a special success the target is entangled and falls prone)',
+      'Veteran hide (treats armor as 3 against first hit of any combat)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'gilak_chieftain_rq',
+    name: 'Gilak Chieftain',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['pellucidar-plains', 'hills', 'jungle'],
+    description: 'The strongest, wisest, or most charismatic Gilak of a tribe earns the title of chieftain through deeds rather than birthright. A chieftain wears bone armor and wields a polished stone axe as a symbol of office. They are the primary targets for David Innes\'s diplomatic efforts to build the Federated Kingdoms.',
+    stats: { STR: 16, CON: 15, SIZ: 13, DEX: 15, INT: 13, POW: 13, CHA: 15 },
+    hitPoints: 14,
+    armor: 2,
+    armorDescription: 'bone-reinforced hide armor',
+    movement: 10,
+    attacks: [
+      { name: 'Stone axe', damage: '1d8+2', skill: 70 },
+      { name: 'Spear', damage: '1d8+2', skill: 65 },
+      { name: 'Flint knife', damage: '1d4+2', skill: 55 }
+    ],
+    specialAbilities: [
+      'War cry (once per combat, all allied Gilaks gain +15% to attacks for one round)',
+      'Negotiation (may treat hostile Gilak groups as neutral with a CHA×3 roll)',
+      'Tactical cunning (INT 13; can direct flanking maneuvers that grant +20% to one ally\'s attack)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'david_innes_rq',
+    name: 'David Innes (The Emperor)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'legendary',
+    terrain: ['pellucidar-plains', 'pellucidar-coast', 'mahar-territory', 'pellucidar-caves'],
+    description: 'A mining engineer from Connecticut who descended to Pellucidar via the Iron Mole burrowing machine. David Innes became the first Emperor of the Federated Kingdoms of Pellucidar through courage, ingenuity, and an inability to accept defeat. He carries surface-world weapons and knowledge that give him an enormous tactical advantage. His legendary flaw is a perpetual inability to navigate without stars.',
+    stats: { STR: 16, CON: 15, SIZ: 13, DEX: 15, INT: 17, POW: 14, CHA: 16 },
+    hitPoints: 14,
+    armor: 3,
+    armorDescription: 'mixed Gilak and improvised armor',
+    movement: 10,
+    attacks: [
+      { name: 'Rifle', damage: '2d8+2', skill: 80 },
+      { name: 'Pistol', damage: '1d8+2', skill: 75 },
+      { name: 'Knife', damage: '1d6+2', skill: 65 }
+    ],
+    specialAbilities: [
+      'Surface-world knowledge (can improvise gunpowder weapons, basic medicine, and mechanical devices)',
+      'Inspiring leadership (all allies within 30m may reroll one failed skill check per combat)',
+      'Unbreakable will (may spend 1 POW to pass any morale check automatically)',
+      'Direction-blind in Pellucidar (cannot navigate by instinct; always needs landmarks or a guide)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'dian_beautiful_rq',
+    name: 'Dian the Beautiful',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'legendary',
+    terrain: ['pellucidar-plains', 'pellucidar-coast', 'mahar-territory'],
+    description: 'Princess of Amoz and wife of David Innes. Dian is the embodiment of Pellucidarian womanhood — fierce, proud, and utterly without weakness in her own mind. She refuses rescue attempts she considers beneath her dignity but fights savagely when cornered. Her noble lineage gives her political leverage among the coastal Gilak tribes.',
+    stats: { STR: 11, CON: 12, SIZ: 10, DEX: 16, INT: 14, POW: 15, CHA: 18 },
+    hitPoints: 11,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 10,
+    attacks: [
+      { name: 'Dagger', damage: '1d4+1', skill: 55 },
+      { name: 'Bone bow', damage: '1d8', skill: 60 }
+    ],
+    specialAbilities: [
+      'Force of personality (CHA 18; hostile humanoids must pass POW×3 to attack her directly)',
+      'Noble lineage of Amoz (coastal tribes treat her as royalty; +30% to all diplomatic rolls)',
+      'Fierce independence (cannot be compelled to accept aid she views as condescending — even from David Innes)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+
+  // ─── Barsoom Setting (all systems) ───────────────────────────────────────────
+
+  // Beasts
+  {
+    id: 'banth_barsoom',
+    name: 'Banth (10-legged Lion)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['barsoom-dead-sea', 'barsoom-city', 'valley-dor'],
+    description: 'The apex predator of Barsoom\'s open wastes — a hairless, lion-like beast with ten powerful legs and a maw capable of crushing bone. Banths are kept in the arena pits of Martian cities and roam the Dead Sea Bottoms in loose packs. Their resonating roar is a specific terror: something in its frequency undermines the resolve of prey.',
+    stats: { STR: 24, CON: 18, SIZ: 22, DEX: 16, INT: 4, POW: 10, CHA: 4 },
+    hitPoints: 20,
+    armor: 1,
+    armorDescription: 'thick hide',
+    movement: 16,
+    attacks: [
+      { name: 'Bite', damage: '1d10+3', skill: 70 },
+      { name: 'Claw (left)', damage: '1d8+3', skill: 65 },
+      { name: 'Claw (right)', damage: '1d8+3', skill: 65 }
+    ],
+    specialAbilities: [
+      'Ten-leg burst (can sprint at movement 22 for one round before needing a round to recover)',
+      'Terrifying roar (once per combat; all enemies within 20m must pass POW×3 or suffer -10% to all rolls for the next round)',
+      'Night hunter (no penalties in darkness; hunts primarily when moons are low)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'thoat_barsoom',
+    name: 'Thoat (8-legged Riding Beast)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'mount',
+    rarity: 'common',
+    terrain: ['barsoom-dead-sea', 'barsoom-city', 'barsoom-aerial'],
+    description: 'The primary riding animal of Barsoom — a large, 8-legged creature with a wide, flat body and a relatively small head. Green Martian thoats stand 10 feet at the shoulder; red Martian thoats are smaller and lighter. Thoats respond to telepathic commands from trained riders and are tireless over enormous distances across the Dead Sea Bottoms.',
+    stats: { STR: 20, CON: 16, SIZ: 22, DEX: 14, INT: 4, POW: 8, CHA: 5 },
+    hitPoints: 19,
+    armor: 1,
+    armorDescription: 'tough hide',
+    movement: 20,
+    attacks: [
+      { name: 'Trample', damage: '2d6+4', skill: 40 },
+      { name: 'Bite', damage: '1d6+4', skill: 45 }
+    ],
+    specialAbilities: [
+      'Eight-legged stability (never stumbles; immune to terrain movement penalties on open ground)',
+      'Telepathic bond (responds to the mental commands of a trained rider without reins; untrained riders must use STR to control)',
+      'Endurance (can travel at full movement for 24 hours before requiring rest)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'calot_barsoom',
+    name: 'Calot (10-legged Martian Dog)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'common',
+    terrain: ['barsoom-dead-sea', 'barsoom-city'],
+    description: 'Calots are the loyal dogs of Barsoom — ten-legged, roughly frog-like in body shape, with enormous mouths and small eyes. They bond deeply and permanently to a single person and will sacrifice themselves without hesitation for their bonded owner. Woola, John Carter\'s calot, is the most famous example. A calot\'s affection, once won, is absolute.',
+    stats: { STR: 14, CON: 14, SIZ: 14, DEX: 18, INT: 6, POW: 10, CHA: 8 },
+    hitPoints: 14,
+    armor: 0,
+    armorDescription: 'thin hide',
+    movement: 18,
+    attacks: [
+      { name: 'Bite', damage: '1d8+1', skill: 65 },
+      { name: 'Tackle and pin', damage: 'grapple', skill: 55 }
+    ],
+    specialAbilities: [
+      'Unbreakable bond (a bonded calot will never leave its owner willingly; dies before abandoning them)',
+      'Ten-leg sprint (movement 22 for one round when pursuing a fleeing target)',
+      'Pin (on a successful tackle, the target is grappled; calot automatically bites for 1d8+1 each round while pinning)'
+    ],
+    hitLocationTemplateId: 'quadruped'
+  },
+  {
+    id: 'white_ape_barsoom',
+    name: 'White Ape of Barsoom',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'uncommon',
+    terrain: ['barsoom-city', 'barsoom-dead-sea'],
+    description: 'Towering white-furred apes fifteen feet tall, with four arms arranged in two pairs at shoulder and waist. White apes are used as arena beasts and guard animals, and also roam the ruins of dead cities in small territorial bands. Their four arms allow simultaneous attacks that can overwhelm an armored defender within seconds.',
+    stats: { STR: 28, CON: 20, SIZ: 26, DEX: 12, INT: 5, POW: 8, CHA: 3 },
+    hitPoints: 23,
+    armor: 1,
+    armorDescription: 'thick fur and hide',
+    movement: 12,
+    attacks: [
+      { name: 'Upper arm (left)', damage: '1d8+5', skill: 65 },
+      { name: 'Upper arm (right)', damage: '1d8+5', skill: 65 },
+      { name: 'Lower arm (left)', damage: '1d6+5', skill: 60 },
+      { name: 'Lower arm (right)', damage: '1d6+5', skill: 60 },
+      { name: 'Bite/tusk', damage: '1d6+5', skill: 55 }
+    ],
+    specialAbilities: [
+      'Four arms (may attack with up to 4 limbs per round; each attack after the first is at -10% cumulative)',
+      'Wall-climber (can scale vertical stone and metal surfaces at half movement)',
+      'Territorial fury (when defending its lair or arena, gains +10% to all attacks)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'plant_man_barsoom',
+    name: 'Plant Man (Valley Dor)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'chaos',
+    rarity: 'uncommon',
+    terrain: ['valley-dor'],
+    description: 'The nightmarish inhabitants of the Valley Dor — creatures neither fully animal nor fully vegetable. Plant men stand seven feet tall with smooth pallid bodies and sucker-tipped tentacle arms used to drain blood from prey. They exist to feed the sacred valley, preying on the pilgrims who travel the River Iss believing they journey to paradise.',
+    stats: { STR: 18, CON: 16, SIZ: 16, DEX: 10, INT: 3, POW: 8, CHA: 1 },
+    hitPoints: 16,
+    armor: 2,
+    armorDescription: 'fibrous vegetable hide',
+    movement: 8,
+    attacks: [
+      { name: 'Tentacle (left)', damage: '1d6+2', skill: 55 },
+      { name: 'Tentacle (right)', damage: '1d6+2', skill: 55 },
+      { name: 'Blood drain (grappled)', damage: '1d4 per round', skill: 50 }
+    ],
+    specialAbilities: [
+      'Blood drain (if tentacle grapple succeeds, automatically drains 1d4 HP/round; the drained blood nourishes the plant man)',
+      'Vegetable constitution (immune to poison, disease, and fatigue; does not need to breathe)',
+      'Coordinated swarm (two or more plant men attacking the same target gain +10% to grapple attempts)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'apt_barsoom',
+    name: 'Apt (4-armed Arctic Beast)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'beast',
+    rarity: 'rare',
+    terrain: ['mountains', 'tundra'],
+    description: 'The great white hunting beast of Barsoom\'s polar regions — a massive predator whose thick albino fur renders it nearly invisible against snow and ice. The apt has four powerful arms ending in raking claws and a lion-like head with great curved tusks. It is the apex predator of the Okar domain and feared even by Yellow Martian warriors.',
+    stats: { STR: 26, CON: 20, SIZ: 24, DEX: 10, INT: 3, POW: 8, CHA: 2 },
+    hitPoints: 22,
+    armor: 3,
+    armorDescription: 'thick albino fur and hide',
+    movement: 14,
+    attacks: [
+      { name: 'Upper claw (left)', damage: '1d8+4', skill: 60 },
+      { name: 'Upper claw (right)', damage: '1d8+4', skill: 60 },
+      { name: 'Lower claw (left)', damage: '1d8+4', skill: 55 },
+      { name: 'Lower claw (right)', damage: '1d8+4', skill: 55 },
+      { name: 'Bite (tusks)', damage: '1d10+4', skill: 55 }
+    ],
+    specialAbilities: [
+      'Arctic camouflage (in snow or ice terrain, +40% to any ambush or surprise attack)',
+      'Four arms (may attack with up to 4 claws per round; each after the first at -10% cumulative)',
+      'Smash (can break through wooden barriers and stone walls up to 1 foot thick)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+
+  // Humanoids & Intelligent Creatures
+  {
+    id: 'thark_warrior_barsoom',
+    name: 'Green Martian (Thark) Warrior',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'humanoid',
+    rarity: 'common',
+    terrain: ['barsoom-dead-sea', 'barsoom-city', 'barsoom-aerial'],
+    description: 'The Green Martians are the nomadic warrior hordes of Barsoom — fifteen feet tall, four-armed, tusked, and raised without love. Drilled in warfare from birth, they respect courage above all else and nothing else. The Tharks are the most prominent horde, and Tars Tarkas their greatest Jeddak.',
+    stats: { STR: 26, CON: 20, SIZ: 28, DEX: 14, INT: 10, POW: 10, CHA: 6 },
+    hitPoints: 24,
+    armor: 2,
+    armorDescription: 'partial metal harness over natural toughness',
+    movement: 14,
+    attacks: [
+      { name: 'Radium rifle', damage: '3d6', skill: 60 },
+      { name: 'Long sword (upper)', damage: '1d8+5', skill: 65 },
+      { name: 'Long sword (lower)', damage: '1d8+5', skill: 60 },
+      { name: 'Pistol (lower)', damage: '1d6+5', skill: 55 }
+    ],
+    specialAbilities: [
+      'Four arms (can fire rifle while wielding two swords and a pistol simultaneously; no penalty for holding multiple weapons)',
+      'Limited telepathy (can sense the emotional state of creatures within 30m; cannot read specific thoughts)',
+      'Hardened upbringing (immune to fear effects; morale never breaks while Jeddak is alive and visible)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'red_martian_soldier_barsoom',
+    name: 'Red Martian Soldier',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'common',
+    terrain: ['barsoom-city', 'barsoom-aerial', 'barsoom-dead-sea'],
+    description: 'The red Martians are the dominant human civilization of Barsoom — copper-skinned, adapted over millennia to their planet\'s lower gravity. A trained soldier is extraordinarily agile: they leap distances and recover from falls that would kill a surface-worlder. Standard rank-and-file of all city-state armies.',
+    stats: { STR: 13, CON: 13, SIZ: 12, DEX: 18, INT: 12, POW: 12, CHA: 13 },
+    hitPoints: 13,
+    armor: 2,
+    armorDescription: 'Barsoomian metal harness and partial plate',
+    movement: 14,
+    attacks: [
+      { name: 'Radium pistol', damage: '1d8+2', skill: 70 },
+      { name: 'Long sword', damage: '1d8+2', skill: 70 },
+      { name: 'Dagger', damage: '1d4+2', skill: 60 }
+    ],
+    specialAbilities: [
+      'Low-gravity acrobatics (+20% to all dodge actions and any roll involving leaping or falling)',
+      'Trained swordsman (may parry once per round with long sword without using an action)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'first_born_pirate_barsoom',
+    name: 'First Born (Black Martian) Pirate',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'humanoid',
+    rarity: 'uncommon',
+    terrain: ['valley-dor', 'barsoom-aerial'],
+    description: 'The First Born — black-skinned, athletic, supremely arrogant — believe themselves the original race of Barsoom. Operating from the hidden underground sea of Omean beneath the Valley Dor, they prey on pilgrim ships from the River Iss. To uninitiated red Martians, they are gods. In truth they are the most dangerous pirates on the planet.',
+    stats: { STR: 16, CON: 15, SIZ: 14, DEX: 17, INT: 12, POW: 13, CHA: 13 },
+    hitPoints: 15,
+    armor: 3,
+    armorDescription: 'finest Barsoomian metal armor',
+    movement: 14,
+    attacks: [
+      { name: 'Long sword', damage: '1d8+2', skill: 75 },
+      { name: 'Radium pistol', damage: '1d8+2', skill: 70 },
+      { name: 'Dagger', damage: '1d4+2', skill: 65 }
+    ],
+    specialAbilities: [
+      'Naval boarding (+15% to all attack rolls during ship or vessel boarding actions)',
+      'Elite swordsmanship (+10% when outnumbering a single target 2:1 or more)',
+      'Supreme confidence (immune to intimidation from anyone they consider lesser — which is everyone)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'thern_barsoom',
+    name: 'Thern (White Martian False Priest)',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'chaos',
+    rarity: 'uncommon',
+    terrain: ['valley-dor', 'barsoom-city'],
+    description: 'White-skinned, golden-wigged priests who maintain the Valley Dor\'s sacred illusion. They convince all red Martians that the River Iss leads to paradise; in reality it leads to the plant men, the First Born, and death. Therns use psychological manipulation, cult authority, and genuine psychic ability to sustain their civilization-scale deception.',
+    stats: { STR: 14, CON: 13, SIZ: 13, DEX: 15, INT: 16, POW: 15, CHA: 17 },
+    hitPoints: 13,
+    armor: 2,
+    armorDescription: 'white robes over concealed metal harness',
+    movement: 12,
+    attacks: [
+      { name: 'Long sword', damage: '1d8+2', skill: 65 },
+      { name: 'Radium pistol', damage: '1d8+2', skill: 60 },
+      { name: 'Telepathic suggestion', damage: 'POW vs POW (special)', skill: 75 }
+    ],
+    specialAbilities: [
+      'Cult authority (pilgrims and uninitiated red Martians obey Thern commands automatically; the deception is total)',
+      'Telepathic suggestion (POW vs POW contest; success causes target to believe one false statement for 1d6 hours)',
+      'Escape reflex (+30% to any disengage action when personally threatened)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'zodangan_soldier_barsoom',
+    name: 'Zodangan Soldier',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'common',
+    terrain: ['barsoom-city', 'barsoom-aerial', 'barsoom-dead-sea'],
+    description: 'Zodanga — Helium\'s great rival, a city that moves across the Barsoomian wastes on enormous metal legs — fields professional, disciplined, and considerably more ruthless soldiers than most city-states. Zodangan forces fight in tight formations and respect strength above sentiment.',
+    stats: { STR: 14, CON: 13, SIZ: 13, DEX: 16, INT: 11, POW: 11, CHA: 11 },
+    hitPoints: 13,
+    armor: 2,
+    armorDescription: 'Zodangan standard harness and plate',
+    movement: 14,
+    attacks: [
+      { name: 'Radium pistol', damage: '1d8+2', skill: 65 },
+      { name: 'Long sword', damage: '1d8+2', skill: 65 }
+    ],
+    specialAbilities: [
+      'Formation discipline (+10% to attack rolls when fighting in a coordinated squad of 5 or more)',
+      'Ruthless orders (Zodangan soldiers never offer quarter unless specifically ordered to)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+
+  // NPCs
+  {
+    id: 'john_carter_barsoom',
+    name: 'John Carter, Warlord of Mars',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'legendary',
+    terrain: ['barsoom-dead-sea', 'barsoom-city', 'valley-dor', 'barsoom-aerial'],
+    description: 'A Virginia gentleman and former Confederate officer transported to Barsoom through means he never fully understood. Earth physiology on Mars translates into superhuman strength, speed, and agility. He is also the finest swordsman on two worlds. His defining qualities are an unbreakable personal code of honor, an inability to leave someone helpless, and the will to survive circumstances that should be fatal.',
+    stats: { STR: 20, CON: 18, SIZ: 14, DEX: 20, INT: 16, POW: 16, CHA: 17 },
+    hitPoints: 16,
+    armor: 2,
+    armorDescription: 'Barsoomian metal harness',
+    movement: 18,
+    attacks: [
+      { name: 'Long sword', damage: '1d8+3', skill: 90 },
+      { name: 'Radium pistol', damage: '1d8+3', skill: 80 },
+      { name: 'Grapple/unarmed', damage: '1d6+3', skill: 85 }
+    ],
+    specialAbilities: [
+      'Earth physiology (Martian gravity amplifies STR, DEX, and movement; stats already reflect this advantage)',
+      'Legendary swordsman (scores a critical hit when skill roll succeeds by 30 or more points)',
+      'Unbreakable will (once per combat, may reroll any death or incapacitation check)',
+      'Code of honor (cannot willingly leave a helpless person in danger — story constraint, not mechanical weakness)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'dejah_thoris_barsoom',
+    name: 'Dejah Thoris, Princess of Helium',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'legendary',
+    terrain: ['barsoom-city', 'valley-dor'],
+    description: 'Princess of Helium and the most celebrated figure on Barsoom. Dejah Thoris is not passive: she understands politics, commands loyalty, possesses scientific expertise, and will fight to the death when cornered. She has been captured repeatedly and escaped or survived every time through her own resourcefulness. Her capture incites the first Barsoom novel; she is nobody\'s helpless prize.',
+    stats: { STR: 10, CON: 12, SIZ: 10, DEX: 16, INT: 18, POW: 16, CHA: 20 },
+    hitPoints: 11,
+    armor: 0,
+    armorDescription: 'none',
+    movement: 12,
+    attacks: [
+      { name: 'Dagger', damage: '1d4+1', skill: 55 }
+    ],
+    specialAbilities: [
+      'Brilliant scientist (can identify and operate any Barsoomian device; improvise technical solutions under pressure)',
+      'Royal authority of Helium (every loyal Heliumite will die for her; her word is law in Helium)',
+      'Force of personality (CHA 20; hostile humanoids must pass POW×3 to directly harm her in non-combat contexts)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'tars_tarkas_barsoom',
+    name: 'Tars Tarkas, Jeddak of Thark',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'legendary',
+    terrain: ['barsoom-dead-sea', 'barsoom-city'],
+    description: 'The greatest warrior of the Thark horde and its elected Jeddak — the only Green Martian to have survived long enough, and won enough respect, to rule. Tars Tarkas is unusual among his people in being capable of friendship. His bond with John Carter is the core relationship of the first Barsoom trilogy. In battle he is without peer among the Green Martians.',
+    stats: { STR: 28, CON: 22, SIZ: 30, DEX: 16, INT: 14, POW: 14, CHA: 12 },
+    hitPoints: 26,
+    armor: 3,
+    armorDescription: 'Thark chieftain\'s heavy metal harness and war trophies',
+    movement: 16,
+    attacks: [
+      { name: 'Long sword (upper pair)', damage: '2d8+6', skill: 85 },
+      { name: 'Radium rifle', damage: '3d6', skill: 70 },
+      { name: 'Pistol (lower pair)', damage: '1d6+6', skill: 75 }
+    ],
+    specialAbilities: [
+      'Jeddak\'s authority (all Tharks within sight fight at +15% while Tars Tarkas stands)',
+      'Legendary warrior (scores critical hits when skill roll succeeds by 20 or more points)',
+      'Friendship bond (gains +20% to all rolls when John Carter is present and in mortal danger)',
+      'Four arms (can simultaneously use rifle and pistols while wielding swords; no multi-weapon penalty)'
+    ],
+    hitLocationTemplateId: 'humanoid'
+  },
+  {
+    id: 'kantos_kan_barsoom',
+    name: 'Kantos Kan, Heliumite Officer',
+    gameSystem: 'runequest',
+    gameSystems: ['runequest', 'dragonbane', 'kal-arath', 'osric'],
+    category: 'npc',
+    rarity: 'uncommon',
+    terrain: ['barsoom-city', 'barsoom-aerial'],
+    description: 'A senior officer of Helium\'s navy and one of John Carter\'s earliest and most reliable red Martian allies. Kantos Kan is a gifted aerial flier pilot, a skilled swordsman, and a man of absolute loyalty who has survived encounters that would have killed most soldiers. He serves as the practical military liaison between John Carter and Heliumite forces.',
+    stats: { STR: 15, CON: 14, SIZ: 13, DEX: 17, INT: 14, POW: 13, CHA: 15 },
+    hitPoints: 14,
+    armor: 2,
+    armorDescription: 'officer\'s Heliumite harness and plate',
+    movement: 14,
+    attacks: [
+      { name: 'Long sword', damage: '1d8+2', skill: 75 },
+      { name: 'Radium pistol', damage: '1d8+2', skill: 70 }
+    ],
+    specialAbilities: [
+      'Expert aerial navigator (can pilot any Barsoomian flier at full capability; improvise repairs under fire)',
+      'Tactical coordination (can organize up to 20 soldiers into an effective unit with one minute of preparation)',
+      'Loyal to the last (will never abandon John Carter or Dejah Thoris regardless of odds)'
+    ],
+    hitLocationTemplateId: 'humanoid'
   }
 ];

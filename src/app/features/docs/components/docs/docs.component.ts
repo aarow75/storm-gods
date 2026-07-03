@@ -43,14 +43,18 @@ const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
     { filename: 'OSRIC-vs-RuneQuest-Comparison.md', name: 'OSRIC vs RuneQuest', icon: '⚖️' },
     { filename: 'OSRIC-vs-Dragonbane-Comparison.md', name: 'OSRIC vs Dragonbane', icon: '⚖️' },
     { filename: 'Kal-Arath-vs-OSRIC-Comparison.md', name: 'Kal-Arath vs OSRIC', icon: '⚖️' },
-  ]
+  ],
+  mothership: [
+    { filename: 'Mothership-Mechanics-Reference.md', name: 'Mechanics Reference', icon: '⚙️' },
+  ],
 };
 
 const ADVENTURE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   runequest: [],
   dragonbane: [],
   'kal-arath': [],
-  osric: []
+  osric: [],
+  mothership: [],
 }
 
 
@@ -58,7 +62,8 @@ const RULES_DOCUMENTS: Record<GameSystem, RulesDocument[]> = {
   runequest: [],
   dragonbane: [],
   'kal-arath': [],
-  osric: []
+  osric: [],
+  mothership: [],
 };
 
 @Component({

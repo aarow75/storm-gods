@@ -1,1 +1,1 @@
-export type GameSystem = 'runequest' | 'dragonbane' | 'kal-arath' | 'osric';
+export type GameSystem = 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership';

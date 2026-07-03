@@ -1483,4 +1483,148 @@
     </section>
 
   } <!-- end osric -->
+
+  @if (gameSystemService.gameSystem() === 'mothership') {
+
+    <section class="gm-section">
+      <h3>Combat Sequence</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Step</th><th>Action</th><th>Detail</th></tr></thead>
+        <tbody>
+          @for (row of msCombatSequence; track row.step) {
+          <tr><td>{{ row.step }}</td><td>{{ row.action }}</td><td>{{ row.detail }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Class Starting Saves &amp; Skills</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Class</th><th>Sanity</th><th>Fear</th><th>Body</th><th>Armor</th><th>Starting Skills</th></tr></thead>
+        <tbody>
+          @for (row of msClassSaves; track row.className) {
+          <tr>
+            <td>{{ row.className }}</td>
+            <td>{{ row.sanity }}%</td>
+            <td>{{ row.fear }}%</td>
+            <td>{{ row.body }}%</td>
+            <td>{{ row.armor }}%</td>
+            <td>{{ row.skills }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Skill Ranks</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Rank</th><th>Bonus</th><th>Cost</th><th>Note</th></tr></thead>
+        <tbody>
+          @for (row of msSkillRanks; track row.rank) {
+          <tr><td>{{ row.rank }}</td><td>{{ row.bonus }}</td><td>{{ row.cost }}</td><td>{{ row.note }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Weapons</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Weapon</th><th>DMG</th><th>Range (S/M/L)</th><th>Shots</th><th>Cost</th><th>Special</th></tr></thead>
+        <tbody>
+          @for (row of msWeapons; track row.name) {
+          <tr>
+            <td>{{ row.name }}</td><td>{{ row.dmg }}</td><td>{{ row.range }}</td>
+            <td>{{ row.shots }}</td><td>{{ row.cost }}</td><td>{{ row.note }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Armor</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Type</th><th>Armor Save Bonus</th><th>Notes</th></tr></thead>
+        <tbody>
+          @for (row of msArmor; track row.type) {
+          <tr><td>{{ row.type }}</td><td>{{ row.bonus }}</td><td>{{ row.notes }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Healing (6+ hours rest → Body save)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Result</th><th>Effect</th></tr></thead>
+        <tbody>
+          @for (row of msHealing; track row.outcome) {
+          <tr><td>{{ row.outcome }}</td><td>{{ row.result }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Unconsciousness &amp; Death (at 0 HP → Body save or die; success → Warden rolls d10)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>d10</th><th>Result</th></tr></thead>
+        <tbody>
+          @for (row of msUnconscious; track row.d10) {
+          <tr><td>{{ row.d10 }}</td><td>{{ row.result }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Panic Effect Table (2d10 + Stress − Resolve)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Roll</th><th>Effect</th></tr></thead>
+        <tbody>
+          @for (row of msPanicTable; track row.roll) {
+          <tr><td>{{ row.roll }}</td><td>{{ row.effect }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>XP &amp; Leveling</h3>
+      <div class="dragonbane-ref">
+        <div class="ref-box">
+          <h3>XP Awards</h3>
+          <ul>
+            <li><strong>Survive a session:</strong> 10 XP (level 0→1 immediately)</li>
+            <li><strong>Save a crew member's life:</strong> 3 XP</li>
+            <li><strong>Investigate a distress signal:</strong> 3 XP</li>
+            <li><strong>Map unknown sector:</strong> 5 XP</li>
+            <li><strong>Retrieve alien artifact:</strong> 2 XP</li>
+            <li><strong>Kill creature with 70+ Instinct:</strong> 2 XP</li>
+            <li><strong>Unlock a great mystery:</strong> 2 XP</li>
+          </ul>
+        </div>
+        <div class="ref-box">
+          <h3>Level Up</h3>
+          <ul>
+            <li><strong>Major:</strong> Improve 1 stat by 5 + another by 3 (max 85) <em>or</em> improve 2 saves by 4 each</li>
+            <li><strong>Minor:</strong> Gain 1 Resolve <em>or</em> remove 1 phobia/addiction <em>or</em> heal all Stress</li>
+            <li><strong>Skills:</strong> Gain 2 Skill Points (Trained=1pt, Expert=2pt, Master=3pt)</li>
+          </ul>
+          <table class="gm-table-small" style="margin-top:0.5rem">
+            <thead><tr><th>Level</th><th>Total XP</th></tr></thead>
+            <tbody>
+              @for (row of msXpTable; track row.level) {
+              <tr><td>{{ row.level }}</td><td>{{ row.xp }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  } <!-- end mothership -->
 </div>

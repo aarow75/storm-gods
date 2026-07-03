@@ -416,6 +416,98 @@
     </div>
   </div>
 </div>
+} @else if (isMothership) {
+<div class="publications-page">
+  <header class="page-header">
+    <h2>Mothership Publications</h2>
+    <p class="page-subtitle">Science-fiction horror RPG by Tuesday Knight Games</p>
+  </header>
+
+  <div class="publications-container">
+    @if (mothershipCoreRules.length > 0) {
+    <div class="section">
+      <h3>Core Rulebooks</h3>
+      <p class="section-description">The essential books for playing and running Mothership</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of mothershipCoreRules; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (mothershipAdventures.length > 0) {
+    <div class="section">
+      <h3>Adventures & Scenarios</h3>
+      <p class="section-description">Published modules and campaigns</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of mothershipAdventures; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (mothershipSupplements.length > 0) {
+    <div class="section">
+      <h3>Supplements</h3>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of mothershipSupplements; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ mothershipCoreRules.length }}</div>
+        <div class="stat-label">Core Books</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ mothershipAdventures.length }}</div>
+        <div class="stat-label">Adventures</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ publications.length }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+  </div>
+</div>
 } @else if (isKalArath) {
 <div class="publications-page">
   <header class="page-header">

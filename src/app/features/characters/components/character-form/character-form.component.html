@@ -355,8 +355,8 @@
         </div>
         }
 
-        <!-- Magic Component (hidden for OSRIC non-spellcasting classes) -->
-        @if (gameSystemService.gameSystem() !== 'osric' || osricClassUsesMagic) {
+        <!-- Magic Component (hidden for OSRIC non-spellcasting classes and Mothership) -->
+        @if (gameSystemService.gameSystem() !== 'mothership' && (gameSystemService.gameSystem() !== 'osric' || osricClassUsesMagic)) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('magic')">
           <div class="section-header" (click)="toggleSection('magic')">
             <h4>Magic</h4>

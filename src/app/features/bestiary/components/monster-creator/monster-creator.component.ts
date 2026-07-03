@@ -26,7 +26,7 @@ export class MonsterCreatorComponent implements OnInit {
     name: string;
     description: string;
     category: 'humanoid' | 'beast' | 'undead' | 'chaos' | 'dragon' | 'spirit' | 'npc' | 'mount';
-    gameSystem: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric';
+    gameSystem: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership';
     hitPoints: number;
     armor: number;
     armorDescription: string;
@@ -65,7 +65,8 @@ export class MonsterCreatorComponent implements OnInit {
     { value: 'runequest', label: 'RuneQuest' },
     { value: 'dragonbane', label: 'DragonBane' },
     { value: 'kal-arath', label: 'Kal-Arath' },
-    { value: 'osric', label: 'OSRIC' }
+    { value: 'osric', label: 'OSRIC' },
+    { value: 'mothership', label: 'Mothership' },
   ];
   hitLocationTemplateOptions = [
     { value: '', label: 'None (flat HP)' },

@@ -83,6 +83,12 @@ h1 {
   box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3);
 }
 
+.system-toggle-ms.active {
+  background: linear-gradient(135deg, #0e7490 0%, #164e63 100%);
+  color: var(--color-bg-white);
+  box-shadow: 0 4px 12px rgba(14, 116, 144, 0.3);
+}
+
 .font-size-btn {
   padding: var(--spacing-2xl) var(--spacing-3xl);
   background-color: var(--color-bg-light);

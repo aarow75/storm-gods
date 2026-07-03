@@ -242,3 +242,36 @@ export const KAL_ARATH_EQUIPMENT_LIST: EquipmentDefinition[] = [
   { name: 'Cart',               category: 'Transport & Storage', cost: 100,hitPoints: 20,encumbrance: 0 },
   { name: 'Wagon',              category: 'Transport & Storage', cost: 300,hitPoints: 30,encumbrance: 0 },
 ];
+
+// ─── Mothership ────────────────────────────────────────────────────────────────
+// Costs in Credits (Cr). Encumbrance in abstract units.
+export const MOTHERSHIP_EQUIPMENT_LIST: EquipmentDefinition[] = [
+  // Survival & Exploration
+  { name: 'Oxygen Tank',            category: 'Survival', cost: 50,  hitPoints: 4, encumbrance: 2 },
+  { name: 'Water Filter',           category: 'Survival', cost: 75,  hitPoints: 2, encumbrance: 1 },
+  { name: 'Rebreather',             category: 'Survival', cost: 120, hitPoints: 2, encumbrance: 1 },
+  { name: 'MRE (×7)',               category: 'Survival', cost: 70,  hitPoints: 1, encumbrance: 2 },
+  { name: 'Camping Gear',           category: 'Survival', cost: 100, hitPoints: 3, encumbrance: 3 },
+  { name: 'Mag-Boots',              category: 'Survival', cost: 200, hitPoints: 4, encumbrance: 1 },
+  // Medical
+  { name: 'First Aid Kit',          category: 'Medical', cost: 75,  hitPoints: 2, encumbrance: 1 },
+  { name: 'Medscanner',             category: 'Medical', cost: 150, hitPoints: 2, encumbrance: 1 },
+  { name: 'Automed (×6)',           category: 'Medical', cost: 300, hitPoints: 1, encumbrance: 1 },
+  { name: 'Pain Pills (×6)',        category: 'Medical', cost: 450, hitPoints: 1, encumbrance: 0 },
+  { name: 'Stimpak (×6)',           category: 'Medical', cost: 600, hitPoints: 1, encumbrance: 1 },
+  // Electronics & Tools
+  { name: 'Electronic Tool Kit',    category: 'Tools', cost: 650, hitPoints: 3, encumbrance: 2 },
+  { name: 'Cybernetic Diagnostic Scanner', category: 'Tools', cost: 400, hitPoints: 2, encumbrance: 1 },
+  { name: 'Body Cam',               category: 'Tools', cost: 50,  hitPoints: 1, encumbrance: 0 },
+  { name: 'Flashlight',             category: 'Tools', cost: 20,  hitPoints: 1, encumbrance: 0 },
+  { name: 'Short-range Comms',      category: 'Tools', cost: 80,  hitPoints: 1, encumbrance: 0 },
+  { name: 'Long-range Comms',       category: 'Tools', cost: 300, hitPoints: 1, encumbrance: 1 },
+  { name: 'Heads-Up Display',       category: 'Tools', cost: 75,  hitPoints: 1, encumbrance: 0 },
+  { name: 'Lockpick Set',           category: 'Tools', cost: 40,  hitPoints: 1, encumbrance: 0 },
+  { name: 'Binoculars',             category: 'Tools', cost: 50,  hitPoints: 2, encumbrance: 1 },
+  // Sensors & Science
+  { name: 'Bioscanner',             category: 'Sensors', cost: 200, hitPoints: 2, encumbrance: 1 },
+  { name: 'Infrared Goggles',       category: 'Sensors', cost: 150, hitPoints: 2, encumbrance: 0 },
+  { name: 'Survey Kit',             category: 'Sensors', cost: 250, hitPoints: 2, encumbrance: 2 },
+  { name: 'Locator',                category: 'Sensors', cost: 100, hitPoints: 1, encumbrance: 0 },
+];

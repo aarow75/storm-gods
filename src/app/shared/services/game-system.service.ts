@@ -10,6 +10,7 @@ import {
   DRAGONBANE_EQUIPMENT_LIST,
   OSRIC_EQUIPMENT_LIST,
   KAL_ARATH_EQUIPMENT_LIST,
+  MOTHERSHIP_EQUIPMENT_LIST,
 } from '@shared/constants/equipment.constants';
 
 export type { GameSystem };
@@ -25,7 +26,7 @@ export interface GameSystemData {
 })
 export class GameSystemService {
   private readonly STORAGE_KEY = 'gameSystem';
-  private static readonly SYSTEM_PATTERN = /^\/(runequest|dragonbane|kal-arath|osric)(?:\/|$)/;
+  private static readonly SYSTEM_PATTERN = /^\/(runequest|dragonbane|kal-arath|osric|mothership)(?:\/|$)/;
 
   gameSystem = signal<GameSystem>(this.loadLastUsed());
 
@@ -193,6 +194,34 @@ export class GameSystemService {
     ]
   };
 
+  private mothership: GameSystemData = {
+    // Class determines starting saves and skill points
+    cults: [
+      'Teamster',
+      'Android',
+      'Scientist',
+      'Marine',
+    ],
+    // In Mothership, "occupation" = class (same as cult here; stored in background.occupation)
+    occupations: [
+      'Teamster',
+      'Android',
+      'Scientist',
+      'Marine',
+    ],
+    // Homelands map to broad crew origins
+    homelands: [
+      'Inner Colonies',
+      'Outer Rim',
+      'Corporate Employee',
+      'Military Veteran',
+      'Station-Born',
+      'Ship-Born',
+      'Earth Expatriate',
+      'Unknown',
+    ],
+  };
+
   constructor(private router: Router) {
     this.updateFromUrl(this.router.url);
     this.router.events
@@ -204,7 +233,7 @@ export class GameSystemService {
 
   private loadLastUsed(): GameSystem {
     const stored = localStorage.getItem(this.STORAGE_KEY);
-    if (stored === 'dragonbane' || stored === 'kal-arath' || stored === 'osric') return stored;
+    if (stored === 'dragonbane' || stored === 'kal-arath' || stored === 'osric' || stored === 'mothership') return stored;
     return 'runequest';
   }
 
@@ -226,7 +255,7 @@ export class GameSystemService {
   /** Navigate to the equivalent page under the other game system. */
   switchSystem(system: GameSystem): void {
     if (system === this.gameSystem()) return;
-    const match = this.router.url.match(/^\/(runequest|dragonbane|kal-arath|osric)(.*)$/);
+    const match = this.router.url.match(/^\/(runequest|dragonbane|kal-arath|osric|mothership)(.*)$/);
     const tail = match?.[2];
     const target = tail && tail !== '/' ? tail : '/characters';
     this.router.navigateByUrl(`/${system}${target}`);
@@ -235,60 +264,70 @@ export class GameSystemService {
   getCults(): string[] {
     if (this.gameSystem() === 'kal-arath') return this.kalArath.cults;
     if (this.gameSystem() === 'osric') return this.osric.cults;
+    if (this.gameSystem() === 'mothership') return this.mothership.cults;
     return this.gameSystem() === 'runequest' ? this.runequest.cults : this.dragonbane.cults;
   }
 
   getOccupations(): string[] {
     if (this.gameSystem() === 'kal-arath') return this.kalArath.occupations;
     if (this.gameSystem() === 'osric') return this.osric.occupations;
+    if (this.gameSystem() === 'mothership') return this.mothership.occupations;
     return this.gameSystem() === 'runequest' ? this.runequest.occupations : this.dragonbane.occupations;
   }
 
   getHomelands(): string[] {
     if (this.gameSystem() === 'kal-arath') return this.kalArath.homelands;
     if (this.gameSystem() === 'osric') return this.osric.homelands;
+    if (this.gameSystem() === 'mothership') return this.mothership.homelands;
     return this.gameSystem() === 'runequest' ? this.runequest.homelands : this.dragonbane.homelands;
   }
 
   getSystemName(): string {
     if (this.gameSystem() === 'kal-arath') return 'Kal-Arath';
     if (this.gameSystem() === 'osric') return 'OSRIC';
+    if (this.gameSystem() === 'mothership') return 'Mothership';
     return this.gameSystem() === 'runequest' ? 'RuneQuest' : 'Dragonbane';
   }
 
   getHomelandLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Origin';
     if (this.gameSystem() === 'osric') return 'Race';
+    if (this.gameSystem() === 'mothership') return 'Origin';
     return this.gameSystem() === 'runequest' ? 'Homeland' : 'Kin (Race)';
   }
 
   getOccupationLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Background';
     if (this.gameSystem() === 'osric') return 'Class';
+    if (this.gameSystem() === 'mothership') return 'Class';
     return this.gameSystem() === 'runequest' ? 'Occupation' : 'Profession';
   }
 
   getCultLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Demonic Pact';
     if (this.gameSystem() === 'osric') return 'Alignment';
+    if (this.gameSystem() === 'mothership') return 'Class';
     return this.gameSystem() === 'runequest' ? 'Cult/Religion' : 'Belief';
   }
 
   getSelectHomelandLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Select Origin';
     if (this.gameSystem() === 'osric') return 'Select Race';
+    if (this.gameSystem() === 'mothership') return 'Select Origin';
     return this.gameSystem() === 'runequest' ? 'Select Homeland' : 'Select Kin';
   }
 
   getSelectOccupationLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Select Background';
     if (this.gameSystem() === 'osric') return 'Select Class';
+    if (this.gameSystem() === 'mothership') return 'Select Class';
     return this.gameSystem() === 'runequest' ? 'Select Occupation' : 'Select Profession';
   }
 
   getSelectCultLabel(): string {
     if (this.gameSystem() === 'kal-arath') return 'Select Demonic Pact';
     if (this.gameSystem() === 'osric') return 'Select Alignment';
+    if (this.gameSystem() === 'mothership') return 'Select Class';
     return this.gameSystem() === 'runequest' ? 'Select Cult' : 'Select Belief';
   }
 
@@ -300,6 +339,7 @@ export class GameSystemService {
     if (this.gameSystem() === 'dragonbane') return DRAGONBANE_EQUIPMENT_LIST;
     if (this.gameSystem() === 'osric') return OSRIC_EQUIPMENT_LIST;
     if (this.gameSystem() === 'kal-arath') return KAL_ARATH_EQUIPMENT_LIST;
+    if (this.gameSystem() === 'mothership') return MOTHERSHIP_EQUIPMENT_LIST;
     return RUNEQUEST_EQUIPMENT_LIST;
   }
 
@@ -307,6 +347,7 @@ export class GameSystemService {
     if (this.gameSystem() === 'dragonbane') return 'SP';
     if (this.gameSystem() === 'osric') return 'GP';
     if (this.gameSystem() === 'kal-arath') return 'Silver';
+    if (this.gameSystem() === 'mothership') return 'Cr';
     return 'L';
   }
 
@@ -314,6 +355,7 @@ export class GameSystemService {
     if (this.gameSystem() === 'dragonbane') return 'silver';
     if (this.gameSystem() === 'osric') return 'gold';
     if (this.gameSystem() === 'kal-arath') return 'silver';
+    if (this.gameSystem() === 'mothership') return 'lunars';
     return 'lunars';
   }
 }

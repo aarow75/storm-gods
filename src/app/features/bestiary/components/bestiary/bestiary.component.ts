@@ -33,6 +33,7 @@ export class BestiaryComponent implements OnInit {
     { value: 'dragonbane', label: 'DragonBane' },
     { value: 'kal-arath', label: 'Kal-Arath' },
     { value: 'osric', label: 'OSRIC' },
+    { value: 'mothership', label: 'Mothership' },
   ];
   searchQuery = signal('');
   categoryFilter = signal<string>('all');
@@ -50,10 +51,12 @@ export class BestiaryComponent implements OnInit {
   filteredMonsters = computed(() => {
     let result = this.monsters;
 
-    // Filter by system
+    // Filter by system — gameSystems[] overrides the single gameSystem field
     const systemFilter = this.systemFilter();
     if (systemFilter !== 'all') {
-      result = result.filter(m => m.gameSystem === systemFilter);
+      result = result.filter(m =>
+        m.gameSystems ? m.gameSystems.includes(systemFilter as typeof m.gameSystem) : m.gameSystem === systemFilter
+      );
     }
 
     // Filter by search query

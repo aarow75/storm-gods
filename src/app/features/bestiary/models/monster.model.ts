@@ -22,7 +22,8 @@ export interface HitLocationTemplate {
 export interface Monster {
   id: string;
   name: string;
-  gameSystem: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric';
+  gameSystem: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership';
+  gameSystems?: ('runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership')[];
   category: 'humanoid' | 'beast' | 'undead' | 'chaos' | 'dragon' | 'spirit' | 'npc' | 'mount';
   description: string;
   stats: CharacterStats;

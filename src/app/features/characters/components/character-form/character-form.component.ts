@@ -109,7 +109,7 @@ export class CharacterFormComponent implements OnInit {
   get isOsric(): boolean { return this.gameSystemService.getRules().getMagicSystemType() === 'osric'; }
   get showConditions(): boolean {
     const t = this.gameSystemService.getRules().getMagicSystemType();
-    return t !== 'kal-arath' && t !== 'osric';
+    return t !== 'kal-arath' && t !== 'osric' && t !== 'mothership';
   }
 
   get osricClassUsesMagic(): boolean {
