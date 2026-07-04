@@ -5,7 +5,8 @@ import { DerivedStats, EquipmentItem, Resources } from '@characters/models/chara
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
   SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses,
-  AbilityDefinition, ClassHitDie, ToHitMechanic
+  AbilityDefinition, ClassHitDie, ToHitMechanic,
+  ArmorModel, InitiativeMechanic
 } from './game-system-rules.interface';
 
 // OSRIC uses 6 ability scores. SIZ is hidden; POW field stores Wisdom.
@@ -126,7 +127,7 @@ const RACE_ABILITIES: Record<string, AbilityDefinition[]> = {
     { name: 'Charm & Sleep Immunity', description: '90% immunity to sleep and charm spells.' },
     { name: 'Infravision 60 ft', description: 'See in darkness up to 60 ft in shades of grey.' },
     { name: 'Combat Bonus (Bows & Swords)', description: '+1 to hit with any pulled bow; +1 to hit with longsword and short sword.' },
-    { name: 'Secret Door Detection', description: 'Detect secret doors 1–3 in 6 depending on circumstance; automatically notice concealed doors within 10 ft (1-in-6).' },
+    { name: 'Secret Door Detection', description: 'Detect secret doors 1–3 in 6 depending on circumstance.' },
     { name: 'Surprise Advantage', description: '4-in-6 chance to surprise opponents under optimal conditions.' },
   ],
   'Gnome': [
@@ -140,7 +141,7 @@ const RACE_ABILITIES: Record<string, AbilityDefinition[]> = {
   'Half-Elf': [
     { name: 'Infravision 60 ft', description: 'See in darkness up to 60 ft in shades of grey.' },
     { name: 'Partial Charm & Sleep Resistance', description: '30% immunity to sleep and charm spells.' },
-    { name: 'Secret Door Detection', description: 'Detect secret doors 2-in-6, concealed doors 3-in-6; auto-notice within 10 ft (1-in-6).' },
+    { name: 'Secret Door Detection', description: 'Detect secret doors 2-in-6, concealed doors 3-in-6.' },
   ],
   'Half-Orc': [
     { name: 'Infravision 60 ft', description: 'See in darkness up to 60 ft in shades of grey.' },
@@ -158,7 +159,7 @@ const RACE_ABILITIES: Record<string, AbilityDefinition[]> = {
 
 const CLASS_HIT_DICE: Record<string, ClassHitDie> = {
   'Assassin':    { sides: 6,  maxHdLevel: 15, bonusPerLevel: 2 },
-  'Cleric':      { sides: 8,  maxHdLevel: 11, bonusPerLevel: 2 },
+  'Cleric':      { sides: 8,  maxHdLevel: 9,  bonusPerLevel: 2 },
   'Druid':       { sides: 8,  maxHdLevel: 14, bonusPerLevel: 1 },
   'Fighter':     { sides: 10, maxHdLevel: 9,  bonusPerLevel: 3 },
   'Illusionist': { sides: 4,  maxHdLevel: 11, bonusPerLevel: 1 },
@@ -168,12 +169,41 @@ const CLASS_HIT_DICE: Record<string, ClassHitDie> = {
   'Thief':       { sides: 6,  maxHdLevel: 10, bonusPerLevel: 2 },
 };
 
+// OSRIC 3.0 race/class level caps (from OSRIC-Mechanics-Reference.md)
+const RACE_CLASS_LEVEL_CAPS: Record<string, Record<string, number>> = {
+  'Dwarf': { 'Assassin': 9, 'Cleric': 8, 'Fighter': 9, 'Thief': 999 },
+  'Elf': { 'Assassin': 999, 'Cleric': 999, 'Fighter': 7, 'Illusionist': 999, 'Magic User': 11, 'Thief': 999 },
+  'Gnome': { 'Assassin': 999, 'Cleric': 999, 'Fighter': 999, 'Illusionist': 999, 'Thief': 999 },
+  'Half-Elf': { 'Assassin': 999, 'Cleric': 999, 'Fighter': 999, 'Magic User': 999, 'Ranger': 999, 'Thief': 999 },
+  'Half-Orc': { 'Assassin': 15, 'Cleric': 4, 'Fighter': 10, 'Thief': 7 },
+  'Halfling': { 'Druid': 6, 'Fighter': 4, 'Thief': 999 },
+  'Human': { 'Assassin': 15, 'Druid': 14, 'Cleric': 999, 'Fighter': 999, 'Illusionist': 999, 'Magic User': 999, 'Paladin': 999, 'Ranger': 999, 'Thief': 999 },
+};
+
+// OSRIC 3.0 Fighter per-level attack progression (attacks per round, represented as multiplier × /2)
+// Levels 1–6: 1/1 (one full attack); Levels 7–12: 3/2 (three attacks per two rounds); Levels 13+: 2/1 (two full attacks)
+const FIGHTER_ATTACK_PROGRESSION: Record<number, { attacks: number; perRounds: number }> = {
+  1: { attacks: 1, perRounds: 1 },
+  2: { attacks: 1, perRounds: 1 },
+  3: { attacks: 1, perRounds: 1 },
+  4: { attacks: 1, perRounds: 1 },
+  5: { attacks: 1, perRounds: 1 },
+  6: { attacks: 1, perRounds: 1 },
+  7: { attacks: 3, perRounds: 2 },
+  8: { attacks: 3, perRounds: 2 },
+  9: { attacks: 3, perRounds: 2 },
+  10: { attacks: 3, perRounds: 2 },
+  11: { attacks: 3, perRounds: 2 },
+  12: { attacks: 3, perRounds: 2 },
+  13: { attacks: 2, perRounds: 1 },
+};
+
 const CLASS_ABILITIES: Record<string, AbilityDefinition[]> = {
   'Assassin': [
     { name: 'Assassination', description: 'With surprise: 50% instant kill + 5% per assassin level − 5% per two victim levels.' },
     { name: 'Backstab', description: '+4 to hit from behind; ×2 damage (levels 1–4), ×3 (5–8), ×4 (9–12).' },
     { name: 'Disguise', description: 'Only a 2% daily base chance for observers to detect the disguise.' },
-    { name: 'Thief Abilities', description: 'Access to thief skills at two class levels below current rank.' },
+    { name: 'Thief Abilities', description: 'Access to thief skills (Climb Walls, Find/Remove Traps, Hide in Shadows, Move Quietly, Open Locks, Pick Pockets, Read Languages) from level 1 onward.' },
     { name: 'Special Languages (Level 9+)', description: 'High-Int (15+) assassins can learn special languages.', minLevel: 9 },
     { name: 'Arcane Scroll Use (Level 12+)', description: 'Can cast spells from arcane scrolls.', minLevel: 12 },
   ],
@@ -190,7 +220,7 @@ const CLASS_ABILITIES: Record<string, AbilityDefinition[]> = {
     { name: 'Spellcasting', description: 'Druid spells require mistletoe, holly, or oak leaves as components.' },
   ],
   'Fighter': [
-    { name: 'Bonus Attacks', description: 'Levels 1–6: 1 attack/round; Levels 7–12: 3 attacks/2 rounds; Levels 13+: 2 attacks/round.' },
+    { name: 'Bonus Attacks', description: 'Bonus attacks advance on a per-level basis, with improvements at specific character levels.' },
     { name: 'Multiple Attacks vs. Weak Foes', description: 'Vs. creatures with <1d8 HP: one attack per character level per round.' },
     { name: 'Weapon Specialization (Optional)', description: '+1 to hit, +2 damage, and bonus attacks. Double specialization: +3 to hit, +3 damage.' },
   ],
@@ -199,7 +229,7 @@ const CLASS_ABILITIES: Record<string, AbilityDefinition[]> = {
     { name: 'Stronghold (Level 10)', description: 'May establish a stronghold similar to a fighter\'s.', minLevel: 10 },
   ],
   'Magic User': [
-    { name: 'Arcane Spellcasting', description: 'Depend entirely on spell books. Int determines spell-learning chance (35%–90%) and spells learnable per level.' },
+    { name: 'Arcane Spellcasting', description: 'Depend entirely on spell books. Int determines spell acquisition via a Spell Acquisition Table (minimum and maximum spells per spell level).' },
     { name: 'Eldritch Craft (Level 7+)', description: 'Create potions, scribe scrolls, recharge rods/staves/wands.', minLevel: 7 },
     { name: 'Eldritch Power (Level 12+)', description: 'Attempt creation of other magical items.', minLevel: 12 },
     { name: 'Tower or Keep (Level 11)', description: 'May establish a tower or keep.', minLevel: 11 },
@@ -385,6 +415,18 @@ export function getOsricMaxSpellLevel(className: string, charLevel: number): num
     if (charLevel >= thresholds[i]) max = i + 1;
   }
   return max;
+}
+
+// Returns spell acquisition details: chance to understand spell & max spells per level based on INT
+export function getOsricSpellAcquisition(intelligence: number): { chance: number; maxPerLevel: number } {
+  if (intelligence >= 19) return { chance: 90, maxPerLevel: 22 };
+  if (intelligence >= 18) return { chance: 85, maxPerLevel: 18 };
+  if (intelligence >= 17) return { chance: 75, maxPerLevel: 14 };
+  if (intelligence >= 15) return { chance: 65, maxPerLevel: 11 };
+  if (intelligence >= 13) return { chance: 55, maxPerLevel: 9 };
+  if (intelligence >= 11) return { chance: 45, maxPerLevel: 7 };
+  if (intelligence >= 9)  return { chance: 35, maxPerLevel: 3 };
+  return { chance: 35, maxPerLevel: 3 };
 }
 
 // Returns all spells available to a class up to their accessible spell level
@@ -589,7 +631,22 @@ export class OsricRules implements GameSystemRules {
     return getConHpModifier(con);
   }
 
+  getMaxCharacterLevel(race: string, className: string): number {
+    return RACE_CLASS_LEVEL_CAPS[race]?.[className] ?? 999;
+  }
+
+  getFighterAttackProgression(level: number): { attacks: number; perRounds: number } {
+    // Return progression for level, defaulting to level 13+ rules if level > 13
+    return FIGHTER_ATTACK_PROGRESSION[level] ?? FIGHTER_ATTACK_PROGRESSION[13]!;
+  }
+
   getToHitMechanic(): ToHitMechanic { return { type: 'd20-over-ac' }; }
+
+  // AC affects whether you are hit, not how much damage you take.
+  getArmorModel(): ArmorModel { return { kind: 'ac' }; }
+
+  // Side-based initiative: one d6 per side each round; the lower roll acts first.
+  getInitiativeMechanic(): InitiativeMechanic { return { kind: 'side-d6' }; }
 
   getD20AttackBonus(stats: CharacterStats, isRanged: boolean): number {
     return isRanged ? getDexMissileModifier(stats.DEX) : getStrToHitBonus(stats.STR);

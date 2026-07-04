@@ -99,7 +99,23 @@ Governs mental acuity and problem-solving. Essential for magic users and illusio
 | 18 | 7 |
 | 19 | 8 |
 
-Magic users and illusionists also consult Intelligence for their chance to understand spells (35% at Int 9, up to 90% at Int 19) and the number of spells per level they may learn (4–6 minimum/maximum at low Int, 10–22 at high Int).
+Magic users and illusionists also consult Intelligence for spell acquisition. Intelligence determines both the chance to understand a spell and the maximum number of spells per spell level that can be known.
+
+**Spell Acquisition Table:**
+
+| Intelligence Score | Chance to Understand Spell | Maximum Spells Per Spell Level |
+|--------------------|-----------------------------|--------------------------------|
+| 9–10 | 35% | 3 |
+| 11–12 | 45% | 7 |
+| 13–14 | 55% | 9 |
+| 15–16 | 65% | 11 |
+| 17 | 75% | 14 |
+| 18 | 85% | 18 |
+| 19 | 90% | 22 |
+
+**Learning Extra Spells:** If a caster finds an arcane spell scroll while adventuring—or obtains another magic-user's spell book—they must cast *read magic* on the spell (use your Int score to understand it). You must then *read* the actual spell, taking twice the normal casting time. You retain the option to "drag" it from your understanding; if you fail, the spell is lost from memory.
+
+To learn a magical ink spell, a caster must make a magical ink special in a town or city. Research and experimentation costs 10 gp per level of the spell. As soon as the casting is finished, the spell emerges from the caster's text, and at the same time the spell disappears from the source text. Once the spell is copied, the original text remains but the spell is lost.
 
 ---
 
@@ -199,7 +215,7 @@ Diminutive gem-lovers with innate magic resistance; lifespan exceeds 650 years. 
 Born of human and elven parents; typically adopt the culture of whichever society raised them.
 
 - **Magic Resistance:** 30% immunity to sleep and charm spells
-- **Secret Door Detection:** 2-in-6 chance (secret), 3-in-6 (concealed); auto-notice within 10 ft (1-in-6)
+- **Secret Door Detection:** 2-in-6 chance (secret), 3-in-6 (concealed)
 - **Infravision:** 60 ft
 - **Movement:** 120 ft
 - **Languages:** Common, Elven, Gnoll, Gnome, Goblin, Halfling, Hobgoblin, Orcish
@@ -217,7 +233,7 @@ Most resemble full orcs; some develop enough human traits for character advancem
 - **Movement:** 120 ft
 - **Languages:** Common and Orcish; max 2 additional languages regardless of Int
 - **Permitted Classes:** Assassin, Cleric, Fighter, Thief, Cleric/Fighter, Cleric/Thief, Cleric/Assassin, Fighter/Thief
-- **Level Caps:** Assassin 15, Cleric 4, Fighter 10, Thief 6–7 (by Dex)
+- **Level Caps:** Assassin 15, Cleric 4, Fighter 10, Thief 7
 - **Ability Score Ranges:** Str 6–18, Dex 3–17, Con 13–19, Int 3–17, Wis 3–14, Cha 3–12
 - **Starting Age:** Cleric 20+1d4, Fighter 13+1d4, Thief 20+2d4
 
@@ -269,7 +285,7 @@ Stealthy killers trained in espionage, disguise, poison, and murder. Must begin 
 - **Assassination:** With surprise, 50% instant kill + 5% per assassin level − 5% per two victim levels
 - **Backstab:** +4 to hit from behind; ×2 damage (levels 1–4), ×3 (5–8), ×4 (9–12)
 - **Disguise:** 2% daily base chance for observers to detect
-- **Thief Abilities:** Equivalent to two levels below current rank
+- **Thief Abilities:** Available from level 1 onward, granting assassins access to core thief skills (Climb Walls, Find/Disarm Traps, Hide in Shadows, Move Quietly, Open Locks, Pick Pockets, Read Languages)
 - **Level 9+:** High-Int (15+) assassins can learn special languages
 - **Level 12+:** Can cast from arcane scrolls
 
@@ -328,7 +344,7 @@ Melee combat specialists; among the most durable classes.
 - **Proficiencies:** 4 initial + 1 per 2 levels; non-proficiency penalty -2
 
 **Key Abilities:**
-- **Bonus Attacks:** Levels 1–6: 1 attack/round; Levels 7–12: 3 attacks/2 rounds; Levels 13+: 2 attacks/round
+- **Bonus Attacks:** Advance on a per-level basis rather than banded ranges. **TODO: Exact per-level progression requires verification against the OSRIC 3.0 Fighter table.**
 - **Fighting Unskilled Opponents:** vs. creatures with <1d8 HP, one attack per character level
 - **Weapon Specialization (Optional):** +1 to hit, +2 damage, bonus attacks; double specialization: +3 to hit, +3 damage
 
@@ -365,7 +381,7 @@ Rare arcane spellcasters who, despite combat weakness, possess "the most powerfu
 - **Weapons:** Daggers, darts, oil, staffs only
 - **Proficiencies:** 1 initially + 1 per 5 levels
 
-**Spellcasting:** Depend entirely on spell books. Int determines the chance to understand a spell (35%–90%) and spells learnable per level (4–22 depending on Int). Receive one bonus spell of their highest available level when gaining a level.
+**Spellcasting:** Depend entirely on spell books. Int determines spell acquisition via a Spell Acquisition Table (minimum and maximum spells per level). **TODO: Exact table and starting spell system require verification against the OSRIC 3.0 rulebook.** Receive bonus spells of their highest available level when gaining a level.
 
 **Key Abilities:**
 - **Level 7 (Eldritch Craft):** Create potions, scribe scrolls, recharge rods/staves/wands
@@ -714,8 +730,8 @@ If character level vastly exceeds monster level, proportionally reduce XP to pre
 ### Training to Advance
 
 After accumulating sufficient XP, characters must train before the level becomes official:
-- **Cost:** ~1,500 gp per level
-- **Duration:** 1d4 weeks (GM may adjust based on player performance)
+- **Cost:** 1,500 gp per level
+- **Duration:** 1d3 weeks per level
 
 **Optional Rule — Random Variable:** 50/50 chance the XP requirement increases or decreases; roll d20 × target level for the adjustment. *(Note: this optional rule is excluded from Open Game Content.)*
 
@@ -786,7 +802,7 @@ Before rolling initiative:
 
 ### 3. Initiative
 
-Both sides roll d6. The roll indicates which segment the **other** party acts in — higher roll wins. Segments 7–10 are reserved for spell completion or held actions.
+Both sides roll d6. The party with the **lower** roll acts first. Segments 7–10 are reserved for spell completion or held actions.
 
 **Missile Bonus:** Characters with missile weapons add their missile attack bonus to the initiative roll.
 
@@ -894,7 +910,7 @@ Most monsters use fighter attack matrices. Convert monster HD to equivalent leve
 | 18+1 to 19 | 20 |
 | 19+1 or higher | 21 |
 
-**Saving Throws:** Use the same conversion. GMs may use other class matrices when appropriate (e.g., a goblin shaman saves as a cleric). For multiple class abilities, use the most favorable table.
+**Saving Throws:** OSRIC 3.0 changed saving throw resolution: monsters now use dedicated monster saving throw tables rather than adopting character-class matrices. The HD-to-equivalent-level conversion (table above) still applies to monster attack rolls. GMs should consult the OSRIC 3.0 rulebook for the specific monster saving throw table. **TODO: Exact monster saving throw table requires verification against the OSRIC 3.0 rulebook.**
 
 **Spell Casting Level:** Monsters cast spells at their Hit Dice level unless specified otherwise.
 

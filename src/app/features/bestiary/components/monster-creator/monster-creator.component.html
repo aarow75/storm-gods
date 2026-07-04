@@ -59,8 +59,8 @@
             <input id="hitPoints" type="number" [(ngModel)]="form.hitPoints" min="1" />
           </div>
           <div class="form-group">
-            <label for="armor">Armor Points</label>
-            <input id="armor" type="number" [(ngModel)]="form.armor" min="0" />
+            <label for="armor">{{ armorFieldLabel }}</label>
+            <input id="armor" type="number" [(ngModel)]="form.armor" [min]="armorFieldMin" />
           </div>
           <div class="form-group">
             <label for="armorDescription">Armor Type</label>

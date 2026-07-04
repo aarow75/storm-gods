@@ -429,7 +429,7 @@ export const MONSTERS: Monster[] = [
     description: 'A dungeon staple: a rat the size of a large cat. They swarm in numbers, spread disease, and are found in nearly every dungeon level.',
     stats: { STR: 4, CON: 8, SIZ: 4, DEX: 13, INT: 2, POW: 6, CHA: 2 },
     hitPoints: 4,
-    armor: 0,
+    armor: 7,
     armorDescription: 'none',
     movement: 9,
     attacks: [
@@ -482,7 +482,7 @@ export const MONSTERS: Monster[] = [
     description: 'A classic 8+3 HD undead of immense power. OSRIC vampires drain two levels per hit, regenerate rapidly, and can only be permanently destroyed by sunlight or beheading.',
     stats: { STR: 20, CON: 0, SIZ: 13, DEX: 14, INT: 16, POW: 18, CHA: 13 },
     hitPoints: 38,
-    armor: 0,
+    armor: 1,
     armorDescription: 'requires +1 or better weapon to hit',
     movement: 12,
     attacks: [
@@ -547,7 +547,7 @@ export const MONSTERS: Monster[] = [
     description: 'The brown bear of the OSRIC wilderness: 5+5 HD with a devastating bear hug. Among the most dangerous natural predators a low-level party will face.',
     stats: { STR: 19, CON: 16, SIZ: 20, DEX: 13, INT: 3, POW: 9, CHA: 5 },
     hitPoints: 22,
-    armor: 2,
+    armor: 6,
     armorDescription: 'thick hide',
     movement: 12,
     attacks: [
@@ -610,7 +610,7 @@ export const MONSTERS: Monster[] = [
     description: 'A 4+4 HD predator used as a mount by goblins and orcs. Tougher than any natural wolf and instilled with pack cunning.',
     stats: { STR: 17, CON: 14, SIZ: 20, DEX: 15, INT: 5, POW: 8, CHA: 5 },
     hitPoints: 22,
-    armor: 1,
+    armor: 6,
     armorDescription: 'thick hide',
     movement: 15,
     attacks: [
@@ -779,7 +779,7 @@ export const MONSTERS: Monster[] = [
     description: 'The standard light riding horse of the OSRIC world. Faster than a warhorse, it is the mount of choice for scouts, merchants, and adventurers.',
     stats: { STR: 16, CON: 14, SIZ: 18, DEX: 13, INT: 5, POW: 8, CHA: 6 },
     hitPoints: 15,
-    armor: 0,
+    armor: 7,
     armorDescription: 'none',
     movement: 16,
     attacks: [
@@ -1127,7 +1127,7 @@ export const MONSTERS: Monster[] = [
     description: 'A 1st–2nd level Fighter or Thief class outlaw. A classic random encounter on OSRIC roads — dangerous in numbers to low-level parties.',
     stats: { STR: 13, CON: 11, SIZ: 12, DEX: 12, INT: 9, POW: 9, CHA: 8 },
     hitPoints: 8,
-    armor: 2,
+    armor: 7,
     armorDescription: 'leather armor + shield',
     movement: 9,
     attacks: [
@@ -1226,7 +1226,7 @@ export const MONSTERS: Monster[] = [
     description: 'An OSRIC Ranger NPC at 3rd–5th level: a hardened wilderness fighter with tracking, stealth, and knowledge of monstrous creatures. More durable than a simple bandit due to multiple class HD.',
     stats: { STR: 14, CON: 14, SIZ: 13, DEX: 14, INT: 12, POW: 11, CHA: 10 },
     hitPoints: 20,
-    armor: 3,
+    armor: 5,
     armorDescription: 'chain mail',
     movement: 9,
     attacks: [
@@ -1325,7 +1325,7 @@ export const MONSTERS: Monster[] = [
     description: 'A 0-level or 1st-level Fighter serving as city watch. Follows orders from the local lord or guild; reinforcements arrive quickly if an alarm is sounded.',
     stats: { STR: 13, CON: 12, SIZ: 12, DEX: 11, INT: 9, POW: 9, CHA: 9 },
     hitPoints: 8,
-    armor: 3,
+    armor: 4,
     armorDescription: 'chain mail + shield',
     movement: 9,
     attacks: [
@@ -1546,7 +1546,7 @@ export const MONSTERS: Monster[] = [
     description: 'Small, malicious humanoids that dwell in caves and ruins. Goblins are cowardly alone but dangerous in swarms, and delight in ambushes and traps.',
     stats: { STR: 8, CON: 9, SIZ: 7, DEX: 13, INT: 9, POW: 8, CHA: 5 },
     hitPoints: 5,
-    armor: 1,
+    armor: 6,
     armorDescription: 'leather scraps',
     movement: 9,
     attacks: [
@@ -1565,7 +1565,7 @@ export const MONSTERS: Monster[] = [
     description: 'Brutish and warlike humanoids that live to fight. Orcs organize into aggressive warbands and raid settlements for food, slaves, and sport.',
     stats: { STR: 16, CON: 14, SIZ: 15, DEX: 10, INT: 9, POW: 9, CHA: 5 },
     hitPoints: 8,
-    armor: 3,
+    armor: 6,
     armorDescription: 'hide armor + shield',
     movement: 9,
     attacks: [
@@ -1585,7 +1585,7 @@ export const MONSTERS: Monster[] = [
     description: 'Tiny reptilian humanoids known for their cunning traps and tunnel warrens. Kobolds worship dragons and see themselves as their humble servants.',
     stats: { STR: 7, CON: 8, SIZ: 6, DEX: 14, INT: 9, POW: 8, CHA: 6 },
     hitPoints: 4,
-    armor: 1,
+    armor: 7,
     armorDescription: 'natural scales',
     movement: 9,
     attacks: [
@@ -1604,7 +1604,7 @@ export const MONSTERS: Monster[] = [
     description: 'Large, stealthy goblinoids that move with surprising silence for their size. Bugbears are natural ambush predators who lead goblin tribes through terror.',
     stats: { STR: 17, CON: 15, SIZ: 18, DEX: 14, INT: 10, POW: 10, CHA: 6 },
     hitPoints: 14,
-    armor: 3,
+    armor: 5,
     armorDescription: 'hide armor',
     movement: 9,
     attacks: [
@@ -1624,7 +1624,7 @@ export const MONSTERS: Monster[] = [
     description: 'A large, dim-witted brute that bullies smaller creatures and hoards treasure. Ogres are powerful fighters who rely on raw strength and thick hides.',
     stats: { STR: 22, CON: 18, SIZ: 28, DEX: 8, INT: 6, POW: 9, CHA: 5 },
     hitPoints: 22,
-    armor: 4,
+    armor: 5,
     armorDescription: 'tough hide + scraps of armor',
     movement: 9,
     attacks: [
@@ -1663,7 +1663,7 @@ export const MONSTERS: Monster[] = [
     description: 'A foul undead that feeds on corpses and living flesh. Ghouls are known for their paralyzing touch, which leaves victims helpless before the pack descends.',
     stats: { STR: 15, CON: 14, SIZ: 13, DEX: 15, INT: 7, POW: 12, CHA: 2 },
     hitPoints: 14,
-    armor: 0,
+    armor: 6,
     armorDescription: 'none',
     movement: 9,
     attacks: [
@@ -1682,7 +1682,7 @@ export const MONSTERS: Monster[] = [
     description: 'A malevolent undead spirit that drains the life force from the living. Wraiths are the remnants of evil beings who refused to pass on after death.',
     stats: { STR: 10, CON: 16, SIZ: 9, DEX: 16, INT: 13, POW: 18, CHA: 4 },
     hitPoints: 16,
-    armor: 0,
+    armor: 4,
     armorDescription: 'none (incorporeal)',
     movement: 14,
     attacks: [
@@ -1719,7 +1719,7 @@ export const MONSTERS: Monster[] = [
     description: 'A massive bear adapted to cave life. Cave bears are among the most feared natural predators and are sometimes used as guardians by dungeon-dwelling humanoids.',
     stats: { STR: 25, CON: 20, SIZ: 30, DEX: 10, INT: 3, POW: 10, CHA: 6 },
     hitPoints: 25,
-    armor: 3,
+    armor: 6,
     armorDescription: 'thick fur and hide',
     movement: 12,
     attacks: [
@@ -1739,7 +1739,7 @@ export const MONSTERS: Monster[] = [
     description: 'A large predatory spider that spins thick webs to capture prey. Several varieties exist; most are venomous and capable of paralyzing or killing their victims.',
     stats: { STR: 16, CON: 14, SIZ: 18, DEX: 14, INT: 2, POW: 9, CHA: 2 },
     hitPoints: 14,
-    armor: 2,
+    armor: 4,
     armorDescription: 'chitin carapace',
     movement: 12,
     attacks: [
@@ -1759,7 +1759,7 @@ export const MONSTERS: Monster[] = [
     description: 'Even a young red dragon is an apex predator and one of the most dangerous creatures adventurers can face. Greedy, arrogant, and intelligent, red dragons hoard wealth and destroy those who challenge them.',
     stats: { STR: 28, CON: 22, SIZ: 36, DEX: 10, INT: 16, POW: 18, CHA: 12 },
     hitPoints: 30,
-    armor: 8,
+    armor: -1,
     armorDescription: 'red dragon scales',
     movement: 14,
     attacks: [

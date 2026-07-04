@@ -236,6 +236,17 @@ export class MonsterCreatorComponent implements OnInit {
     return getRulesForSystem(this.form.gameSystem).usesStrikeRank();
   }
 
+  get armorFieldLabel(): string {
+    const kind = getRulesForSystem(this.form.gameSystem).getArmorModel?.()?.kind;
+    if (kind === 'ac') return 'Armor Class (descending, 10 = unarmored)';
+    if (kind === 'save') return 'Armor Save (%)';
+    return 'Armor Points';
+  }
+
+  get armorFieldMin(): number {
+    return getRulesForSystem(this.form.gameSystem).getArmorModel?.()?.kind === 'ac' ? -2 : 0;
+  }
+
   get showHitLocations(): boolean {
     return getRulesForSystem(this.form.gameSystem).usesHitLocations();
   }

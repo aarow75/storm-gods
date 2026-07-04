@@ -6,9 +6,31 @@ export type BackgroundForBonuses = Pick<CharacterBackground, 'occupation' | 'hom
 
 export type ToHitMechanic =
   | { type: 'percentile' }                       // d100 ≤ skill (RuneQuest)
+  | { type: 'percentile-under-stat';             // d100 ≤ raw stat (Mothership Combat check)
+      stat: keyof CharacterStats; statLabel: string }
   | { type: 'd20-under' }                        // d20 ≤ skill (Dragonbane)
   | { type: 'd20-over-ac' }                      // d20 + bonus ≥ (20 − defenderAC) (OSRIC)
-  | { type: 'd6-pool'; difficulty: number };     // d6 + skill ≥ difficulty (Kal-Arath)
+  | { type: '2d6-over'; target: number;          // 2d6 + stat ≥ target (Kal-Arath)
+      meleeStat: keyof CharacterStats; meleeStatLabel: string;
+      missileStat: keyof CharacterStats; missileStatLabel: string };
+      // double-6 = critical hit (damage dice doubled); double-1 = fumble (automatic miss)
+
+/** How armor mitigates damage in the combat tracker. */
+export type ArmorModel =
+  | { kind: 'locations' }             // RuneQuest: per-hit-location AP subtracted from damage
+  | { kind: 'flat' }                  // Dragonbane / Kal-Arath: armor points subtracted from damage
+  | { kind: 'ac' }                    // OSRIC: AC affects to-hit only; no damage reduction
+  | { kind: 'save'; skill: string };  // Mothership: defender rolls d100 ≤ (skill + armor points); opposed vs attack roll
+
+/** How turn order is determined in the combat tracker. */
+export type InitiativeMechanic =
+  | { kind: 'strike-rank' }                            // RuneQuest: computed SR, ascending; no roll
+  | { kind: 'side-d6' }                                // OSRIC: one d6 per side each round; higher side acts first
+  | { kind: 'd6-plus-stat'; stat: keyof CharacterStats; statLabel: string; target: number }
+      // Kal-Arath: each character d6 + stat; ≥ target acts before enemies; natural 1 always loses initiative
+  | { kind: 'unique-cards'; deckSize: number }         // Dragonbane: unique card 1..deckSize each; low acts first
+  | { kind: 'stat-check'; stat: keyof CharacterStats; statLabel: string };
+      // Mothership: each character d100 ≤ stat; pass acts before enemies, fail after
 
 export interface StatDefinition {
   key: keyof CharacterStats;
@@ -148,9 +170,10 @@ export interface GameSystemRules {
   /**
    * Describes the to-hit mechanic used in combat.
    * - 'percentile': d100 roll-under a skill % (RuneQuest default)
+   * - 'percentile-under-stat': d100 roll-under a raw stat (Mothership Combat check)
    * - 'd20-under':  d20 roll-under a skill value (Dragonbane)
    * - 'd20-over-ac': d20 + bonus ≥ (20 − defenderAC) (OSRIC)
-   * - 'd6-pool':    d6 + skill ≥ difficulty (Kal-Arath)
+   * - '2d6-over':   2d6 + stat ≥ target; double-6 crit, double-1 fumble (Kal-Arath)
    * Omit (or return undefined) to default to 'percentile'.
    */
   getToHitMechanic?(): ToHitMechanic;
@@ -160,6 +183,12 @@ export interface GameSystemRules {
    * isRanged = true for missile weapons (DEX-based), false for melee (STR-based).
    */
   getD20AttackBonus?(stats: CharacterStats, isRanged: boolean): number;
+
+  /** How armor mitigates damage. Default when omitted: usesHitLocations() ? 'locations' : 'flat'. */
+  getArmorModel?(): ArmorModel;
+
+  /** Turn-order mechanic. Default when omitted: { kind: 'strike-rank' }. */
+  getInitiativeMechanic?(): InitiativeMechanic;
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -180,6 +209,9 @@ export interface GameSystemRules {
 
   /** CON modifier applied per hit die roll. Returns 0 for systems that don't use this. */
   getConHpModifier?(con: number): number;
+
+  /** Maximum level for a race/class combination. Returns unlimited (999) if no restriction. OSRIC-specific. */
+  getMaxCharacterLevel?(race: string, className: string): number;
 
   // ── Character Sheet Display ───────────────────────────────────────────────
 

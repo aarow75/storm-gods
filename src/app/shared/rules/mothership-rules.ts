@@ -3,7 +3,8 @@ import { WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield } from
 import { DerivedStats, EquipmentItem, Resources } from '@characters/models/character.model';
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
-  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic
+  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic,
+  ArmorModel, InitiativeMechanic
 } from './game-system-rules.interface';
 
 // Mothership uses 4 primary stats rolled with 6d10.
@@ -275,7 +276,20 @@ export class MothershipRules implements GameSystemRules {
   getMagicSystemType(): string { return 'mothership'; }
   getCurrencyLabel(): string { return 'Cr'; }
 
-  getToHitMechanic(): ToHitMechanic { return { type: 'percentile' }; }
+  // Combat check: d100 ≤ Combat stat (CMB is stored in stats.DEX).
+  getToHitMechanic(): ToHitMechanic {
+    return { type: 'percentile-under-stat', stat: 'DEX', statLabel: 'Combat' };
+  }
+
+  // Armor is not damage reduction: the defender rolls an Armor Save
+  // (d100 ≤ Armor Save skill + armor type % bonus), opposed vs the attack roll.
+  getArmorModel(): ArmorModel { return { kind: 'save', skill: 'Armor Save' }; }
+
+  // Initiative: each character makes a Speed check (d100 ≤ SPD, stored in stats.CON);
+  // pass acts before enemies, fail acts after.
+  getInitiativeMechanic(): InitiativeMechanic {
+    return { kind: 'stat-check', stat: 'CON', statLabel: 'Speed' };
+  }
 
   usesStrikeRank(): boolean { return false; }
   getInitiativeLabel(): string { return 'Speed Check'; }

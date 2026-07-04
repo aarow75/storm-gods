@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { MONSTERS } from '@bestiary/constants/monsters.constants';
 import { ENCOUNTER_TABLES, EncounterTable } from '@bestiary/constants/encounters.constants';
 import { HIT_LOCATION_TEMPLATES } from '@bestiary/constants/hit-location-templates.constants';
-import { Monster, calculateMonsterHitLocations } from '@bestiary/models/monster.model';
+import { Monster, calculateMonsterHitLocations, getMonsterCombatArmor } from '@bestiary/models/monster.model';
 import { CombatParticipant, CombatMonster } from '@shared/models/combat-participant.model';
 import { getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
 import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
@@ -138,6 +138,13 @@ export class BestiaryComponent implements OnInit {
     return gameSystem ? `system-${gameSystem}` : '';
   }
 
+  getArmorLabel(monster: Monster): string {
+    const kind = getRulesForSystem(monster.gameSystem).getArmorModel?.()?.kind;
+    if (kind === 'ac') return 'AC:';
+    if (kind === 'save') return 'Armor Save:';
+    return 'Armor:';
+  }
+
   getCategoryLabel(category: string): string {
     const labels: Record<string, string> = {
       'humanoid': 'Humanoid',
@@ -217,8 +224,11 @@ export class BestiaryComponent implements OnInit {
       id: `bestiary-${bestiaryMonster.id}-${this.combatService.generateId().substring(0, 8)}`,
       name: bestiaryMonster.name,
       hitPoints: bestiaryMonster.hitPoints,
-      strikeRank: getSizeModifier(bestiaryMonster.stats.SIZ) + getDexterityModifier(bestiaryMonster.stats.DEX),
-      armor: bestiaryMonster.armor,
+      // The SIZ/DEX strike-rank formula is RuneQuest-only; other systems roll initiative
+      strikeRank: this.gameSystemService.getRules().usesStrikeRank()
+        ? getSizeModifier(bestiaryMonster.stats.SIZ) + getDexterityModifier(bestiaryMonster.stats.DEX)
+        : 0,
+      armor: getMonsterCombatArmor(bestiaryMonster, this.gameSystemService.gameSystem()),
       weapons: bestiaryMonster.attacks.map(a => ({
         name: a.name,
         damage: a.damage,

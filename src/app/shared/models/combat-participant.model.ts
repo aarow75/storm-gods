@@ -40,4 +40,10 @@ export interface CombatParticipant {
   isSurprised?: boolean;
   effectiveSR?: number;
   movementRate?: number;
+  // Rolled initiative (non-strike-rank systems). Absent on strike-rank systems
+  // and in saves created before initiative rolls existed; sorting falls back
+  // to effectiveSR/finalStrikeRank when initiativeOrder is missing.
+  initiativeRoll?: number;
+  initiativeOrder?: number;    // normalized ascending sort key; lower acts first
+  initiativeDisplay?: string;  // human-readable result, e.g. "Card 3", "d6+2 = 5"
 }

@@ -6,7 +6,7 @@ import { CombatParticipant, Monster, DEFAULT_MONSTERS } from '@combat/models/com
 import { Character } from '@characters/models/character.model';
 import { calculateHitLocations, getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
 import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
-import { Monster as BestiaryMonster } from '@bestiary/models/monster.model';
+import { Monster as BestiaryMonster, getMonsterCombatArmor } from '@bestiary/models/monster.model';
 import { MONSTERS as BESTIARY_MONSTERS } from '@bestiary/constants/monsters.constants';
 import { CharacterService } from '@characters/services/character.service';
 import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
@@ -17,7 +17,7 @@ import { CharacterUpdateService } from '@characters/services/character-update.se
 import { GameSystemService } from '@shared/services/game-system.service';
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { parseDamageWithConditions } from '@combat/utils/damage-parser';
-import { ToHitMechanic } from '@shared/rules/game-system-rules.interface';
+import { ToHitMechanic, ArmorModel, InitiativeMechanic } from '@shared/rules/game-system-rules.interface';
 
 
 interface PendingAttack {
@@ -77,6 +77,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   get rules() { return this.gameSystemService.getRules(); }
   get hitLocationsOrder() { return this.rules.getHitLocationsDisplayOrder(); }
+  private get armorModel(): ArmorModel {
+    return this.rules.getArmorModel?.() ?? (this.rules.usesHitLocations() ? { kind: 'locations' } : { kind: 'flat' });
+  }
+  private get initiativeMechanic(): InitiativeMechanic {
+    return this.rules.getInitiativeMechanic?.() ?? { kind: 'strike-rank' };
+  }
+  get usesRolledInitiative(): boolean { return this.initiativeMechanic.kind !== 'strike-rank'; }
 
   private saveTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly SAVE_DELAY_MS = 300;
@@ -361,8 +368,11 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       id: `bestiary-${bm.id}`,
       name: bm.name,
       hitPoints: bm.hitPoints,
-      strikeRank: getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX),
-      armor: bm.armor,
+      // The SIZ/DEX strike-rank formula is RuneQuest-only; other systems roll initiative
+      strikeRank: this.rules.usesStrikeRank()
+        ? getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX)
+        : 0,
+      armor: getMonsterCombatArmor(bm, this.gameSystemService.gameSystem()),
       weapons: bm.attacks.map(a => ({
         name: a.name,
         damage: a.damage,
@@ -495,6 +505,9 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   startTurns(): void {
     this.currentRound++;
     this.combatService.setCurrentRound(this.currentRound);
+    // Rolled-initiative systems re-roll every round (OSRIC per-side d6,
+    // Dragonbane card redraw, Kal-Arath d6+AGI, Mothership Speed check)
+    if (this.usesRolledInitiative) this.rollInitiative();
     this.actedThisRound.clear();
     this.turnsStarted = true;
     this.strikeRankLocked = true;  // Lock SR once turns begin
@@ -537,6 +550,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.actedThisRound.clear();
     this.turnsStarted = false;
     this.strikeRankLocked = false;
+    this.combatService.clearInitiative(this.combatParticipants);
+    this.debouncedSaveCombat();
   }
 
   isActiveTurn(participantId: string): boolean {
@@ -654,6 +669,27 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     return participant.effectiveSR ?? participant.finalStrikeRank;
   }
 
+  // ── Rolled initiative (non-strike-rank systems) ──────────────────────────
+
+  getInitiativeDisplay(participant: CombatParticipant): string {
+    if (!this.usesRolledInitiative) return String(this.getDisplaySR(participant));
+    return participant.initiativeDisplay ?? '—';
+  }
+
+  isSrModified(participant: CombatParticipant): boolean {
+    return !this.usesRolledInitiative && this.getDisplaySR(participant) !== participant.finalStrikeRank;
+  }
+
+  rollInitiative(): void {
+    if (!this.usesRolledInitiative) return;
+    const lines = this.combatService.rollInitiativeForRound(
+      this.combatParticipants, this.initiativeMechanic, p => this.getParticipantStats(p)
+    );
+    lines.forEach(l => this.combatLogService.addEntry(l));
+    this.combatParticipants = this.combatService.sortParticipantsByStrikeRank(this.combatParticipants);
+    this.saveCombat();
+  }
+
   // ── Attack flow ──────────────────────────────────────────────────────────
 
   rollWeaponDamage(participant: CombatParticipant): void {
@@ -766,22 +802,29 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // ── Kal-Arath: d6 + skill ≥ difficulty ──────────────────────────────────
-    if (mechanic.type === 'd6-pool') {
+    // ── Kal-Arath: 2d6 + stat ≥ target (double-6 crit, double-1 fumble) ──────
+    if (mechanic.type === '2d6-over') {
       const attackSkill = this.getEffectiveAttackSkill(participant);
-      const d6Roll = Math.floor(Math.random() * 6) + 1;
-      const total = d6Roll + attackSkill;
-      const isHit = total >= mechanic.difficulty;
-      const skillStr = attackSkill > 0 ? `+${attackSkill}` : '';
-      const hitDisplay = `d6: ${d6Roll}${skillStr}=${total} vs ${mechanic.difficulty}+`;
+      const d1 = Math.floor(Math.random() * 6) + 1;
+      const d2 = Math.floor(Math.random() * 6) + 1;
+      const total = d1 + d2 + attackSkill;
+      const isCrit = d1 === 6 && d2 === 6;
+      const isFumble = d1 === 1 && d2 === 1;
+      const isHit = isCrit || (!isFumble && total >= mechanic.target);
+      const isRanged = this.weaponList.find(w => w.name === participant.selectedWeapon)?.isMissile ?? false;
+      const statLabel = isRanged ? mechanic.missileStatLabel : mechanic.meleeStatLabel;
+      const skillStr = attackSkill > 0 ? `+${attackSkill}` : attackSkill < 0 ? `${attackSkill}` : '';
+      const hitDisplay = `2d6+${statLabel}: ${d1}+${d2}${skillStr} = ${total} vs ${mechanic.target}+`;
 
       if (!isHit) {
+        const missTag = isFumble ? '[FUMBLE]' : '[MISS]';
+        const missText = isFumble ? 'double 1s — automatic miss!' : 'missed!';
         this.combatLogService.addEntry(
-          `[MISS] ${participant.name} → ${opponent.name}: missed! (${hitDisplay})`
+          `${missTag} ${participant.name} → ${opponent.name}: ${missText} (${hitDisplay})`
         );
         this.lastMissResult.set(participant.id, {
-          targetName: opponent.name, attackRoll: d6Roll, attackSkill,
-          display: hitDisplay
+          targetName: opponent.name, attackRoll: d1 + d2, attackSkill,
+          display: isFumble ? `${hitDisplay} — FUMBLE (double 1s)` : hitDisplay
         });
         this.saveCombat();
         this.focusNextRollButton();
@@ -789,13 +832,21 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // Critical success doubles the damage dice: roll the notation twice.
       const result = this.diceService.rollDiceNotation(damage);
+      let rawDamage = result.total;
+      let damageBreakdown = result.breakdown;
+      if (isCrit) {
+        const critRoll = this.diceService.rollDiceNotation(damage);
+        rawDamage += critRoll.total;
+        damageBreakdown = `${result.breakdown} + ${critRoll.breakdown} (CRIT — dice doubled)`;
+      }
       this.pendingAttack = {
         attacker: participant, defender: opponent,
-        rawDamage: result.total, damageBreakdown: result.breakdown,
+        rawDamage, damageBreakdown,
         hitLocation: undefined, locationRoll: undefined,
-        attackRoll: d6Roll, attackSkill,
-        attackRollDisplay: `${hitDisplay} — hit!`,
+        attackRoll: d1 + d2, attackSkill,
+        attackRollDisplay: isCrit ? `${hitDisplay} — CRITICAL HIT (double 6s)!` : `${hitDisplay} — hit!`,
       };
       this.endTurn(participant.id);
       this.lastMissResult.delete(participant.id);
@@ -804,7 +855,8 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // ── RuneQuest: d100 roll-under skill percentage ───────────────────────────
+    // ── Percentile: d100 roll-under (RuneQuest skill %, Mothership Combat stat) ──
+    const checkLabel = mechanic.type === 'percentile-under-stat' ? `${mechanic.statLabel} check: ` : '';
     const attackSkill = this.getEffectiveAttackSkill(participant);
     const attackRoll = Math.floor(Math.random() * 100) + 1;
 
@@ -812,7 +864,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const totalBonus = this.getTotalAttackBonus(participant);
       const baseSkill = attackSkill - totalBonus;
       const bonusParts = totalBonus > 0 ? `+${totalBonus} bonus` : '';
-      const hitDisplay = `rolled ${attackRoll} vs ${attackSkill}%` +
+      const hitDisplay = `${checkLabel}rolled ${attackRoll} vs ${attackSkill}%` +
         (bonusParts ? ` (${baseSkill} skill ${bonusParts})` : '');
       this.combatLogService.addEntry(
         `[MISS] ${participant.name} → ${opponent.name}: attack failed! (${hitDisplay})`
@@ -836,7 +888,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       rawDamage: result.total, damageBreakdown: result.breakdown,
       hitLocation: location, locationRoll: roll,
       attackRoll, attackSkill,
-      attackRollDisplay: `Rolled ${attackRoll} vs ${attackSkill}%`,
+      attackRollDisplay: `${checkLabel}Rolled ${attackRoll} vs ${attackSkill}%`,
     };
     this.endTurn(participant.id);
     this.lastMissResult.delete(participant.id);
@@ -846,13 +898,31 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   resolveNoDefense(): void {
     if (!this.pendingAttack) return;
-    const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll, attackRollDisplay } = this.pendingAttack;
+    const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll, attackRoll, attackRollDisplay } = this.pendingAttack;
     const locationInfo = hitLocation ? ` (d20:${locationRoll} = ${hitLocation})` : '';
 
-    const armor = this.getArmorValue(defender, hitLocation);
-    const finalDamage = Math.max(0, rawDamage - armor);
-
-    const armorInfo = armor > 0 ? ` - ${armor} armor = ${finalDamage}` : ` = ${finalDamage}`;
+    let armor: number;
+    let finalDamage: number;
+    let armorInfo: string;
+    if (this.armorModel.kind === 'save') {
+      // Mothership: opposed check. The attack already succeeded; the defender rolls
+      // an Armor Save. If the save also succeeds, the higher successful roll wins.
+      const target = this.getArmorSaveTarget(defender);
+      const saveRoll = Math.floor(Math.random() * 100) + 1;
+      const saveSucceeded = saveRoll <= target;
+      const attackWins = !saveSucceeded || attackRoll > saveRoll;
+      finalDamage = attackWins ? rawDamage : 0;
+      armor = attackWins ? 0 : rawDamage;
+      armorInfo = ` — Armor Save: ${saveRoll} vs ${target}%` + (
+        !saveSucceeded ? ` — failed, ${rawDamage}`
+        : attackWins ? ` — saved, but attack ${attackRoll} beats save ${saveRoll} — ${rawDamage}`
+        : ' — SAVED, 0'
+      );
+    } else {
+      armor = this.getArmorValue(defender, hitLocation);
+      finalDamage = Math.max(0, rawDamage - armor);
+      armorInfo = armor > 0 ? ` - ${armor} armor = ${finalDamage}` : ` = ${finalDamage}`;
+    }
     const toHitInfo = attackRollDisplay ? ` [${attackRollDisplay}]` : '';
     this.combatLogService.addEntry(
       `[ATTACK] ${attacker.name} → ${defender.name}${toHitInfo}${locationInfo}: ${rawDamage} (${damageBreakdown})${armorInfo} damage`
@@ -1164,19 +1234,28 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   getEffectiveAttackSkill(participant: CombatParticipant): number {
     let baseSkill = 0;
+    const mechanic = this.rules.getToHitMechanic?.() ?? { type: 'percentile' as const };
     if (participant.type === 'character') {
-      const character = this.characters.find(c => c.id === participant.characterId);
-      if (character) {
-        const weapon = character.weapons.find(w => w.name === participant.selectedWeapon);
-        baseSkill = weapon ? (character.skills[weapon.skill] || 0) : 0;
+      if (mechanic.type === 'percentile-under-stat') {
+        // Mothership: roll under the raw Combat stat, not a weapon skill
+        baseSkill = this.getParticipantStats(participant)?.[mechanic.stat] ?? 0;
+      } else if (mechanic.type === '2d6-over') {
+        // Kal-Arath: stat bonus by weapon type (STR melee / AGI missile)
+        const isRanged = this.weaponList.find(w => w.name === participant.selectedWeapon)?.isMissile ?? false;
+        baseSkill = this.getParticipantStats(participant)?.[isRanged ? mechanic.missileStat : mechanic.meleeStat] ?? 0;
+      } else {
+        const character = this.characters.find(c => c.id === participant.characterId);
+        if (character) {
+          const weapon = character.weapons.find(w => w.name === participant.selectedWeapon);
+          baseSkill = weapon ? (character.skills[weapon.skill] || 0) : 0;
+        }
       }
     } else {
       // Default monster skill calibrated to ~50% hit rate per mechanic
-      const mechanic = this.rules.getToHitMechanic?.() ?? { type: 'percentile' as const };
       baseSkill = mechanic.type === 'd20-under' ? 10   // d20 ≤ 10 = 50%
-                : mechanic.type === 'd6-pool'   ? 0    // d6+0 ≥ 4 = 50%
+                : mechanic.type === '2d6-over'  ? 1    // 2d6+1 ≥ 8 ≈ 58%
                 : mechanic.type === 'd20-over-ac' ? 0  // OSRIC: not used (uses AC directly)
-                : 50;                                   // percentile: 50%
+                : 50;                                   // percentile variants: 50%
     }
     return baseSkill + this.getTotalAttackBonus(participant);
   }
@@ -1433,15 +1512,30 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         return values.length ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : 0;
       }
 
-      // OSRIC: AC affects whether you're hit, not how much damage is taken
-      if (this.gameSystemService.gameSystem() === 'osric') return 0;
+      // AC affects the to-hit roll; a save is rolled in resolveNoDefense — neither reduces damage here
+      if (this.armorModel.kind === 'ac' || this.armorModel.kind === 'save') return 0;
       // Dragonbane, Kal-Arath: flat Armor Rating subtracts from damage
       const armorDef = this.rules.getArmorTypes().find(a => a.name === character.armorType);
       return armorDef?.points ?? 0;
     }
-    // OSRIC: monster.armor is AC, not damage reduction
-    if (this.gameSystemService.gameSystem() === 'osric') return 0;
+    // Monsters: armor is AC (OSRIC) or an Armor Save target (Mothership), not damage reduction
+    if (this.armorModel.kind === 'ac' || this.armorModel.kind === 'save') return 0;
     return this.monsters.find(m => m.id === participant.monsterId)?.armor || 0;
+  }
+
+  /** Mothership: percentage target for the defender's Armor Save. */
+  getArmorSaveTarget(participant: CombatParticipant): number {
+    const model = this.armorModel;
+    if (model.kind !== 'save') return 0;
+    if (participant.type === 'character') {
+      const character = this.characters.find(c => c.id === participant.characterId);
+      if (!character) return 0;
+      const skillPct = character.skills[model.skill] ?? 0;
+      const armorPts = this.rules.getArmorTypes().find(a => a.name === character.armorType)?.points ?? 0;
+      return skillPct + armorPts;
+    }
+    // Monster armor value doubles as its Armor Save %
+    return this.monsters.find(m => m.id === participant.monsterId)?.armor ?? 0;
   }
 
   getDefenderAC(participant: CombatParticipant): number {
@@ -1539,11 +1633,20 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         const avg = Math.round(values.reduce((s, v) => s + v, 0) / values.length);
         return min === max ? `${min}` : `${min}-${max} (avg: ${avg})`;
       }
-      if (this.gameSystemService.gameSystem() === 'osric' && character.derivedStats.armorClass !== undefined) {
+      if (this.armorModel.kind === 'ac' && character.derivedStats.armorClass !== undefined) {
         return `AC: ${character.derivedStats.armorClass}`;
+      }
+      if (this.armorModel.kind === 'save') {
+        return `Save: ${this.getArmorSaveTarget(participant)}%`;
       }
       const armorDef = this.rules.getArmorTypes().find(a => a.name === character.armorType);
       return armorDef ? `${armorDef.points}` : '0';
+    }
+    if (this.armorModel.kind === 'save') {
+      return `Save: ${this.getArmorSaveTarget(participant)}%`;
+    }
+    if (this.armorModel.kind === 'ac') {
+      return `AC: ${this.getDefenderAC(participant)}`;
     }
     return this.monsters.find(m => m.id === participant.monsterId)?.armor.toString() || '0';
   }

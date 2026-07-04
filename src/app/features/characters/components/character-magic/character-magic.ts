@@ -1,10 +1,10 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Magic, Spell, RuneSpell, DragonbaneSpell } from '@characters/models/character.model';
+import { Magic, Spell, RuneSpell, DragonbaneSpell, CharacterStats } from '@characters/models/character.model';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { KA_PACT_SPELLS, KA_DOOMS } from '@shared/rules/kal-arath-rules';
-import { getOsricAvailableSpells } from '@shared/rules/osric-rules';
+import { getOsricAvailableSpells, getOsricSpellAcquisition } from '@shared/rules/osric-rules';
 import { DB_SPELLS_BY_DISCIPLINE } from '@shared/rules/dragonbane-rules';
 
 const DB_DISCIPLINES = ['Animism', 'Elementalism', 'General Magic', 'Mentalism'] as const;
@@ -21,6 +21,7 @@ export class CharacterMagic {
   @Input() pact: string = '';
   @Input() occupation: string = '';
   @Input() level: number = 1;
+  @Input() stats: CharacterStats = { STR: 10, CON: 10, SIZ: 0, DEX: 10, INT: 10, POW: 10, CHA: 10 };
   @Input() spiritMagicSpells!: string[];
   @Input() sorcerySpells!: string[];
   @Input() getAvailableRuneSpells!: () => RuneSpell[];
@@ -127,6 +128,24 @@ export class CharacterMagic {
 
   onRemoveSpell(type: 'spiritMagic' | 'sorcery', index: number): void {
     this.removeSpell.emit({type, index});
+  }
+
+  get osricSpellAcquisition(): { chance: number; maxPerLevel: number } {
+    return getOsricSpellAcquisition(this.stats.INT);
+  }
+
+  osricSpellCountByLevel(spellLevel: number): number {
+    return this.magic.sorcery.filter(s => s.points === spellLevel).length;
+  }
+
+  osricSpellAcquisitionHint(): string {
+    const { chance, maxPerLevel } = this.osricSpellAcquisition;
+    return `INT ${this.stats.INT}: ${chance}% chance to understand spells, max ${maxPerLevel} spells per spell level`;
+  }
+
+  osricSpellLevelExceeded(spellLevel: number): boolean {
+    const count = this.osricSpellCountByLevel(spellLevel);
+    return count > this.osricSpellAcquisition.maxPerLevel;
   }
 
   onAddRuneSpell(): void {

@@ -117,11 +117,12 @@ export class DiceService {
         continue;
       }
 
-      // Check if it's a dice roll (e.g., "1d6", "2d8", "d6", "d6/a", "d6/d")
-      const diceMatch = segment.match(/^(\d*)d(\d+)(\/[ad])?$/);
+      // Check if it's a dice roll (e.g., "1d6", "2d8", "d6", "d6/a", "d6/d", "1d%")
+      const diceMatch = segment.match(/^(\d*)d(\d+|%)(\/[ad])?$/);
       if (diceMatch) {
         const count = diceMatch[1] ? parseInt(diceMatch[1]) : 1;
-        const sides = parseInt(diceMatch[2]);
+        const sidesToken = diceMatch[2]; // '%' = percentile die (d100)
+        const sides = sidesToken === '%' ? 100 : parseInt(sidesToken);
         const modifier = diceMatch[3]; // '/a' = advantage, '/d' = disadvantage
 
         let roll: number;
@@ -130,15 +131,15 @@ export class DiceService {
           const r1 = this.rollDice(count, sides);
           const r2 = this.rollDice(count, sides);
           roll = Math.max(r1, r2);
-          label = `${count}d${sides}/a[${r1},${r2}→${roll}]`;
+          label = `${count}d${sidesToken}/a[${r1},${r2}→${roll}]`;
         } else if (modifier === '/d') {
           const r1 = this.rollDice(count, sides);
           const r2 = this.rollDice(count, sides);
           roll = Math.min(r1, r2);
-          label = `${count}d${sides}/d[${r1},${r2}→${roll}]`;
+          label = `${count}d${sidesToken}/d[${r1},${r2}→${roll}]`;
         } else {
           roll = this.rollDice(count, sides);
-          label = `${count}d${sides}[${roll}]`;
+          label = `${count}d${sidesToken}[${roll}]`;
         }
 
         // Check if this should be subtracted

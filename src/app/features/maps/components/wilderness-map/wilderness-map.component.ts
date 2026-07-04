@@ -27,7 +27,7 @@ import { GameSystemService } from '@shared/services/game-system.service';
 import { ExportService } from '@shared/services/export.service';
 import { Character } from '@characters/models/character.model';
 import { CombatParticipant, CombatMonster } from '@shared/models/combat-participant.model';
-import { Monster as BestiaryMonster } from '@bestiary/models/monster.model';
+import { Monster as BestiaryMonster, getMonsterCombatArmor } from '@bestiary/models/monster.model';
 import { getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
 import { dijkstra } from '@maps/utils/hex-pathfinding';
 
@@ -398,8 +398,11 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
       id: `bestiary-${bm.id}`,
       name: bm.name,
       hitPoints: bm.hitPoints,
-      strikeRank: getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX),
-      armor: bm.armor,
+      // The SIZ/DEX strike-rank formula is RuneQuest-only; other systems roll initiative
+      strikeRank: this.gameSystemService.getRules().usesStrikeRank()
+        ? getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX)
+        : 0,
+      armor: getMonsterCombatArmor(bm, this.gameSystemService.gameSystem()),
       weapons: bm.attacks.map((a) => ({
         name: a.name,
         damage: a.damage,

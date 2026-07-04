@@ -5,7 +5,8 @@ import { DerivedStats, EquipmentItem, WEAPON_SKILLS, Resources } from '@characte
 import { DB_SKILLS, DB_MAGIC_SKILLS, DB_SKILL_BY_ATTR, DB_SKILL_CATEGORIES } from '@characters/constants/skill-categories.constants';
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
-  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic
+  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic,
+  ArmorModel, InitiativeMechanic
 } from './game-system-rules.interface';
 
 // Six conditions from the rulebook, each tied to an attribute. Suffering a condition
@@ -334,6 +335,12 @@ export class DragonbaneRules implements GameSystemRules {
   }
 
   getToHitMechanic(): ToHitMechanic { return { type: 'd20-under' }; }
+
+  // Armor Rating subtracts flat from damage.
+  getArmorModel(): ArmorModel { return { kind: 'flat' }; }
+
+  // Initiative cards: each participant draws a unique card 1-10; low acts first.
+  getInitiativeMechanic(): InitiativeMechanic { return { kind: 'unique-cards', deckSize: 10 }; }
 
   usesStrikeRank(): boolean { return false; }
   getInitiativeLabel(): string { return 'Initiative'; }

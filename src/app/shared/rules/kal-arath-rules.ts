@@ -5,7 +5,8 @@ import { DerivedStats, EquipmentItem, Resources } from '@characters/models/chara
 import { KA_WARRIOR_SKILLS, KA_ROGUE_SKILLS, KA_MYSTIC_SKILLS, KA_EXPLORER_SKILLS, KA_SKILL_CATEGORIES } from '@characters/constants/skill-categories.constants';
 import {
   GameSystemRules, StatDefinition, ConditionDefinition,
-  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic
+  SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic,
+  ArmorModel, InitiativeMechanic
 } from './game-system-rules.interface';
 import { Weapon, Shield } from './game-rules';
 
@@ -246,8 +247,23 @@ export class KalArathRules implements GameSystemRules {
     return 'S';
   }
 
-  // Roll d6 + skill ≥ 4 to hit. Skill starts at 0 (50% base chance) and improves with advancement.
-  getToHitMechanic(): ToHitMechanic { return { type: 'd6-pool', difficulty: 4 }; }
+  // Attack: 2d6 + STR (melee) or AGI (missile) vs 8. Double-6 crits (damage dice
+  // doubled); double-1 fumbles (automatic miss). AGI is stored in stats.DEX.
+  getToHitMechanic(): ToHitMechanic {
+    return {
+      type: '2d6-over', target: 8,
+      meleeStat: 'STR', meleeStatLabel: 'STR',
+      missileStat: 'DEX', missileStatLabel: 'AGI',
+    };
+  }
+
+  // Armor is flat damage reduction (Light -1 / Medium -2 / Heavy -3).
+  getArmorModel(): ArmorModel { return { kind: 'flat' }; }
+
+  // Initiative: each character rolls d6 + AGI; 4+ acts before enemies, natural 1 always loses.
+  getInitiativeMechanic(): InitiativeMechanic {
+    return { kind: 'd6-plus-stat', stat: 'DEX', statLabel: 'AGI', target: 4 };
+  }
 
   usesStrikeRank(): boolean { return false; }
   getInitiativeLabel(): string { return 'Initiative'; }

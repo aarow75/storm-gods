@@ -136,7 +136,7 @@
               </div>
             }
             <div class="combat-stat">
-              <span class="stat-label">Armor:</span>
+              <span class="stat-label">{{ getArmorLabel(monster) }}</span>
               <span class="stat-value">{{ monster.armor }}</span>
               @if (monster.armorDescription) {
                 <span class="description-text">({{ monster.armorDescription }})</span>

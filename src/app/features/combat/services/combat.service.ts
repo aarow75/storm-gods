@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 import { CombatParticipant, Monster, CombatLogEntry, CombatMapState, CombatMapTemplate } from '@combat/models/combat.model';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { DiceService } from '@shared/services/dice.service';
+import { InitiativeMechanic } from '@shared/rules/game-system-rules.interface';
+import { CharacterStats } from '@shared/models/character-stats.model';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +15,7 @@ export class CombatService {
   private readonly MAP_KEY = 'combat-map';
   private readonly MAP_TEMPLATES_KEY = 'combat-map-templates';
 
-  constructor(private gameSystemService: GameSystemService) {}
+  constructor(private gameSystemService: GameSystemService, private diceService: DiceService) {}
 
   private key(base: string): string {
     return `${this.gameSystemService.gameSystem()}-${base}`;
@@ -103,7 +106,110 @@ export class CombatService {
   }
 
   sortParticipantsByStrikeRank(participants: CombatParticipant[]): CombatParticipant[] {
-    return [...participants].sort((a, b) => (a.effectiveSR ?? a.finalStrikeRank) - (b.effectiveSR ?? b.finalStrikeRank));
+    // Rolled initiative wins when present; strike-rank systems never set it.
+    return [...participants].sort((a, b) =>
+      (a.initiativeOrder ?? a.effectiveSR ?? a.finalStrikeRank) -
+      (b.initiativeOrder ?? b.effectiveSR ?? b.finalStrikeRank));
+  }
+
+  /**
+   * Roll initiative for one round using the system's mechanic, mutating
+   * initiativeRoll/initiativeOrder/initiativeDisplay on each participant.
+   * initiativeOrder is a normalized ascending key: lower acts first.
+   * Returns combat-log lines describing the rolls.
+   */
+  rollInitiativeForRound(
+    participants: CombatParticipant[],
+    mechanic: InitiativeMechanic,
+    statsFor: (p: CombatParticipant) => CharacterStats | null
+  ): string[] {
+    if (mechanic.kind === 'strike-rank' || participants.length === 0) return [];
+    const lines: string[] = [];
+
+    if (mechanic.kind === 'side-d6') {
+      const partyRoll = this.diceService.rollD6();
+      const enemyRoll = this.diceService.rollD6();
+      for (const p of participants) {
+        const roll = p.type === 'character' ? partyRoll : enemyRoll;
+        p.initiativeRoll = roll;
+        p.initiativeOrder = roll;
+        p.initiativeDisplay = `d6: ${roll}`;
+      }
+      const outcome = partyRoll < enemyRoll ? 'party acts first'
+                    : enemyRoll < partyRoll ? 'enemies act first'
+                    : 'simultaneous!';
+      lines.push(`[INITIATIVE] Party d6: ${partyRoll} vs Enemies d6: ${enemyRoll} — ${outcome}`);
+      return lines;
+    }
+
+    if (mechanic.kind === 'd6-plus-stat') {
+      for (const p of participants) {
+        if (p.type !== 'character') {
+          p.initiativeRoll = undefined;
+          p.initiativeOrder = 1;
+          p.initiativeDisplay = '—';
+          continue;
+        }
+        const die = this.diceService.rollD6();
+        const bonus = statsFor(p)?.[mechanic.stat] ?? 0;
+        const total = die + bonus;
+        const losesOnNatural1 = die === 1;
+        const actsFirst = !losesOnNatural1 && total >= mechanic.target;
+        p.initiativeRoll = total;
+        p.initiativeOrder = actsFirst ? 0 : 2;
+        const bonusStr = bonus ? (bonus > 0 ? `+${bonus}` : `${bonus}`) : '';
+        const outcome = losesOnNatural1 ? 'natural 1 — loses initiative'
+                      : `${die}${bonusStr} = ${total} — ${actsFirst ? 'before enemies' : 'after enemies'}`;
+        p.initiativeDisplay = `d6+${mechanic.statLabel}: ${outcome}`;
+        lines.push(`[INITIATIVE] ${p.name} d6+${mechanic.statLabel}: ${outcome}`);
+      }
+      return lines;
+    }
+
+    if (mechanic.kind === 'unique-cards') {
+      const deck = Array.from(
+        { length: Math.max(mechanic.deckSize, participants.length) },
+        (_, i) => i + 1
+      );
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+      participants.forEach((p, i) => {
+        p.initiativeRoll = deck[i];
+        p.initiativeOrder = deck[i];
+        p.initiativeDisplay = `Card ${deck[i]}`;
+        lines.push(`[INITIATIVE] ${p.name} draws card ${deck[i]}`);
+      });
+      return lines;
+    }
+
+    // stat-check (Mothership Speed check)
+    for (const p of participants) {
+      if (p.type !== 'character') {
+        p.initiativeRoll = undefined;
+        p.initiativeOrder = 1;
+        p.initiativeDisplay = '—';
+        continue;
+      }
+      const roll = this.diceService.rollPercentile();
+      const target = statsFor(p)?.[mechanic.stat] ?? 0;
+      const passed = roll <= target;
+      p.initiativeRoll = roll;
+      p.initiativeOrder = passed ? 0 : 2;
+      p.initiativeDisplay = `${mechanic.statLabel}: ${roll} vs ${target} — ${passed ? 'pass' : 'fail'}`;
+      lines.push(`[INITIATIVE] ${p.name} ${mechanic.statLabel} check: ${roll} vs ${target} — ${passed ? 'acts before enemies' : 'acts after enemies'}`);
+    }
+    return lines;
+  }
+
+  /** Remove rolled initiative so stale values never leak into sorting. */
+  clearInitiative(participants: CombatParticipant[]): void {
+    for (const p of participants) {
+      delete p.initiativeRoll;
+      delete p.initiativeOrder;
+      delete p.initiativeDisplay;
+    }
   }
 
   generateId(): string {

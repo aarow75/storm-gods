@@ -24,6 +24,12 @@
         </div>
         <div class="turn-actions">
           @if (!turnsStarted) {
+            @if (usesRolledInitiative) {
+              <button class="btn btn-turn-start" (click)="rollInitiative()" [disabled]="!!pendingAttack"
+                      [title]="'Roll ' + rules.getInitiativeLabel() + ' for all participants'">
+                ⚄ Roll Initiative
+              </button>
+            }
             <button class="btn btn-turn-start" (click)="startTurns()" [disabled]="!!pendingAttack">
               ▶ Start Turns
             </button>
@@ -47,7 +53,7 @@
                 <span class="turn-queue-chip"
                       [class.chip-acting]="isActiveTurn(p.id)"
                       [class.chip-acted]="hasActed(p.id)"
-                      [title]="p.name + ' (SR ' + getDisplaySR(p) + ')'">
+                      [title]="p.name + ' (' + rules.getInitiativeLabel() + ' ' + getInitiativeDisplay(p) + ')'">
                   {{ p.name }}
                   @if (hasActed(p.id)) {<span class="chip-check">✓</span>}
                   @if (isActiveTurn(p.id)) {<span class="chip-now">NOW</span>}
@@ -186,8 +192,8 @@
                 </div>
                 <div class="collapsed-stat">
                   <span class="stat-label">{{ rules.getInitiativeLabel() }}:</span>
-                  <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
-                    {{ getDisplaySR(participant) }}
+                  <strong [class.sr-modified]="isSrModified(participant)">
+                    {{ getInitiativeDisplay(participant) }}
                   </strong>
                 </div>
                 @if (rules.usesStrikeRank() && participant.movementThisRound !== undefined && participant.movementThisRound > 0) {
@@ -221,8 +227,8 @@
             <div class="participant-and-hit-locations">
             <div class="participant-details">
               <div class="detail-group">
-                <label>{{ rules.getInitiativeLabel() }}: <strong [class.sr-modified]="getDisplaySR(participant) !== participant.finalStrikeRank">
-                  {{ getDisplaySR(participant) }}
+                <label>{{ rules.getInitiativeLabel() }}: <strong [class.sr-modified]="isSrModified(participant)">
+                  {{ getInitiativeDisplay(participant) }}
                 </strong></label>
                 @if (rules.usesStrikeRank()) {
                   <span class="sr-breakdown">
