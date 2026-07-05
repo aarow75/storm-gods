@@ -875,3 +875,9 @@ h5 {
   background: var(--color-bg-indigo-light);
   border-radius: var(--border-radius-lg);
 }
+
+.section-heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2xl);
+}

@@ -2,6 +2,8 @@
   <div class="header">
     <h2>Combat Tracker</h2>
     <div class="header-actions">
+      <app-doc-ref-link kind="weapons" />
+      <app-doc-ref-link kind="spells" />
       <button class="btn btn-primary" (click)="openAddParticipantModal()">Add Participant</button>
       <a [routerLink]="gameSystemService.link('combat-map')" class="btn btn-secondary">Combat Map</a>
       <a [routerLink]="gameSystemService.link('monster-creator')" class="btn btn-secondary">Monster Creator</a>

@@ -18,6 +18,7 @@ import { GameSystemService } from '@shared/services/game-system.service';
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { parseDamageWithConditions } from '@combat/utils/damage-parser';
 import { ToHitMechanic, ArmorModel, InitiativeMechanic } from '@shared/rules/game-system-rules.interface';
+import { DocRefLinkComponent } from '@shared/components/doc-ref-link/doc-ref-link.component';
 
 
 interface PendingAttack {
@@ -36,7 +37,7 @@ interface PendingAttack {
 @Component({
   standalone: true,
   selector: 'app-combat-tracker',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DocRefLinkComponent],
   templateUrl: './combat-tracker.component.html',
   styleUrl: './combat-tracker.component.css'
 })

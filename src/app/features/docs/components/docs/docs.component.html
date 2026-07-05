@@ -49,6 +49,31 @@
         </div>
       }
 
+      @if (referenceDocuments().length > 0) {
+        <div class="docs-nav-group">
+          <div>
+            <button (click)="toggleReferenceMenu()" class="docs-nav-link docs-nav-toggle">
+              <span class="docs-nav-icon">&#x1F4DC;</span>
+              <span>Reference</span>
+              <span class="toggle-icon" [class.expanded]="isExpandedReference">▼</span>
+            </button>
+            @if (isExpandedReference) {
+              <ul class="docs-nav-submenu">
+                @for (doc of referenceDocuments(); track doc.filename) {
+                  <li>
+                    <a [routerLink]="gameSystemService.link('docs', 'page')" [queryParams]="{ file: doc.filename, tocMaxLevel: doc.tocMaxLevel }"
+                       routerLinkActive="active" class="docs-nav-sublink">
+                      @if (doc.icon) { {{ doc.icon }} }
+                      {{ doc.name }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      }
+
       @if (customDocuments().length > 0) {
         <div class="docs-nav-group">
           <div>

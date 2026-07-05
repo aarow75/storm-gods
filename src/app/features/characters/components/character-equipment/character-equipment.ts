@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EquipmentItem, EquipmentDefinition, Resources } from '@characters/models/character.model';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { DocRefLinkComponent } from '@shared/components/doc-ref-link/doc-ref-link.component';
 
 @Component({
   standalone: true,
   selector: 'app-character-equipment',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DocRefLinkComponent],
   templateUrl: './character-equipment.html',
   styleUrl: './character-equipment.css',
 })

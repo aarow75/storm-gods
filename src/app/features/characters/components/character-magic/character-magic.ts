@@ -6,13 +6,14 @@ import { GameSystemService } from '@shared/services/game-system.service';
 import { KA_PACT_SPELLS, KA_DOOMS } from '@shared/rules/kal-arath-rules';
 import { getOsricAvailableSpells, getOsricSpellAcquisition } from '@shared/rules/osric-rules';
 import { DB_SPELLS_BY_DISCIPLINE } from '@shared/rules/dragonbane-rules';
+import { DocRefLinkComponent } from '@shared/components/doc-ref-link/doc-ref-link.component';
 
 const DB_DISCIPLINES = ['Animism', 'Elementalism', 'General Magic', 'Mentalism'] as const;
 
 @Component({
   standalone: true,
   selector: 'app-character-magic',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DocRefLinkComponent],
   templateUrl: './character-magic.html',
   styleUrl: './character-magic.css',
 })

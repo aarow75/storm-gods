@@ -54,6 +54,37 @@ const CUSTOM_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   ],
 };
 
+// Spell/weapon/equipment reference pages describing the items offered in the
+// app's dropdowns. Filenames must match REFERENCE_DOCS in
+// @shared/constants/reference-docs.constants.ts (used by in-app reference links).
+const REFERENCE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
+  runequest: [
+    { filename: 'RuneQuest-Spells.md', name: 'Spells', icon: '🪄', tocMaxLevel: 2 },
+    { filename: 'RuneQuest-Weapons.md', name: 'Weapons & Armor', icon: '⚔️' },
+    { filename: 'RuneQuest-Equipment.md', name: 'Equipment', icon: '🎒' },
+  ],
+  dragonbane: [
+    { filename: 'Dragonbane-Spells.md', name: 'Spells', icon: '🪄', tocMaxLevel: 2 },
+    { filename: 'Dragonbane-Weapons.md', name: 'Weapons & Armor', icon: '⚔️' },
+    { filename: 'Dragonbane-Equipment.md', name: 'Equipment', icon: '🎒' },
+  ],
+  'kal-arath': [
+    { filename: 'Kal-Arath-Spells.md', name: 'Spells', icon: '🪄', tocMaxLevel: 2 },
+    { filename: 'Kal-Arath-Weapons.md', name: 'Weapons & Armor', icon: '⚔️' },
+    { filename: 'Kal-Arath-Equipment.md', name: 'Equipment', icon: '🎒' },
+  ],
+  osric: [
+    { filename: 'OSRIC-Spells.md', name: 'Spells', icon: '🪄', tocMaxLevel: 2 },
+    { filename: 'OSRIC-Weapons.md', name: 'Weapons & Armor', icon: '⚔️' },
+    { filename: 'OSRIC-Equipment.md', name: 'Equipment', icon: '🎒' },
+  ],
+  mothership: [
+    { filename: 'Mothership-Weapons.md', name: 'Weapons & Armor', icon: '⚔️' },
+    { filename: 'Mothership-Equipment.md', name: 'Equipment', icon: '🎒' },
+  ],
+  brp: [],
+};
+
 const ADVENTURE_DOCUMENTS: Record<GameSystem, CustomDocument[]> = {
   runequest: [],
   dragonbane: [],
@@ -83,9 +114,11 @@ export class DocsComponent {
   rulesDocuments = computed(() => RULES_DOCUMENTS[this.gameSystemService.gameSystem()]);
   customDocuments = computed(() => CUSTOM_DOCUMENTS[this.gameSystemService.gameSystem()]);
   adventureDocuments = computed(() => ADVENTURE_DOCUMENTS[this.gameSystemService.gameSystem()]);
+  referenceDocuments = computed(() => REFERENCE_DOCUMENTS[this.gameSystemService.gameSystem()]);
   isExpandedRules = true;
   isExpandedCustom = true;
   isExpandedAdventures = true;
+  isExpandedReference = true;
 
   constructor(
     public gameSystemService: GameSystemService
@@ -101,5 +134,9 @@ export class DocsComponent {
 
   toggleAdventuresMenu() {
     this.isExpandedAdventures = !this.isExpandedAdventures;
+  }
+
+  toggleReferenceMenu() {
+    this.isExpandedReference = !this.isExpandedReference;
   }
 }

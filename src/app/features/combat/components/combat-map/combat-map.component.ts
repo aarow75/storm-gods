@@ -13,11 +13,12 @@ import { CombatLogService } from '@combat/services/combat-log.service';
 import { DiceService } from '@shared/services/dice.service';
 import { CharacterService } from '@characters/services/character.service';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { DocRefLinkComponent } from '@shared/components/doc-ref-link/doc-ref-link.component';
 
 @Component({
   standalone: true,
   selector: 'app-combat-map',
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule, DocRefLinkComponent],
   templateUrl: './combat-map.component.html',
   styleUrl: './combat-map.component.css'
 })

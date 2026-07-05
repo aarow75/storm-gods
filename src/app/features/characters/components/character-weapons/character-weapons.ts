@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { Weapon, WeaponDefinition, CharacterStats, Resources } from '@characters/models/character.model';
 import { getRulesForSystem } from '@shared/rules/game-system-rules.factory';
 import { GameSystem } from '@shared/models/game-system.model';
+import { DocRefLinkComponent } from '@shared/components/doc-ref-link/doc-ref-link.component';
 
 @Component({
   standalone: true,
   selector: 'app-character-weapons',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DocRefLinkComponent],
   templateUrl: './character-weapons.html',
   styleUrl: './character-weapons.css',
 })
