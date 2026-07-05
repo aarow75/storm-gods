@@ -37,9 +37,9 @@
     <label>Encumbrance:</label>
     <input type="text" [value]="derivedStats.totalEncumbrance + ' / ' + derivedStats.maxEncumbrance" readonly />
   </div>
-  @if (isRuneQuest) {
+  @if (usesStrikeRank) {
   <div class="form-group">
-    <label>Strike Rank:</label>
+    <label>{{ initiativeLabel }}:</label>
     <input type="number" [(ngModel)]="derivedStats.strikeRank" name="strikeRank" readonly />
     <span class="stat-breakdown">{{ strikeRankBreakdown }}</span>
   </div>

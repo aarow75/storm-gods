@@ -34,6 +34,7 @@ export class BestiaryComponent implements OnInit {
     { value: 'kal-arath', label: 'Kal-Arath' },
     { value: 'osric', label: 'OSRIC' },
     { value: 'mothership', label: 'Mothership' },
+    { value: 'brp', label: 'Basic Role-Playing' },
   ];
   searchQuery = signal('');
   categoryFilter = signal<string>('all');

@@ -25,7 +25,7 @@ export type ArmorModel =
 /** How turn order is determined in the combat tracker. */
 export type InitiativeMechanic =
   | { kind: 'strike-rank' }                            // RuneQuest: computed SR, ascending; no roll
-  | { kind: 'side-d6' }                                // OSRIC: one d6 per side each round; higher side acts first
+  | { kind: 'side-d6' }                                // OSRIC: one d6 per side each round; lower side acts first
   | { kind: 'd6-plus-stat'; stat: keyof CharacterStats; statLabel: string; target: number }
       // Kal-Arath: each character d6 + stat; ≥ target acts before enemies; natural 1 always loses initiative
   | { kind: 'unique-cards'; deckSize: number }         // Dragonbane: unique card 1..deckSize each; low acts first
@@ -57,6 +57,10 @@ export interface SkillCategory {
 export interface ArmorTypeDefinition {
   name: string;
   points: number;
+  /** Weight in lbs counted toward encumbrance (OSRIC). */
+  encumbrance?: number;
+  /** Movement cap imposed by the armor regardless of weight, in app movement units (ft/10, OSRIC). */
+  maxMove?: number;
 }
 
 export interface AbilityDefinition {
@@ -69,6 +73,7 @@ export interface ClassHitDie {
   sides: number;
   maxHdLevel: number;      // last level that earns a full hit die
   bonusPerLevel: number;   // flat HP added per level above maxHdLevel
+  firstLevelDice?: number; // dice rolled at level 1 (OSRIC Ranger rolls 2); default 1
 }
 
 export interface GameSystemRules {
@@ -144,7 +149,12 @@ export interface GameSystemRules {
   /** d20 roll → hit location name. Null for systems without hit locations. */
   getHitLocationRollTable(): Record<number, string> | null;
 
-  /** Location name → wound effect. Null for systems without hit location effects. */
+  /**
+   * Location name → wound effect when the location reaches 0 HP. `fatal: true` means the
+   * character dies when the location's damage reaches −(location max), i.e. double its HP
+   * (RQ2: head/chest/abdomen destroyed = instant death; limbs are severed instead).
+   * Null for systems without hit location effects.
+   */
   getLocationEffects(): Record<string, { label: string; fatal: boolean }> | null;
 
   /** Ordered list of hit location names for the character sheet grid. Empty for systems without locations. */
@@ -163,6 +173,18 @@ export interface GameSystemRules {
 
   /** Whether this system uses skill-based parry and dodge rolls for defense resolution. False hides those options in the combat tracker. */
   usesParryDodge(): boolean;
+
+  /**
+   * Which defensive reactions the combat tracker offers when usesParryDodge() is true.
+   * Default when omitted: { parry: true, dodge: true }. Kal-Arath is dodge-only.
+   */
+  getDefenseOptions?(): { parry: boolean; dodge: boolean };
+
+  /** Skill name used for dodge rolls. Default when omitted: 'Dodge' (Dragonbane uses 'Evade (AGL)'). */
+  getDodgeSkillName?(): string;
+
+  /** Whether damage dice explode (Kal-Arath: a die showing its maximum is rerolled once and added). */
+  damageDiceExplode?(): boolean;
 
   /** Whether parry weapons/shields take HP damage when blocking. False hides weapon HP tracking in the combat tracker. */
   usesWeaponHP(): boolean;
@@ -183,6 +205,19 @@ export interface GameSystemRules {
    * isRanged = true for missile weapons (DEX-based), false for melee (STR-based).
    */
   getD20AttackBonus?(stats: CharacterStats, isRanged: boolean): number;
+
+  /**
+   * For the 'd20-over-ac' mechanic: d20 target number before subtracting the
+   * defender's AC (THAC0). Characters pass className/level; monsters pass
+   * monsterMaxHp (hit dice derived from HP). Default 20 when omitted.
+   */
+  getD20AttackTarget?(attacker: { className?: string; level?: number; monsterMaxHp?: number }): number;
+
+  /**
+   * Melee attacks allowed for a combatant this round (multi-attack progressions).
+   * Systems that omit this allow unlimited melee attacks within the turn structure.
+   */
+  getMeleeAttacksPerRound?(className: string | undefined, level: number, roundNumber: number): number;
 
   /** How armor mitigates damage. Default when omitted: usesHitLocations() ? 'locations' : 'flat'. */
   getArmorModel?(): ArmorModel;
@@ -207,8 +242,12 @@ export interface GameSystemRules {
   /** Hit die info for a class (for level-up HP rolling). Returns null for systems without class-based HD. */
   getClassHitDie?(className: string): ClassHitDie | null;
 
-  /** CON modifier applied per hit die roll. Returns 0 for systems that don't use this. */
-  getConHpModifier?(con: number): number;
+  /**
+   * CON modifier applied per hit die roll. Returns 0 for systems that don't use this.
+   * OSRIC: bonuses above +2 (CON 17+) apply only to fighters, paladins, and rangers,
+   * so pass the class name when known.
+   */
+  getConHpModifier?(con: number, className?: string): number;
 
   /** Maximum level for a race/class combination. Returns unlimited (999) if no restriction. OSRIC-specific. */
   getMaxCharacterLevel?(race: string, className: string): number;
@@ -223,6 +262,13 @@ export interface GameSystemRules {
 
   /** Whether stat-rolling buttons are shown on the character form. */
   canRollStats(): boolean;
+
+  /**
+   * Roll a starting value for one stat using this system's generation method
+   * (RQ2: 3d6 / 2d6+6 for SIZ+INT; Dragonbane: 4d6 drop lowest; Mothership: 6d10).
+   * Omit to fall back to the app-wide default roll.
+   */
+  rollStat?(stat: keyof CharacterStats): number;
 
   /** Whether this system tracks magic points (or WP equivalent). */
   showsMagicPoints(): boolean;

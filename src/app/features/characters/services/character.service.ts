@@ -69,6 +69,19 @@ export class CharacterService implements DataPort {
       char.background = { ...DEFAULT_BACKGROUND };
     }
 
+    // Migrate legacy RQ shield names to the RQ2 Small/Medium/Large shields
+    const legacyShieldNames: Record<string, string> = {
+      'Target Shield': 'Small Shield',
+      'Heater Shield': 'Medium Shield',
+      'Kite Shield': 'Large Shield',
+      'Tower Shield': 'Large Shield',
+    };
+    for (const shield of char.shields ?? []) {
+      if (legacyShieldNames[shield.name]) {
+        shield.name = legacyShieldNames[shield.name];
+      }
+    }
+
     // Ensure derivedStats exist
     if (!char.derivedStats) {
       const rules = getRulesForSystem(char.gameSystem || 'runequest');

@@ -121,6 +121,16 @@ export class CharacterFormComponent implements OnInit {
     const occ = this.character.background?.occupation ?? '';
     return occ === 'Thief' || occ === 'Assassin';
   }
+
+  // Race/class level cap (OSRIC). undefined = no cap (999 sentinel or system without caps).
+  get levelCap(): number | undefined {
+    const rules = this.gameSystemService.getRules();
+    const race = this.character.background?.homeland ?? '';
+    const className = this.character.background?.occupation ?? '';
+    if (!rules.getMaxCharacterLevel || !race || !className) return undefined;
+    const cap = rules.getMaxCharacterLevel(race, className);
+    return cap >= 999 ? undefined : cap;
+  }
   combatSkills = COMBAT_SKILLS;
   weaponSkills = WEAPON_SKILLS;
   characterColors = CHARACTER_COLORS;
@@ -306,9 +316,16 @@ export class CharacterFormComponent implements OnInit {
 
   roll3D6(stat: keyof CharacterStats): void {
     if (this.character.stats) {
-      this.character.stats[stat] = this.diceService.roll3D6Configured();
+      this.character.stats[stat] = this.rollStatForSystem(stat);
       this.randomizedFields.add(stat.toLowerCase());
     }
+  }
+
+  // Use the system's own generation method (RQ2 2d6+6 for SIZ/INT, Dragonbane 4d6
+  // drop lowest, Mothership 6d10); fall back to the app-wide configured 3d6 roll.
+  private rollStatForSystem(stat: keyof CharacterStats): number {
+    const rules = this.gameSystemService.getRules();
+    return rules.rollStat ? rules.rollStat(stat) : this.diceService.roll3D6Configured();
   }
 
   rollPercentile(stat: keyof CharacterStats): void {
@@ -323,7 +340,7 @@ export class CharacterFormComponent implements OnInit {
       .filter(s => s.visible)
       .map(s => s.key);
     for (const key of visibleKeys) {
-      this.character.stats[key] = this.diceService.roll3D6Configured();
+      this.character.stats[key] = this.rollStatForSystem(key);
       this.randomizedFields.add(key.toLowerCase());
     }
     this.calculateDerivedValues();

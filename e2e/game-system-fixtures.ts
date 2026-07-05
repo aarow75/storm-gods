@@ -43,22 +43,22 @@ export const CALC_FIXTURES: Record<GameSystem, { character: unknown; expected: R
       magic: { spiritMagic: [], runeMagic: [], sorcery: [], runePoints: 0, doom: '', dragonbaneSpells: [] },
       resources: { lunars: 0, wheels: 0, clacks: 0, reputation: 0, ransom: 0, silver: 0, gold: 0 },
     }),
-    // Formulas:
-    // totalHP = max(1, SIZ + conHPMod(CON) + powHPMod(POW))
-    //   conHPMod(14) = 1
+    // Formulas (RQ2 reference):
+    // totalHP = max(1, CON + sizHPMod(SIZ) + powHPMod(POW))
+    //   sizHPMod(13) = 1
     //   powHPMod(14) = 1
-    //   = max(1, 13 + 1 + 1) = 15
-    // damageBonus: STR+SIZ = 25 -> floor((25-13)/8)+1 = 2 -> '+2d6'
+    //   = max(1, 14 + 1 + 1) = 16
+    // damageBonus: (STR+SIZ)/2 = 12.5 -> 13-16 band -> '+1d4'
     // magicPoints = POW = 14
-    // healingRate = ceil(CON/4) = ceil(14/4) = 4
+    // healingRate = 1 (flat 1 HP/week per location)
     // movementRate = 8 (no encumbrance overage)
     // strikeRank = sizeMod(13) + dexMod(15) = 2 + 1 = 3
     // maxEncumbrance = min(12, floor((12+14)/2)) = min(12, 13) = 12
     expected: {
-      totalHP: '15',
-      damageBonus: '+2d6',
+      totalHP: '16',
+      damageBonus: '+1d4',
       magicPoints: '14',
-      healingRate: '4',
+      healingRate: '1',
       movementRate: '8',
       strikeRank: '3',
       encumbrance: '0 / 12',
@@ -115,11 +115,11 @@ export const CALC_FIXTURES: Record<GameSystem, { character: unknown; expected: R
       resources: { gold: 0 },
     }),
     // Formulas:
-    // maxHitPoints = 4 + CON(TOU) = 4 + 8 = 12
+    // maxHitPoints = 6 + CON(TOU) = 6 + 8 = 14 (optional max-HP rule: d6 taken as 6)
     // healingRate = max(1, 1 + CON) = max(1, 1 + 8) = 9
     // encumbrance: maxEncumbrance = STR + 8 = 10 + 8 = 18
     expected: {
-      totalHP: '12',
+      totalHP: '14',
       healingRate: '9',
       encumbrance: '0 / 18',
     },
@@ -150,7 +150,9 @@ export const CALC_FIXTURES: Record<GameSystem, { character: unknown; expected: R
     // damageBonus(label "STR Bonus") = getStrBonus(17) = '+1/+1'
     // healingRate = 1
     // missileAttackBonus = getDexMissileModifier(17) = 2
-    // movementRate: no equipment, effectiveENC = -50 -> 12
+    // totalEncumbrance = Chain Mail armor weight = 30 lbs
+    // movementRate: effectiveENC = 30 - 50 = -20 -> weight tier 12,
+    //   capped by Chain Mail maxMove -> 9
     // maxEncumbrance = getStrMaxEncumbrance(17) = 200
     expected: {
       totalHP: '9',
@@ -158,8 +160,8 @@ export const CALC_FIXTURES: Record<GameSystem, { character: unknown; expected: R
       healingRate: '1',
       armorClass: '2',
       missileAttack: '+2',
-      movementRate: '12',
-      encumbrance: '0 / 200',
+      movementRate: '9',
+      encumbrance: '30 / 200',
     },
   },
 

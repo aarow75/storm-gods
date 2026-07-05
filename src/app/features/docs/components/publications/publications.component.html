@@ -501,6 +501,83 @@
         <div class="stat-number">{{ mothershipAdventures.length }}</div>
         <div class="stat-label">Adventures</div>
       </div>
+      @if (mothershipSupplements.length > 0) {
+      <div class="stat-card">
+        <div class="stat-number">{{ mothershipSupplements.length }}</div>
+        <div class="stat-label">Supplements</div>
+      </div>
+      }
+      <div class="stat-card">
+        <div class="stat-number">{{ publications.length }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+  </div>
+</div>
+} @else if (isBrp) {
+<div class="publications-page">
+  <header class="page-header">
+    <h2>Basic Role-Playing Publications</h2>
+    <p class="page-subtitle">The universal D100 system by Chaosium Inc.</p>
+  </header>
+
+  <div class="publications-container">
+    @if (brpCoreRules.length > 0) {
+    <div class="section">
+      <h3>Core Rules</h3>
+      <p class="section-description">Editions of the Basic Role-Playing system itself</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of brpCoreRules; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    @if (brpGames.length > 0) {
+    <div class="section">
+      <h3>Games Powered by BRP</h3>
+      <p class="section-description">Chaosium games built on the Basic Role-Playing engine</p>
+      <div class="publications-table dragonbane-table">
+        <div class="table-header">
+          <div class="col-title">Title</div>
+          <div class="col-year">Year</div>
+          <div class="col-publisher">Publisher</div>
+          <div class="col-description">Description</div>
+        </div>
+        @for (pub of brpGames; track pub.title) {
+        <div class="table-row">
+          <div class="col-title">{{ pub.title }}</div>
+          <div class="col-year">{{ pub.publishedYear }}</div>
+          <div class="col-publisher">{{ pub.publisher || '—' }}</div>
+          <div class="col-description">{{ pub.description || '—' }}</div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ brpCoreRules.length }}</div>
+        <div class="stat-label">Core Rules</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ brpGames.length }}</div>
+        <div class="stat-label">BRP Games</div>
+      </div>
       <div class="stat-card">
         <div class="stat-number">{{ publications.length }}</div>
         <div class="stat-label">Total</div>

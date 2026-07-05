@@ -89,6 +89,12 @@ h1 {
   box-shadow: 0 4px 12px rgba(14, 116, 144, 0.3);
 }
 
+.system-toggle-brp.active {
+  background: linear-gradient(135deg, #a16207 0%, #713f12 100%);
+  color: var(--color-bg-white);
+  box-shadow: 0 4px 12px rgba(161, 98, 7, 0.3);
+}
+
 .font-size-btn {
   padding: var(--spacing-2xl) var(--spacing-3xl);
   background-color: var(--color-bg-light);

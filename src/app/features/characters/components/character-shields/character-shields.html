@@ -23,10 +23,17 @@
       </div>
       @if (getShieldDefinition(shield.name); as shieldDef) {
         <div class="shield-stats">
-          <div class="stat-group">
-            <span class="stat-label">AP:</span>
-            <span class="stat-value">{{ shieldDef.armorPoints }}</span>
-          </div>
+          @if (shieldDef.parryBonus) {
+            <div class="stat-group">
+              <span class="stat-label">Parry:</span>
+              <span class="stat-value">+{{ shieldDef.parryBonus }}%</span>
+            </div>
+          } @else {
+            <div class="stat-group">
+              <span class="stat-label">AP:</span>
+              <span class="stat-value">{{ shieldDef.armorPoints }}</span>
+            </div>
+          }
           <div class="stat-group">
             <span class="stat-label">HP:</span>
             <span class="stat-value">{{ shield.currentHitPoints !== undefined ? shield.currentHitPoints : shieldDef.hitPoints }}/{{ shieldDef.hitPoints }}</span>

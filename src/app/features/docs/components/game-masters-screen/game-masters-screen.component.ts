@@ -701,4 +701,81 @@ export class GameMastersScreenComponent {
     { level: 4, xp: 75  }, { level: 5, xp: 125 }, { level: 6, xp: 175 }, { level: 7, xp: 225 },
     { level: 8, xp: 300 }, { level: 9, xp: 375 }, { level: 10, xp: 500 },
   ];
+
+  // ─── Basic Role-Playing Data ─────────────────────────────────────────────────
+
+  brpCombatSequence = [
+    { step: '1', action: 'Statement of Intent',  detail: 'Everyone declares actions; a stated action may be aborted but not substituted' },
+    { step: '2', action: 'Movement',             detail: 'Non-engaged characters move (24m/round, 36m 4-legged); movers can\'t fight until next round' },
+    { step: '3', action: 'Resolution',           detail: 'Missiles first, then hand combat in descending DEX order; killed/KO\'d before acting = no attack' },
+    { step: '4', action: 'Bookkeeping',          detail: 'Record damage, healing, and successful skill use (for experience checks)' },
+  ];
+
+  brpCharacteristicRolls = [
+    { roll: 'Idea',       formula: 'INT × 5', use: 'Realize something the character would know (referee may lower the multiplier)' },
+    { roll: 'Luck',       formula: 'POW × 5', use: 'Avoid mischance — land safely from a fall, be in the right place' },
+    { roll: 'Dodge',      formula: 'DEX × 5', use: 'Dive out of the way of a seen threat (thrown/missile weapons, charges)' },
+    { roll: 'Persuasion', formula: 'CHA × 5', use: 'Talk your way in or out (CHA × 3 if the listener is suspicious)' },
+  ];
+
+  brpSkills = [
+    { skill: 'Climbing', pct: '55%' },
+    { skill: 'Hide', pct: '55%' },
+    { skill: 'Jumping', pct: '45%' },
+    { skill: 'Throw', pct: '45%' },
+    { skill: 'Listening', pct: '45%' },
+    { skill: 'First Aid', pct: '45%' },
+    { skill: 'Spot Hidden Item', pct: '25%' },
+    { skill: 'Move Quietly', pct: '25%' },
+  ];
+
+  brpWeapons = [
+    { name: 'Fist',           type: 'Natural',   pct: '50%', dmg: '1d3',   breakage: '—', note: 'Poor vs. armor' },
+    { name: 'Mace',           type: 'Hand',      pct: '30%', dmg: '1d6+2', breakage: '20', note: 'Any blunt instrument (coal shovel, big stick)' },
+    { name: 'Axe',            type: 'Hand',      pct: '25%', dmg: '1d8+2', breakage: '15', note: 'Most damage of the hand weapons' },
+    { name: '2-Handed Spear', type: 'Thrusting', pct: '25%', dmg: '1d8+1', breakage: '15', note: 'Impales; 2nd rank; attack+parry or parry ×2' },
+    { name: 'Sword',          type: 'Hand',      pct: '15%', dmg: '1d8+1', breakage: '20', note: 'Durable but hardest to learn' },
+    { name: 'Rock',           type: 'Thrown',    pct: '45%', dmg: '1d4',   breakage: '—', note: 'Weak vs. any armor' },
+    { name: 'Javelin',        type: 'Thrown',    pct: '20%', dmg: '1d10',  breakage: '—', note: 'Impales' },
+    { name: 'Bow',            type: 'Missile',   pct: '10%', dmg: '1d6+1', breakage: '—', note: 'Impales; best range' },
+    { name: 'Shield',         type: 'Parry only',pct: '25%', dmg: '—',     breakage: 'Never breaks', note: 'Blocks 12 points on a successful parry' },
+  ];
+
+  brpArmor = [
+    { type: 'Leather',   points: 2, notes: 'Jerkin, leggings, hood — "a heavy motorcycle jacket"' },
+    { type: 'Ring Mail', points: 4, notes: 'Can be worn over leather for 6 points total' },
+    { type: 'Plate',     points: 6, notes: 'The best armor available' },
+    { type: 'Shield',    points: 12, notes: 'Only on a successful parry; blocks before armor applies' },
+  ];
+
+  brpResolutionMatrix = [
+    { attack: 'Hits',   parry: 'Misses', result: 'Defender takes damage (armor subtracts its points)' },
+    { attack: 'Hits',   parry: 'Parries', result: 'No damage to defender; a parrying weapon takes the rolled damage toward breakage' },
+    { attack: 'Misses', parry: 'Parries', result: 'No damage' },
+    { attack: 'Misses', parry: 'Misses', result: 'No damage' },
+  ];
+
+  brpCombatNotes = [
+    { rule: 'Rear attack',       effect: '+20% to hit; target cannot parry attacks from a foe they\'ve turned away from' },
+    { rule: 'Impale (spear/javelin/arrow)', effect: 'Attack roll ≤ 20% of skill → rolled damage + weapon maximum; weapon sticks (full round + D100 ≤ impale ×2 to pull free)' },
+    { rule: 'Two parries',       effect: 'With weapon + shield a character may parry twice instead of attacking; one shield parry per round' },
+    { rule: 'Thrown/missile',    effect: 'Cannot be parried — only dodged (DEX × 5); resolved before hand combat' },
+    { rule: 'Changing weapons',  effect: 'Takes a full melee round; may still shield-parry or dodge' },
+    { rule: 'Resistance Table',  effect: 'Active vs. passive characteristic: 50% + (active − passive) × 5% chance of success' },
+  ];
+
+  brpDamageRules = [
+    { rule: 'Hit Points',   effect: 'HP = CON; no penalty for cumulative damage above 1 HP' },
+    { rule: 'Unconscious',  effect: 'At 1 HP or less; will not wake naturally — needs tending or First Aid' },
+    { rule: 'Death',        effect: 'Damage exceeding total HP kills the character' },
+    { rule: 'Falling',      effect: '~1d6 per 2 meters (4m fall = 2d6); Jumping or Luck roll may avoid' },
+    { rule: 'Healing',      effect: '1 HP per game week; healing potions restore up to 5 points' },
+  ];
+
+  brpExperience = [
+    { step: '1', detail: 'After the adventure, list each skill used successfully during play (marked when it happened)' },
+    { step: '2', detail: 'Learning threshold = 100 − current skill %' },
+    { step: '3', detail: 'Roll D100 ≤ threshold → add 5% to the skill; otherwise no change' },
+    { step: '4', detail: 'One check per skill per adventure; attack and parry advance separately; characteristic rolls never improve' },
+  ];
 }

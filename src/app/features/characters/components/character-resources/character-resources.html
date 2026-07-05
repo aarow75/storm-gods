@@ -12,9 +12,13 @@
           [(ngModel)]="resources[resource.key]"
           [name]="'resource-' + resource.key"
           min="0"
+          [max]="resource.key === 'level' ? levelCap ?? null : null"
         />
         @if (resource.hint) {
           <span class="resource-hint">{{ resource.hint }}</span>
+        }
+        @if (isOverLevelCap(resource.key)) {
+          <span class="resource-hint level-cap-warning">Exceeds racial/class level cap of {{ levelCap }}</span>
         }
       </div>
     </div>

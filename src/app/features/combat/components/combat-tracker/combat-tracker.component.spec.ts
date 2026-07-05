@@ -205,17 +205,55 @@ describe('CombatTrackerComponent', () => {
 
       expect(component.getEffectiveAttackSkill(attacker)).toBe(2); // STR bonus
 
-      // 2d6 = 3+4, +2 STR = 9 ≥ 8 hit; damage d6 = 5; armor 1 → 4
+      // 2d6 = 3+4, +2 STR = 9 ≥ 8 hit; damage d6 = 5 (no explosion); armor 1 → 4
       vi.spyOn(Math, 'random')
         .mockReturnValueOnce(0.4)   // d1 → 3
         .mockReturnValueOnce(0.5)   // d2 → 4
         .mockReturnValueOnce(0.75); // damage d6 → 5
       component.rollWeaponDamage(attacker);
 
+      // Kal-Arath offers the defender a dodge; take the hit to resolve
+      expect(component.pendingAttack).not.toBeNull();
+      component.resolveNoDefense();
+
       const result = component.lastDamageRolls.get(attacker.id);
       expect(result?.total).toBe(5);
       expect(result?.finalDamage).toBe(4);
       expect(result?.attackRollDisplay).toContain('2d6+STR');
+    });
+
+    it('damage dice explode: a 6 is rerolled once and added', async () => {
+      await setup('kal-arath', [kalArathCharacter()]);
+      const { attacker } = addCombatPair(characters[0], monster);
+
+      // 2d6 = 4+4, +2 STR = 10 ≥ 8 hit; damage d6 = 6 explodes → +3 = 9; armor 1 → 8
+      vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.5)   // d1 → 4
+        .mockReturnValueOnce(0.5)   // d2 → 4
+        .mockReturnValueOnce(0.99)  // damage d6 → 6 (explodes)
+        .mockReturnValueOnce(0.4);  // explosion die → 3
+      component.rollWeaponDamage(attacker);
+      component.resolveNoDefense();
+
+      const result = component.lastDamageRolls.get(attacker.id);
+      expect(result?.total).toBe(9);
+      expect(result?.finalDamage).toBe(8);
+    });
+
+    it('defender can dodge with 2d6 + AGI vs 8', async () => {
+      await setup('kal-arath', [kalArathCharacter()]);
+      const { attacker, defender } = addCombatPair(characters[0], monster);
+
+      // Attack hits: 4+4+2 = 10; damage d6 = 5; dodge (monster AGI default 1): 5+4+1 = 10 ≥ 8 → dodged
+      vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.5).mockReturnValueOnce(0.5)   // attack 2d6 → 4, 4
+        .mockReturnValueOnce(0.75)                           // damage d6 → 5
+        .mockReturnValueOnce(0.7).mockReturnValueOnce(0.5);  // dodge 2d6 → 5, 4
+      component.rollWeaponDamage(attacker);
+      component.resolveDodge();
+
+      expect(component.lastDamageRolls.get(attacker.id)?.finalDamage).toBe(0);
+      expect(defender.currentHitPoints.filter(hp => hp).length).toBe(0);
     });
 
     it('misses on 2d6 + STR < 8', async () => {
@@ -234,16 +272,18 @@ describe('CombatTrackerComponent', () => {
       await setup('kal-arath', [kalArathCharacter()]);
       const { attacker } = addCombatPair(characters[0], monster);
 
-      // 6+6 crit; damage d6 = 6 and d6 = 4 → 10 raw; armor 1 → 9
+      // 6+6 crit doubles the dice: d6 = 6 (explodes → +4) plus crit d6 = 2 → 12 raw; armor 1 → 11
       vi.spyOn(Math, 'random')
         .mockReturnValueOnce(0.99).mockReturnValueOnce(0.99)
-        .mockReturnValueOnce(0.99)  // first damage die → 6
-        .mockReturnValueOnce(0.5);  // crit damage die → 4
+        .mockReturnValueOnce(0.99)  // first damage die → 6 (explodes)
+        .mockReturnValueOnce(0.5)   // explosion die → 4
+        .mockReturnValueOnce(0.2);  // crit damage die → 2
       component.rollWeaponDamage(attacker);
+      component.resolveNoDefense();
 
       const result = component.lastDamageRolls.get(attacker.id);
-      expect(result?.total).toBe(10);
-      expect(result?.finalDamage).toBe(9);
+      expect(result?.total).toBe(12);
+      expect(result?.finalDamage).toBe(11);
       expect(result?.attackRollDisplay).toContain('CRITICAL');
     });
 
@@ -284,8 +324,8 @@ describe('CombatTrackerComponent', () => {
       await setup('runequest', [runequestCharacter()]);
       const { attacker } = addCombatPair(characters[0], monster);
 
-      // 80 weapon skill − 5 characteristic attack modifier (all stats 10)
-      expect(component.getEffectiveAttackSkill(attacker)).toBe(75);
+      // 80 weapon skill; DEX 10 gives no attack modifier on the RQ2 table
+      expect(component.getEffectiveAttackSkill(attacker)).toBe(80);
 
       // d100 = 40 ≤ 75 hit; damage 1d8 = 5 (+1 = 6); location d20 = 20 → Head
       vi.spyOn(Math, 'random')

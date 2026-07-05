@@ -149,23 +149,28 @@ export class KalArathRules implements GameSystemRules {
     stats: CharacterStats,
     equipment: EquipmentItem[],
     weapons: Weapon[],
-    _shields: Shield[],
+    shields: Shield[],
     _background?: BackgroundForBonuses,
     _armorType?: string
   ): DerivedStats {
-    // TOU is stored in the CON field. HP = d6+TOU at creation; we show the average (4+TOU).
+    // TOU is stored in the CON field. HP = d6+TOU at creation; we use the reference's
+    // optional max-HP rule (6+TOU) "for higher survival rate".
     const tou = stats.CON;
     const str = stats.STR;
-    const maxHitPoints = 4 + tou;
+    const maxHitPoints = 6 + tou;
 
-    // Encumbrance: STR+8 items; over limit = all physical rolls at disadvantage
+    // Encumbrance: STR+8 items (shields count); over limit = all physical rolls at disadvantage
     const maxEncumbrance = str + 8;
     const equipmentENC = equipment.reduce((sum, item) => sum + item.encumbrance * item.quantity, 0);
     const weaponsENC = weapons.reduce((sum, w) => {
       const def = WEAPON_LIST.find(wd => wd.name === w.name);
       return sum + (def?.encumbrance ?? 0);
     }, 0);
-    const totalENC = equipmentENC + weaponsENC;
+    const shieldsENC = shields.reduce((sum, s) => {
+      const def = SHIELD_LIST.find(sd => sd.name === s.name);
+      return sum + (def?.encumbrance ?? 0);
+    }, 0);
+    const totalENC = equipmentENC + weaponsENC + shieldsENC;
     const overENC = Math.max(0, totalENC - maxEncumbrance);
     // Reference: at double max, character cannot move at all
     const movementRate = totalENC >= maxEncumbrance * 2 ? 0 : 6;
@@ -260,6 +265,9 @@ export class KalArathRules implements GameSystemRules {
   // Armor is flat damage reduction (Light -1 / Medium -2 / Heavy -3).
   getArmorModel(): ArmorModel { return { kind: 'flat' }; }
 
+  // Damage dice explode: a 6 is rerolled once and added (a second 6 counts as-is).
+  damageDiceExplode(): boolean { return true; }
+
   // Initiative: each character rolls d6 + AGI; 4+ acts before enemies, natural 1 always loses.
   getInitiativeMechanic(): InitiativeMechanic {
     return { kind: 'd6-plus-stat', stat: 'DEX', statLabel: 'AGI', target: 4 };
@@ -276,7 +284,11 @@ export class KalArathRules implements GameSystemRules {
     return { attack: 0, parry: 0, dodge: 0 };
   }
   getParryRepeatPenalty(): number { return 0; }
-  usesParryDodge(): boolean { return false; }
+
+  // Kal-Arath is player-facing: the defender rolls 2d6+AGI vs 8 to dodge enemy attacks.
+  // There is no parry roll (a shield is sacrificed manually to negate one attack).
+  usesParryDodge(): boolean { return true; }
+  getDefenseOptions(): { parry: boolean; dodge: boolean } { return { parry: false, dodge: true }; }
   usesWeaponHP(): boolean { return false; }
 
   getSystemName(): string { return 'Kal-Arath'; }
@@ -303,7 +315,8 @@ export class KalArathRules implements GameSystemRules {
   getPrimaryWealthAmount(resources: Resources): number { return resources.silver ?? 0; }
   weaponSkillIsFixed(): boolean { return false; }
   weaponHasSelectableSkill(): boolean { return false; }
-  getDefaultStats(): CharacterStats { return { STR: 1, CON: 1, SIZ: 0, DEX: 1, INT: 1, POW: 0, CHA: 1 }; }
+  // 4 points across the 5 stats at creation (one stat may drop to -1 for an extra point)
+  getDefaultStats(): CharacterStats { return { STR: 1, CON: 1, SIZ: 0, DEX: 1, INT: 1, POW: 0, CHA: 0 }; }
   getArmorHint(): string {
     return 'Armor reduces all incoming damage (Light: −1, Medium: −2, Heavy: −3). A shield adds −1 and can be sacrificed to reduce a single attack to 0 damage.';
   }

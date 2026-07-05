@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DerivedStats, CharacterStats } from '@characters/models/character.model';
+import { DerivedStats, CharacterStats, getSizeModifier, getDexterityModifier } from '@characters/models/character.model';
 import { GameSystemService } from '@shared/services/game-system.service';
 
 @Component({
@@ -29,6 +29,8 @@ export class CharacterDerivedStats {
 
   get isRuneQuest(): boolean { return this.rules.usesHitLocations(); }
   get isOsric(): boolean { return this.rules.getMagicSystemType() === 'osric'; }
+  get usesStrikeRank(): boolean { return this.rules.usesStrikeRank(); }
+  get initiativeLabel(): string { return this.rules.getInitiativeLabel(); }
 
   get showMagicPoints(): boolean { return this.rules.showsMagicPoints(); }
   get magicPointsLabel(): string { return this.rules.getMagicPointsLabel(); }
@@ -38,14 +40,21 @@ export class CharacterDerivedStats {
   get healingRateLabel(): string { return this.rules.getHealingRateLabel(); }
   get showMovementRate(): boolean { return this.rules.showsMovementRate(); }
 
+  // Dice earned by a given level: usually one per level up to maxHdLevel, but some
+  // classes roll extra dice at level 1 (OSRIC Ranger rolls 2).
+  private osricDiceCount(hd: { maxHdLevel: number; firstLevelDice?: number }): number {
+    const bonusFirstLevelDice = (hd.firstLevelDice ?? 1) - 1;
+    return Math.min(this.level!, hd.maxHdLevel) + bonusFirstLevelDice;
+  }
+
   get osricHpFormula(): string {
     if (!this.occupation || !this.level) return '';
     const rules = this.gameSystemService.getRules();
     const hd = rules.getClassHitDie?.(this.occupation);
     if (!hd) return '';
     const con = this.stats?.CON ?? 10;
-    const conMod = rules.getConHpModifier?.(con) ?? 0;
-    const diceCount = Math.min(this.level, hd.maxHdLevel);
+    const conMod = rules.getConHpModifier?.(con, this.occupation) ?? 0;
+    const diceCount = this.osricDiceCount(hd);
     const extraLevels = Math.max(0, this.level - hd.maxHdLevel);
     const parts: string[] = [`${diceCount}d${hd.sides}`];
     if (conMod !== 0) parts.push(`${conMod >= 0 ? '+' : ''}${conMod * diceCount} (CON)`);
@@ -59,8 +68,8 @@ export class CharacterDerivedStats {
     const hd = rules.getClassHitDie?.(this.occupation);
     if (!hd) return;
     const con = this.stats?.CON ?? 10;
-    const conMod = rules.getConHpModifier?.(con) ?? 0;
-    const diceCount = Math.min(this.level, hd.maxHdLevel);
+    const conMod = rules.getConHpModifier?.(con, this.occupation) ?? 0;
+    const diceCount = this.osricDiceCount(hd);
     const extraLevels = Math.max(0, this.level - hd.maxHdLevel);
     let total = 0;
     for (let i = 0; i < diceCount; i++) {
@@ -82,27 +91,15 @@ export class CharacterDerivedStats {
 
   get strikeRankBreakdown(): string {
     if (!this.stats) return '';
-    const siz = this.stats.SIZ;
     const dex = this.stats.DEX;
-    const sizMod = this.getSizeModifier(siz);
-    const dexMod = this.getDexterityModifier(dex);
     const total = this.derivedStats.strikeRank;
+    // BRP orders combat by pure DEX; rank = 20 − DEX so lower acts first
+    if (this.gameSystemService.gameSystem() === 'brp') {
+      return `20 − DEX ${dex} = ${total} (lower acts first)`;
+    }
+    const siz = this.stats.SIZ;
+    const sizMod = getSizeModifier(siz);
+    const dexMod = getDexterityModifier(dex);
     return `SIZ ${siz}→${sizMod} + DEX ${dex}→${dexMod} = ${total}`;
-  }
-
-  private getSizeModifier(siz: number): number {
-    if (siz >= 22) return 0;
-    if (siz >= 15) return 1;
-    if (siz >= 7) return 2;
-    return 3;
-  }
-
-  private getDexterityModifier(dex: number): number {
-    if (dex >= 19) return 0;
-    if (dex >= 16) return 1;
-    if (dex >= 13) return 2;
-    if (dex >= 9) return 3;
-    if (dex >= 6) return 4;
-    return 5;
   }
 }

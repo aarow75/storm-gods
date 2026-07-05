@@ -54,6 +54,20 @@ export class DiceService {
     return total;
   }
 
+  // Each die showing its maximum is rerolled once and the extra added;
+  // a maximum on the reroll counts as-is (no chain).
+  private rollDiceExploding(count: number, sides: number): number {
+    let total = 0;
+    for (let i = 0; i < count; i++) {
+      const roll = Math.floor(Math.random() * sides) + 1;
+      total += roll;
+      if (roll === sides) {
+        total += Math.floor(Math.random() * sides) + 1;
+      }
+    }
+    return total;
+  }
+
   private rollDiceWithBreakdown(count: number, sides: number): { rolls: number[]; total: number } {
     const rolls: number[] = [];
     for (let i = 0; i < count; i++) {
@@ -93,9 +107,12 @@ export class DiceService {
 
   /**
    * Parse and roll complex dice notation like "1d8+1", "2d6+1d4", "1d6+poison"
-   * Returns the total rolled value and a detailed breakdown
+   * Returns the total rolled value and a detailed breakdown.
+   *
+   * options.explode: a die showing its maximum is rerolled once and the extra
+   * added (Kal-Arath damage; a second maximum counts as-is).
    */
-  rollDiceNotation(notation: string): { total: number; breakdown: string } {
+  rollDiceNotation(notation: string, options?: { explode?: boolean }): { total: number; breakdown: string } {
     // Clean up the notation
     const cleanNotation = notation.toLowerCase().trim();
 
@@ -125,21 +142,26 @@ export class DiceService {
         const sides = sidesToken === '%' ? 100 : parseInt(sidesToken);
         const modifier = diceMatch[3]; // '/a' = advantage, '/d' = disadvantage
 
+        const rollSet = () => options?.explode
+          ? this.rollDiceExploding(count, sides)
+          : this.rollDice(count, sides);
+
         let roll: number;
         let label: string;
+        const bang = options?.explode ? '!' : '';
         if (modifier === '/a') {
-          const r1 = this.rollDice(count, sides);
-          const r2 = this.rollDice(count, sides);
+          const r1 = rollSet();
+          const r2 = rollSet();
           roll = Math.max(r1, r2);
-          label = `${count}d${sidesToken}/a[${r1},${r2}→${roll}]`;
+          label = `${count}d${sidesToken}/a${bang}[${r1},${r2}→${roll}]`;
         } else if (modifier === '/d') {
-          const r1 = this.rollDice(count, sides);
-          const r2 = this.rollDice(count, sides);
+          const r1 = rollSet();
+          const r2 = rollSet();
           roll = Math.min(r1, r2);
-          label = `${count}d${sidesToken}/d[${r1},${r2}→${roll}]`;
+          label = `${count}d${sidesToken}/d${bang}[${r1},${r2}→${roll}]`;
         } else {
-          roll = this.rollDice(count, sides);
-          label = `${count}d${sidesToken}[${roll}]`;
+          roll = rollSet();
+          label = `${count}d${sidesToken}${bang}[${roll}]`;
         }
 
         // Check if this should be subtracted

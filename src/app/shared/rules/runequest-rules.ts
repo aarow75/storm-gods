@@ -10,7 +10,7 @@ import {
   calculateDerivedStats as rqCalculateDerivedStats,
   calculateSkillCategoryModifiers as rqCalculateSkillCategoryModifiers,
   applySkillBonuses as rqApplySkillBonuses,
-  getConHPModifier, getPowHPModifier,
+  getSizHPModifier, getPowHPModifier, getCharacteristicModifier,
   DEFAULT_SKILLS, COMBAT_SKILLS,
   OCCUPATION_SKILL_BONUSES, HOMELAND_SKILL_BONUSES, CULT_SKILL_BONUSES
 } from '@characters/models/character.model';
@@ -102,7 +102,8 @@ export class RuneQuestRules implements GameSystemRules {
   }
 
   calculateHitLocations(stats: CharacterStats): HitLocations {
-    const totalHP = Math.max(1, stats.SIZ + getConHPModifier(stats.CON) + getPowHPModifier(stats.POW));
+    // RQ2: Total HP = CON + HP modifier(SIZ) + HP modifier(POW)
+    const totalHP = Math.max(1, stats.CON + getSizHPModifier(stats.SIZ) + getPowHPModifier(stats.POW));
     return rqCalculateHitLocations(totalHP);
   }
 
@@ -185,15 +186,18 @@ export class RuneQuestRules implements GameSystemRules {
     };
   }
 
+  // RQ2 Damage Results: at 0 location HP, limbs go useless and vital locations knock the
+  // character out (dying in 1d6 rounds); `fatal` locations kill only at −(location max),
+  // i.e. once total damage to the location reaches double its HP.
   getLocationEffects(): Record<string, { label: string; fatal: boolean }> {
     return {
-      'Head':      { label: 'Instant Death', fatal: true  },
-      'Chest':     { label: 'Incapacitated', fatal: false },
-      'Abdomen':   { label: 'Incapacitated', fatal: false },
-      'Right Arm': { label: 'Arm Useless',   fatal: false },
-      'Left Arm':  { label: 'Arm Useless',   fatal: false },
-      'Right Leg': { label: 'Leg Useless',   fatal: false },
-      'Left Leg':  { label: 'Leg Useless',   fatal: false },
+      'Head':      { label: 'Unconscious — dies in 1d6 rounds without healing', fatal: true  },
+      'Chest':     { label: 'Unconscious — dies in 1d6 rounds without healing', fatal: true  },
+      'Abdomen':   { label: 'Unconscious — dies in 1d6 rounds without healing', fatal: true  },
+      'Right Arm': { label: 'Arm Useless', fatal: false },
+      'Left Arm':  { label: 'Arm Useless', fatal: false },
+      'Right Leg': { label: 'Leg Useless', fatal: false },
+      'Left Leg':  { label: 'Leg Useless', fatal: false },
     };
   }
 
@@ -201,28 +205,11 @@ export class RuneQuestRules implements GameSystemRules {
     return ['Head', 'Right Arm (Weapon)', 'Chest', 'Left Arm (Shield)', 'Abdomen', 'Right Leg', 'Left Leg'];
   }
 
+  // RQ2 Attack/Parry/Defense modifiers all use the same DEX-based table
+  // (RuneQuest Classic Mechanics Reference, Ability Modifier Tables).
   getAttackBonuses(stats: CharacterStats): { attack: number; parry: number; dodge: number } {
-    const str = stats.STR ?? 10;
-    const siz = stats.SIZ ?? 10;
-    const dex = stats.DEX ?? 10;
-    const int = stats.INT ?? 10;
-    const pow = stats.POW ?? 10;
-
-    const attackStr = this.atkStr(str);
-    const attackInt = this.atkInt(int);
-    const attackPow = this.atkPow(pow);
-    const attackDex = this.atkDex(dex);
-
-    const parryStr = this.parStr(str);
-    const parrySiz = this.parSiz(siz);
-    const parryPow = this.parPow(pow);
-    const parryDex = this.parDex(dex);
-
-    return {
-      attack: attackStr + attackInt + attackPow + attackDex,
-      parry:  parryStr + parrySiz + parryPow + parryDex,
-      dodge:  parryDex + attackInt,
-    };
+    const dexMod = getCharacteristicModifier(stats.DEX ?? 10);
+    return { attack: dexMod, parry: dexMod, dodge: dexMod };
   }
 
   getParryRepeatPenalty(): number {
@@ -231,69 +218,6 @@ export class RuneQuestRules implements GameSystemRules {
 
   usesParryDodge(): boolean { return true; }
   usesWeaponHP(): boolean { return true; }
-
-  private atkStr(str: number): number {
-    if (str <= 8)  return -5;
-    if (str <= 12) return 0;
-    if (str <= 16) return 5;
-    if (str <= 20) return 10;
-    return 10 + Math.floor((str - 20) / 4) * 5;
-  }
-
-  private atkInt(int: number): number {
-    if (int <= 4)  return 0;
-    if (int <= 8)  return -10;
-    if (int <= 12) return -5;
-    if (int <= 16) return 5;
-    if (int <= 20) return 10;
-    return 10 + Math.floor((int - 20) / 4) * 5;
-  }
-
-  private atkPow(pow: number): number {
-    if (pow <= 12) return 0;
-    if (pow <= 20) return 5;
-    return 5 + Math.floor((pow - 20) / 4) * 5;
-  }
-
-  private atkDex(dex: number): number {
-    if (dex <= 4)  return -10;
-    if (dex <= 8)  return -5;
-    if (dex <= 12) return 0;
-    if (dex <= 16) return 5;
-    if (dex <= 20) return 10;
-    return 10 + Math.floor((dex - 20) / 4) * 5;
-  }
-
-  private parStr(str: number): number {
-    if (str <= 4)  return -5;
-    if (str <= 12) return 0;
-    if (str <= 16) return 5;
-    if (str <= 20) return 5;
-    return 5 + Math.floor((str - 20) / 4) * 5;
-  }
-
-  private parSiz(siz: number): number {
-    if (siz <= 4)  return 5;
-    if (siz <= 16) return 0;
-    if (siz <= 20) return -5;
-    return -5 - Math.floor((siz - 20) / 4) * 5;
-  }
-
-  private parPow(pow: number): number {
-    if (pow <= 4)  return -5;
-    if (pow <= 12) return 0;
-    if (pow <= 20) return 5;
-    return 5 + Math.floor((pow - 20) / 4) * 5;
-  }
-
-  private parDex(dex: number): number {
-    if (dex <= 4)  return -10;
-    if (dex <= 8)  return -5;
-    if (dex <= 12) return 0;
-    if (dex <= 16) return 5;
-    if (dex <= 20) return 10;
-    return 10 + Math.floor((dex - 20) / 4) * 5;
-  }
 
   getMagicSystemType(): string {
     return 'runequest';
@@ -306,6 +230,13 @@ export class RuneQuestRules implements GameSystemRules {
   getSystemName(): string { return 'RuneQuest'; }
   getStatRange(): { min: number; max: number } { return { min: 1, max: 30 }; }
   canRollStats(): boolean { return true; }
+
+  // RQ2 characteristic generation: 3D6 for most stats, 2D6+6 for SIZ and INT
+  rollStat(stat: keyof CharacterStats): number {
+    const d6 = () => Math.floor(Math.random() * 6) + 1;
+    if (stat === 'SIZ' || stat === 'INT') return d6() + d6() + 6;
+    return d6() + d6() + d6();
+  }
   showsMagicPoints(): boolean { return true; }
   getMagicPointsLabel(): string { return 'Magic Points'; }
   showsDamageBonus(): boolean { return true; }

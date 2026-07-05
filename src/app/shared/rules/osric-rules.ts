@@ -21,19 +21,21 @@ const STAT_DEFINITIONS: StatDefinition[] = [
 ];
 
 // Descending AC: base 10 (unarmored), lower = better. Shield reduces AC by 1.
+// encumbrance = armor weight in lbs (counts toward carried weight);
+// maxMove = movement cap the armor imposes regardless of weight (ft/10).
 export const OSRIC_ARMOR_TYPES: ArmorTypeDefinition[] = [
-  { name: 'None',                points: 10 },
-  { name: 'Leather',             points: 8  },
-  { name: 'Padded Gambeson',     points: 8  },
-  { name: 'Studded Leather',     points: 7  },
-  { name: 'Ring Mail',           points: 7  },
-  { name: 'Scale / Lamellar',    points: 6  },
-  { name: 'Chain Mail',          points: 5  },
-  { name: 'Elfin Chain',         points: 5  },
-  { name: 'Banded Mail',         points: 4  },
-  { name: 'Splint Mail',         points: 4  },
-  { name: 'Plate Mail',          points: 3  },
-  { name: 'Field Plate',         points: 2  },
+  { name: 'None',                points: 10, encumbrance: 0,  maxMove: 12 },
+  { name: 'Leather',             points: 8,  encumbrance: 15, maxMove: 12 },
+  { name: 'Padded Gambeson',     points: 8,  encumbrance: 10, maxMove: 9  },
+  { name: 'Studded Leather',     points: 7,  encumbrance: 20, maxMove: 9  },
+  { name: 'Ring Mail',           points: 7,  encumbrance: 35, maxMove: 9  },
+  { name: 'Scale / Lamellar',    points: 6,  encumbrance: 40, maxMove: 6  },
+  { name: 'Chain Mail',          points: 5,  encumbrance: 30, maxMove: 9  },
+  { name: 'Elfin Chain',         points: 5,  encumbrance: 15, maxMove: 12 },
+  { name: 'Banded Mail',         points: 4,  encumbrance: 35, maxMove: 9  },
+  { name: 'Splint Mail',         points: 4,  encumbrance: 40, maxMove: 6  },
+  { name: 'Plate Mail',          points: 3,  encumbrance: 45, maxMove: 6  },
+  { name: 'Field Plate',         points: 2,  encumbrance: 50, maxMove: 9  },
 ];
 
 // DEX-to-AC modifier table (subtract from AC; high DEX improves AC)
@@ -93,11 +95,16 @@ function getStrBonus(str: number): string {
   return '-3/-1';
 }
 
-// CON-to-HP modifier per hit die (fighter values used for CON 17+)
-function getConHpModifier(con: number): number {
-  if (con >= 19) return 5;
-  if (con >= 18) return 4;
-  if (con >= 17) return 3;
+// Warrior classes get the higher CON HP bonuses at CON 17+
+const WARRIOR_CLASSES = ['Fighter', 'Paladin', 'Ranger'];
+
+// CON-to-HP modifier per hit die. CON 17+ bonuses above +2 apply only to
+// fighters, paladins, and rangers; all other classes cap at +2.
+function getConHpModifier(con: number, className?: string): number {
+  const isWarrior = className === undefined || WARRIOR_CLASSES.includes(className);
+  if (con >= 19) return isWarrior ? 5 : 2;
+  if (con >= 18) return isWarrior ? 4 : 2;
+  if (con >= 17) return isWarrior ? 3 : 2;
   if (con >= 16) return 2;
   if (con >= 15) return 1;
   if (con >= 8)  return 0;
@@ -162,10 +169,11 @@ const CLASS_HIT_DICE: Record<string, ClassHitDie> = {
   'Cleric':      { sides: 8,  maxHdLevel: 9,  bonusPerLevel: 2 },
   'Druid':       { sides: 8,  maxHdLevel: 14, bonusPerLevel: 1 },
   'Fighter':     { sides: 10, maxHdLevel: 9,  bonusPerLevel: 3 },
-  'Illusionist': { sides: 4,  maxHdLevel: 11, bonusPerLevel: 1 },
+  'Illusionist': { sides: 4,  maxHdLevel: 10, bonusPerLevel: 1 },
   'Magic User':  { sides: 4,  maxHdLevel: 11, bonusPerLevel: 1 },
   'Paladin':     { sides: 10, maxHdLevel: 9,  bonusPerLevel: 3 },
-  'Ranger':      { sides: 8,  maxHdLevel: 10, bonusPerLevel: 2 },
+  // Rangers roll 2 hit dice at 1st level (max 11 dice at 10th level)
+  'Ranger':      { sides: 8,  maxHdLevel: 10, bonusPerLevel: 2, firstLevelDice: 2 },
   'Thief':       { sides: 6,  maxHdLevel: 10, bonusPerLevel: 2 },
 };
 
@@ -179,6 +187,35 @@ const RACE_CLASS_LEVEL_CAPS: Record<string, Record<string, number>> = {
   'Halfling': { 'Druid': 6, 'Fighter': 4, 'Thief': 999 },
   'Human': { 'Assassin': 15, 'Druid': 14, 'Cleric': 999, 'Fighter': 999, 'Illusionist': 999, 'Magic User': 999, 'Paladin': 999, 'Ranger': 999, 'Thief': 999 },
 };
+
+// THAC0 by class group, indexed by level band: levels 1–2, 3–4, … 17–18, 19+.
+// Same values as the GM screen reference table (game-masters-screen.component.ts).
+const THAC0_BANDS: Record<string, number[]> = {
+  'Fighter':     [20, 18, 16, 14, 12, 10, 8, 6, 4, 2],
+  'Paladin':     [20, 18, 16, 14, 12, 10, 8, 6, 4, 2],
+  'Ranger':      [20, 18, 16, 14, 12, 10, 8, 6, 4, 2],
+  'Cleric':      [20, 20, 18, 18, 16, 14, 12, 10, 8, 8],
+  'Druid':       [20, 20, 18, 18, 16, 14, 12, 10, 8, 8],
+  'Thief':       [20, 20, 18, 18, 16, 16, 14, 14, 12, 12],
+  'Assassin':    [20, 20, 18, 18, 16, 16, 14, 14, 12, 12],
+  'Magic User':  [20, 20, 20, 18, 18, 16, 16, 14, 14, 12],
+  'Illusionist': [20, 20, 20, 18, 18, 16, 16, 14, 14, 12],
+};
+
+export function getOsricThac0(className: string | undefined, level: number): number {
+  const bands = THAC0_BANDS[className ?? ''];
+  if (!bands) return 20;
+  const band = Math.min(9, Math.floor((Math.max(1, level) - 1) / 2));
+  return bands[band];
+}
+
+// Monster HD → equivalent fighter level for attack rolls (OSRIC attack matrix).
+// HD n maps to level n+1 (1 HD = 2, 2 HD = 3, …); sub-1 HD creatures attack at level 1.
+// HD itself is derived from hit points (monsters store HP only): average 4.5 HP per die.
+export function getOsricMonsterAttackLevel(maxHitPoints: number): number {
+  const hd = Math.max(1, Math.round(maxHitPoints / 4.5));
+  return Math.min(21, hd + 1);
+}
 
 // OSRIC 3.0 Fighter per-level attack progression (attacks per round, represented as multiplier × /2)
 // Levels 1–6: 1/1 (one full attack); Levels 7–12: 3/2 (three attacks per two rounds); Levels 13+: 2/1 (two full attacks)
@@ -456,13 +493,13 @@ const WEAPON_LIST: WeaponDefinition[] = [
   { name: 'Long Sword',        damage: '1d8',    defaultSkill: 'Melee', strikeRank: 0, encumbrance: 7,  hitPoints: 14, minSTR: 0, minDEX: 0, cost: 15, isMissile: false, canParry: true  },
   { name: 'Battle Axe',        damage: '1d8',    defaultSkill: 'Melee', strikeRank: 0, encumbrance: 7,  hitPoints: 12, minSTR: 0, minDEX: 0, cost: 5,  isMissile: false, canParry: false },
   { name: 'Mace (Heavy)',      damage: '1d6+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 10, hitPoints: 10, minSTR: 0, minDEX: 0, cost: 10, isMissile: false, canParry: true  },
-  { name: 'Flail',             damage: '1d6+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 15, hitPoints: 8,  minSTR: 0, minDEX: 0, cost: 3,  isMissile: false, canParry: false },
-  { name: 'Warhammer',         damage: '1d4+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 5,  hitPoints: 10, minSTR: 0, minDEX: 0, cost: 2,  isMissile: false, canParry: false },
+  { name: 'Flail',             damage: '1d6+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 10, hitPoints: 8,  minSTR: 0, minDEX: 0, cost: 3,  isMissile: false, canParry: false },
+  { name: 'Warhammer',         damage: '1d4+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 5,  hitPoints: 10, minSTR: 0, minDEX: 0, cost: 1,  isMissile: false, canParry: false },
   { name: 'Lance',             damage: '2d4+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 15, hitPoints: 12, minSTR: 0, minDEX: 0, cost: 6,  isMissile: false, canParry: false },
   // Two-handed melee
   { name: 'Two-Handed Sword',  damage: '1d10',   defaultSkill: 'Melee', strikeRank: 0, encumbrance: 25, hitPoints: 16, minSTR: 0, minDEX: 0, cost: 30, isMissile: false, canParry: false },
-  { name: 'Halberd',           damage: '1d10',   defaultSkill: 'Melee', strikeRank: 0, encumbrance: 17, hitPoints: 12, minSTR: 0, minDEX: 0, cost: 9,  isMissile: false, canParry: false },
-  { name: 'Pole Arm',          damage: '1d6+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 15, hitPoints: 12, minSTR: 0, minDEX: 0, cost: 7,  isMissile: false, canParry: false },
+  { name: 'Halberd',           damage: '1d10',   defaultSkill: 'Melee', strikeRank: 0, encumbrance: 18, hitPoints: 12, minSTR: 0, minDEX: 0, cost: 9,  isMissile: false, canParry: false },
+  { name: 'Pole Arm',          damage: '1d6+1',  defaultSkill: 'Melee', strikeRank: 0, encumbrance: 8,  hitPoints: 12, minSTR: 0, minDEX: 0, cost: 6,  isMissile: false, canParry: false },
   // Ranged
   { name: 'Short Bow',         damage: '1d6',    defaultSkill: 'Missile', strikeRank: 0, encumbrance: 8,  hitPoints: 8,  minSTR: 0, minDEX: 0, cost: 15, isMissile: true,  range: '50/100',  rateOfFire: 2, canParry: false },
   { name: 'Long Bow',          damage: '1d6',    defaultSkill: 'Missile', strikeRank: 0, encumbrance: 12, hitPoints: 10, minSTR: 0, minDEX: 0, cost: 60, isMissile: true,  range: '70/140',  rateOfFire: 2, canParry: false },
@@ -488,7 +525,7 @@ export class OsricRules implements GameSystemRules {
     equipment: EquipmentItem[],
     weapons: Weapon[],
     shields: Shield[],
-    _background?: BackgroundForBonuses,
+    background?: BackgroundForBonuses,
     armorType?: string
   ): DerivedStats {
     const con = stats.CON;
@@ -496,11 +533,12 @@ export class OsricRules implements GameSystemRules {
     const dex = stats.DEX;
 
     // Base HP: average Fighter (d10) at level 1 + CON modifier. Player adjusts per class/level.
-    const conMod = getConHpModifier(con);
+    const conMod = getConHpModifier(con, background?.occupation || undefined);
     const maxHitPoints = Math.max(1, 6 + conMod);
 
     // Armor Class: base from worn armor, improved by Dex and shield(s)
-    const baseAc = OSRIC_ARMOR_TYPES.find(a => a.name === armorType)?.points ?? 10;
+    const armorDef = OSRIC_ARMOR_TYPES.find(a => a.name === armorType);
+    const baseAc = armorDef?.points ?? 10;
     const dexMod = getDexAcModifier(dex);
     const shieldBonus = shields.length;
     const ac = Math.max(-10, baseAc - dexMod - shieldBonus);
@@ -516,7 +554,8 @@ export class OsricRules implements GameSystemRules {
       const def = SHIELD_LIST.find(sd => sd.name === s.name);
       return sum + (def?.encumbrance ?? 0);
     }, 0);
-    const totalENC = equipmentENC + weaponsENC + shieldENC;
+    const armorENC = armorDef?.encumbrance ?? 0;
+    const totalENC = equipmentENC + weaponsENC + shieldENC + armorENC;
 
     // Effective weight for tier lookup: subtract STR bonus from carried weight
     const strAdj = maxEncumbrance - 150;
@@ -528,6 +567,8 @@ export class OsricRules implements GameSystemRules {
     else if (effectiveENC > 70)  movementRate = 6;
     else if (effectiveENC > 35)  movementRate = 9;
     else                         movementRate = 12;
+    // Armor independently caps max movement regardless of weight carried
+    movementRate = Math.min(movementRate, armorDef?.maxMove ?? 12);
 
     // STR bonus string (hit/damage) and DEX missile attack adjustment
     const strBonus = getStrBonus(str);
@@ -627,8 +668,8 @@ export class OsricRules implements GameSystemRules {
     return CLASS_HIT_DICE[className] ?? null;
   }
 
-  getConHpModifier(con: number): number {
-    return getConHpModifier(con);
+  getConHpModifier(con: number, className?: string): number {
+    return getConHpModifier(con, className);
   }
 
   getMaxCharacterLevel(race: string, className: string): number {
@@ -652,6 +693,28 @@ export class OsricRules implements GameSystemRules {
     return isRanged ? getDexMissileModifier(stats.DEX) : getStrToHitBonus(stats.STR);
   }
 
+  // THAC0: characters by class/level; monsters attack as fighters of their HD-equivalent level.
+  getD20AttackTarget(attacker: { className?: string; level?: number; monsterMaxHp?: number }): number {
+    if (attacker.monsterMaxHp !== undefined) {
+      return getOsricThac0('Fighter', getOsricMonsterAttackLevel(attacker.monsterMaxHp));
+    }
+    return getOsricThac0(attacker.className, attacker.level ?? 1);
+  }
+
+  // Fighters follow the per-level progression table; Paladins and Rangers gain
+  // 3/2 attacks at level 8. A 3/2 rate grants the extra attack on odd rounds.
+  getMeleeAttacksPerRound(className: string | undefined, level: number, roundNumber: number): number {
+    let progression = { attacks: 1, perRounds: 1 };
+    if (className === 'Fighter') {
+      progression = this.getFighterAttackProgression(level);
+    } else if ((className === 'Paladin' || className === 'Ranger') && level >= 8) {
+      progression = { attacks: 3, perRounds: 2 };
+    }
+    if (progression.perRounds === 1) return progression.attacks;
+    // 3 attacks per 2 rounds → 2 on odd rounds, 1 on even rounds
+    return roundNumber % 2 === 1 ? 2 : 1;
+  }
+
   usesStrikeRank(): boolean { return false; }
   getInitiativeLabel(): string { return 'Initiative'; }
   getMovementInitiativeCost(_meters: number): number { return 0; }
@@ -669,6 +732,12 @@ export class OsricRules implements GameSystemRules {
   getSystemName(): string { return 'OSRIC'; }
   getStatRange(): { min: number; max: number } { return { min: 1, max: 30 }; }
   canRollStats(): boolean { return true; }
+
+  // OSRIC ability generation: 3d6 per ability
+  rollStat(_stat: keyof CharacterStats): number {
+    const d6 = () => Math.floor(Math.random() * 6) + 1;
+    return d6() + d6() + d6();
+  }
   showsMagicPoints(): boolean { return false; }
   getMagicPointsLabel(): string { return ''; }
   showsDamageBonus(): boolean { return true; }

@@ -38,3 +38,8 @@
     text-align: center;
     white-space: nowrap;
 }
+
+.level-cap-warning {
+    color: var(--color-warning-dark);
+    font-weight: var(--font-weight-semibold);
+}

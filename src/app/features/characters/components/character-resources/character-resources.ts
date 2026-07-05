@@ -13,6 +13,8 @@ import { GameSystemService } from '@shared/services/game-system.service';
 })
 export class CharacterResources {
   @Input() resources!: Resources;
+  /** Race/class level cap (OSRIC); level input warns when exceeded. Absent = no cap. */
+  @Input() levelCap?: number;
 
   constructor(public gameSystemService: GameSystemService) {}
 
@@ -22,5 +24,9 @@ export class CharacterResources {
 
   getResourceKeys(): { key: keyof Resources; label: string; hint?: string }[] {
     return this.gameSystemService.getRules().getResourceFields();
+  }
+
+  isOverLevelCap(key: keyof Resources): boolean {
+    return key === 'level' && this.levelCap !== undefined && (this.resources.level ?? 0) > this.levelCap;
   }
 }

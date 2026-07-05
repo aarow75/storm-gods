@@ -25,6 +25,7 @@ interface PendingAttack {
   defender: CombatParticipant;
   rawDamage: number;
   damageBreakdown: string;
+  damageNotation: string;     // original dice notation (rerolled on Kal-Arath critical dodge failures)
   hitLocation: string | undefined;
   locationRoll: number | undefined;
   attackRoll: number;
@@ -84,6 +85,21 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     return this.rules.getInitiativeMechanic?.() ?? { kind: 'strike-rank' };
   }
   get usesRolledInitiative(): boolean { return this.initiativeMechanic.kind !== 'strike-rank'; }
+
+  /** Which defensive reactions this system offers (Kal-Arath is dodge-only). */
+  get defenseOptions(): { parry: boolean; dodge: boolean } {
+    if (!this.rules.usesParryDodge()) return { parry: false, dodge: false };
+    return this.rules.getDefenseOptions?.() ?? { parry: true, dodge: true };
+  }
+
+  private get toHitMechanic(): ToHitMechanic {
+    return this.rules.getToHitMechanic?.() ?? { type: 'percentile' };
+  }
+
+  /** Roll weapon damage, honoring systems where damage dice explode (Kal-Arath). */
+  private rollDamage(notation: string): { total: number; breakdown: string } {
+    return this.diceService.rollDiceNotation(notation, { explode: this.rules.damageDiceExplode?.() ?? false });
+  }
 
   private saveTimeout: ReturnType<typeof setTimeout> | null = null;
   private readonly SAVE_DELAY_MS = 300;
@@ -368,9 +384,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       id: `bestiary-${bm.id}`,
       name: bm.name,
       hitPoints: bm.hitPoints,
-      // The SIZ/DEX strike-rank formula is RuneQuest-only; other systems roll initiative
+      // The SIZ/DEX strike-rank formula is RuneQuest-only; BRP orders by pure DEX
+      // (rank = 20 − DEX so ascending sort puts the highest DEX first); other
+      // systems roll initiative
       strikeRank: this.rules.usesStrikeRank()
-        ? getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX)
+        ? (this.gameSystemService.gameSystem() === 'brp'
+            ? Math.max(0, 20 - bm.stats.DEX)
+            : getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX))
         : 0,
       armor: getMonsterCombatArmor(bm, this.gameSystemService.gameSystem()),
       weapons: bm.attacks.map(a => ({
@@ -466,8 +486,23 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
   getWeaponRateOfFire(participant: CombatParticipant): number {
     const def = this.weaponList.find(w => w.name === participant.selectedWeapon);
-    if (!def?.isMissile) return Infinity; // melee: unlimited within pendingAttack constraint
+    if (!def?.isMissile) return this.getMeleeAttacksAllowed(participant);
     return def.rateOfFire ?? 1;
+  }
+
+  // Melee attacks allowed this round: multi-attack systems (OSRIC fighter
+  // progression) provide a per-round count; others are unlimited within the
+  // pendingAttack constraint.
+  private getMeleeAttacksAllowed(participant: CombatParticipant): number {
+    if (!this.rules.getMeleeAttacksPerRound) return Infinity;
+    const round = Math.max(1, this.currentRound); // before Start Turns, treat as round 1
+    if (participant.type === 'character') {
+      const character = this.characters.find(c => c.id === participant.characterId);
+      return this.rules.getMeleeAttacksPerRound(
+        character?.background?.occupation, character?.resources?.level ?? 1, round
+      );
+    }
+    return this.rules.getMeleeAttacksPerRound(undefined, 1, round);
   }
 
   hasAttacksRemaining(participant: CombatParticipant): boolean {
@@ -480,6 +515,15 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const def = this.weaponList.find(w => w.name === participant.selectedWeapon);
     if (!def?.isMissile) return null;
     return { range: def.range ?? '-', rof: def.rateOfFire ?? 1 };
+  }
+
+  // Shown only for multi-attack melee combatants (e.g. high-level OSRIC fighters).
+  getMeleeAttackInfo(participant: CombatParticipant): { allowed: number } | null {
+    const def = this.weaponList.find(w => w.name === participant.selectedWeapon);
+    if (def?.isMissile) return null;
+    const allowed = this.getMeleeAttacksAllowed(participant);
+    if (!isFinite(allowed) || allowed <= 1) return null;
+    return { allowed };
   }
 
   resetRound(): void {
@@ -730,12 +774,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const attackBonus = stats ? (this.rules.getD20AttackBonus?.(stats, isRanged) ?? 0) : 0;
       const d20Roll = Math.floor(Math.random() * 20) + 1;
       const defenderAC = this.getDefenderAC(opponent);
-      const targetRoll = 20 - defenderAC;
+      const thac0 = this.getAttackerThac0(participant);
+      const targetRoll = thac0 - defenderAC;
       const isHit = (d20Roll + attackBonus) >= targetRoll;
 
       const bonusStr = attackBonus > 0 ? `+${attackBonus}` : attackBonus < 0 ? `${attackBonus}` : '';
       const rollDisplay = bonusStr ? `${d20Roll}${bonusStr}=${d20Roll + attackBonus}` : `${d20Roll}`;
-      const hitDisplay = `d20: ${rollDisplay} vs AC ${defenderAC}`;
+      const hitDisplay = `d20: ${rollDisplay} vs AC ${defenderAC} (THAC0 ${thac0})`;
 
       if (!isHit) {
         this.combatLogService.addEntry(
@@ -747,19 +792,19 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         });
         this.saveCombat();
         this.focusNextRollButton();
-        this.endTurn(participant.id);
+        if (!this.hasAttacksRemaining(participant)) this.endTurn(participant.id);
         return;
       }
 
-      const result = this.diceService.rollDiceNotation(damage);
+      const result = this.rollDamage(damage);
       this.pendingAttack = {
         attacker: participant, defender: opponent,
-        rawDamage: result.total, damageBreakdown: result.breakdown,
+        rawDamage: result.total, damageBreakdown: result.breakdown, damageNotation: damage,
         hitLocation: undefined, locationRoll: undefined,
         attackRoll: d20Roll, attackSkill: targetRoll,
         attackRollDisplay: `${hitDisplay} — hit!`,
       };
-      this.endTurn(participant.id);
+      if (!this.hasAttacksRemaining(participant)) this.endTurn(participant.id);
       this.lastMissResult.delete(participant.id);
       if (!this.rules.usesParryDodge()) { this.resolveNoDefense(); return; }
       setTimeout(() => this.takeHitBtn?.nativeElement?.focus(), 0);
@@ -787,10 +832,10 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const result = this.diceService.rollDiceNotation(damage);
+      const result = this.rollDamage(damage);
       this.pendingAttack = {
         attacker: participant, defender: opponent,
-        rawDamage: result.total, damageBreakdown: result.breakdown,
+        rawDamage: result.total, damageBreakdown: result.breakdown, damageNotation: damage,
         hitLocation: undefined, locationRoll: undefined,
         attackRoll, attackSkill,
         attackRollDisplay: `${hitDisplay} — hit!`,
@@ -833,17 +878,17 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       }
 
       // Critical success doubles the damage dice: roll the notation twice.
-      const result = this.diceService.rollDiceNotation(damage);
+      const result = this.rollDamage(damage);
       let rawDamage = result.total;
       let damageBreakdown = result.breakdown;
       if (isCrit) {
-        const critRoll = this.diceService.rollDiceNotation(damage);
+        const critRoll = this.rollDamage(damage);
         rawDamage += critRoll.total;
         damageBreakdown = `${result.breakdown} + ${critRoll.breakdown} (CRIT — dice doubled)`;
       }
       this.pendingAttack = {
         attacker: participant, defender: opponent,
-        rawDamage, damageBreakdown,
+        rawDamage, damageBreakdown, damageNotation: damage,
         hitLocation: undefined, locationRoll: undefined,
         attackRoll: d1 + d2, attackSkill,
         attackRollDisplay: isCrit ? `${hitDisplay} — CRITICAL HIT (double 6s)!` : `${hitDisplay} — hit!`,
@@ -879,13 +924,13 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const result = this.diceService.rollDiceNotation(damage);
+    const result = this.rollDamage(damage);
     const usesLocations = this.gameSystemService.getRules().usesHitLocations();
     const { roll, location } = usesLocations ? this.rollLocation() : { roll: undefined, location: undefined };
 
     this.pendingAttack = {
       attacker: participant, defender: opponent,
-      rawDamage: result.total, damageBreakdown: result.breakdown,
+      rawDamage: result.total, damageBreakdown: result.breakdown, damageNotation: damage,
       hitLocation: location, locationRoll: roll,
       attackRoll, attackSkill,
       attackRollDisplay: `${checkLabel}Rolled ${attackRoll} vs ${attackSkill}%`,
@@ -997,6 +1042,12 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // ── Dragonbane: d20 ≤ weapon/Shields skill; success negates the damage ───
+    if (this.toHitMechanic.type === 'd20-under') {
+      this.resolveD20Parry();
+      return;
+    }
+
     const baseParrySkill = this.getEffectiveParrySkill(defender);
     const charBonus = this.getTotalParryBonus(defender);
     const penalty = this.getParryPenalty(defender, attacker.id);
@@ -1072,8 +1123,65 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.focusNextRollButton();
   }
 
+  // Dragonbane parry reaction: d20 ≤ weapon/Shields skill. Success negates the damage.
+  // Dragon (1) = free counterattack opportunity; Demon (20) = parry fails and the
+  // weapon/shield loses a point of Durability.
+  private resolveD20Parry(): void {
+    if (!this.pendingAttack) return;
+    const { attacker, defender, rawDamage, damageBreakdown } = this.pendingAttack;
+
+    const skill = this.getEffectiveParrySkill(defender);
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const isDragon = roll === 1;
+    const isDemon = roll === 20;
+    const success = !isDemon && roll <= skill;
+
+    if (success) {
+      let logEntry = `[PARRY] ${defender.name} parries with ${defender.selectedParryItem}! (d20: ${roll} vs ${skill}) — damage negated`;
+      if (isDragon) logEntry += `. DRAGON ROLL — ${defender.name} may make a free counterattack!`;
+      this.combatLogService.addEntry(logEntry);
+      this.lastDamageRolls.set(attacker.id, {
+        total: rawDamage, breakdown: damageBreakdown,
+        finalDamage: 0, armorAbsorbed: 0, targetName: defender.name
+      });
+    } else {
+      const armor = this.getArmorValue(defender);
+      const finalDamage = Math.max(0, rawDamage - armor);
+      let logEntry = `[PARRY FAILED] ${defender.name} fails to parry (d20: ${roll} vs ${skill}): ${finalDamage} damage`;
+      if (isDemon) logEntry += `. DEMON ROLL — ${defender.selectedParryItem} loses 1 Durability!`;
+      this.combatLogService.addEntry(logEntry);
+
+      const { justDied } = this.applyDamageToDefender(defender, finalDamage, undefined);
+      if (justDied) {
+        attacker.kills = (attacker.kills || 0) + 1;
+        this.combatLogService.addEntry(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
+      }
+      this.lastDamageRolls.set(attacker.id, {
+        total: rawDamage, breakdown: damageBreakdown,
+        finalDamage, armorAbsorbed: armor, targetName: defender.name
+      });
+    }
+
+    this.applyCreatureConditions(defender, attacker);
+    this.pendingAttack = null;
+    this.saveCombat();
+    this.focusNextRollButton();
+  }
+
   resolveDodge(): void {
     if (!this.pendingAttack) return;
+
+    // ── Dragonbane: d20 ≤ EVADE; Demon (20) = fall prone ─────────────────────
+    if (this.toHitMechanic.type === 'd20-under') {
+      this.resolveD20Dodge();
+      return;
+    }
+    // ── Kal-Arath: 2d6 + AGI ≥ 8; double-1 = enemy damage dice doubled ───────
+    if (this.toHitMechanic.type === '2d6-over') {
+      this.resolve2d6Dodge();
+      return;
+    }
+
     const { attacker, defender, rawDamage, damageBreakdown, hitLocation, locationRoll } = this.pendingAttack;
     const locationInfo = hitLocation ? ` (d20:${locationRoll} = ${hitLocation})` : '';
 
@@ -1128,6 +1236,106 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.focusNextRollButton();
   }
 
+  // Dragonbane dodge reaction: d20 ≤ EVADE avoids the hit entirely.
+  // Demon (20) = the dodge fails and the defender falls prone.
+  private resolveD20Dodge(): void {
+    if (!this.pendingAttack) return;
+    const { attacker, defender, rawDamage, damageBreakdown } = this.pendingAttack;
+
+    const skill = this.getEffectiveDodgeSkill(defender);
+    const roll = Math.floor(Math.random() * 20) + 1;
+    const isDemon = roll === 20;
+    const success = !isDemon && roll <= skill;
+
+    if (success) {
+      this.combatLogService.addEntry(
+        `[DODGE] ${defender.name} evades! (d20: ${roll} vs ${skill})`
+      );
+      this.lastDamageRolls.set(attacker.id, {
+        total: rawDamage, breakdown: damageBreakdown,
+        finalDamage: 0, armorAbsorbed: 0, targetName: defender.name
+      });
+    } else {
+      const armor = this.getArmorValue(defender);
+      const finalDamage = Math.max(0, rawDamage - armor);
+      let logEntry = `[DODGE FAILED] ${defender.name} fails to evade (d20: ${roll} vs ${skill}): ${finalDamage} damage`;
+      if (isDemon) logEntry += `. DEMON ROLL — ${defender.name} falls prone!`;
+      this.combatLogService.addEntry(logEntry);
+
+      const { justDied } = this.applyDamageToDefender(defender, finalDamage, undefined);
+      if (justDied) {
+        attacker.kills = (attacker.kills || 0) + 1;
+        this.combatLogService.addEntry(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
+      }
+      this.lastDamageRolls.set(attacker.id, {
+        total: rawDamage, breakdown: damageBreakdown,
+        finalDamage, armorAbsorbed: armor, targetName: defender.name
+      });
+    }
+
+    this.applyCreatureConditions(defender, attacker);
+    this.pendingAttack = null;
+    this.saveCombat();
+    this.focusNextRollButton();
+  }
+
+  // Kal-Arath dodge: 2d6 + AGI vs 8. Double-6 always dodges; double-1 is a critical
+  // failure — the attacker's damage dice are doubled (the notation is rolled again).
+  private resolve2d6Dodge(): void {
+    if (!this.pendingAttack || this.toHitMechanic.type !== '2d6-over') return;
+    const { attacker, defender, rawDamage, damageBreakdown, damageNotation } = this.pendingAttack;
+    const mechanic = this.toHitMechanic;
+
+    // AGI is stored in the mechanic's missile stat field (DEX) for Kal-Arath
+    const agi = this.getParticipantStats(defender)?.[mechanic.missileStat] ?? 1;
+    const d1 = Math.floor(Math.random() * 6) + 1;
+    const d2 = Math.floor(Math.random() * 6) + 1;
+    const total = d1 + d2 + agi;
+    const isCrit = d1 === 6 && d2 === 6;
+    const isFumble = d1 === 1 && d2 === 1;
+    const success = isCrit || (!isFumble && total >= mechanic.target);
+    const agiStr = agi > 0 ? `+${agi}` : agi < 0 ? `${agi}` : '';
+    const rollDisplay = `2d6+AGI: ${d1}+${d2}${agiStr} = ${total} vs ${mechanic.target}+`;
+
+    if (success) {
+      this.combatLogService.addEntry(
+        `[DODGE] ${defender.name} dodges! (${rollDisplay})${isCrit ? ' — CRITICAL SUCCESS (double 6s)!' : ''}`
+      );
+      this.lastDamageRolls.set(attacker.id, {
+        total: rawDamage, breakdown: damageBreakdown,
+        finalDamage: 0, armorAbsorbed: 0, targetName: defender.name
+      });
+    } else {
+      let damage = rawDamage;
+      let breakdown = damageBreakdown;
+      if (isFumble) {
+        const extra = this.rollDamage(damageNotation);
+        damage += extra.total;
+        breakdown = `${damageBreakdown} + ${extra.breakdown} (CRITICAL FAILURE — dice doubled)`;
+      }
+      const armor = this.getArmorValue(defender);
+      const finalDamage = Math.max(0, damage - armor);
+      const failText = isFumble ? 'CRITICAL FAILURE (double 1s) — damage dice doubled!' : 'fails to dodge';
+      this.combatLogService.addEntry(
+        `[DODGE FAILED] ${defender.name} ${failText} (${rollDisplay}): ${finalDamage} damage`
+      );
+
+      const { justDied } = this.applyDamageToDefender(defender, finalDamage, undefined);
+      if (justDied) {
+        attacker.kills = (attacker.kills || 0) + 1;
+        this.combatLogService.addEntry(`[SLAIN] ${defender.name} was slain by ${attacker.name}!`);
+      }
+      this.lastDamageRolls.set(attacker.id, {
+        total: damage, breakdown, finalDamage, armorAbsorbed: armor, targetName: defender.name
+      });
+    }
+
+    this.applyCreatureConditions(defender, attacker);
+    this.pendingAttack = null;
+    this.saveCombat();
+    this.focusNextRollButton();
+  }
+
   // ── Core damage application ──────────────────────────────────────────────
 
   private applyDamageToDefender(
@@ -1147,11 +1355,21 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const prevDmg = defender.locationDamage[location] ?? 0;
       defender.locationDamage[location] = prevDmg + damage;
 
+      // RQ2 Damage Results: reaching 0 location HP disables the location (limb useless /
+      // knocked unconscious); reaching −(location max) — i.e. double its HP in damage —
+      // severs a limb or instantly kills through a vital (fatal) location.
       const locMax = this.getLocationMaxHP(defender, location);
-      if (locMax > 0 && defender.locationDamage[location] >= locMax && prevDmg < locMax) {
+      const effect = this.rules.getLocationEffects()?.[location];
+      const newDmg = defender.locationDamage[location];
+      if (locMax > 0 && newDmg >= locMax * 2 && prevDmg < locMax * 2) {
         locationMaxed = true;
-        locationEffect = this.rules.getLocationEffects()?.[location]?.label ?? '';
-        locationFatal = this.rules.getLocationEffects()?.[location]?.fatal ?? false;
+        locationFatal = effect?.fatal ?? false;
+        locationEffect = locationFatal
+          ? 'Location destroyed — INSTANT DEATH'
+          : 'Limb severed or irrevocably crushed';
+      } else if (locMax > 0 && newDmg >= locMax && prevDmg < locMax) {
+        locationMaxed = true;
+        locationEffect = effect?.label ?? '';
       }
     }
 
@@ -1187,18 +1405,47 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
       const parryItem = participant.selectedParryItem;
       if (!parryItem) return 0;
       const shield = character.shields?.find(s => s.name === parryItem);
-      if (shield) return character.skills['Shield'] || 0;
+      if (shield) {
+        // RQ2 shields add their Defense Bonus (+15/20/25%) to the parry roll
+        const shieldBonus = this.shieldList.find(sd => sd.name === shield.name)?.parryBonus ?? 0;
+        const skill = character.skills[shield.skill] ?? character.skills['Shield'] ?? 0;
+        return skill + shieldBonus;
+      }
       const weapon = character.weapons.find(w => w.name === parryItem);
       return weapon ? (character.skills[weapon.skill] || 0) : 0;
     }
-    return 40;
+    // Default monster parry calibrated to ~40% per mechanic
+    return this.toHitMechanic.type === 'd20-under' ? 8 : 40;
   }
 
   getEffectiveDodgeSkill(participant: CombatParticipant): number {
+    const dodgeSkill = this.rules.getDodgeSkillName?.() ?? 'Dodge';
     if (participant.type === 'character') {
-      return this.characters.find(c => c.id === participant.characterId)?.skills['Dodge'] || 0;
+      return this.characters.find(c => c.id === participant.characterId)?.skills[dodgeSkill] || 0;
     }
-    return 15;
+    // Default monster dodge calibrated to ~15-25% per mechanic
+    return this.toHitMechanic.type === 'd20-under' ? 5 : 15;
+  }
+
+  /** Human-readable parry chance for the defense button, per the system's mechanic. */
+  getParryDisplayLabel(participant: CombatParticipant, attackerId: string): string {
+    const skill = this.getEffectiveParrySkill(participant);
+    if (this.toHitMechanic.type === 'd20-under') return `d20 vs ${skill}`;
+    const total = skill + this.getTotalParryBonus(participant) - this.getParryPenalty(participant, attackerId);
+    return `${total}%`;
+  }
+
+  /** Human-readable dodge chance for the defense button, per the system's mechanic. */
+  getDodgeDisplayLabel(participant: CombatParticipant): string {
+    if (this.toHitMechanic.type === '2d6-over') {
+      const mechanic = this.toHitMechanic;
+      const agi = this.getParticipantStats(participant)?.[mechanic.missileStat] ?? 1;
+      const agiStr = agi >= 0 ? `+${agi}` : `${agi}`;
+      return `2d6${agiStr} vs ${mechanic.target}+`;
+    }
+    const skill = this.getEffectiveDodgeSkill(participant);
+    if (this.toHitMechanic.type === 'd20-under') return `d20 vs ${skill}`;
+    return `${skill + this.getDodgeBonus(participant)}%`;
   }
 
   getEncPenalty(participant: CombatParticipant): number {
@@ -1211,6 +1458,20 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
   private getParticipantStats(participant: CombatParticipant): CharacterStats | null {
     if (participant.type !== 'character') return null;
     return this.characters.find(c => c.id === participant.characterId)?.stats ?? null;
+  }
+
+  // THAC0 for d20-over-ac systems: characters by class/level, monsters by
+  // HD-equivalent level (derived from max HP). 20 when the rules don't say.
+  private getAttackerThac0(participant: CombatParticipant): number {
+    if (!this.rules.getD20AttackTarget) return 20;
+    if (participant.type === 'character') {
+      const character = this.characters.find(c => c.id === participant.characterId);
+      return this.rules.getD20AttackTarget({
+        className: character?.background?.occupation,
+        level: character?.resources?.level ?? 1,
+      });
+    }
+    return this.rules.getD20AttackTarget({ monsterMaxHp: participant.maxHitPoints });
   }
 
   getTotalAttackBonus(participant: CombatParticipant): number {
@@ -1237,8 +1498,15 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const mechanic = this.rules.getToHitMechanic?.() ?? { type: 'percentile' as const };
     if (participant.type === 'character') {
       if (mechanic.type === 'percentile-under-stat') {
-        // Mothership: roll under the raw Combat stat, not a weapon skill
+        // Mothership: roll under the Combat stat plus the applicable combat skill
+        // bonus (Firearms for ranged weapons, Close-Quarters Combat for melee)
         baseSkill = this.getParticipantStats(participant)?.[mechanic.stat] ?? 0;
+        const character = this.characters.find(c => c.id === participant.characterId);
+        if (character) {
+          const isRanged = this.weaponList.find(w => w.name === participant.selectedWeapon)?.isMissile ?? false;
+          const skillName = isRanged ? 'Firearms' : 'Close-Quarters Combat';
+          baseSkill += character.skills[skillName] ?? 0;
+        }
       } else if (mechanic.type === '2d6-over') {
         // Kal-Arath: stat bonus by weapon type (STR melee / AGI missile)
         const isRanged = this.weaponList.find(w => w.name === participant.selectedWeapon)?.isMissile ?? false;
@@ -1514,9 +1782,11 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
 
       // AC affects the to-hit roll; a save is rolled in resolveNoDefense — neither reduces damage here
       if (this.armorModel.kind === 'ac' || this.armorModel.kind === 'save') return 0;
-      // Dragonbane, Kal-Arath: flat Armor Rating subtracts from damage
+      // Dragonbane, Kal-Arath: flat Armor Rating subtracts from damage; a carried shield adds its rating
       const armorDef = this.rules.getArmorTypes().find(a => a.name === character.armorType);
-      return armorDef?.points ?? 0;
+      const shieldPoints = (character.shields ?? []).reduce((sum, s) =>
+        sum + (this.shieldList.find(sd => sd.name === s.name)?.armorPoints ?? 0), 0);
+      return (armorDef?.points ?? 0) + shieldPoints;
     }
     // Monsters: armor is AC (OSRIC) or an Armor Save target (Mothership), not damage reduction
     if (this.armorModel.kind === 'ac' || this.armorModel.kind === 'save') return 0;

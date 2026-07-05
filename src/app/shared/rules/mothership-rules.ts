@@ -119,11 +119,15 @@ const SKILL_CATEGORIES: SkillCategory[] = [
   },
 ];
 
-// Starting saves and skills by class (occupation in the background model)
+// Starting saves and skills by class (occupation in the background model).
+// Where the rules say "pick one/two", the listed defaults are applied and the
+// player may swap them for another allowed choice. Bonus skill points
+// (Teamster +4, Scientist +3, Android +2, Marine +3) are spent manually.
 const CLASS_STARTING_SKILLS: Record<string, Record<string, number>> = {
   'Teamster': {
     'Sanity Save': 30, 'Fear Save': 35, 'Body Save': 30, 'Armor Save': 35,
-    'Zero-G': 10, 'Mechanical Repair': 10,
+    // Zero-G + Mechanical Repair, plus one of Heavy Machinery or Piloting
+    'Zero-G': 10, 'Mechanical Repair': 10, 'Heavy Machinery': 10,
   },
   'Android': {
     'Sanity Save': 25, 'Fear Save': 35, 'Body Save': 45, 'Armor Save': 25,
@@ -131,6 +135,8 @@ const CLASS_STARTING_SKILLS: Record<string, Record<string, number>> = {
   },
   'Scientist': {
     'Sanity Save': 40, 'Fear Save': 25, 'Body Save': 25, 'Armor Save': 25,
+    // Pick two of Biology / Agriculture / Geology / Computers / Mathematics / Chemistry
+    'Biology': 10, 'Chemistry': 10,
   },
   'Marine': {
     'Sanity Save': 25, 'Fear Save': 30, 'Body Save': 35, 'Armor Save': 50,
@@ -308,6 +314,13 @@ export class MothershipRules implements GameSystemRules {
   getSystemName(): string { return 'Mothership'; }
   getStatRange(): { min: number; max: number } { return { min: 1, max: 100 }; }
   canRollStats(): boolean { return true; }
+
+  // Mothership stat generation: 6d10 summed
+  rollStat(_stat: keyof CharacterStats): number {
+    let total = 0;
+    for (let i = 0; i < 6; i++) total += Math.floor(Math.random() * 10) + 1;
+    return total;
+  }
   showsMagicPoints(): boolean { return false; }
   getMagicPointsLabel(): string { return ''; }
   showsDamageBonus(): boolean { return false; }

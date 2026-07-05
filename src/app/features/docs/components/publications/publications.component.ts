@@ -5,6 +5,7 @@ import { RUNEQUEST_PUBLICATIONS } from '@docs/constants/runequest-publications.c
 import { DRAGONBANE_PUBLICATIONS } from '@docs/constants/dragonbane-publications.constants';
 import { OSRIC_PUBLICATIONS } from '@docs/constants/osric-publications.constants';
 import { MOTHERSHIP_PUBLICATIONS } from '@docs/constants/mothership-publications.constants';
+import { BRP_PUBLICATIONS } from '@docs/constants/brp-publications.constants';
 import { GameSystemService } from '@shared/services/game-system.service';
 
 @Component({
@@ -24,6 +25,7 @@ export class PublicationsComponent {
     if (this.systemType === 'dragonbane') return DRAGONBANE_PUBLICATIONS;
     if (this.systemType === 'osric') return OSRIC_PUBLICATIONS;
     if (this.systemType === 'mothership') return MOTHERSHIP_PUBLICATIONS;
+    if (this.systemType === 'brp') return BRP_PUBLICATIONS;
     return [];
   }
 
@@ -32,6 +34,19 @@ export class PublicationsComponent {
   get isRunequest() { return this.systemType === 'runequest'; }
   get isOsric() { return this.systemType === 'osric'; }
   get isMothership() { return this.systemType === 'mothership'; }
+  get isBrp() { return this.systemType === 'brp'; }
+
+  get brpCoreRules() {
+    return BRP_PUBLICATIONS.filter(p => p.category === 'rules');
+  }
+
+  get brpGames() {
+    return BRP_PUBLICATIONS.filter(p => p.category === 'game');
+  }
+
+  get brpSupplements() {
+    return BRP_PUBLICATIONS.filter(p => p.category === 'supplement');
+  }
 
   get mothershipCoreRules() {
     return MOTHERSHIP_PUBLICATIONS.filter(p => p.category === 'rules');

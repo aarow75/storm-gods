@@ -57,13 +57,13 @@ describe('CombatService', () => {
       expect(p.initiativeOrder).toBeUndefined();
     });
 
-    it('side-d6: the higher-rolling side acts first', () => {
-      dice.rollD6.mockReturnValueOnce(4).mockReturnValueOnce(2); // party 4, enemies 2
+    it('side-d6: the lower-rolling side acts first (OSRIC)', () => {
+      dice.rollD6.mockReturnValueOnce(2).mockReturnValueOnce(4); // party 2, enemies 4
       const pc = participant({ name: 'pc', type: 'character' });
       const npc = participant({ name: 'npc', type: 'monster' });
       const lines = service.rollInitiativeForRound([pc, npc], { kind: 'side-d6' }, () => stats());
-      expect(pc.initiativeOrder).toBe(-4);
-      expect(npc.initiativeOrder).toBe(-2);
+      expect(pc.initiativeOrder).toBe(2);
+      expect(npc.initiativeOrder).toBe(4);
       expect(lines[0]).toContain('party acts first');
     });
 

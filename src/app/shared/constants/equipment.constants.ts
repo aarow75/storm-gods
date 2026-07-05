@@ -275,3 +275,40 @@ export const MOTHERSHIP_EQUIPMENT_LIST: EquipmentDefinition[] = [
   { name: 'Survey Kit',             category: 'Sensors', cost: 250, hitPoints: 2, encumbrance: 2 },
   { name: 'Locator',                category: 'Sensors', cost: 100, hitPoints: 1, encumbrance: 0 },
 ];
+
+// ─── Basic Role-Playing ───────────────────────────────────────────────────────
+// The 1980 introductory booklet lists no gear prices; costs are plausible
+// silver-piece values for its rural early-fantasy setting.
+export const BRP_EQUIPMENT_LIST: EquipmentDefinition[] = [
+  // Adventuring Gear
+  { name: 'Rope (10m)',          category: 'Adventuring Gear', cost: 3,  hitPoints: 6,  encumbrance: 1 },
+  { name: 'Torch',               category: 'Adventuring Gear', cost: 1,  hitPoints: 1,  encumbrance: 1 },
+  { name: 'Lantern',             category: 'Adventuring Gear', cost: 15, hitPoints: 4,  encumbrance: 1 },
+  { name: 'Oil (flask)',         category: 'Adventuring Gear', cost: 2,  hitPoints: 1,  encumbrance: 1 },
+  { name: 'Flint & Steel',       category: 'Adventuring Gear', cost: 2,  hitPoints: 1,  encumbrance: 0 },
+  { name: 'Bedroll',             category: 'Adventuring Gear', cost: 5,  hitPoints: 3,  encumbrance: 1 },
+  { name: 'Waterskin',           category: 'Adventuring Gear', cost: 2,  hitPoints: 2,  encumbrance: 1 },
+  { name: 'Sack (large)',        category: 'Adventuring Gear', cost: 1,  hitPoints: 2,  encumbrance: 0 },
+  { name: 'Quiver & 20 Arrows',  category: 'Adventuring Gear', cost: 10, hitPoints: 2,  encumbrance: 1 },
+  // Clothing
+  { name: 'Rough Clothes',       category: 'Clothing', cost: 3,  hitPoints: 4, encumbrance: 1 },
+  { name: 'Traveling Clothes',   category: 'Clothing', cost: 10, hitPoints: 4, encumbrance: 1 },
+  { name: 'Cloak',               category: 'Clothing', cost: 5,  hitPoints: 3, encumbrance: 1 },
+  { name: 'Boots',               category: 'Clothing', cost: 8,  hitPoints: 6, encumbrance: 1 },
+  // Food & Provisions
+  { name: 'Meal (1 day)',        category: 'Food & Provisions', cost: 1,  hitPoints: 1, encumbrance: 1 },
+  { name: 'Rations (1 week)',    category: 'Food & Provisions', cost: 6,  hitPoints: 1, encumbrance: 2 },
+  { name: 'Chicken (live)',      category: 'Food & Provisions', cost: 2,  hitPoints: 1, encumbrance: 1 },
+  // Medical
+  { name: 'Bandages',            category: 'Medical', cost: 2,  hitPoints: 1, encumbrance: 0 },
+  { name: 'Healing Potion (5 HP)', category: 'Medical', cost: 100, hitPoints: 1, encumbrance: 0 },
+  // Tools
+  { name: 'Coal Shovel',         category: 'Tools', cost: 3,  hitPoints: 6,  encumbrance: 1 },
+  { name: 'Hammer',              category: 'Tools', cost: 3,  hitPoints: 6,  encumbrance: 1 },
+  { name: 'Crowbar',             category: 'Tools', cost: 5,  hitPoints: 8,  encumbrance: 1 },
+  // Transport & Storage
+  { name: 'Backpack',            category: 'Transport & Storage', cost: 8,   hitPoints: 4,  encumbrance: 1 },
+  { name: 'Mule',                category: 'Transport & Storage', cost: 150, hitPoints: 12, encumbrance: 0 },
+  { name: 'Cart',                category: 'Transport & Storage', cost: 100, hitPoints: 20, encumbrance: 0 },
+  { name: 'Wagon',               category: 'Transport & Storage', cost: 300, hitPoints: 30, encumbrance: 0 },
+];

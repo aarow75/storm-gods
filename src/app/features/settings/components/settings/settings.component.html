@@ -37,6 +37,12 @@
         class="system-toggle-btn system-toggle-ms">
         Mothership
       </button>
+      <button
+        (click)="switchSystem('brp')"
+        [class.active]="gameSystemService.gameSystem() === 'brp'"
+        class="system-toggle-btn system-toggle-brp">
+        Basic Role-Playing
+      </button>
     </div>
   </div>
 

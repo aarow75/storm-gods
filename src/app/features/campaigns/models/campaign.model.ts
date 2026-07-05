@@ -1,7 +1,7 @@
 export interface Campaign {
   id: string;
   name: string;
-  gameSystem: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership';
+  gameSystem: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership' | 'brp';
   startDate: string;
   endDate?: string;
   status: 'active' | 'completed' | 'paused';

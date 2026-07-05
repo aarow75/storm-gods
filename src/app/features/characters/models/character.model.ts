@@ -14,7 +14,7 @@ export interface Character {
   id: string;
   name: string;
   color?: string;
-  gameSystem?: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership';
+  gameSystem?: 'runequest' | 'dragonbane' | 'kal-arath' | 'osric' | 'mothership' | 'brp';
   background: CharacterBackground;
   stats: CharacterStats;
   derivedStats: DerivedStats;
@@ -424,12 +424,13 @@ export function calculateTotalArmor(armorType?: string, shields: Shield[] = []):
   };
 }
 
-export function getConHPModifier(con: number): number {
-  if (con <= 4)  return -2;
-  if (con <= 6)  return -1;
-  if (con <= 12) return 0;
-  if (con <= 16) return 1;
-  if (con <= 20) return 2;
+// RQ2 hit point adjustment by SIZ (RuneQuest Classic Mechanics Reference, HP Modifier tables)
+export function getSizHPModifier(siz: number): number {
+  if (siz <= 4)  return -2;
+  if (siz <= 6)  return -1;
+  if (siz <= 12) return 0;
+  if (siz <= 16) return 1;
+  if (siz <= 20) return 2;
   return 3;
 }
 
@@ -440,23 +441,24 @@ export function getPowHPModifier(pow: number): number {
 }
 
 export function calculateDerivedStats(stats: CharacterStats, equipment: EquipmentItem[] = [], weapons: Weapon[] = [], shields: Shield[] = []): DerivedStats {
-  // RQ2: Total HP = SIZ + HP modifier(CON) + HP modifier(POW)
-  const totalHP = Math.max(1, stats.SIZ + getConHPModifier(stats.CON) + getPowHPModifier(stats.POW));
-  const strSiz = stats.STR + stats.SIZ;
+  // RQ2: Total HP = CON + HP modifier(SIZ) + HP modifier(POW)
+  const totalHP = Math.max(1, stats.CON + getSizHPModifier(stats.SIZ) + getPowHPModifier(stats.POW));
+  const strSizAvg = (stats.STR + stats.SIZ) / 2;
 
-  // Damage Bonus: RQ2 table — 1–6: -1D4, 7–12: none, 13–16: +1D4, 17–20: +1D6, each +8 adds +1D6
+  // Damage Bonus by STR+SIZ average: 1–6: -1D4, 7–12: none, 13–16: +1D4, 17–20: +1D6, each +8 adds +1D6
   let damageBonus = '0';
-  if (strSiz <= 6)  damageBonus = '-1d4';
-  else if (strSiz <= 12) damageBonus = '0';
-  else if (strSiz <= 16) damageBonus = '+1d4';
-  else if (strSiz <= 20) damageBonus = '+1d6';
+  if (strSizAvg <= 6)  damageBonus = '-1d4';
+  else if (strSizAvg <= 12) damageBonus = '0';
+  else if (strSizAvg <= 16) damageBonus = '+1d4';
+  else if (strSizAvg <= 20) damageBonus = '+1d6';
   else {
-    const extraD6 = Math.floor((strSiz - 13) / 8) + 1;
+    const extraD6 = 1 + Math.ceil((strSizAvg - 20) / 8);
     damageBonus = `+${extraD6}d6`;
   }
 
-  // RQ2 spirit combat damage is 1D6 per round for winner; POW affects Spirit Combat skill (POW×3%), not damage
-  const spiritCombatDamage = '1d6';
+  // RQ2 spirit combat damage: D6 + POW HP modifier for the round's winner
+  const powMod = getPowHPModifier(stats.POW);
+  const spiritCombatDamage = powMod > 0 ? `1d6+${powMod}` : powMod < 0 ? `1d6-${-powMod}` : '1d6';
 
   // Strike Rank: base 0 + SIZ modifier + DEX modifier
   let strikeRank = getSizeModifier(stats.SIZ) + getDexterityModifier(stats.DEX);
@@ -480,7 +482,7 @@ export function calculateDerivedStats(stats: CharacterStats, equipment: Equipmen
     magicPoints: stats.POW,
     damageBonus: damageBonus,
     spiritCombatDamage: spiritCombatDamage,
-    healingRate: Math.ceil(stats.CON / 4), // RQG-style (CON/4); RQ2 Classic uses flat 1 HP/week
+    healingRate: 1, // RQ2 Classic natural healing: 1 HP per week per location
     movementRate: movementRate,
     strikeRank: strikeRank,
     maxEncumbrance: maxEncumbrance,
@@ -845,27 +847,35 @@ const SKILL_CATEGORY_MAP: Record<string, string> = {
   'Move Quietly': 'Stealth'
 };
 
-// Calculate skill category modifier from characteristics (RQ2: characteristic modifiers per category)
-// Each skill category gets a modifier based on the average of its tied characteristics
-// Formula: (average of tied characteristics - 10) * 5 / number of characteristics
-export function calculateSkillCategoryModifiers(stats: CharacterStats): Record<string, number> {
-  const calculateModifier = (characteristics: number[]): number => {
-    if (characteristics.length === 0) return 0;
-    const average = characteristics.reduce((a, b) => a + b, 0) / characteristics.length;
-    // Each characteristic point above/below 10 contributes to skill modifiers
-    // Standard range: 3-21, average is ~10-11
-    // Modifier = (average - 10) * 5
-    return Math.round((average - 10) * 5);
-  };
+// RQ2 characteristic modifier table (RuneQuest Classic Mechanics Reference, Ability Modifier Tables):
+// applies to Perception/Knowledge (by INT) and Stealth/Manipulation (by DEX)
+export function getCharacteristicModifier(value: number): number {
+  if (value <= 4)  return -25;
+  if (value <= 6)  return -15;
+  if (value <= 8)  return -10;
+  if (value <= 12) return 0;
+  if (value <= 15) return 5;
+  if (value <= 17) return 10;
+  if (value <= 18) return 15;
+  if (value <= 20) return 20;
+  return 25;
+}
 
+// Skill category modifiers per the RQ2 reference: Perception and Knowledge use the INT
+// table; Stealth and Manipulation (incl. weapon skills) use the DEX table. Agility skills
+// use the DEX-based Defense modifier (same table). The reference defines no modifier for
+// Communication or Magic skills.
+export function calculateSkillCategoryModifiers(stats: CharacterStats): Record<string, number> {
+  const intMod = getCharacteristicModifier(stats.INT);
+  const dexMod = getCharacteristicModifier(stats.DEX);
   return {
-    'Agility': calculateModifier([stats.STR, stats.SIZ, stats.DEX, stats.POW]),
-    'Communication': calculateModifier([stats.INT, stats.POW, stats.CHA]),
-    'Knowledge': calculateModifier([stats.INT, stats.POW]),
-    'Magic': calculateModifier([stats.POW, stats.CHA]),
-    'Manipulation': calculateModifier([stats.STR, stats.DEX, stats.INT, stats.POW]),
-    'Perception': calculateModifier([stats.INT, stats.POW]),
-    'Stealth': calculateModifier([stats.SIZ, stats.DEX, stats.INT, stats.POW])
+    'Agility': dexMod,
+    'Communication': 0,
+    'Knowledge': intMod,
+    'Magic': 0,
+    'Manipulation': dexMod,
+    'Perception': intMod,
+    'Stealth': dexMod
   };
 }
 

@@ -159,6 +159,16 @@ function getAgeModifiers(age: number): Partial<Record<keyof CharacterStats, numb
   return {};
 }
 
+// Age modifiers adjust the attributes themselves, so they must feed HP (CON), WP (WIL),
+// movement (AGL), damage bonus and encumbrance (STR) as well as skill base chances.
+function applyAgeModifiers(stats: CharacterStats, age: number): CharacterStats {
+  const adjusted = { ...stats };
+  for (const [key, delta] of Object.entries(getAgeModifiers(age)) as [keyof CharacterStats, number][]) {
+    adjusted[key] = Math.min(18, Math.max(1, (adjusted[key] ?? 10) + delta));
+  }
+  return adjusted;
+}
+
 export const DB_SPELLS_BY_DISCIPLINE: Record<string, string[]> = {
   'Animism': [
     'Animal Friendship', 'Bewitch Animal', 'Commune with Nature', 'Drain Life Force',
@@ -190,13 +200,14 @@ export class DragonbaneRules implements GameSystemRules {
   }
 
   calculateDerivedStats(
-    stats: CharacterStats,
+    rawStats: CharacterStats,
     equipment: EquipmentItem[],
     weapons: Weapon[],
     shields: Shield[],
     background?: BackgroundForBonuses,
     _armorType?: string
   ): DerivedStats {
+    const stats = applyAgeModifiers(rawStats, background?.age ?? 21);
     const totalHP = stats.CON;
 
     // Encumbrance: max = half STR rounded up; over limit = bane on all physical rolls
@@ -280,11 +291,7 @@ export class DragonbaneRules implements GameSystemRules {
     // Set every skill to its attribute-based chance
     if (stats) {
       // Apply age stat modifiers before computing base chances
-      const mods = getAgeModifiers(background.age);
-      const adjustedStats = { ...stats };
-      for (const [key, delta] of Object.entries(mods) as [keyof CharacterStats, number][]) {
-        adjustedStats[key] = Math.min(18, Math.max(1, (adjustedStats[key] ?? 10) + delta));
-      }
+      const adjustedStats = applyAgeModifiers(stats, background.age);
 
       for (const skill of Object.keys(result)) {
         const attr = SKILL_TO_ATTR[skill];
@@ -330,8 +337,9 @@ export class DragonbaneRules implements GameSystemRules {
     return 'dragonbane';
   }
 
+  // Dragonbane prices are listed in silver
   getCurrencyLabel(): string {
-    return 'GC';
+    return 'S';
   }
 
   getToHitMechanic(): ToHitMechanic { return { type: 'd20-under' }; }
@@ -353,12 +361,23 @@ export class DragonbaneRules implements GameSystemRules {
     return { attack: 0, parry: 0, dodge: 0 };
   }
   getParryRepeatPenalty(): number { return 0; }
-  usesParryDodge(): boolean { return false; }
+
+  // Dragonbane reactions: parry with the weapon/Shields skill or dodge with EVADE.
+  // A successful parry negates the damage; you may parry or dodge, not both.
+  usesParryDodge(): boolean { return true; }
+  getDodgeSkillName(): string { return 'Evade (AGL)'; }
   usesWeaponHP(): boolean { return false; }
 
   getSystemName(): string { return 'Dragonbane'; }
   getStatRange(): { min: number; max: number } { return { min: 1, max: 30 }; }
   canRollStats(): boolean { return true; }
+
+  // Dragonbane attribute generation: 4d6, drop the lowest die
+  rollStat(_stat: keyof CharacterStats): number {
+    const rolls = [0, 0, 0, 0].map(() => Math.floor(Math.random() * 6) + 1);
+    rolls.sort((a, b) => a - b);
+    return rolls[1] + rolls[2] + rolls[3];
+  }
   showsMagicPoints(): boolean { return true; }
   getMagicPointsLabel(): string { return 'WP'; }
   showsDamageBonus(): boolean { return true; }

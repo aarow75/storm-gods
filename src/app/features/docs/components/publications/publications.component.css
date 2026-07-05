@@ -185,6 +185,11 @@
   grid-template-columns: 2fr 45px 120px 40px 1.5fr;
 }
 
+.dragonbane-table .table-header:has(.col-publisher):not(:has(.col-owned)),
+.dragonbane-table .table-row:has(.col-publisher):not(:has(.col-owned)) {
+  grid-template-columns: 2fr 45px 120px 2.5fr;
+}
+
 .dragonbane-table .table-header:has(.col-levels),
 .dragonbane-table .table-row:has(.col-levels) {
   grid-template-columns: 2fr 45px 120px 55px 40px 1.5fr;

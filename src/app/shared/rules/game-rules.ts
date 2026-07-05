@@ -34,6 +34,8 @@ export interface ShieldDefinition {
   encumbrance: number;
   cost: number;
   protectedLocations: string[];
+  /** Percentage added to parry rolls made with this shield (RQ2 shield Defense Bonus). */
+  parryBonus?: number;
 }
 
 export interface HitLocations {
@@ -94,11 +96,12 @@ export const WEAPON_LIST: WeaponDefinition[] = [
   { name: 'Grapple',       damage: 'Special',defaultSkill: 'Unarmed',           strikeRank: 3, encumbrance: 0, hitPoints: 0,  minSTR: 0,  minDEX: 0,  cost: 0,   isMissile: false, canParry: false }
 ];
 
+// RQ2 shields (RuneQuest Classic Mechanics Reference, Shield Statistics): shields grant a
+// parry bonus and absorb damage with their HP when parrying — they do not armor locations.
 export const SHIELD_LIST: ShieldDefinition[] = [
-  { name: 'Target Shield',  armorPoints: 6,  hitPoints: 9,  encumbrance: 1, cost: 30,  protectedLocations: ['Left Arm', 'Chest'] },
-  { name: 'Heater Shield',  armorPoints: 10, hitPoints: 12, encumbrance: 2, cost: 60,  protectedLocations: ['Left Arm', 'Right Arm', 'Chest'] },
-  { name: 'Kite Shield',    armorPoints: 12, hitPoints: 14, encumbrance: 3, cost: 100, protectedLocations: ['Left Arm', 'Right Arm', 'Chest', 'Abdomen'] },
-  { name: 'Tower Shield',   armorPoints: 14, hitPoints: 16, encumbrance: 4, cost: 150, protectedLocations: ['Left Arm', 'Right Arm', 'Chest', 'Abdomen', 'Head'] }
+  { name: 'Small Shield',  armorPoints: 0, hitPoints: 9,  encumbrance: 1, cost: 15, protectedLocations: [], parryBonus: 15 },
+  { name: 'Medium Shield', armorPoints: 0, hitPoints: 12, encumbrance: 2, cost: 20, protectedLocations: [], parryBonus: 20 },
+  { name: 'Large Shield',  armorPoints: 0, hitPoints: 15, encumbrance: 2, cost: 25, protectedLocations: [], parryBonus: 25 }
 ];
 
 // RQ2 armor values (RuneQuest Classic Mechanics Reference, Armor Statistics table)

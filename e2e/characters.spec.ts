@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, goto, seedCharacter } from './helpers';
+import { clearStorage, goto, seedCharacter, buildRuneQuestCharacter } from './helpers';
 
 test.describe('Character List', () => {
   test.beforeEach(async ({ page }) => {
@@ -19,14 +19,14 @@ test.describe('Character List', () => {
   });
 
   test('shows character cards when characters exist', async ({ page }) => {
-    await seedCharacter(page, 'Kallyr Starbrow');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Kallyr Starbrow' }));
     await goto(page, 'characters');
     await expect(page.locator('.character-card')).toBeVisible();
     await expect(page.locator('.character-card h3')).toContainText('Kallyr Starbrow');
   });
 
   test('character card shows derived stats', async ({ page }) => {
-    await seedCharacter(page, 'Argrath');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Argrath' }));
     await goto(page, 'characters');
     await expect(page.locator('.derived-stat .derived-label', { hasText: 'Dmg Bonus' })).toBeVisible();
     await expect(page.locator('.derived-stat .derived-label', { hasText: 'Strike Rank' })).toBeVisible();
@@ -34,7 +34,7 @@ test.describe('Character List', () => {
   });
 
   test('character card shows characteristics', async ({ page }) => {
-    await seedCharacter(page, 'Harrek');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Harrek' }));
     await goto(page, 'characters');
     await expect(page.locator('.stat', { hasText: 'STR:' })).toBeVisible();
     await expect(page.locator('.stat', { hasText: 'CON:' })).toBeVisible();
@@ -42,20 +42,20 @@ test.describe('Character List', () => {
   });
 
   test('character card shows hit locations', async ({ page }) => {
-    await seedCharacter(page, 'Jar-eel');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Jar-eel' }));
     await goto(page, 'characters');
     await expect(page.locator('.hit-item', { hasText: 'Head:' })).toBeVisible();
     await expect(page.locator('.hit-item', { hasText: 'Chest:' })).toBeVisible();
   });
 
   test('header shows Create New Character button', async ({ page }) => {
-    await seedCharacter(page, 'Broyan');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Broyan' }));
     await goto(page, 'characters');
     await expect(page.locator('.btn-create-character')).toBeVisible();
   });
 
   test('clicking Edit button navigates to character form', async ({ page }) => {
-    await seedCharacter(page, 'Orlanth');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Orlanth' }));
     await goto(page, 'characters');
     await page.locator('.btn.btn-edit').first().click();
     await page.waitForURL('**/create?id=*');
@@ -63,7 +63,7 @@ test.describe('Character List', () => {
   });
 
   test('clicking Delete button removes the character', async ({ page }) => {
-    await seedCharacter(page, 'Yelm');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Yelm' }));
     await goto(page, 'characters');
     await expect(page.locator('.character-card')).toBeVisible();
     page.once('dialog', (d) => d.accept());
@@ -86,7 +86,7 @@ test.describe('Character Creation', () => {
   });
 
   test('navigates to create form from header button', async ({ page }) => {
-    await seedCharacter(page, 'Temp');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Temp' }));
     await goto(page, 'characters');
     await page.locator('.btn-create-character').click();
     await page.waitForURL('**/create');
@@ -142,7 +142,7 @@ test.describe('Character Creation', () => {
   });
 
   test('edit mode shows orange edit banner', async ({ page }) => {
-    await seedCharacter(page, 'Elusu');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Elusu' }));
     await goto(page, 'characters');
     await page.locator('.btn.btn-edit').first().click();
     await page.waitForURL('**/create?id=*');
@@ -151,7 +151,7 @@ test.describe('Character Creation', () => {
   });
 
   test('edit mode shows Update Character heading', async ({ page }) => {
-    await seedCharacter(page, 'Humakti');
+    await seedCharacter(page, buildRuneQuestCharacter({ name: 'Humakti' }));
     await goto(page, 'characters');
     await page.locator('.btn.btn-edit').first().click();
     await page.waitForURL('**/create?id=*');

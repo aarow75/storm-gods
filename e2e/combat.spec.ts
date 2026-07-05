@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { clearStorage, goto, seedCharacter } from './helpers';
+import { clearStorage, goto, seedCharacter, buildRuneQuestCharacter } from './helpers';
 
 test.describe('Combat Tracker', () => {
   test.beforeEach(async ({ page }) => {

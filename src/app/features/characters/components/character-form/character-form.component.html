@@ -356,7 +356,7 @@
         }
 
         <!-- Magic Component (hidden for OSRIC non-spellcasting classes and Mothership) -->
-        @if (gameSystemService.gameSystem() !== 'mothership' && (gameSystemService.gameSystem() !== 'osric' || osricClassUsesMagic)) {
+        @if (gameSystemService.gameSystem() !== 'mothership' && gameSystemService.gameSystem() !== 'brp' && (gameSystemService.gameSystem() !== 'osric' || osricClassUsesMagic)) {
         <div class="form-section" [class.collapsed]="isSectionCollapsed('magic')">
           <div class="section-header" (click)="toggleSection('magic')">
             <h4>Magic</h4>
@@ -400,6 +400,7 @@
           <div class="section-content">
             <app-character-resources
               [resources]="character.resources!"
+              [levelCap]="levelCap"
             ></app-character-resources>
           </div>
           }

@@ -1627,4 +1627,119 @@
     </section>
 
   } <!-- end mothership -->
+
+  @if (gameSystemService.gameSystem() === 'brp') {
+
+    <section class="gm-section">
+      <h3>Melee Round Sequence (~12 seconds)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Phase</th><th>Action</th><th>Detail</th></tr></thead>
+        <tbody>
+          @for (row of brpCombatSequence; track row.step) {
+          <tr><td>{{ row.step }}</td><td>{{ row.action }}</td><td>{{ row.detail }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Characteristic Rolls (D100 ≤ stat × multiplier)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Roll</th><th>Formula</th><th>Use</th></tr></thead>
+        <tbody>
+          @for (row of brpCharacteristicRolls; track row.roll) {
+          <tr><td>{{ row.roll }}</td><td>{{ row.formula }}</td><td>{{ row.use }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Weapons (attack &amp; parry start at listed %)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Weapon</th><th>Type</th><th>Start %</th><th>Damage</th><th>Breakage</th><th>Notes</th></tr></thead>
+        <tbody>
+          @for (row of brpWeapons; track row.name) {
+          <tr>
+            <td>{{ row.name }}</td><td>{{ row.type }}</td><td>{{ row.pct }}</td>
+            <td>{{ row.dmg }}</td><td>{{ row.breakage }}</td><td>{{ row.note }}</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Armor (points subtract from every hit)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Type</th><th>Points</th><th>Notes</th></tr></thead>
+        <tbody>
+          @for (row of brpArmor; track row.type) {
+          <tr><td>{{ row.type }}</td><td>{{ row.points }}</td><td>{{ row.notes }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Attack vs. Parry Resolution</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Attack</th><th>Parry</th><th>Result</th></tr></thead>
+        <tbody>
+          @for (row of brpResolutionMatrix; track $index) {
+          <tr><td>{{ row.attack }}</td><td>{{ row.parry }}</td><td>{{ row.result }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Combat Notes</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Rule</th><th>Effect</th></tr></thead>
+        <tbody>
+          @for (row of brpCombatNotes; track row.rule) {
+          <tr><td>{{ row.rule }}</td><td>{{ row.effect }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Damage, Death &amp; Healing</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Rule</th><th>Effect</th></tr></thead>
+        <tbody>
+          @for (row of brpDamageRules; track row.rule) {
+          <tr><td>{{ row.rule }}</td><td>{{ row.effect }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Skill Starting Percentages</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Skill</th><th>Start %</th></tr></thead>
+        <tbody>
+          @for (row of brpSkills; track row.skill) {
+          <tr><td>{{ row.skill }}</td><td>{{ row.pct }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <section class="gm-section">
+      <h3>Experience Checks (between adventures)</h3>
+      <table class="gm-table-small">
+        <thead><tr><th>Step</th><th>Procedure</th></tr></thead>
+        <tbody>
+          @for (row of brpExperience; track row.step) {
+          <tr><td>{{ row.step }}</td><td>{{ row.detail }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </section>
+
+  } <!-- end brp -->
 </div>
