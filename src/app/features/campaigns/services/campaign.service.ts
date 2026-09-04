@@ -9,19 +9,62 @@ import {
   DEFAULT_OBJECTIVE,
   DEFAULT_SESSION
 } from '@campaigns/models/campaign.model';
+import { CampaignScenario } from '@campaigns/models/scenario.model';
 import { GameSystemService } from '@shared/services/game-system.service';
+import { DataPort } from '@shared/services/data-port.service';
+import { WildernessMapService } from '@maps/services/wilderness-map.service';
+import { ScenarioMapService } from '@maps/services/scenario-map.service';
+import { getMapBackgroundById } from '@maps/constants/map-backgrounds.constants';
 
 @Injectable({
   providedIn: 'root'
 })
-export class CampaignService {
+export class CampaignService implements DataPort {
+  readonly dataPortLabel = 'Campaigns';
+  readonly dataPortKey = 'campaigns';
+
   private readonly INDEX_KEY = 'campaigns-index';
   private readonly CAMPAIGN_KEY_PREFIX = 'campaign-';
 
   campaignsUpdated$ = new BehaviorSubject<Campaign[]>([]);
 
-  constructor(private gameSystemService: GameSystemService) {
+  constructor(
+    private gameSystemService: GameSystemService,
+    private wildernessMapService: WildernessMapService,
+    private scenarioMapService: ScenarioMapService
+  ) {
     this.migrateStorageKeys();
+  }
+
+  exportData(): unknown {
+    const system = this.gameSystemService.gameSystem();
+    const campaigns = this.getIndexIds()
+      .map((id) => this.getCampaignData(id))
+      .filter((d): d is CampaignData => d !== null && d.campaign.gameSystem === system);
+    return {
+      exportType: 'campaigns',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      campaigns,
+    };
+  }
+
+  importData(rawData: unknown): string {
+    const data = rawData as { campaigns?: CampaignData[] };
+    let imported = 0;
+    let skipped = 0;
+    for (const cd of data.campaigns ?? []) {
+      if (this.getCampaignData(cd.campaign.id)) {
+        skipped++;
+        continue;
+      }
+      cd.scenarios ??= [];
+      this.saveCampaignData(cd);
+      this.addToIndex(cd.campaign.id);
+      imported++;
+    }
+    this.campaignsUpdated$.next(this.getCampaigns());
+    return `Imported ${imported} campaign(s). ${skipped} skipped (already exist).`;
   }
 
   private migrateStorageKeys(): void {
@@ -60,7 +103,9 @@ export class CampaignService {
     if (!data) return null;
 
     try {
-      return JSON.parse(data) as CampaignData;
+      const parsed = JSON.parse(data) as CampaignData;
+      parsed.scenarios ??= [];
+      return parsed;
     } catch {
       return null;
     }
@@ -87,7 +132,8 @@ export class CampaignService {
     const campaignData: CampaignData = {
       campaign: newCampaign,
       objectives: [],
-      sessionLogs: []
+      sessionLogs: [],
+      scenarios: []
     };
 
     this.saveCampaignData(campaignData);
@@ -253,6 +299,113 @@ export class CampaignService {
     if (!data) return;
 
     data.objectives = data.objectives.filter(o => o.id !== objectiveId);
+    data.campaign.updatedAt = new Date().toISOString();
+    this.saveCampaignData(data);
+  }
+
+  // Scenario operations
+  getScenariosByCampaign(campaignId: string): CampaignScenario[] {
+    const data = this.getCampaignData(campaignId);
+    return data?.scenarios ?? [];
+  }
+
+  getScenario(campaignId: string, scenarioId: string): CampaignScenario | null {
+    const data = this.getCampaignData(campaignId);
+    return data?.scenarios.find((s) => s.id === scenarioId) ?? null;
+  }
+
+  createScenario(
+    campaignId: string,
+    scenario: Partial<CampaignScenario>,
+    sourceMapId?: string
+  ): CampaignScenario {
+    const data = this.getCampaignData(campaignId);
+    if (!data) throw new Error('Campaign not found');
+
+    const id = this.generateId();
+    const mapId = this.generateId();
+    const now = new Date().toISOString();
+
+    const newScenario: CampaignScenario = {
+      id,
+      campaignId,
+      name: scenario.name || 'Unnamed Scenario',
+      type: scenario.type || 'hex-crawl',
+      status: scenario.status || 'active',
+      mapId,
+      currentDay: scenario.currentDay ?? 1,
+      notes: scenario.notes || '',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    let sourceTerrain;
+    let width = 20, height = 20, scale = 6;
+    let scaleUnit: 'miles' | 'kilometers' = 'miles';
+    let backgroundImage: string | undefined;
+    if (sourceMapId) {
+      const sourceState = this.wildernessMapService.getState();
+      sourceTerrain = sourceState.terrainMaps[sourceMapId];
+      const sourceCustomMap = sourceState.customMaps.find((m) => m.id === sourceMapId);
+      if (sourceCustomMap) {
+        ({ width, height, scale, scaleUnit } = sourceCustomMap);
+      } else {
+        // Not a user-created custom map - it may be one of the built-in background
+        // maps (e.g. "Dragon Pass"), with or without a painted terrain overlay on top.
+        const bg = getMapBackgroundById(sourceMapId);
+        if (bg) {
+          width = bg.width;
+          height = bg.height;
+          scale = bg.scale ?? 6;
+          scaleUnit = bg.scaleUnit ?? 'miles';
+          backgroundImage = bg.id;
+        }
+      }
+    }
+    this.scenarioMapService.createMapFromSource(mapId, newScenario.name, sourceTerrain, {
+      width,
+      height,
+      scale,
+      scaleUnit,
+      backgroundImage,
+    });
+
+    data.scenarios.push(newScenario);
+    data.campaign.updatedAt = now;
+    this.saveCampaignData(data);
+
+    return newScenario;
+  }
+
+  updateScenario(campaignId: string, scenarioId: string, updates: Partial<CampaignScenario>): void {
+    const data = this.getCampaignData(campaignId);
+    if (!data) return;
+
+    const scenario = data.scenarios.find((s) => s.id === scenarioId);
+    if (!scenario) return;
+
+    Object.assign(scenario, updates, {
+      id: scenario.id,
+      campaignId,
+      mapId: scenario.mapId,
+      createdAt: scenario.createdAt,
+      updatedAt: new Date().toISOString(),
+    });
+
+    data.campaign.updatedAt = new Date().toISOString();
+    this.saveCampaignData(data);
+  }
+
+  deleteScenario(campaignId: string, scenarioId: string): void {
+    const data = this.getCampaignData(campaignId);
+    if (!data) return;
+
+    const scenario = data.scenarios.find((s) => s.id === scenarioId);
+    if (scenario) {
+      this.scenarioMapService.deleteMap(scenario.mapId);
+    }
+
+    data.scenarios = data.scenarios.filter((s) => s.id !== scenarioId);
     data.campaign.updatedAt = new Date().toISOString();
     this.saveCampaignData(data);
   }

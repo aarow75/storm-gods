@@ -27,6 +27,10 @@ export interface CombatParticipant {
   baseStrikeRank: number;
   selectedWeapon?: string;
   selectedParryItem?: string;
+  selectedSpell?: string;
+  spellTargetId?: string;                            // ally/self spell target (characters only)
+  spellSlotsUsed?: { [spellLevel: number]: number }; // OSRIC slot expenditure, per combat
+  cannotCastUntilRest?: boolean;                     // Kal-Arath failed-casting lockout
   finalStrikeRank: number;
   selectedOpponentId?: string;
   isDead?: boolean;

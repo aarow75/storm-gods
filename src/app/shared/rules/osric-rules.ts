@@ -8,6 +8,10 @@ import {
   AbilityDefinition, ClassHitDie, ToHitMechanic,
   ArmorModel, InitiativeMechanic
 } from './game-system-rules.interface';
+import {
+  SpellEffect, CastCheck, CastableSpell, SpellCasterInfo,
+  buildSpellEffectIndex, normalizeSpellName
+} from './spell-effects.model';
 
 // OSRIC uses 6 ability scores. SIZ is hidden; POW field stores Wisdom.
 const STAT_DEFINITIONS: StatDefinition[] = [
@@ -466,6 +470,140 @@ export function getOsricSpellAcquisition(intelligence: number): { chance: number
   return { chance: 35, maxPerLevel: 3 };
 }
 
+// Spells castable per day by class and character level (index = spellLevel − 1),
+// per the OSRIC spell progression tables. Levels beyond the table reuse the last row.
+export const OSRIC_SPELLS_PER_DAY: Record<string, number[][]> = {
+  'Magic User': [
+    [1], [2], [2, 1], [3, 2], [4, 2, 1], [4, 2, 2], [4, 3, 2, 1], [4, 3, 3, 2],
+    [4, 3, 3, 2, 1], [4, 4, 3, 2, 2], [4, 4, 4, 3, 3], [4, 4, 4, 4, 4, 1],
+    [5, 5, 5, 4, 4, 2], [5, 5, 5, 4, 4, 2, 1], [5, 5, 5, 5, 5, 2, 1],
+    [5, 5, 5, 5, 5, 3, 2, 1], [5, 5, 5, 5, 5, 3, 3, 2], [5, 5, 5, 5, 5, 3, 3, 2, 1],
+  ],
+  'Illusionist': [
+    [1], [2], [2, 1], [3, 2], [3, 2, 1], [3, 3, 2], [4, 3, 2, 1], [4, 3, 3, 2],
+    [4, 4, 3, 2, 1], [4, 4, 3, 3, 2], [4, 4, 4, 3, 2, 1], [5, 4, 4, 3, 3, 2],
+    [5, 5, 4, 4, 3, 2, 1], [5, 5, 5, 4, 4, 3, 2],
+  ],
+  'Cleric': [
+    [1], [2], [2, 1], [3, 2], [3, 3, 1], [3, 3, 2], [3, 3, 2, 1], [3, 3, 3, 2],
+    [4, 4, 3, 2, 1], [4, 4, 3, 3, 2], [5, 4, 4, 3, 2, 1], [6, 5, 5, 3, 2, 2],
+    [6, 6, 6, 4, 2, 2], [6, 6, 6, 5, 3, 2, 1], [7, 7, 7, 5, 4, 2, 1],
+  ],
+  'Druid': [
+    [2], [2, 1], [3, 2, 1], [4, 2, 2], [4, 3, 2], [4, 3, 2, 1], [4, 4, 3, 1], [4, 4, 3, 2],
+    [5, 4, 3, 2, 1], [5, 4, 3, 3, 2], [5, 5, 3, 3, 2, 1], [5, 5, 4, 4, 3, 2, 1],
+    [6, 5, 5, 5, 4, 3, 2], [6, 6, 6, 6, 5, 4, 3],
+  ],
+  // Paladins pray for Cleric spells starting at level 9; Rangers gain Druid
+  // spells at 8 (and Magic User spells at 9 — simplified to one shared pool)
+  'Paladin': [
+    [], [], [], [], [], [], [], [],
+    [1], [2], [2, 1], [2, 2], [2, 2, 1], [3, 2, 1], [3, 2, 1, 1], [3, 3, 1, 1],
+    [3, 3, 2, 1], [3, 3, 3, 1], [3, 3, 3, 2], [3, 3, 3, 3],
+  ],
+  'Ranger': [
+    [], [], [], [], [], [], [],
+    [1], [2], [2, 1], [2, 2], [2, 2, 1], [2, 2, 2], [3, 2, 2], [3, 3, 2], [3, 3, 3],
+  ],
+};
+
+// Combat spell effects, from public/docs/OSRIC-Spells.md. Casting is Vancian —
+// no roll; a slot of the spell's level is expended.
+export const OSRIC_SPELL_EFFECTS: SpellEffect[] = [
+  // Magic User
+  { name: 'Magic Missile', target: 'enemy', kind: 'damage', ignoresArmor: true,
+    notationForLevel: (lvl) => {
+      const n = Math.min(5, 1 + Math.floor((lvl - 1) / 2));
+      return `${n}d4+${n}`;
+    },
+    description: '1 unerring bolt +1 per 2 extra levels — no save, never misses' },
+  { name: 'Shocking Grasp', target: 'enemy', kind: 'damage',
+    notationForLevel: (lvl) => `1d8+${lvl}`,
+    description: 'Touch delivers electrical damage' },
+  { name: 'Fireball', target: 'enemy', kind: 'damage',
+    notationForLevel: (lvl) => `${Math.min(lvl, 10)}d6`,
+    description: '20-ft radius burst; save for half — apply manually' },
+  { name: 'Lightning Bolt', target: 'enemy', kind: 'damage',
+    notationForLevel: (lvl) => `${Math.min(lvl, 10)}d6`,
+    description: '40–80 ft stroke; save for half — apply manually' },
+  { name: 'Flaming Sphere', target: 'enemy', kind: 'damage', notation: '2d4',
+    description: 'Rolling globe of fire; save negates — undo if the save succeeds' },
+  { name: 'Cone of Cold', target: 'enemy', kind: 'damage',
+    notationForLevel: (lvl) => `${lvl}d4+${lvl}`,
+    description: 'Cone of frost; save for half — apply manually' },
+  { name: 'Sleep', target: 'enemy', kind: 'utility',
+    description: '2d4 HD of creatures (4 HD max each) fall asleep, no save' },
+  { name: 'Web', target: 'enemy', kind: 'utility',
+    description: 'Sticky strands fill 8,000 cu ft; STR determines escape time' },
+  { name: 'Stinking Cloud', target: 'enemy', kind: 'utility',
+    description: '20-ft cube of vapor: save or be helpless while inside +1 round' },
+  { name: 'Hold Person', target: 'enemy', kind: 'utility',
+    description: 'Paralyzes 1–4 humanoids (save negates) for 2 rds/level' },
+  { name: 'Ray of Enfeeblement', target: 'enemy', kind: 'utility',
+    description: 'Target loses 25% +2%/level of STR (save negates)' },
+  { name: 'Scare', target: 'enemy', kind: 'utility',
+    description: 'One creature under 6 HD trembles in terror (save negates) 3d4 rounds' },
+  { name: 'Ice Storm', target: 'enemy', kind: 'damage', notation: '3d10',
+    description: 'Hail mode: 40-ft area, no save. Alternative sleet mode (blind/halt movement, 80-ft area, 1 rd) not automated — resolve manually if chosen' },
+  { name: 'Chain Lightning', target: 'enemy', kind: 'damage',
+    notationForLevel: (lvl) => `${lvl}d6`,
+    description: 'Primary bolt; each subsequent arc is one die weaker (save for half) — apply manually for additional targets' },
+  { name: 'Delayed Blast Fireball', target: 'enemy', kind: 'damage',
+    notationForLevel: (lvl) => `${lvl}d6+${lvl}`,
+    description: 'Detonates after a delay of your choosing, up to 5 rounds; save for half — apply manually' },
+  { name: 'Meteor Swarm', target: 'enemy', kind: 'damage', notation: '10d4',
+    description: 'One of four 10d4 bursts (or eight 5d4); save for half — apply manually for additional bursts/targets' },
+  { name: 'Finger of Death', target: 'enemy', kind: 'utility',
+    description: "Point and pronounce: the victim's heart stops (save negates) — resolve manually" },
+  { name: 'Power Word Kill', target: 'enemy', kind: 'utility',
+    description: 'No save: kills one creature with up to 60 hp outright (or splits among several totaling 120) — resolve manually' },
+  // Cleric
+  { name: 'Cure Light Wounds', target: 'ally', kind: 'healing', notation: '1d8' },
+  { name: 'Cure Serious Wounds', target: 'ally', kind: 'healing', notation: '2d8+1' },
+  { name: 'Cure Critical Wounds', target: 'ally', kind: 'healing', notation: '3d8+3' },
+  { name: 'Heal', target: 'ally', kind: 'healing', notation: 'full',
+    description: 'Wipes away all but 1d4 of the target\'s lost HP' },
+  { name: 'Flame Strike', target: 'enemy', kind: 'damage', notation: '6d8',
+    description: 'Column of divine fire; save for half — apply manually' },
+  { name: 'Spiritual Weapon', target: 'enemy', kind: 'damage', notation: '1d6+1',
+    description: 'Hovering force-hammer strikes as the cleric directs' },
+  { name: 'Bless', target: 'ally', kind: 'utility',
+    description: 'Allies within 50 ft gain +1 to hit and morale for 6 rounds' },
+  { name: 'Command', target: 'enemy', kind: 'utility',
+    description: 'One word obeyed for 1 round; no save under 6 HD' },
+  { name: 'Chant', target: 'ally', kind: 'utility',
+    description: '+1 to allies\' rolls and −1 to foes\' while the cleric chants' },
+  { name: 'Prayer', target: 'ally', kind: 'utility',
+    description: '+1 allies, −1 foes, no concentration needed, 1 rd/level' },
+  { name: 'Blade Barrier', target: 'enemy', kind: 'damage', notation: '8d8',
+    description: 'Whirling wall of blades — damage to any who pass through' },
+  // Druid
+  { name: 'Call Lightning', target: 'enemy', kind: 'damage',
+    notationForLevel: (lvl) => `${2 + lvl}d8`,
+    description: 'Under storm clouds, one bolt per turn; save for half — apply manually' },
+  { name: 'Produce Flame', target: 'enemy', kind: 'damage', notation: '1d4+1',
+    description: 'Hurled palm-flame, 40 ft, ignites combustibles' },
+  { name: 'Fire Storm', target: 'enemy', kind: 'damage', notation: '2d8',
+    description: 'Sheet of roaring flame; save for half — apply manually' },
+  { name: 'Entangle', target: 'enemy', kind: 'utility',
+    description: 'Plants in a 20-ft radius grasp and hold (save = move at 10%)' },
+  { name: 'Faerie Fire', target: 'enemy', kind: 'utility',
+    description: 'Glowing outline: +2 to hit the target in dark, negates invisibility' },
+  { name: 'Heat Metal', target: 'enemy', kind: 'utility',
+    description: 'Metal on the target glows over 7 rounds: 1d4 then 2d4 burns — apply manually' },
+  { name: 'Summon Insects', target: 'enemy', kind: 'utility',
+    description: 'Biting cloud harries one victim: 2 HP/round and half-actions' },
+  // Illusionist
+  { name: 'Colour Spray', target: 'enemy', kind: 'utility',
+    description: '1d6 creatures blinded/stunned/unconscious by relative level' },
+  { name: 'Phantasmal Killer', target: 'enemy', kind: 'utility',
+    description: 'The victim\'s worst nightmare hunts them; a touch kills (saves and INT resist)' },
+  { name: 'Blindness', target: 'enemy', kind: 'utility',
+    description: 'Strikes a victim blind until dispelled (save negates)' },
+];
+
+const OSRIC_SPELL_EFFECT_INDEX = buildSpellEffectIndex(OSRIC_SPELL_EFFECTS);
+
 // Returns all spells available to a class up to their accessible spell level
 export function getOsricAvailableSpells(className: string, charLevel: number): { name: string; spellLevel: number }[] {
   const spellList = OSRIC_CLASS_SPELLS[className];
@@ -646,6 +784,22 @@ export class OsricRules implements GameSystemRules {
 
   getMagicSystemType(): string {
     return 'osric';
+  }
+
+  getSpellEffect(spellName: string): SpellEffect | null {
+    return OSRIC_SPELL_EFFECT_INDEX.get(normalizeSpellName(spellName)) ?? null;
+  }
+
+  // Vancian casting: no roll — the memorized spell simply takes effect.
+  getCastCheck(_spell: CastableSpell, _caster: SpellCasterInfo): CastCheck {
+    return { kind: 'auto' };
+  }
+
+  getSpellSlotsPerDay(className: string | undefined, level: number): number[] {
+    const table = OSRIC_SPELLS_PER_DAY[className ?? ''];
+    if (!table || table.length === 0) return [];
+    const row = table[Math.min(Math.max(1, level), table.length) - 1];
+    return row ?? [];
   }
 
   getCurrencyLabel(): string {

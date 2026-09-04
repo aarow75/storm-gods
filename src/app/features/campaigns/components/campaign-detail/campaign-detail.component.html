@@ -56,6 +56,15 @@
           type="button"
           role="tab"
           class="tab-btn"
+          [class.active]="activeTab === 'scenarios'"
+          [attr.aria-selected]="activeTab === 'scenarios'"
+          (click)="selectTab('scenarios')">
+          Scenarios
+        </button>
+        <button
+          type="button"
+          role="tab"
+          class="tab-btn"
           [class.active]="activeTab === 'analytics'"
           [attr.aria-selected]="activeTab === 'analytics'"
           (click)="selectTab('analytics')">
@@ -91,6 +100,13 @@
           [campaignData]="campaignData"
           (dataChanged)="onDataChanged()">
         </app-campaign-objectives>
+      }
+
+      @if (activeTab === 'scenarios') {
+        <app-campaign-scenarios
+          [campaignData]="campaignData"
+          (dataChanged)="onDataChanged()">
+        </app-campaign-scenarios>
       }
 
       @if (activeTab === 'analytics') {

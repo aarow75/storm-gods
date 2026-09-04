@@ -17,8 +17,6 @@ import {
 } from '@maps/models/wilderness-map.model';
 import { TERRAIN_DEFINITIONS } from '@maps/constants/terrain.constants';
 import { MAP_BACKGROUNDS } from '@maps/constants/map-backgrounds.constants';
-import { ENCOUNTER_TABLES } from '@bestiary/constants/encounters.constants';
-import { MONSTERS as BESTIARY_MONSTERS } from '@bestiary/constants/monsters.constants';
 import { WildernessMapService } from '@maps/services/wilderness-map.service';
 import { CharacterReadService } from '@shared/services/character-read.service';
 import { EncounterLaunchService } from '@combat/services/encounter-launch.service';
@@ -26,10 +24,10 @@ import { DiceService } from '@shared/services/dice.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { ExportService } from '@shared/services/export.service';
 import { Character } from '@characters/models/character.model';
-import { CombatParticipant, CombatMonster } from '@shared/models/combat-participant.model';
-import { Monster as BestiaryMonster, getMonsterCombatArmor } from '@bestiary/models/monster.model';
-import { getSizeModifier, getDexterityModifier } from '@shared/rules/game-rules';
 import { dijkstra } from '@maps/utils/hex-pathfinding';
+import { buildHexGrid, terrainFillColor, terrainStrokeColor } from '@maps/utils/hex-grid.util';
+import { EncounterRollResult, rollEncounterForTerrain } from '@maps/utils/encounter-roll.util';
+import { buildEncounterParticipants } from '@maps/utils/encounter-combat.util';
 
 @Component({
   standalone: true,
@@ -93,14 +91,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   previewPathSet = new Set<string>();
   previewCost = 0;
 
-  encounterResult: {
-    roll: number;
-    creature: string;
-    count: string;
-    difficulty: 'trivial' | 'easy' | 'moderate' | 'challenging' | 'deadly';
-    terrain: string;
-    stoppedAt: HexCoord;
-  } | null = null;
+  encounterResult: (EncounterRollResult & { stoppedAt: HexCoord }) | null = null;
 
   mapMode: 'terrain' | 'image' = 'terrain';
   hexBorderOpacity = 1;
@@ -168,37 +159,10 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private buildHexGrid(): void {
-    const S = HEX_SIZE;
-    const sqrt3 = Math.sqrt(3);
-    this.hexes = [];
-
-    for (let r = 0; r < this.gridHeight; r++) {
-      for (let q_offset = 0; q_offset < this.gridWidth; q_offset++) {
-        const q = q_offset - Math.floor(r / 2);
-
-        const cx = S * (sqrt3 * q + (sqrt3 / 2) * r);
-        const cy = S * ((3 / 2) * r);
-
-        const pts = [];
-        for (let i = 0; i < 6; i++) {
-          const angleDeg = 60 * i - 30;
-          const angleRad = (Math.PI / 180) * angleDeg;
-          pts.push(`${cx + S * Math.cos(angleRad)},${cy + S * Math.sin(angleRad)}`);
-        }
-
-        this.hexes.push({ q, r, cx, cy, points: pts.join(' ') });
-      }
-    }
-
-    this.svgWidth = HEX_SIZE * Math.sqrt(3) * (this.gridWidth + 0.5) + HEX_SIZE * 2;
-    this.svgHeight = HEX_SIZE * 1.5 * this.gridHeight + HEX_SIZE * 2;
-  }
-
-  private hexToRgba(hex: string, alpha: number): string {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    const grid = buildHexGrid(this.gridWidth, this.gridHeight, HEX_SIZE);
+    this.hexes = grid.hexes;
+    this.svgWidth = grid.svgWidth;
+    this.svgHeight = grid.svgHeight;
   }
 
   getTerrainAt(q: number, r: number): string {
@@ -207,27 +171,11 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   getHexFill(q: number, r: number): string {
-    const terrain = this.getTerrainAt(q, r);
-    if (this.mapMode === 'image') {
-      if (terrain !== 'none') {
-        const def = TERRAIN_DEFINITIONS.find((t) => t.id === terrain);
-        const baseColor = def?.fillColor ?? '#f5f0e8';
-        return this.hexToRgba(baseColor, this.terrainOpacity);
-      }
-      return 'rgba(255, 255, 255, 0.05)';
-    }
-    const def = TERRAIN_DEFINITIONS.find((t) => t.id === terrain);
-    return def?.fillColor ?? '#f5f0e8';
+    return terrainFillColor(this.getTerrainAt(q, r) as TerrainType, this.mapMode, this.terrainOpacity);
   }
 
   getHexStroke(q: number, r: number): string {
-    if (this.mapMode === 'image') {
-      // return 'rgba(100, 100, 100, 0.3)';
-      return 'rgba(0, 0, 0, 1)';
-    }
-    const terrain = this.getTerrainAt(q, r);
-    const def = TERRAIN_DEFINITIONS.find((t) => t.id === terrain);
-    return def?.strokeColor ?? '#ccc';
+    return terrainStrokeColor(this.getTerrainAt(q, r) as TerrainType, this.mapMode);
   }
 
   onHexPointerDown(q: number, r: number, event: PointerEvent): void {
@@ -345,145 +293,28 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
     return token.name.toLowerCase().includes('encounter');
   }
 
-  private terrainToEncounterTableName(terrain: TerrainType): string {
-    const map: Partial<Record<TerrainType, string>> = {
-      plains: 'plains',
-      forest: 'forest',
-      'dense-forest': 'forest',
-      hills: 'mountains',
-      mountains: 'mountains',
-      desert: 'desert',
-      road: 'roads',
-      swamp: 'forest',
-      river: 'forest',
-      none: 'plains',
-    };
-    return map[terrain] ?? 'plains';
-  }
-
-  private rollEncounterForTerrain(
-    terrain: TerrainType
-  ): {
-    roll: number;
-    creature: string;
-    count: string;
-    difficulty: 'trivial' | 'easy' | 'moderate' | 'challenging' | 'deadly';
-    terrain: string;
-    stoppedAt: HexCoord;
-  } | null {
-    const tableName = this.terrainToEncounterTableName(terrain);
-    const table = ENCOUNTER_TABLES.find((t) => t.terrain === tableName);
-    if (!table) return null;
-
-    const roll = Math.ceil(Math.random() * 20);
-
-    const entry = table.entries.find((e) => {
-      const [low, high] = e.roll.includes('-') ? e.roll.split('-').map(Number) : [Number(e.roll), Number(e.roll)];
-      return roll >= low && roll <= high;
-    });
-
-    if (!entry) return null;
-    return {
-      roll,
-      creature: entry.creature,
-      count: entry.count,
-      difficulty: entry.difficulty,
-      terrain: tableName,
-      stoppedAt: { q: 0, r: 0 },
-    };
-  }
-
-  private convertBestiaryMonster(bm: BestiaryMonster): CombatMonster {
-    return {
-      id: `bestiary-${bm.id}`,
-      name: bm.name,
-      hitPoints: bm.hitPoints,
-      // The SIZ/DEX strike-rank formula is RuneQuest-only; other systems roll initiative
-      strikeRank: this.gameSystemService.getRules().usesStrikeRank()
-        ? getSizeModifier(bm.stats.SIZ) + getDexterityModifier(bm.stats.DEX)
-        : 0,
-      armor: getMonsterCombatArmor(bm, this.gameSystemService.gameSystem()),
-      weapons: bm.attacks.map((a) => ({
-        name: a.name,
-        damage: a.damage,
-        strikeRankModifier: 0,
-      })),
-    };
-  }
-
-  private parseCountString(countStr: string): number {
-    if (countStr === '-') return 0;
-    const diceMatch = countStr.match(/(\d+)d(\d+)/);
-    if (diceMatch) {
-      const count = parseInt(diceMatch[1], 10);
-      const sides = parseInt(diceMatch[2], 10);
-      let total = 0;
-      for (let i = 0; i < count; i++) {
-        total += Math.floor(Math.random() * sides) + 1;
-      }
-      return total;
-    }
-    const numMatch = countStr.match(/\d+/);
-    return numMatch ? parseInt(numMatch[0], 10) : 1;
-  }
-
   startCombatWithEncounter(): void {
     if (!this.encounterResult) return;
 
     const creatureName = this.encounterResult.creature;
-    const countStr = this.encounterResult.count;
-    const count = this.parseCountString(countStr);
-
-    if (count === 0) {
-      alert('No creatures to encounter!');
-      this.encounterResult = null;
-      return;
-    }
-
-    const bestiaryMonster = BESTIARY_MONSTERS.find(
-      (m) => m.name.toLowerCase() === creatureName.toLowerCase()
+    const result = buildEncounterParticipants(
+      this.encounterResult,
+      this.gameSystemService,
+      () => this.encounterLaunchService.generateId()
     );
 
-    if (!bestiaryMonster) {
-      alert(`Creature "${creatureName}" not found in bestiary`);
+    this.encounterResult = null;
+
+    if (!result.success) {
+      if (result.reason === 'no-creatures') {
+        alert('No creatures to encounter!');
+      } else {
+        alert(`Creature "${creatureName}" not found in bestiary`);
+      }
       return;
     }
 
-    const combatMonster = this.convertBestiaryMonster(bestiaryMonster);
-    const participants: CombatParticipant[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const id = this.encounterLaunchService.generateId();
-      const baseStrikeRank = combatMonster.strikeRank;
-      const firstWeapon = combatMonster.weapons[0]?.name || 'Bite';
-      const weapon = combatMonster.weapons.find((w) => w.name === firstWeapon);
-      const finalStrikeRank = baseStrikeRank + (weapon?.strikeRankModifier || 0);
-
-      const participant: CombatParticipant = {
-        id,
-        name: count > 1 ? `${combatMonster.name} ${i + 1}` : combatMonster.name,
-        type: 'monster',
-        monsterId: combatMonster.id,
-        maxHitPoints: combatMonster.hitPoints,
-        currentHitPoints: new Array(combatMonster.hitPoints).fill(false),
-        baseStrikeRank,
-        selectedWeapon: firstWeapon,
-        selectedParryItem: firstWeapon,
-        finalStrikeRank,
-        isDead: false,
-        kills: 0,
-        color: '#666666',
-        locationDamage: {},
-        distanceToOpponent: 0,
-        movementThisRound: 0,
-        isSurprised: false,
-        movementRate: 8,
-      };
-      participants.push(participant);
-    }
-
-    this.encounterResult = null;
-    this.encounterLaunchService.launchEncounter(participants);
+    this.encounterLaunchService.launchEncounter(result.participants);
   }
 
   onHexClick(q: number, r: number): void {
@@ -532,7 +363,7 @@ export class WildernessMapComponent implements OnInit, AfterViewInit, OnDestroy 
           // Roll encounter based on terrain at the encounter hex
           const encHex = path[encounterHexIdx];
           const terrain = (this.state.tiles[tileKey(encHex.q, encHex.r)] ?? 'none') as TerrainType;
-          const rollResult = this.rollEncounterForTerrain(terrain);
+          const rollResult = rollEncounterForTerrain(terrain);
           if (rollResult) {
             this.encounterResult = { ...rollResult, stoppedAt: stopHex };
           } else {

@@ -12,8 +12,9 @@ import { CampaignCharactersComponent } from '../campaign-characters/campaign-cha
 import { CampaignSessionsComponent } from '../campaign-sessions/campaign-sessions.component';
 import { CampaignObjectivesComponent } from '../campaign-objectives/campaign-objectives.component';
 import { CampaignAnalyticsComponent } from '../campaign-analytics/campaign-analytics.component';
+import { CampaignScenariosComponent } from '../campaign-scenarios/campaign-scenarios.component';
 
-type TabType = 'overview' | 'characters' | 'sessions' | 'objectives' | 'analytics';
+type TabType = 'overview' | 'characters' | 'sessions' | 'objectives' | 'scenarios' | 'analytics';
 
 @Component({
   selector: 'app-campaign-detail',
@@ -26,6 +27,7 @@ type TabType = 'overview' | 'characters' | 'sessions' | 'objectives' | 'analytic
     CampaignCharactersComponent,
     CampaignSessionsComponent,
     CampaignObjectivesComponent,
+    CampaignScenariosComponent,
     CampaignAnalyticsComponent
   ],
   templateUrl: './campaign-detail.component.html',

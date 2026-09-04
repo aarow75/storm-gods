@@ -1,0 +1,84 @@
+<div class="campaign-scenarios">
+  <div class="header">
+    <h3>Scenarios</h3>
+    <button class="btn btn-primary" (click)="openCreateModal()">+ New Scenario</button>
+  </div>
+
+  @if (scenarios.length === 0) {
+    <div class="no-scenarios">
+      <p>No scenarios yet. Add a hex-crawl scenario to start exploring the wilderness with your party!</p>
+      <button class="btn btn-primary" (click)="openCreateModal()">Create Scenario</button>
+    </div>
+  } @else {
+    <div class="scenarios-list">
+      @for (scenario of scenarios; track scenario.id) {
+        <div class="scenario-card" (click)="openScenario(scenario)">
+          <div class="scenario-header">
+            <div class="header-left">
+              <span class="type-badge">{{ getTypeLabel(scenario.type) }}</span>
+              <h5>{{ scenario.name }}</h5>
+            </div>
+            <span [class]="'status-badge status-' + scenario.status">{{ getStatusLabel(scenario.status) }}</span>
+          </div>
+          <div class="scenario-meta">
+            <span>Day {{ scenario.currentDay }}</span>
+          </div>
+          @if (scenario.notes) {
+            <p class="scenario-notes">{{ scenario.notes }}</p>
+          }
+          <div class="scenario-actions">
+            <button class="btn btn-secondary btn-small" (click)="openScenario(scenario)">Open</button>
+            <button class="btn btn-danger btn-small" (click)="deleteScenario(scenario, $event)">Delete</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showCreateModal) {
+  <div class="modal" (click)="closeCreateModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>New Scenario</h3>
+        <button class="btn-close" (click)="closeCreateModal()">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Name <span class="required-star">*</span></label>
+          <input type="text" [(ngModel)]="newScenarioForm.name" placeholder="Scenario name" />
+        </div>
+
+        <div class="form-group">
+          <label>Type</label>
+          <select disabled>
+            <option>Hex Crawl</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Copy terrain from map</label>
+          <select [(ngModel)]="newScenarioForm.sourceMapId">
+            <option value="">Blank map</option>
+            @for (map of availableSourceMaps; track map.id) {
+              <option [value]="map.id">{{ map.label }}</option>
+            }
+          </select>
+          <p class="field-hint">Terrain is copied once, at creation. The scenario keeps its own private map and hex history from then on.</p>
+          <p class="field-hint">
+            Found {{ availableSourceMaps.length }} existing map(s) painted for {{ gameSystemService.getSystemName() }}.
+            @if (availableSourceMaps.length === 0) {
+              Paint terrain on the <a [routerLink]="gameSystemService.link('wilderness-map')">Wilderness Map</a> under this same game system first.
+            }
+          </p>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="createScenario()">Create</button>
+      </div>
+    </div>
+  </div>
+}

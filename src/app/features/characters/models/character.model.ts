@@ -64,6 +64,7 @@ export interface DerivedStats {
   totalHitPoints: number;
   maxHitPoints?: number; // Maximum HP, used for healing reference
   magicPoints: number;
+  currentMagicPoints?: number; // Spendable MP/WP pool; magicPoints is the max
   damageBonus: string;
   spiritCombatDamage: string;
   healingRate: number;
@@ -138,6 +139,7 @@ export interface Magic {
   runeMagic: RuneSpell[];
   sorcery: Spell[];
   runePoints: number;
+  currentRunePoints?: number; // Spendable rune point pool; runePoints is the max
   doom?: string;
   dragonbaneSpells?: DragonbaneSpell[];
 }
@@ -280,6 +282,7 @@ export const DEFAULT_BACKGROUND: CharacterBackground = {
 export const DEFAULT_DERIVED_STATS: DerivedStats = {
   totalHitPoints: 10,
   magicPoints: 10,
+  currentMagicPoints: 10,
   damageBonus: '0',
   spiritCombatDamage: '1d6',
   healingRate: 2,
@@ -340,7 +343,8 @@ export const DEFAULT_MAGIC: Magic = {
   spiritMagic: [],
   runeMagic: [],
   sorcery: [],
-  runePoints: 0
+  runePoints: 0,
+  currentRunePoints: 0
 };
 
 export const DEFAULT_RESOURCES: Resources = {

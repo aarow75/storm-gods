@@ -18,6 +18,10 @@ import {
   GameSystemRules, StatDefinition, ConditionDefinition,
   SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses
 } from './game-system-rules.interface';
+import {
+  SpellEffect, CastCheck, CastableSpell, SpellCasterInfo,
+  buildSpellEffectIndex, normalizeSpellName
+} from './spell-effects.model';
 
 const CONDITIONS: ConditionDefinition[] = [
   { name: 'Prone',    effect: 'Melee attackers +20%, ranged attackers -20%' },
@@ -70,6 +74,135 @@ const SKILL_CATEGORIES: SkillCategory[] = [
   { name: 'Stealth Skills',      skills: ['Hide', 'Move Quietly'] },
   { name: 'Agility Skills',      skills: ['Climb', 'Dodge', 'Ride', 'Swim'] },
 ];
+
+// Spirit magic combat effects, from public/docs/RuneQuest-Spells.md. Costs come
+// from the character's learned Spell.points at cast time (variable spells are
+// bought at 1-4 points), so no cost is stored here.
+export const RQ_SPIRIT_SPELL_EFFECTS: SpellEffect[] = [
+  { name: 'Disruption', target: 'enemy', kind: 'damage', notation: '1d3', ignoresArmor: true, resisted: true },
+  { name: 'Heal', target: 'ally', kind: 'healing', notation: '1', perPoint: true,
+    description: 'Heals 1 point per point of spell to a touched location' },
+  { name: 'Bladesharp', target: 'self', kind: 'utility',
+    description: '+5% to hit and +1 damage per point (max +20%/+4) on a hacking/stabbing weapon — apply manually' },
+  { name: 'Countermagic', target: 'self', kind: 'utility',
+    description: 'Defensive shell vs incoming spells; stops spells 2+ points weaker' },
+  { name: 'Detect', target: 'self', kind: 'utility',
+    description: 'Locates the named thing by direction and distance (40m)' },
+  { name: 'Extinguish', target: 'self', kind: 'utility',
+    description: 'Puts out one large fire or all small fires within 10m' },
+  { name: 'Fanaticism', target: 'ally', kind: 'utility',
+    description: 'Hit chance ×1.5, but no parries/protective spells and Defense halved — apply manually' },
+  { name: 'Firearrow', target: 'self', kind: 'utility',
+    description: 'Next missile does 3d6 heat damage (armor absorbs); the missile is consumed — set manually' },
+  { name: 'Fireblade', target: 'self', kind: 'utility',
+    description: 'Edged weapon does 3d6 damage instead of normal (armor absorbs) — set weapon damage manually' },
+  { name: 'Glamour', target: 'ally', kind: 'utility', description: 'CHA ×1.5 for the duration' },
+  { name: 'Ignite', target: 'self', kind: 'utility', description: 'Sets fire to anything normally burnable (40m)' },
+  { name: 'Light', target: 'self', kind: 'utility', description: 'Lights a 12m radius on a cast object' },
+  { name: 'Lightwall', target: 'self', kind: 'utility', description: '10m × 3m wall of light; blocks vision from the far side' },
+  { name: 'Mobility', target: 'ally', kind: 'utility', description: 'Doubles the movement class of the recipient' },
+  { name: 'Protection', target: 'self', kind: 'utility',
+    description: '+1 armor point per point of spell on all locations — apply manually' },
+  { name: 'Shimmer', target: 'self', kind: 'utility', description: '+5% Defense per point vs all attackers' },
+  { name: 'Speedart', target: 'self', kind: 'utility', description: 'Missiles get +15% to hit and +3 damage — apply manually' },
+  { name: 'Spirit Screen', target: 'self', kind: 'utility',
+    description: 'Spirit combat ward: each point destroys 2 points of an attacking spirit\'s POW' },
+  { name: 'Strength', target: 'ally', kind: 'utility', description: 'STR ×1.5 (max species maximum) for the duration' },
+  { name: 'Vigor', target: 'ally', kind: 'utility', description: 'CON ×1.5 (max species maximum) for the duration' },
+];
+
+// Rune magic combat effects, from public/docs/RuneQuest-Spells.md. Cost = the
+// spell's runePointCost, deducted from magic.currentRunePoints.
+export const RQ_RUNE_SPELL_EFFECTS: SpellEffect[] = [
+  { name: 'Lightning', target: 'enemy', kind: 'damage', notation: '3d6', ignoresArmor: true, resisted: true },
+  { name: 'Thunderbolt', target: 'enemy', kind: 'damage', notation: '3d6', ignoresArmor: true, resisted: true,
+    targetsTotalHp: true, description: 'Damage to total HP; must be healed magically before natural healing' },
+  { name: 'Sever Spirit', target: 'enemy', kind: 'damage', resisted: true, slays: true,
+    notation: '1d6', targetsTotalHp: true,
+    description: 'POW vs POW: success kills the target; on failure the target takes 1d6' },
+  { name: 'Heal Body', target: 'ally', kind: 'healing', notation: 'full',
+    description: 'Cures the total damage taken by a body, regardless of hit location' },
+  { name: 'Wind Words', target: 'self', kind: 'utility', description: 'Hear conversations carried downwind within 160m' },
+  { name: 'Bless Crops', target: 'self', kind: 'utility', description: 'Wards one hectare and increases harvest ×1.5' },
+  { name: 'Truesword', target: 'self', kind: 'utility',
+    description: 'Doubles sword damage (up to the sword\'s max roll) — apply manually' },
+  { name: 'Shield', target: 'self', kind: 'utility',
+    description: '+2 armor points on all locations and 2 points of Countermagic per point — apply manually' },
+  { name: 'Reflection', target: 'self', kind: 'utility',
+    description: 'Reflects spells of no more POW points than the Reflection back at their casters' },
+  { name: 'Axis Mundi', target: 'self', kind: 'utility',
+    description: 'Warded circle: worshippers add the priest\'s rune magic to their defense' },
+];
+
+// Sorcery combat effects, from public/docs/RuneQuest-Spells.md. Cost = 1 MP
+// per point of intensity (spell.cost). Most sorcery spells are buffs/debuffs/
+// utility with no direct damage — those stay 'utility' with a manual-apply
+// note, matching the spirit magic convention above. 'Spirit Screen' is
+// omitted here since it's identical to the spirit magic version and already
+// resolves through the shared index.
+export const RQ_SORCERY_SPELL_EFFECTS: SpellEffect[] = [
+  { name: 'Animate (Substance)', target: 'self', kind: 'utility',
+    description: 'Animates ~1 SIZ of the named substance per intensity to grip, carry, or strike' },
+  { name: 'Banish', target: 'enemy', kind: 'utility',
+    description: 'Intensity vs POW: on success expels a spirit/elemental/entity back to its home plane — resolve manually' },
+  { name: 'Beast Form', target: 'self', kind: 'utility',
+    description: 'Transforms the subject into an ordinary animal of ~SIZ per intensity; keeps INT/POW' },
+  { name: 'Blessing', target: 'ally', kind: 'utility',
+    description: '+5% per intensity to one named skill for the duration — apply manually' },
+  { name: 'Castback', target: 'self', kind: 'utility',
+    description: 'Ward: a spell failing to beat this intensity strikes its own caster instead; collapses after one reflection' },
+  { name: 'Curse', target: 'enemy', kind: 'utility',
+    description: '-5% per intensity to all skills if POW is overcome, until dispelled — apply manually' },
+  { name: 'Damage Boosting', target: 'self', kind: 'utility',
+    description: '+1 damage per intensity on a cast weapon — apply manually' },
+  { name: 'Damage Resistance', target: 'self', kind: 'utility',
+    description: 'Reduces incoming damage per blow by the intensity, before armor — apply manually' },
+  { name: 'Diminish (Characteristic)', target: 'enemy', kind: 'utility',
+    description: '-1 characteristic per 2 intensity if POW is overcome — apply manually' },
+  { name: 'Dispel Magic', target: 'enemy', kind: 'utility',
+    description: 'Removes one active spell of equal or lower magnitude (full strength vs spirit magic, half vs rune magic)' },
+  { name: 'Dominate (Species)', target: 'enemy', kind: 'utility',
+    description: 'Seizes the will of one creature of the named species whose POW is overcome, for the duration' },
+  { name: 'Enhance (Characteristic)', target: 'ally', kind: 'utility',
+    description: '+1 characteristic per 2 intensity, up to 1.5x natural — apply manually' },
+  { name: 'Flight', target: 'ally', kind: 'utility',
+    description: 'Grants flight at ~movement class 3 per intensity; unwilling targets require overcoming POW' },
+  { name: 'Forge (Substance)', target: 'self', kind: 'utility',
+    description: 'Shapes/mends/joins 1 SIZ of the named substance per intensity, without tools or heat' },
+  { name: 'Glow', target: 'self', kind: 'utility',
+    description: 'Sorcerous light illuminating 3m per intensity, color and brightness at the caster\'s whim' },
+  { name: 'Haste', target: 'ally', kind: 'utility',
+    description: '+1 movement class and -1 strike rank per 2 intensity; fatigues the target when it ends — apply manually' },
+  { name: 'Illusion', target: 'self', kind: 'utility',
+    description: 'Phantom of sight/sound up to 1 SIZ per intensity; disbelieved by overcoming intensity with INT' },
+  { name: 'Neutralize Magic', target: 'enemy', kind: 'utility',
+    description: 'Suppresses magic of equal or lower magnitude in the area for the duration' },
+  { name: 'Palsy', target: 'enemy', kind: 'utility',
+    description: 'Locks one hit location rigid if POW is overcome; vital locations render the victim helpless' },
+  { name: 'Phantom (Sense)', target: 'enemy', kind: 'utility',
+    description: 'Creates a false sensory impression perceived by all within range' },
+  { name: 'Regenerate', target: 'ally', kind: 'utility',
+    description: 'Heals 1 HP per intensity per hit location over the spell\'s duration; regrows severed members over weeks' },
+  { name: 'Sculpt (Substance)', target: 'self', kind: 'utility',
+    description: 'Plastically reshapes 1 SIZ of the named substance per intensity; keeps its new shape' },
+  { name: 'Sense (Substance)', target: 'self', kind: 'utility',
+    description: 'Perceives the named substance\'s direction, distance, and rough quantity within range' },
+  { name: 'Slow', target: 'enemy', kind: 'utility',
+    description: '-1 movement class and +1 strike rank per 2 intensity if POW is overcome — apply manually' },
+  { name: 'Summon (Entity)', target: 'self', kind: 'utility',
+    description: 'Calls an entity of the named type from its home plane; size/power scale with intensity' },
+  { name: 'Teleport', target: 'self', kind: 'utility',
+    description: 'Moves the caster (or a touched target) to a seen spot within range; ~SIZ 7 per intensity' },
+  { name: 'Venom', target: 'enemy', kind: 'damage', notation: '6', perPoint: true,
+    ignoresArmor: true, resisted: true, halfOnResistFailure: true, targetsTotalHp: true,
+    description: 'Poison potency 6 per intensity vs CON on the resistance table; half potency if resisted' },
+  { name: 'Ward', target: 'self', kind: 'utility',
+    description: 'Warded area of 1m radius per intensity; intruders take 1d3 per 2 intensity unless they overcome the ward\'s intensity with POW' },
+];
+
+const RQ_SPELL_EFFECT_INDEX = buildSpellEffectIndex([
+  ...RQ_SPIRIT_SPELL_EFFECTS, ...RQ_RUNE_SPELL_EFFECTS, ...RQ_SORCERY_SPELL_EFFECTS,
+]);
 
 const STAT_DEFINITIONS: StatDefinition[] = [
   { key: 'STR', label: 'STR (Strength)',      visible: true },
@@ -221,6 +354,29 @@ export class RuneQuestRules implements GameSystemRules {
 
   getMagicSystemType(): string {
     return 'runequest';
+  }
+
+  getSpellEffect(spellName: string): SpellEffect | null {
+    return RQ_SPELL_EFFECT_INDEX.get(normalizeSpellName(spellName)) ?? null;
+  }
+
+  // Casting checks per public/docs/RuneQuest-Spells.md: spirit magic on POW×5,
+  // rune magic on the caster's affinity for the spell's rune (POW×5 when the
+  // rune is untrained), sorcery on the Sorcery skill.
+  getCastCheck(spell: CastableSpell, caster: SpellCasterInfo): CastCheck {
+    const powTimes5 = (caster.stats.POW ?? 10) * 5;
+    if (spell.category === 'rune') {
+      // spell.discipline carries the RuneSpell's associatedRune
+      const affinity = spell.discipline ? (caster.runes?.[spell.discipline] ?? 0) : 0;
+      if (affinity > 0) {
+        return { kind: 'percentile-under', target: affinity, label: `${spell.discipline} rune` };
+      }
+      return { kind: 'percentile-under', target: powTimes5, label: 'POW×5' };
+    }
+    if (spell.category === 'sorcery') {
+      return { kind: 'percentile-under', target: caster.skills['Sorcery'] ?? 0, label: 'Sorcery' };
+    }
+    return { kind: 'percentile-under', target: powTimes5, label: 'POW×5' };
   }
 
   getCurrencyLabel(): string {

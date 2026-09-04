@@ -340,6 +340,41 @@
   gap: var(--spacing-lg);
 }
 
+.card-spell-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex-wrap: wrap;
+  margin-top: var(--spacing-lg);
+}
+
+.spell-select {
+  flex: 1;
+  min-width: 120px;
+  font-size: var(--font-size-sm);
+}
+
+.cast-btn {
+  background-color: #7c3aed;
+  color: var(--color-bg-white);
+  border: none;
+}
+
+.cast-btn:hover:not(:disabled) {
+  background-color: #6d28d9;
+}
+
+.spell-resource-chip {
+  padding: var(--spacing-xs) var(--spacing-lg);
+  background: #f5f3ff;
+  border: 1px solid #8b5cf6;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: var(--font-size-sm);
+  color: #5b21b6;
+  white-space: nowrap;
+}
+
 .stat-row {
   display: flex;
   justify-content: space-between;
@@ -515,6 +550,16 @@
 .log-entry.failed {
   background: #fff7ed;
   border-left-color: #f97316;
+}
+
+.log-entry.spell {
+  background: #f5f3ff;
+  border-left-color: #8b5cf6;
+}
+
+.log-entry.heal {
+  background: #ecfdf5;
+  border-left-color: #10b981;
 }
 
 .empty-log {

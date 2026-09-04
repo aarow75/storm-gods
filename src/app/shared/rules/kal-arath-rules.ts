@@ -9,6 +9,10 @@ import {
   ArmorModel, InitiativeMechanic
 } from './game-system-rules.interface';
 import { Weapon, Shield } from './game-rules';
+import {
+  SpellEffect, CastCheck, CastableSpell, SpellCasterInfo,
+  buildSpellEffectIndex, normalizeSpellName
+} from './spell-effects.model';
 
 export const KA_PACT_SPELLS: Record<string, { name: string; tier: number }[]> = {
   'Blood': [
@@ -53,6 +57,96 @@ export const KA_PACT_SPELLS: Record<string, { name: string; tier: number }[]> = 
     { name: 'Soldiers Of the 10,000 Strong Army', tier: 4 },
     { name: 'Forbidden Temple of the 7th Sigil', tier: 5 },
   ],
+};
+
+// Pact spell combat effects, from public/docs/Kal-Arath-Spells.md. Casting is
+// free (pacts have no point pool); the price is failure — 1 damage and no more
+// casting until a rest — and the Arcane Disaster table on a critical failure.
+export const KA_SPELL_EFFECTS: SpellEffect[] = [
+  // Pact of Blood
+  { name: 'Crimson Palm Scripture', target: 'enemy', kind: 'damage', notation: 'd6', ignoresArmor: true,
+    description: 'Drains HP by touch (no attack roll); the caster gains the same amount — add manually' },
+  { name: 'Eternal River of Blessed Strength', target: 'self', kind: 'utility',
+    description: 'Sacrifice 4 HP: +2 STR and AGI for 1 hour — apply manually' },
+  { name: 'Mantra of Thirst', target: 'self', kind: 'utility',
+    description: 'Exchange 6 HP to roll the next casting check at advantage' },
+  { name: 'Ascendance of the Scarlet Flower', target: 'self', kind: 'utility',
+    description: 'Summon a blood demon for d6 rounds (HP 5d6, Armor 2, Claws 2d6, Morale 10)' },
+  { name: 'Mandala of Calm Serenity', target: 'enemy', kind: 'utility',
+    description: 'Sacrifice 2 HP per d6: deal d6 damage automatically to targets in missile range — apply manually' },
+  // Pact of Destruction
+  { name: 'Vision of Transience', target: 'enemy', kind: 'damage', notation: 'd6',
+    description: 'Or shatter one non-magical item within missile range' },
+  { name: 'Way of the Sundering Fist', target: 'self', kind: 'utility',
+    description: 'All your unarmed blows roll damage at advantage' },
+  { name: "Temple's Demolishing Breath", target: 'enemy', kind: 'damage', notation: 'd6',
+    description: 'Hits all in melee range and knocks them back 10\' — apply to other targets manually' },
+  { name: 'Cleansing By Fire', target: 'enemy', kind: 'damage', notation: '3d6',
+    description: 'Exploding fireball, 20\' radius — apply to all in the area' },
+  { name: 'Enlightenment Through Ruin', target: 'enemy', kind: 'damage', notation: '2d6',
+    description: 'Meteor storms, 100\'×100\' for d6+ rounds — 2d6 per round; apply later rounds manually' },
+  // Pact of Domination
+  { name: 'Diamond Mind Shatters', target: 'enemy', kind: 'utility',
+    description: 'Uncontrollable confusion and fear in d6 targets for d6 rounds' },
+  { name: 'Doctrine of the Subservient Path', target: 'enemy', kind: 'utility',
+    description: 'Target obeys the caster within reasonable boundaries of friendship for 1 day' },
+  { name: 'Life Is Only A Mirage', target: 'self', kind: 'utility',
+    description: 'Create a believable illusion up to the size of a large temple (total concentration)' },
+  { name: 'Heavenly Edict of Obedience', target: 'enemy', kind: 'utility',
+    description: 'Complete mental domination of an individual; recast each day to maintain' },
+  { name: 'Liberation From All Earthly Choice', target: 'enemy', kind: 'utility',
+    description: 'Control d6×10 individuals for d6 rounds plus caster level' },
+  // Pact of Illumination
+  { name: 'Flame of Insight', target: 'self', kind: 'utility',
+    description: 'Force a re-roll of any one roll' },
+  { name: 'Lantern of the Revealing Path', target: 'self', kind: 'utility',
+    description: 'Shows the location of any object known to the caster' },
+  { name: 'Ecstatic Meditation on Death', target: 'self', kind: 'utility',
+    description: 'For one day, advantage on all attack and dodge rolls' },
+  { name: 'All-Encompassing Gaze', target: 'self', kind: 'utility',
+    description: 'Gain d6 Fate Points this session — add manually' },
+  { name: 'Golden Final Enlightenment', target: 'self', kind: 'utility',
+    description: 'One re-roll of any roll in the game, caster\'s choice, all session' },
+  // Pact of Shadow
+  { name: 'Sworn to the Dark', target: 'self', kind: 'utility',
+    description: 'Invisibility except in full daylight, 1 hour per level; attacking negates' },
+  { name: 'Veil of the Hidden Monastery', target: 'self', kind: 'utility',
+    description: 'Mobile 20\' globe of darkness around the caster for d6 rounds +1/level' },
+  { name: 'Silent Passage Through The Realm of the Master', target: 'self', kind: 'utility',
+    description: 'Teleport from one shadow to another the caster can see' },
+  { name: "Blessed Guardian of Night's Temple", target: 'self', kind: 'utility',
+    description: 'Summon a shadow demon for d6 rounds +1/level (HP 24, Armor 2, 2d6, Morale 10)' },
+  { name: 'Void of the Black Lotus', target: 'enemy', kind: 'damage', slays: true,
+    description: 'Kills one individual with a mantra. Roll d6: on a 6, gain a level' },
+  // Pact of Corruption
+  { name: 'Decay is the Way of All Things', target: 'self', kind: 'utility',
+    description: 'Animate one recently deceased body to serve for d6 hours (Skeleton Warrior stats)' },
+  { name: 'Clouds Descend To The Earth', target: 'enemy', kind: 'damage', notation: 'd6',
+    description: 'Fog 30\' around the caster: d6/round to all but the caster for d6 rounds — apply later rounds manually' },
+  { name: 'Withering Mandala', target: 'enemy', kind: 'damage', notation: 'd6',
+    description: 'Necrotic rot on d6 targets; any slain rise as ghouls under the caster\'s control' },
+  { name: 'Soldiers Of the 10,000 Strong Army', target: 'self', kind: 'utility',
+    description: 'Summon 3d6 ghouls in a thick fog (total concentration to control)' },
+  { name: 'Forbidden Temple of the 7th Sigil', target: 'self', kind: 'utility',
+    description: 'Major plague outbreak in a populated area for d6 days' },
+];
+
+const KA_SPELL_EFFECT_INDEX = buildSpellEffectIndex(KA_SPELL_EFFECTS);
+
+// Arcane Disaster table (critical casting failure), indexed by 2d6 result,
+// from public/docs/Kal-Arath-Spells.md
+export const KA_ARCANE_DISASTERS: Record<number, string> = {
+  2: 'A lesser demon takes hold of the caster\'s body. The caster\'s soul is trapped and enslaved — the adventure is at an end!',
+  3: 'Blood vessels burst: reduced to 0 HP and −2 TOU permanently unless healed by powerful magic. Roll on the Death Table.',
+  4: 'Sigils overwhelm the mind: −2 INT and vivid, traumatic hallucinations.',
+  5: 'Part of the soul is torn away: −1 INT and −1 PRE; horror and overwhelming emptiness.',
+  6: 'Cursed by a demon: lose the ability to use Fate Points until the curse is ended.',
+  7: 'The caster\'s body changes disturbingly: −1 PRE, but +1 PRE to intimidation.',
+  8: 'Sigils burn into the flesh: −1 PRE and chronic pain — STR checks at disadvantage.',
+  9: 'The magic lashes back with burns and injuries: −1 permanent HP.',
+  10: 'A psychic echo causes headaches and nightmares: −1 INT for d6 sessions.',
+  11: 'The spell drains the caster\'s vitality: −1 STR from fatigue for the remainder of the session.',
+  12: 'The spell fails, but the caster suffers only a minor psychic backlash.',
 };
 
 export const KA_DOOMS: string[] = [
@@ -246,6 +340,32 @@ export class KalArathRules implements GameSystemRules {
 
   getMagicSystemType(): string {
     return 'kal-arath';
+  }
+
+  getSpellEffect(spellName: string): SpellEffect | null {
+    return KA_SPELL_EFFECT_INDEX.get(normalizeSpellName(spellName)) ?? null;
+  }
+
+  // Casting is an INT check vs Spell Difficulty: 2d6 + INT ≥ 8 + tier.
+  // Natural 12 always succeeds with the effect doubled (crit).
+  getCastCheck(spell: CastableSpell, caster: SpellCasterInfo): CastCheck {
+    return {
+      kind: '2d6-over',
+      bonus: caster.stats.INT ?? 0,
+      target: 8 + spell.cost, // cost carries the spell's tier
+      label: 'INT',
+    };
+  }
+
+  // Casting Failure: the caster takes 1 damage and cannot cast again until a
+  // rest. Critical Failure additionally rolls on the Arcane Disaster table.
+  getCastFailureEffects(fumble: boolean): { logNotes: string[]; damageToCaster: number; blockCastingUntilRest: boolean } {
+    const logNotes: string[] = [];
+    if (fumble) {
+      const roll = Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
+      logNotes.push(`ARCANE DISASTER (2d6: ${roll}) — ${KA_ARCANE_DISASTERS[roll]}`);
+    }
+    return { logNotes, damageToCaster: 1, blockCastingUntilRest: true };
   }
 
   getCurrencyLabel(): string {

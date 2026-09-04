@@ -409,6 +409,7 @@ export class CharacterFormComponent implements OnInit {
       const rules = this.gameSystemService.getRules();
       const prevHp = this.character.derivedStats?.totalHitPoints;
       const prevMaxHp = this.character.derivedStats?.maxHitPoints;
+      const prevCurrentMp = this.character.derivedStats?.currentMagicPoints;
 
       this.character.derivedStats = rules.calculateDerivedStats(
         this.character.stats,
@@ -417,6 +418,12 @@ export class CharacterFormComponent implements OnInit {
         this.character.shields ?? [],
         this.character.background,
         this.character.armorType
+      );
+      // Recalculation replaces the whole object — keep the spendable MP pool,
+      // capped at the (possibly changed) max
+      this.character.derivedStats.currentMagicPoints = Math.min(
+        prevCurrentMp ?? this.character.derivedStats.magicPoints,
+        this.character.derivedStats.magicPoints
       );
       this.calculateHitPoints();
 

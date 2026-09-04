@@ -106,6 +106,11 @@ export class CharacterService implements DataPort {
       char.derivedStats.encumbranceDefensePenalty = 0;
     }
 
+    // Migrate current magic points (spendable pool) if missing — starts at max
+    if (char.derivedStats && char.derivedStats.currentMagicPoints === undefined) {
+      char.derivedStats.currentMagicPoints = char.derivedStats.magicPoints ?? 0;
+    }
+
     // Ensure hitLocations exist
     if (!char.hitLocations) {
       const rules = getRulesForSystem(char.gameSystem || 'runequest');
@@ -145,6 +150,9 @@ export class CharacterService implements DataPort {
     }
     if (char.magic.doom === undefined) char.magic.doom = '';
     if (!char.magic.dragonbaneSpells) char.magic.dragonbaneSpells = [];
+    if (char.magic.currentRunePoints === undefined) {
+      char.magic.currentRunePoints = char.magic.runePoints ?? 0;
+    }
 
     // Ensure resources exist
     if (!char.resources) {

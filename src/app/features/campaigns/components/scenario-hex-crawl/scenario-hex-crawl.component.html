@@ -1,0 +1,198 @@
+<div class="scenario-hex-crawl-page">
+  @if (!scenario || !campaign) {
+    <div class="loading">Loading scenario...</div>
+  } @else {
+    <header class="page-header">
+      <button class="btn-back" (click)="goBack()">← {{ campaign.name }}</button>
+      <h1>{{ scenario.name }}</h1>
+      <div class="day-counter">Day {{ scenario.currentDay }}</div>
+    </header>
+
+    <div class="toolbar">
+      <div class="party-tokens">
+        <span class="toolbar-label">Party:</span>
+        @for (char of partyCharacters; track char.id) {
+          <button
+            class="party-token-btn"
+            [style.borderColor]="char.color ?? '#888'"
+            [class.selected]="isTokenSelectedForCharacter(char)"
+            (click)="selectToken(char)">
+            {{ char.name }}
+          </button>
+        }
+      </div>
+
+      <div class="rest-controls">
+        <label for="rest-days">Rest (days):</label>
+        <input id="rest-days" type="number" min="1" [(ngModel)]="restDaysInput" />
+        <button class="btn btn-secondary" (click)="restParty()">Rest Party</button>
+        @if (!showsHealingRate) {
+          <span class="rest-note">This system tracks rest/healing manually — HP was not changed.</span>
+        }
+      </div>
+
+      <div class="hex-import-controls">
+        <label class="btn btn-secondary" title="Import hex definitions from a .txt file (4-digit id, optional terrain, optional danger level [safe/caution/dangerous/unknown], optional description)">
+          Import Hex Definitions
+          <input type="file" accept=".txt" (change)="importHexDefinitions($event)" style="display:none;" />
+        </label>
+      </div>
+    </div>
+
+    <div class="map-legend">
+      <span class="legend-item"><span class="legend-swatch" style="background:#2ecc71"></span>Safe</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#f39c12"></span>Caution</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:#e74c3c"></span>Dangerous</span>
+      <span class="legend-item">📍 Point of interest</span>
+      <span class="legend-item"><span class="legend-dot"></span>Visited</span>
+    </div>
+
+    <div class="map-container">
+      <svg #hexSvg [attr.width]="svgWidth" [attr.height]="svgHeight" class="hex-grid">
+        <g [attr.transform]="'translate(' + svgOffsetX + ',' + svgOffsetY + ')'">
+          @if (mapMode === 'image' && backgroundImagePath) {
+            <image
+              [attr.href]="backgroundImagePath"
+              [attr.width]="svgWidth"
+              [attr.height]="svgHeight"
+              [attr.x]="0"
+              [attr.y]="0"
+              preserveAspectRatio="xMidYMid slice"
+              class="map-background" />
+          }
+          @for (hex of hexes; track hex.q + ',' + hex.r) {
+            <polygon
+              [attr.points]="hex.points"
+              [attr.fill]="getHexFill(hex.q, hex.r)"
+              [attr.stroke]="getDangerColor(hex.q, hex.r) ?? getHexStroke(hex.q, hex.r)"
+              [attr.stroke-width]="getHexStrokeWidth(hex.q, hex.r)"
+              [class.hex-tile]="true"
+              [class.visited]="getHexData(hex.q, hex.r).visited"
+              (click)="onHexClick(hex.q, hex.r)">
+              <title>{{ getHexTooltip(hex.q, hex.r) }}</title>
+            </polygon>
+            @if (getHexData(hex.q, hex.r).visited) {
+              <circle [attr.cx]="hex.cx - HEX_SIZE * 0.35" [attr.cy]="hex.cy - HEX_SIZE * 0.5" r="2" class="visited-dot" />
+            }
+            @if (hasPointsOfInterest(hex.q, hex.r)) {
+              <text
+                [attr.x]="hex.cx + HEX_SIZE * 0.3"
+                [attr.y]="hex.cy - HEX_SIZE * 0.4"
+                text-anchor="middle"
+                [attr.font-size]="HEX_SIZE * 0.55"
+                class="poi-marker"
+                style="pointer-events: none;">📍</text>
+            }
+          }
+
+          @for (token of placedTokens; track token.id) {
+            <circle
+              [attr.cx]="getTokenCx(token)"
+              [attr.cy]="getTokenCy(token)"
+              [attr.r]="HEX_SIZE * 0.55"
+              [attr.fill]="token.color"
+              [attr.stroke]="selectedTokenId === token.id ? 'white' : 'rgba(0,0,0,0.4)'"
+              [attr.stroke-width]="selectedTokenId === token.id ? 2.5 : 1"
+              class="token-circle"
+              (click)="onHexClick(token.position!.q, token.position!.r)" />
+            <text
+              [attr.x]="getTokenCx(token)"
+              [attr.y]="getTokenCy(token)"
+              dominant-baseline="central"
+              text-anchor="middle"
+              [attr.font-size]="HEX_SIZE * 0.6"
+              fill="white"
+              style="pointer-events: none; font-weight: bold; text-shadow: 0 0 2px #000;">
+              {{ token.name[0] }}
+            </text>
+          }
+        </g>
+      </svg>
+    </div>
+
+    @if (encounterResult) {
+      <div class="modal" (click)="dismissEncounter()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Encounter!</h3>
+            <button class="btn-close" (click)="dismissEncounter()">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p><strong>Terrain:</strong> {{ encounterResult.terrain | titlecase }}</p>
+            <p><strong>Roll:</strong> {{ encounterResult.roll }}</p>
+            <p><strong>Creature:</strong> {{ encounterResult.count }} {{ encounterResult.creature }}</p>
+            <p><strong>Difficulty:</strong> {{ encounterResult.difficulty | titlecase }}</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="dismissEncounter()">Ignore</button>
+            <button class="btn btn-primary" (click)="startCombatWithEncounter()">Start Combat</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (selectedHexCoord) {
+      <aside class="hex-detail-panel">
+        <div class="panel-header">
+          <h3>Hex ({{ selectedHexCoord.q }}, {{ selectedHexCoord.r }})</h3>
+          <button class="btn-close" (click)="closeHexDetail()">&times;</button>
+        </div>
+
+        <div class="panel-section">
+          <label>Terrain</label>
+          <p>{{ getTerrainAt(selectedHexCoord.q, selectedHexCoord.r) | titlecase }}</p>
+        </div>
+
+        <div class="panel-section">
+          <label>Danger Level</label>
+          <select [ngModel]="selectedHexData?.dangerLevel" (ngModelChange)="setDangerLevel($event)">
+            <option value="unknown">Unknown</option>
+            <option value="safe">Safe</option>
+            <option value="caution">Caution</option>
+            <option value="dangerous">Dangerous</option>
+          </select>
+        </div>
+
+        <div class="panel-section">
+          <label>Points of Interest</label>
+          @for (poi of selectedHexData?.pointsOfInterest ?? []; track poi.id) {
+            <div class="poi-row">
+              <span>{{ poi.label }}</span>
+              <button class="btn-remove" (click)="removePointOfInterest(poi.id)">&times;</button>
+            </div>
+          }
+          <div class="poi-add">
+            <input type="text" [(ngModel)]="newPoiLabel" placeholder="e.g. Smoldering ruins" />
+            <button class="btn btn-secondary btn-small" (click)="addPointOfInterest()">Add</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <label>Encounter History</label>
+          @if (!(selectedHexData?.encounterHistory ?? []).length) {
+            <p class="empty-note">No encounters here yet.</p>
+          }
+          @for (entry of selectedHexData?.encounterHistory ?? []; track $index) {
+            <div class="encounter-entry">
+              <div><strong>Day {{ entry.day }}:</strong> {{ entry.description }}</div>
+              <input
+                type="text"
+                [ngModel]="entry.outcome"
+                (ngModelChange)="updateEncounterOutcome($index, $event)"
+                placeholder="Outcome (e.g. defeated the orc)" />
+            </div>
+          }
+        </div>
+
+        <div class="panel-section">
+          <label>Notes</label>
+          <textarea
+            rows="4"
+            [ngModel]="selectedHexData?.notes"
+            (ngModelChange)="updateHexNotes($event)"
+            placeholder="Freeform notes about this hex"></textarea>
+        </div>
+      </aside>
+    }
+  }
+</div>

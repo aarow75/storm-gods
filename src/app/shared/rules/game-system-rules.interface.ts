@@ -1,6 +1,7 @@
 import { CharacterStats } from '@shared/models/character-stats.model';
 import { WeaponDefinition, ShieldDefinition, HitLocations, Weapon, Shield } from '@shared/rules/game-rules';
 import { DerivedStats, EquipmentItem, CharacterBackground, Resources } from '@characters/models/character.model';
+import { SpellEffect, CastCheck, CastableSpell, SpellCasterInfo } from './spell-effects.model';
 
 export type BackgroundForBonuses = Pick<CharacterBackground, 'occupation' | 'homeland' | 'cult' | 'age'>;
 
@@ -229,6 +230,37 @@ export interface GameSystemRules {
 
   /** Identifier for the magic system used by this game system. */
   getMagicSystemType(): string;
+
+  // ── Spell Casting (combat) ────────────────────────────────────────────────
+  // Systems without combat magic (Mothership, BRP) omit these methods, which
+  // hides all cast UI in the combat tracker and combat map.
+
+  /**
+   * Combat effect for a spell name (matched case-insensitively). Null when the
+   * spell isn't in the registry — it then resolves as a utility cast (roll +
+   * cost + log entry).
+   */
+  getSpellEffect?(spellName: string): SpellEffect | null;
+
+  /** Casting check for a spell, from the system's casting rules. */
+  getCastCheck?(spell: CastableSpell, caster: SpellCasterInfo): CastCheck;
+
+  /**
+   * OSRIC: spells castable per day for a class at a character level; index =
+   * spellLevel − 1. Empty array = no slots at that level.
+   */
+  getSpellSlotsPerDay?(className: string | undefined, level: number): number[];
+
+  /**
+   * System-specific consequences of a failed casting roll (fumble = critical
+   * failure). Kal-Arath: 1 damage to the caster + no casting until rest, and an
+   * Arcane Disaster on a fumble. Dragonbane: a Magical Mishap on a Demon (20).
+   */
+  getCastFailureEffects?(fumble: boolean): {
+    logNotes: string[];
+    damageToCaster: number;
+    blockCastingUntilRest: boolean;
+  };
 
   /** Short currency label used when displaying weapon costs (e.g. "L", "GC", "S"). */
   getCurrencyLabel(): string;

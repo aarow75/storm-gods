@@ -7,6 +7,8 @@ import { CharacterService } from '@characters/services/character.service';
 import { CombatLogService } from '@combat/services/combat-log.service';
 import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
 import { WildernessMapService } from '@maps/services/wilderness-map.service';
+import { ScenarioMapService } from '@maps/services/scenario-map.service';
+import { CampaignService } from '@campaigns/services/campaign.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,5 +19,7 @@ export const appConfig: ApplicationConfig = {
     { provide: DATA_PORT, useExisting: CombatLogService, multi: true },
     { provide: DATA_PORT, useExisting: CustomMonsterService, multi: true },
     { provide: DATA_PORT, useExisting: WildernessMapService, multi: true },
+    { provide: DATA_PORT, useExisting: ScenarioMapService, multi: true },
+    { provide: DATA_PORT, useExisting: CampaignService, multi: true },
   ]
 };

@@ -1,3 +1,5 @@
+import { CampaignScenario } from './scenario.model';
+
 export interface Campaign {
   id: string;
   name: string;
@@ -44,6 +46,7 @@ export interface CampaignData {
   campaign: Campaign;
   objectives: CampaignObjective[];
   sessionLogs: SessionLogEntry[];
+  scenarios: CampaignScenario[];
 }
 
 export const DEFAULT_CAMPAIGN: Partial<Campaign> = {

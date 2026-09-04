@@ -111,6 +111,12 @@ const gameSystemRoutes: Routes = [
     loadComponent: () =>
       import('@campaigns/components/campaign-detail/campaign-detail.component')
         .then(m => m.CampaignDetailComponent)
+  },
+  {
+    path: 'campaigns/:campaignId/scenarios/:scenarioId',
+    loadComponent: () =>
+      import('@campaigns/components/scenario-hex-crawl/scenario-hex-crawl.component')
+        .then(m => m.ScenarioHexCrawlComponent)
   }
 ];
 

@@ -44,6 +44,8 @@ export interface CustomMap {
   height: number;
   scale: number;
   scaleUnit: 'miles' | 'kilometers';
+  /** Id of a MAP_BACKGROUNDS entry to render behind this map's hex grid, if any. */
+  backgroundImage?: string;
 }
 
 export interface WildernessToken {
@@ -56,11 +58,44 @@ export interface WildernessToken {
   iconType?: LandmarkIconType;
 }
 
+export type DangerLevel = 'unknown' | 'safe' | 'caution' | 'dangerous';
+
+export interface HexEncounterLogEntry {
+  day: number;
+  description: string;
+  outcome?: string;
+}
+
+export interface PointOfInterest {
+  id: string;
+  label: string;
+  notes?: string;
+  source?: 'import';
+}
+
+export interface HexData {
+  visited: boolean;
+  firstVisitedDay?: number;
+  lastVisitedDay?: number;
+  dangerLevel: DangerLevel;
+  pointsOfInterest: PointOfInterest[];
+  notes?: string;
+  encounterHistory: HexEncounterLogEntry[];
+}
+
+export const DEFAULT_HEX_DATA: HexData = {
+  visited: false,
+  dangerLevel: 'unknown',
+  pointsOfInterest: [],
+  encounterHistory: [],
+};
+
 export interface WildernessMapState {
   tiles: Record<string, TerrainType>;
   tokens: WildernessToken[];
   terrainMaps: Record<string, Record<string, TerrainType>>;
   tokenMaps: Record<string, WildernessToken[]>;
+  hexDataMaps?: Record<string, Record<string, HexData>>;
   customMaps: CustomMap[];
   currentMapId?: string;
   backgroundImage?: string;
@@ -86,6 +121,7 @@ export const DEFAULT_WILDERNESS_STATE: WildernessMapState = {
   tokens: [],
   terrainMaps: {},
   tokenMaps: {},
+  hexDataMaps: {},
   customMaps: [],
   mapMode: 'terrain',
   gridWidth: GRID_COLS,

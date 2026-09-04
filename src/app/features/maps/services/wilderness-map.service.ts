@@ -47,9 +47,13 @@ export class WildernessMapService implements DataPort {
 
   getState(): WildernessMapState {
     const data = localStorage.getItem(this.key());
-    const loaded = data ? JSON.parse(data) : { ...DEFAULT_WILDERNESS_STATE };
+    // Deep-clone the default: a shallow spread would share DEFAULT_WILDERNESS_STATE's
+    // nested arrays/objects (customMaps, terrainMaps, ...) by reference across every
+    // caller with no saved state yet, so mutating one would corrupt the shared default.
+    const loaded = data ? JSON.parse(data) : JSON.parse(JSON.stringify(DEFAULT_WILDERNESS_STATE));
     loaded.terrainMaps ??= {};
     loaded.tokenMaps ??= {};
+    loaded.hexDataMaps ??= {};
     loaded.customMaps ??= [];
     if (loaded.currentMapId) {
       // Migrate top-level tiles into terrainMaps if terrainMaps is missing the current map's data

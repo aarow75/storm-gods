@@ -83,7 +83,9 @@
                  [class.parry]="entry.includes('[PARRY]')"
                  [class.dodge]="entry.includes('[DODGE]')"
                  [class.miss]="entry.includes('[MISS]')"
-                 [class.failed]="entry.includes('FAILED')">
+                 [class.failed]="entry.includes('FAILED')"
+                 [class.spell]="entry.includes('[CAST]') || entry.includes('[SPELL]') || entry.includes('[RESISTED]')"
+                 [class.heal]="entry.includes('[HEAL]')">
               {{ entry }}
             </div>
           }
@@ -219,6 +221,14 @@
                           [disabled]="!participant.selectedOpponentId || !!pendingAttack">
                     🎲 Attack
                   </button>
+                  @if (canCast(participant) && participant.selectedSpell) {
+                    <button class="btn btn-cast-spell"
+                            (click)="castSpell(participant)"
+                            [disabled]="!!pendingAttack || !!participant.cannotCastUntilRest || !canAffordSelectedSpell(participant)"
+                            [title]="getCastButtonTitle(participant)">
+                      ✨ Cast
+                    </button>
+                  }
                 }
               </div>
             </div>
@@ -372,6 +382,51 @@
                   </div>
                 }
               </div>
+
+              @if (canCast(participant)) {
+                <div class="detail-group spell-group">
+                  <label for="spell-{{ participant.id }}">Spell:</label>
+                  <div class="spell-control">
+                    <select id="spell-{{ participant.id }}"
+                            [(ngModel)]="participant.selectedSpell"
+                            (change)="onSpellChange(participant)"
+                            [disabled]="!!participant.isDead">
+                      <option value="">-- Select Spell --</option>
+                      @for (spell of getCastableSpells(participant); track spell.name) {
+                        <option [value]="spell.name">{{ spell.name }} ({{ spell.costLabel }})</option>
+                      }
+                    </select>
+                    @if (spellNeedsAllyTarget(participant)) {
+                      <select class="spell-target-select"
+                              [(ngModel)]="participant.spellTargetId"
+                              [disabled]="!!participant.isDead"
+                              title="Spell target">
+                        @for (ally of getAllyTargets(participant); track ally.id) {
+                          <option [value]="ally.id">{{ ally.id === participant.id ? 'Self' : ally.name }}</option>
+                        }
+                      </select>
+                    }
+                    <div class="spell-cast-row">
+                      <button class="btn-cast-spell"
+                              (click)="castSpell(participant)"
+                              [disabled]="!!participant.isDead || !!pendingAttack || !participant.selectedSpell
+                                          || !!participant.cannotCastUntilRest || !canAffordSelectedSpell(participant)"
+                              [title]="getCastButtonTitle(participant)">
+                        ✨ Cast
+                      </button>
+                      @if (getSpellResourceDisplay(participant); as resource) {
+                        <span class="spell-resource-chip">{{ resource }}</span>
+                      }
+                      <button class="btn-restore-magic"
+                              title="Rest — restore magic to full"
+                              (click)="restoreMagic(participant)">↺</button>
+                    </div>
+                    @if (participant.cannotCastUntilRest) {
+                      <span class="cast-blocked-note">Cannot cast until rest</span>
+                    }
+                  </div>
+                </div>
+              }
             </div>
 
             <div class="hit-locations-container">

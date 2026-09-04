@@ -12,7 +12,9 @@ import { CharacterService } from '@characters/services/character.service';
 import { CustomMonsterService } from '@bestiary/services/custom-monster.service';
 import { CombatService } from '@combat/services/combat.service';
 import { CombatLogService } from '@combat/services/combat-log.service';
+import { SpellCastingService } from '@combat/services/spell-casting.service';
 import { DiceService } from '@shared/services/dice.service';
+import { CastableSpell } from '@shared/rules/spell-effects.model';
 import { CharacterUpdateService } from '@characters/services/character-update.service';
 import { GameSystemService } from '@shared/services/game-system.service';
 import { CharacterStats } from '@shared/models/character-stats.model';
@@ -112,6 +114,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     private combatLogService: CombatLogService,
     private diceService: DiceService,
     private characterUpdateService: CharacterUpdateService,
+    private spellCastingService: SpellCastingService,
     public gameSystemService: GameSystemService
   ) {}
 
@@ -171,6 +174,7 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     const system = this.gameSystemService.gameSystem();
     this.characters = this.characterService.getCharacters()
       .filter(c => (c.gameSystem ?? 'runequest') === system);
+    this.castableSpellsCache.clear();
     this.defaultMonsters = this.gameSystemService.getRules().usesHitLocations()
       ? structuredClone(DEFAULT_MONSTERS) : [];
     this.bestiaryMonsters = BESTIARY_MONSTERS
@@ -1335,6 +1339,387 @@ export class CombatTrackerComponent implements OnInit, OnDestroy {
     this.pendingAttack = null;
     this.saveCombat();
     this.focusNextRollButton();
+  }
+
+  // ── Spell casting ────────────────────────────────────────────────────────
+
+  private castableSpellsCache = new Map<string, CastableSpell[]>();
+
+  /** True when the system supports casting and this character knows spells. */
+  canCast(participant: CombatParticipant): boolean {
+    if (participant.type !== 'character' || !participant.characterId) return false;
+    if (!this.rules.getCastCheck) return false;
+    return this.getCastableSpells(participant).length > 0;
+  }
+
+  getCastableSpells(participant: CombatParticipant): CastableSpell[] {
+    if (participant.type !== 'character' || !participant.characterId) return [];
+    let spells = this.castableSpellsCache.get(participant.characterId);
+    if (!spells) {
+      const character = this.characters.find(c => c.id === participant.characterId);
+      spells = character ? this.spellCastingService.getCastableSpells(character, this.rules) : [];
+      this.castableSpellsCache.set(participant.characterId, spells);
+    }
+    return spells;
+  }
+
+  getSelectedSpell(participant: CombatParticipant): CastableSpell | undefined {
+    if (!participant.selectedSpell) return undefined;
+    return this.getCastableSpells(participant).find(s => s.name === participant.selectedSpell);
+  }
+
+  /** Ally/self spells use a separate target select instead of the opponent select. */
+  spellNeedsAllyTarget(participant: CombatParticipant): boolean {
+    const spell = this.getSelectedSpell(participant);
+    return !!spell && spell.effect.target !== 'enemy';
+  }
+
+  getAllyTargets(participant: CombatParticipant): CombatParticipant[] {
+    return this.combatParticipants.filter(p => p.type === participant.type && !p.isDead);
+  }
+
+  onSpellChange(participant: CombatParticipant): void {
+    if (this.spellNeedsAllyTarget(participant)) {
+      const allies = this.getAllyTargets(participant);
+      if (!participant.spellTargetId || !allies.some(a => a.id === participant.spellTargetId)) {
+        participant.spellTargetId = participant.id;
+      }
+    }
+    this.debouncedSaveCombat();
+  }
+
+  canAffordSelectedSpell(participant: CombatParticipant): boolean {
+    const spell = this.getSelectedSpell(participant);
+    if (!spell) return false;
+    const character = this.characters.find(c => c.id === participant.characterId);
+    if (!character) return false;
+    return this.spellCastingService.canAfford(
+      character, spell, participant.spellSlotsUsed, this.getSpellSlotCaps(participant)
+    ).ok;
+  }
+
+  private getSpellSlotCaps(participant: CombatParticipant): number[] | undefined {
+    if (!this.rules.getSpellSlotsPerDay) return undefined;
+    const character = this.characters.find(c => c.id === participant.characterId);
+    return this.rules.getSpellSlotsPerDay(
+      character?.background?.occupation, character?.resources?.level ?? 1
+    );
+  }
+
+  getSpellResourceDisplay(participant: CombatParticipant): string | null {
+    const character = this.characters.find(c => c.id === participant.characterId);
+    if (!character) return null;
+    return this.spellCastingService.getResourceDisplay(character, this.rules, participant.spellSlotsUsed);
+  }
+
+  getCastButtonTitle(participant: CombatParticipant): string {
+    if (participant.cannotCastUntilRest) return 'Casting failed — cannot cast again until a rest';
+    const spell = this.getSelectedSpell(participant);
+    if (!spell) return 'Select a spell to cast';
+    const character = this.characters.find(c => c.id === participant.characterId);
+    if (character) {
+      const afford = this.spellCastingService.canAfford(
+        character, spell, participant.spellSlotsUsed, this.getSpellSlotCaps(participant)
+      );
+      if (!afford.ok) return afford.reason;
+    }
+    return `Cast ${spell.name}`;
+  }
+
+  /** Rest: refill MP/WP/rune points, reset OSRIC slots, clear the casting lockout. */
+  restoreMagic(participant: CombatParticipant): void {
+    const character = this.characters.find(c => c.id === participant.characterId);
+    if (!character) return;
+    this.spellCastingService.restoreResources(character);
+    participant.spellSlotsUsed = {};
+    participant.cannotCastUntilRest = false;
+    this.characters = this.characterService.getCharacters();
+    this.combatLogService.addEntry(`[SPELL] ${participant.name} rests — magic restored to full`);
+    this.saveCombat();
+  }
+
+  castSpell(participant: CombatParticipant): void {
+    if (participant.isDead) return;
+    const character = this.characters.find(c => c.id === participant.characterId);
+    const spell = this.getSelectedSpell(participant);
+    if (!character || !spell) return;
+
+    if (participant.cannotCastUntilRest) {
+      alert(`${participant.name} cannot cast again until they rest!`);
+      return;
+    }
+
+    // Resolve the target: offensive spells use the opponent select,
+    // ally/self spells use the spell target select (default: the caster)
+    let target: CombatParticipant | undefined;
+    if (spell.effect.target === 'enemy') {
+      if (!participant.selectedOpponentId) {
+        alert('Please select an opponent first!');
+        return;
+      }
+      target = this.combatParticipants.find(p => p.id === participant.selectedOpponentId);
+      if (!target || target.isDead) {
+        alert('Selected opponent is not available!');
+        return;
+      }
+    } else {
+      target = this.combatParticipants.find(p => p.id === (participant.spellTargetId || participant.id))
+        ?? participant;
+    }
+
+    const afford = this.spellCastingService.canAfford(
+      character, spell, participant.spellSlotsUsed, this.getSpellSlotCaps(participant)
+    );
+    if (!afford.ok) {
+      alert(afford.reason);
+      return;
+    }
+
+    this.lastAttackerId = participant.id;
+    const casterInfo = this.spellCastingService.buildCasterInfo(character);
+    const check = this.rules.getCastCheck!(spell, casterInfo);
+    const result = this.spellCastingService.rollCastCheck(check);
+
+    // ── Failed casting roll ──────────────────────────────────────────────
+    if (!result.success) {
+      const costInfo = this.spellCastingService.deductCost(character, spell, { success: false });
+      this.combatLogService.addEntry(
+        `[CAST FAILED] ${participant.name}: ${spell.name} (${result.display})${costInfo}`
+      );
+      const failure = this.rules.getCastFailureEffects?.(result.fumble);
+      if (failure) {
+        for (const note of failure.logNotes) {
+          this.combatLogService.addEntry(`[CAST FAILED] ${participant.name}: ${note}`);
+        }
+        if (failure.damageToCaster > 0) {
+          const { justDied } = this.applyDamageToDefender(participant, failure.damageToCaster, undefined);
+          this.combatLogService.addEntry(
+            `[CAST FAILED] ${participant.name} takes ${failure.damageToCaster} damage from the backlash`
+          );
+          if (justDied) this.combatLogService.addEntry(`[SLAIN] ${participant.name} was slain by their own magic!`);
+        }
+        if (failure.blockCastingUntilRest) {
+          participant.cannotCastUntilRest = true;
+          this.combatLogService.addEntry(`[CAST FAILED] ${participant.name} cannot cast again until a rest`);
+        }
+      }
+      this.characters = this.characterService.getCharacters();
+      this.endTurn(participant.id);
+      this.saveCombat();
+      this.focusNextRollButton();
+      return;
+    }
+
+    // ── Pay the cost ─────────────────────────────────────────────────────
+    let costInfo = this.spellCastingService.deductCost(character, spell, { success: true });
+    if (spell.resource === 'spell-slot') {
+      if (!participant.spellSlotsUsed) participant.spellSlotsUsed = {};
+      participant.spellSlotsUsed[spell.cost] = (participant.spellSlotsUsed[spell.cost] ?? 0) + 1;
+      const caps = this.getSpellSlotCaps(participant);
+      const cap = caps?.[spell.cost - 1] ?? 0;
+      costInfo = `, −1 L${spell.cost} slot (${participant.spellSlotsUsed[spell.cost]}/${cap} used)`;
+    }
+    this.characters = this.characterService.getCharacters();
+
+    const effect = spell.effect;
+    const checkInfo = check.kind === 'auto' ? '' : `${result.display}`;
+    const castDetail = [checkInfo, costInfo.replace(/^, /, '')].filter(Boolean).join(', ');
+
+    // ── RuneQuest resistance: caster's POW must overcome the target's ────
+    let overcame = true;
+    let resistInfo = '';
+    if (effect.resisted && target.id !== participant.id) {
+      const casterPow = character.stats.POW ?? 10;
+      const targetPow = this.getParticipantStats(target)?.POW ?? 10;
+      const res = this.spellCastingService.rollResistance(casterPow, targetPow);
+      overcame = res.success;
+      resistInfo = `, resistance: ${res.display}`;
+    }
+
+    // ── Damage spells ─────────────────────────────────────────────────────
+    if (effect.kind === 'damage') {
+      let rawDamage: number;
+      let breakdown: string;
+
+      if (!overcame) {
+        // Target resisted: slaying spells fall back to their notation damage; others fizzle
+        if (effect.slays && effect.notation) {
+          const roll = this.diceService.rollDiceNotation(effect.notation, { explode: this.rules.damageDiceExplode?.() ?? false });
+          rawDamage = roll.total;
+          breakdown = `${roll.breakdown} — target resisted the full effect`;
+        } else if (effect.halfOnResistFailure) {
+          const amount = this.spellCastingService.rollSpellAmount(spell, casterInfo.level ?? 1, {
+            explode: this.rules.damageDiceExplode?.() ?? false, doubleDice: false,
+          });
+          rawDamage = amount && amount !== 'full' ? Math.floor(amount.total / 2) : 0;
+          breakdown = amount && amount !== 'full' ? `${amount.breakdown} halved — target resisted` : 'target resisted';
+        } else {
+          this.combatLogService.addEntry(
+            `[RESISTED] ${target.name} resists ${participant.name}'s ${spell.name}! (${castDetail}${resistInfo})`
+          );
+          this.endTurn(participant.id);
+          this.saveCombat();
+          this.focusNextRollButton();
+          return;
+        }
+      } else if (effect.slays) {
+        rawDamage = this.getHitPointsRemaining(target) + this.getLocationSafetyMargin(target);
+        breakdown = 'slain outright';
+      } else {
+        const amount = this.spellCastingService.rollSpellAmount(spell, casterInfo.level ?? 1, {
+          explode: this.rules.damageDiceExplode?.() ?? false,
+          doubleDice: result.crit,
+        });
+        if (!amount || amount === 'full') {
+          this.logUtilityCast(participant, spell, castDetail);
+          this.endTurn(participant.id);
+          this.saveCombat();
+          this.focusNextRollButton();
+          return;
+        }
+        rawDamage = amount.total;
+        breakdown = amount.breakdown;
+      }
+
+      const usesLocations = this.rules.usesHitLocations() && !effect.targetsTotalHp;
+      const { roll: locationRoll, location } = usesLocations
+        ? this.rollLocation() : { roll: undefined, location: undefined };
+      const armor = effect.ignoresArmor ? 0 : this.getArmorValue(target, location);
+      const finalDamage = Math.max(0, rawDamage - armor);
+      const locationInfo = location ? ` (d20:${locationRoll} = ${location})` : '';
+      const armorInfo = armor > 0 ? ` - ${armor} armor = ${finalDamage}`
+        : effect.ignoresArmor ? ' (ignores armor)' : ` = ${finalDamage}`;
+
+      this.combatLogService.addEntry(
+        `[CAST] ${participant.name} → ${target.name}: ${spell.name} (${castDetail}${resistInfo})${locationInfo}: ` +
+        `${rawDamage} (${breakdown})${armorInfo} damage`
+      );
+
+      const { justDied, locationMaxed, locationEffect } = this.applyDamageToDefender(target, finalDamage, location);
+      if (locationMaxed) {
+        this.combatLogService.addEntry(`[WOUND] ${target.name}'s ${location} — ${locationEffect}!`);
+      }
+      if (justDied) {
+        participant.kills = (participant.kills || 0) + 1;
+        this.combatLogService.addEntry(`[SLAIN] ${target.name} was slain by ${participant.name}'s ${spell.name}!`);
+      }
+      if (effect.description) {
+        this.combatLogService.addEntry(`[CAST] ${spell.name}: ${effect.description}`);
+      }
+
+      this.lastDamageRolls.set(participant.id, {
+        total: rawDamage, breakdown,
+        finalDamage, armorAbsorbed: armor, targetName: target.name,
+        attackRollDisplay: checkInfo || undefined,
+      });
+    }
+
+    // ── Healing spells ────────────────────────────────────────────────────
+    else if (effect.kind === 'healing') {
+      const amount = this.spellCastingService.rollSpellAmount(spell, casterInfo.level ?? 1, {
+        explode: this.rules.damageDiceExplode?.() ?? false,
+        doubleDice: result.crit,
+      });
+      if (amount === null) {
+        this.logUtilityCast(participant, spell, castDetail);
+      } else {
+        const healed = this.applyHealingToParticipant(
+          target, amount === 'full' ? 'full' : amount.total
+        );
+        const rollInfo = amount === 'full' ? 'full heal' : `${amount.total} (${amount.breakdown})`;
+        const targetLabel = target.id === participant.id ? 'self' : target.name;
+        this.combatLogService.addEntry(
+          `[HEAL] ${participant.name} → ${targetLabel}: ${spell.name} (${castDetail}) — ${rollInfo}, +${healed} HP restored`
+        );
+      }
+    }
+
+    // ── Utility spells ────────────────────────────────────────────────────
+    else {
+      this.logUtilityCast(participant, spell, castDetail);
+    }
+
+    this.endTurn(participant.id);
+    this.saveCombat();
+    this.focusNextRollButton();
+  }
+
+  private logUtilityCast(participant: CombatParticipant, spell: CastableSpell, castDetail: string): void {
+    const desc = spell.effect.description ? ` — ${spell.effect.description}` : '';
+    const detail = castDetail ? ` (${castDetail})` : '';
+    this.combatLogService.addEntry(`[SPELL] ${participant.name} casts ${spell.name}${detail}${desc}`);
+  }
+
+  /**
+   * Extra damage needed to guarantee death for slaying spells on hit-location
+   * systems (applyDamageToDefender only kills vital locations at double HP).
+   */
+  private getLocationSafetyMargin(target: CombatParticipant): number {
+    return this.rules.usesHitLocations() ? target.maxHitPoints : 0;
+  }
+
+  /**
+   * Heal a participant: clear HP damage flags, reduce the most-damaged hit
+   * locations, revive if no longer at max damage (unless a vital location is
+   * destroyed), and write the healing back to the character record.
+   */
+  private applyHealingToParticipant(target: CombatParticipant, amount: number | 'full'): number {
+    const taken = target.currentHitPoints.filter(hp => hp).length;
+    if (taken <= 0) return 0;
+    const healed = amount === 'full' ? taken : Math.min(amount, taken);
+    if (healed <= 0) return 0;
+
+    let toClear = healed;
+    for (let i = target.currentHitPoints.length - 1; i >= 0 && toClear > 0; i--) {
+      if (target.currentHitPoints[i]) {
+        target.currentHitPoints[i] = false;
+        toClear--;
+      }
+    }
+
+    // Hit-location systems: healing goes to the worst-hurt locations first
+    if (target.locationDamage) {
+      let remaining = healed;
+      while (remaining > 0) {
+        const damaged = Object.entries(target.locationDamage)
+          .filter(([, dmg]) => dmg > 0)
+          .sort((a, b) => b[1] - a[1]);
+        if (damaged.length === 0) break;
+        const [loc, dmg] = damaged[0];
+        const reduce = Math.min(remaining, dmg);
+        target.locationDamage[loc] = dmg - reduce;
+        remaining -= reduce;
+      }
+    }
+
+    if (target.isDead && (taken - healed) < target.maxHitPoints && !this.hasFatalLocationDestroyed(target)) {
+      target.isDead = false;
+    }
+
+    if (target.type === 'character' && target.characterId) {
+      const character = this.characterService.getCharacter(target.characterId);
+      if (character) {
+        const maxHP = character.derivedStats.maxHitPoints ?? target.maxHitPoints;
+        character.derivedStats.totalHitPoints = Math.min(
+          maxHP, character.derivedStats.totalHitPoints + healed
+        );
+        this.characterService.updateCharacter(character);
+        this.characters = this.characterService.getCharacters();
+        this.characterUpdateService.notifyCharacterUpdated();
+      }
+    }
+
+    return healed;
+  }
+
+  /** True when a fatal (vital) location has taken double its HP — death healing can't undo. */
+  private hasFatalLocationDestroyed(target: CombatParticipant): boolean {
+    const effects = this.rules.getLocationEffects();
+    if (!effects || !target.locationDamage) return false;
+    return Object.entries(target.locationDamage).some(([loc, dmg]) => {
+      const max = this.getLocationMaxHP(target, loc);
+      return max > 0 && dmg >= max * 2 && (effects[loc]?.fatal ?? false);
+    });
   }
 
   // ── Core damage application ──────────────────────────────────────────────

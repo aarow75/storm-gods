@@ -189,6 +189,29 @@
                 ⚔ Attack
               </button>
             </div>
+            @if (canCastSelected()) {
+              <div class="card-spell-actions">
+                <select class="spell-select"
+                        [(ngModel)]="sel.selectedSpell"
+                        [disabled]="!!sel.isDead"
+                        title="Spell to cast">
+                  <option value="">-- Spell --</option>
+                  @for (spell of getSelectedCastableSpells(); track spell.name) {
+                    <option [value]="spell.name">{{ spell.name }} ({{ spell.costLabel }})</option>
+                  }
+                </select>
+                <button
+                  class="btn cast-btn"
+                  (click)="castWithSelectedParticipant()"
+                  [disabled]="sel.isDead || !sel.selectedSpell || !!sel.cannotCastUntilRest"
+                  [title]="sel.cannotCastUntilRest ? 'Cannot cast until rest' : 'Cast spell'">
+                  ✨ Cast
+                </button>
+                @if (getSelectedResourceDisplay(); as resource) {
+                  <span class="spell-resource-chip">{{ resource }}</span>
+                }
+              </div>
+            }
           </div>
         }
 
@@ -233,7 +256,9 @@
                      [class.parry]="entry.includes('[PARRY]')"
                      [class.dodge]="entry.includes('[DODGE]')"
                      [class.miss]="entry.includes('[MISS]')"
-                     [class.failed]="entry.includes('FAILED')">
+                     [class.failed]="entry.includes('FAILED')"
+                     [class.spell]="entry.includes('[CAST]') || entry.includes('[SPELL]') || entry.includes('[RESISTED]')"
+                     [class.heal]="entry.includes('[HEAL]')">
                   {{ entry }}
                 </div>
               }

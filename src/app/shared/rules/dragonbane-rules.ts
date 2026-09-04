@@ -8,6 +8,10 @@ import {
   SkillDefinition, SkillCategory, ArmorTypeDefinition, BackgroundForBonuses, ToHitMechanic,
   ArmorModel, InitiativeMechanic
 } from './game-system-rules.interface';
+import {
+  SpellEffect, CastCheck, CastableSpell, SpellCasterInfo,
+  buildSpellEffectIndex, normalizeSpellName
+} from './spell-effects.model';
 
 // Six conditions from the rulebook, each tied to an attribute. Suffering a condition
 // imposes a bane on rolls using that attribute. All 6 = cannot push rolls.
@@ -194,6 +198,85 @@ export const DB_SPELLS_BY_DISCIPLINE: Record<string, string[]> = {
   ],
 };
 
+// Combat spell effects, from public/docs/Dragonbane-Spells.md. All spells are
+// cast at power level 1 in the combat tracker (2 WP; magic tricks cost 1 WP and
+// always succeed). WP is spent even when the casting roll fails.
+export const DB_SPELL_EFFECTS: SpellEffect[] = [
+  // General Magic
+  { name: 'Cantrip', target: 'self', kind: 'utility', autoSuccess: true, wpCost: 1,
+    description: 'A minor, harmless display of magic — always succeeds' },
+  { name: 'Flaming Hands', target: 'enemy', kind: 'damage', notation: '2d6',
+    description: '2m cone — apply to any other targets in the cone manually' },
+  { name: 'Harm', target: 'enemy', kind: 'damage', notation: '2d6', ignoresArmor: true,
+    description: 'No effect on the undead' },
+  { name: 'Heal', target: 'ally', kind: 'healing', notation: '2d6' },
+  { name: 'Push/Pull', target: 'enemy', kind: 'utility',
+    description: 'Target shoved 2d4 meters; takes that much bludgeoning damage if it strikes something solid' },
+  { name: 'Stun', target: 'enemy', kind: 'utility',
+    description: 'Target must make a WIL roll or become Dazed and lose their next action' },
+  { name: 'Sleep', target: 'enemy', kind: 'utility',
+    description: 'Target must succeed with a WIL roll or sleep for a stretch (Dazed on a success)' },
+  // Animism
+  { name: 'Drain Life Force', target: 'enemy', kind: 'damage', notation: '2d6',
+    description: 'Opposed by CON; the caster regains the same amount of HP — apply manually. No effect on undead/monsters' },
+  { name: "Nature's Armor", target: 'self', kind: 'utility',
+    description: 'Bark and vines give armor rating 2 — apply manually' },
+  // Elementalism
+  { name: 'Call Lightning', target: 'enemy', kind: 'damage', notation: '3d6',
+    description: 'Requires clouds above; anyone adjacent takes half — apply manually' },
+  { name: 'Gust of Wind', target: 'enemy', kind: 'damage', notation: '2d4',
+    description: '10m cone: targets pushed 2d4m and take that much bludgeoning damage (2d6 vs swarms)' },
+  { name: 'Ice Blast', target: 'enemy', kind: 'damage', notation: '2d8',
+    description: 'On a hit the target must make a STR roll or be Frozen in place' },
+  { name: 'Tornado', target: 'enemy', kind: 'damage', notation: '2d6',
+    description: '20m range, concentration: touched creatures are flung 2d6m and take that much bludgeoning damage; Large/Huge monsters unaffected' },
+  { name: 'Earthquake', target: 'enemy', kind: 'utility',
+    description: 'Everyone in the area: EVADE roll or fall and take 2d6 bludgeoning damage' },
+  { name: 'Flaming Weapon', target: 'self', kind: 'utility',
+    description: 'One weapon deals an extra d6 fire damage — set weapon damage manually' },
+  { name: 'Stone Skin', target: 'self', kind: 'utility',
+    description: 'Skin gains armor rating 4 — apply manually' },
+  { name: 'Freeze', target: 'enemy', kind: 'utility',
+    description: 'Target movement halved and bane on AGL rolls until your next turn' },
+  { name: 'Dust Devil', target: 'enemy', kind: 'utility',
+    description: 'Target gets a bane on attacks and AWARENESS until your next turn' },
+  // Mentalism
+  { name: 'Mental Blast', target: 'enemy', kind: 'damage', notation: '2d6', ignoresArmor: true,
+    description: 'Opposed by WIL; no effect on mindless creatures' },
+  { name: 'Daze', target: 'enemy', kind: 'utility',
+    description: 'Target must make a WIL roll or become Dazed with a bane on their next roll' },
+  { name: 'Fear', target: 'enemy', kind: 'utility',
+    description: 'Target must make a WIL roll or become Scared and flee for one stretch' },
+  { name: 'Paralyze', target: 'enemy', kind: 'utility',
+    description: 'Opposed by WIL: the victim can neither move nor act for a round. No effect on monsters' },
+];
+
+const DB_SPELL_EFFECT_INDEX = buildSpellEffectIndex(DB_SPELL_EFFECTS);
+
+// Magical Mishap table (Demon roll), from public/docs/Dragonbane-Spells.md
+export const DB_MAGICAL_MISHAPS: string[] = [
+  'The magical powers leave you Dazed.',
+  'The spellcasting suddenly makes you Exhausted.',
+  'The energies take a toll on your body and make you Sickly.',
+  'You lose control of the spell, which makes you very Angry.',
+  'The spell subjects you to demonic visions that leave you Scared.',
+  'You see the world beyond the veil and realize your own insignificance. You feel Disheartened.',
+  'The magic ravages your body, inflicting D6 damage per power level.',
+  'The spell drains your willpower and you lose D6 WP per power level.',
+  'The spell gives rise to a magical disease with virulence 3D6.',
+  'Another random spell of yours activates instead, with the same target and power level.',
+  'You vomit a frog the moment you tell a lie. Roll D4 every morning; on a 1 it wears off.',
+  'Any gold or silver you touch withers into dust. Roll D4 every morning; on a 1 it wears off.',
+  'The spell blinds you; you act as if in total darkness. Roll D4 every morning; on a 1 you recover.',
+  'Amnesia — you forget who you and the other player characters are.',
+  'The spell also affects a friend or other unintended victim.',
+  'The spell backfires: an offensive spell affects you instead; a protecting or healing spell inflicts damage instead.',
+  'You turn into an animal (D6: 1 cat, 2 fox, 3 goat, 4 wolf, 5 deer, 6 bear), retaining your mental acuity.',
+  'You become one age category younger. Permanent.',
+  'You become one age category older. Permanent.',
+  'Your magic attracts a demon from another dimension. It shows up within the next shift.',
+];
+
 export class DragonbaneRules implements GameSystemRules {
   getStatDefinitions(): StatDefinition[] {
     return STAT_DEFINITIONS;
@@ -335,6 +418,30 @@ export class DragonbaneRules implements GameSystemRules {
 
   getMagicSystemType(): string {
     return 'dragonbane';
+  }
+
+  getSpellEffect(spellName: string): SpellEffect | null {
+    return DB_SPELL_EFFECT_INDEX.get(normalizeSpellName(spellName)) ?? null;
+  }
+
+  // Casting: d20 ≤ the school skill (e.g. 'Elementalism (INT)'). General Magic
+  // spells can be cast with any school; we use the General Magic skill itself.
+  getCastCheck(spell: CastableSpell, caster: SpellCasterInfo): CastCheck {
+    if (spell.effect.autoSuccess) return { kind: 'auto' };
+    const discipline = spell.discipline || 'General Magic';
+    const skill = caster.skills[`${discipline} (INT)`] ?? 0;
+    return { kind: 'd20-under', target: skill, label: discipline };
+  }
+
+  // Demon (20): the roll cannot be pushed and a magical mishap occurs.
+  getCastFailureEffects(fumble: boolean): { logNotes: string[]; damageToCaster: number; blockCastingUntilRest: boolean } {
+    if (!fumble) return { logNotes: [], damageToCaster: 0, blockCastingUntilRest: false };
+    const roll = Math.floor(Math.random() * 20) + 1;
+    return {
+      logNotes: [`MAGICAL MISHAP (d20: ${roll}) — ${DB_MAGICAL_MISHAPS[roll - 1]}`],
+      damageToCaster: 0,
+      blockCastingUntilRest: false,
+    };
   }
 
   // Dragonbane prices are listed in silver
